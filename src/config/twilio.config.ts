@@ -5,18 +5,23 @@ import validateConfig from 'src/utils/validate-config';
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  TWITTER_CONSUMER_KEY: string;
+  TWILIO_ACCOUNT_SID: string;
 
   @IsString()
   @IsOptional()
-  TWITTER_CONSUMER_SECRET: string;
+  TWILIO_AUTH_TOKEN: string;
+
+  @IsString()
+  @IsOptional()
+  TWILIO_FROM_PHONE: string;
 }
 
-export default registerAs('twitter', () => {
+export default registerAs('twilio', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    consumerKey: process.env.TWITTER_CONSUMER_KEY,
-    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    accountSid: process.env.TWILIO_ACCOUNT_SID,
+    authToken: process.env.TWILIO_AUTH_TOKEN,
+    fromPhone: process.env.TWILIO_FROM_PHONE,
   };
 });

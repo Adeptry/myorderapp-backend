@@ -19,6 +19,9 @@ import facebookConfig from './config/facebook.config';
 import fileConfig from './config/file.config';
 import googleConfig from './config/google.config';
 import mailConfig from './config/mail.config';
+import squareConfig from './config/square.config';
+import stripeConfig from './config/stripe.config';
+import twilioConfig from './config/twilio.config';
 import twitterConfig from './config/twitter.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { FilesModule } from './files/files.module';
@@ -45,6 +48,9 @@ import { UsersModule } from './users/users.module';
         googleConfig,
         twitterConfig,
         appleConfig,
+        squareConfig,
+        stripeConfig,
+        twilioConfig,
       ],
       envFilePath: ['.env'],
     }),

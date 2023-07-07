@@ -82,7 +82,14 @@ export type TwilioConfig = {
 };
 
 export type StripeConfig = {
-  stripeApiKey: string;
+  apiKey: string;
+};
+
+export type SquareConfig = {
+  webhookSignatureKey: string;
+  clientEnvironment: string;
+  oauthClientId: string;
+  oauthClientSecret: string;
 };
 
 export type AllConfigType = {
@@ -97,4 +104,5 @@ export type AllConfigType = {
   twitter: TwitterConfig;
   twilio: TwilioConfig;
   stripe: StripeConfig;
+  square: SquareConfig;
 };

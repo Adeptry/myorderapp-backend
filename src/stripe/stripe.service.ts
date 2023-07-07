@@ -9,7 +9,7 @@ export class StripeService {
   private client: Stripe;
 
   constructor(private configService: ConfigService) {
-    const apiKey = this.configService.get<string>('STRIPE_API_KEY', {
+    const apiKey = this.configService.getOrThrow('stripe.apiKey', {
       infer: true,
     });
     if (apiKey) {

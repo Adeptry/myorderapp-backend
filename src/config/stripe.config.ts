@@ -5,18 +5,13 @@ import validateConfig from 'src/utils/validate-config';
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  TWITTER_CONSUMER_KEY: string;
-
-  @IsString()
-  @IsOptional()
-  TWITTER_CONSUMER_SECRET: string;
+  STRIPE_API_KEY: string;
 }
 
-export default registerAs('twitter', () => {
+export default registerAs('stripe', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    consumerKey: process.env.TWITTER_CONSUMER_KEY,
-    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
+    apiKey: process.env.STRIPE_API_KEY,
   };
 });

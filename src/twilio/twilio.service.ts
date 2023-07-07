@@ -7,10 +7,10 @@ export class TwilioService {
   private readonly logger = new Logger(TwilioService.name);
 
   twilioClient = twilio(
-    this.configService.get<string>('TWILIO_ACCOUNT_SID', {
+    this.configService.getOrThrow('twilio.accountSid', {
       infer: true,
     }),
-    this.configService.get<string>('TWILIO_AUTH_TOKEN', {
+    this.configService.getOrThrow('twilio.authToken', {
       infer: true,
     }),
   );
@@ -22,7 +22,7 @@ export class TwilioService {
       await this.twilioClient.messages.create(
         {
           body: body,
-          from: this.configService.get<string>('TWILIO_FROM_PHONE', {
+          from: this.configService.getOrThrow('twilio.fromPhone', {
             infer: true,
           }),
           to: `${toPhone}`,
