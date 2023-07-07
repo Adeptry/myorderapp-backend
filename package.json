@@ -61,6 +61,7 @@
     "rxjs": "7.8.1",
     "source-map-support": "0.5.21",
     "sqlite3": "^5.1.6",
+    "stripe": "^12.12.0",
     "swagger-ui-express": "4.6.3",
     "twilio": "^4.13.0",
     "twitter": "1.7.1",

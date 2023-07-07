@@ -27,6 +27,7 @@ import { HomeModule } from './home/home.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
 import { SessionModule } from './session/session.module';
+import { StripeModule } from './stripe/stripe.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { UsersModule } from './users/users.module';
 
@@ -89,6 +90,7 @@ import { UsersModule } from './users/users.module';
     MailerModule,
     HomeModule,
     TwilioModule,
+    StripeModule,
   ],
 })
 export class AppModule {}

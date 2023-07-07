@@ -81,6 +81,10 @@ export type TwilioConfig = {
   fromPhone?: string;
 };
 
+export type StripeConfig = {
+  stripeApiKey: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   apple: AppleConfig;
@@ -92,4 +96,5 @@ export type AllConfigType = {
   mail: MailConfig;
   twitter: TwitterConfig;
   twilio: TwilioConfig;
+  stripe: StripeConfig;
 };
