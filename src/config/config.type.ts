@@ -75,6 +75,12 @@ export type TwitterConfig = {
   consumerSecret?: string;
 };
 
+export type TwilioConfig = {
+  accountSid?: string;
+  authToken?: string;
+  fromPhone?: string;
+};
+
 export type AllConfigType = {
   app: AppConfig;
   apple: AppleConfig;
@@ -85,4 +91,5 @@ export type AllConfigType = {
   google: GoogleConfig;
   mail: MailConfig;
   twitter: TwitterConfig;
+  twilio: TwilioConfig;
 };
