@@ -3,10 +3,12 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { nanoid } from 'nanoid';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { LocationsService } from 'src/locations/locations.service';
 import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
+import { UsersService } from 'src/users/users.service';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { MoaCreateMerchantInput } from './dto/create-merchant.input';
 import { MoaUpdateMerchantInput } from './dto/update-merchant.input';
@@ -24,6 +26,10 @@ export class MerchantsService {
     private readonly squareService: SquareService,
     @Inject(forwardRef(() => CatalogsService))
     private readonly catalogsService: CatalogsService,
+    @Inject(forwardRef(() => LocationsService))
+    private readonly locationsService: LocationsService,
+    @Inject(forwardRef(() => UsersService))
+    private readonly usersService: UsersService,
   ) {}
 
   async create(input: MoaCreateMerchantInput) {
@@ -33,19 +39,27 @@ export class MerchantsService {
       entity.moaId = nanoid();
     }
 
-    // const stripeCustomer = await this.stripeService.createCustomer({
-    //   email: entity.email,
-    //   phone: entity.phoneNumber,
-    //   name: entity.fullName,
-    // });
-    // entity.stripeId = stripeCustomer?.id;
+    const user = await this.usersService.findOneOrFail({ id: input.userId });
 
-    return await this.merchantsRepository.save(entity);
+    const stripeCustomer = await this.stripeService.createCustomer({
+      email: user.email ?? '',
+      phone: user.phoneNumber ?? '',
+      name: user.firstName ?? '',
+    });
+    entity.stripeId = stripeCustomer?.id;
+    entity.squareAccessToken =
+      'EAAAEOWFQd6GaSQsraEd9mnRaZ487STemt5ZbL5gTQLW8Y52ra64TC5nABsSvYVY';
+
+    const merchant = await this.merchantsRepository.save(entity);
+
+    merchant.moaId && (await this.squareSync(merchant.moaId));
+
+    return merchant;
   }
 
-  async squareSync(moaId: string) {
+  async squareSync(merchantMoaId: string) {
     const merchant = await this.findOneOrFail({
-      where: { moaId },
+      where: { moaId: merchantMoaId },
     });
 
     const squareAccessToken = merchant.squareAccessToken;
@@ -69,6 +83,11 @@ export class MerchantsService {
     merchant.catalog = await this.catalogsService.squareSync({
       squareAccessToken,
       catalogMoaId: catalog.moaId,
+    });
+
+    await this.locationsService.sync({
+      merchantMoaId,
+      squareAccessToken,
     });
 
     return merchant;
@@ -169,5 +188,13 @@ export class MerchantsService {
       .relation(MoaMerchant, 'user')
       .of(entity)
       .loadOne();
+  }
+
+  async loadLocations(entity: MoaMerchant): Promise<Location[]> {
+    return this.merchantsRepository
+      .createQueryBuilder()
+      .relation(MoaMerchant, 'locations')
+      .of(entity)
+      .loadMany();
   }
 }

@@ -1,6 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CatalogsModule } from 'src/catalogs/catalogs.module';
+import { LocationsModule } from 'src/locations/locations.module';
 import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { MerchantsService } from 'src/merchants/merchants.service';
 import { SquareModule } from 'src/square/square.module';
@@ -14,6 +15,7 @@ import { UsersModule } from 'src/users/users.module';
     forwardRef(() => SquareModule),
     forwardRef(() => UsersModule),
     forwardRef(() => CatalogsModule),
+    forwardRef(() => LocationsModule),
   ],
   controllers: [],
   providers: [MerchantsService],

@@ -1,10 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
+  ApiResponse,
   CatalogObject,
   Client,
   Environment,
+  ListLocationsResponse,
+  Location,
   ObtainTokenResponse,
+  RetrieveLocationResponse,
 } from 'square';
 
 @Injectable()
@@ -68,7 +72,7 @@ export class SquareService {
     }
   }
 
-  async listSquareCatalog(client: Client): Promise<CatalogObject[]> {
+  async listCatalog(client: Client): Promise<CatalogObject[]> {
     const catalogObjects: CatalogObject[] = [];
     let listCatalogResponse = await client?.catalogApi.listCatalog(
       undefined,
@@ -87,6 +91,31 @@ export class SquareService {
     }
 
     return catalogObjects;
+  }
+
+  async listLocations(client: Client): Promise<ListLocationsResponse | null> {
+    let response: ApiResponse<ListLocationsResponse> | null = null;
+    try {
+      response = (await client?.locationsApi?.listLocations()) ?? null;
+    } catch (error) {
+      this.logger.error(error);
+    }
+    return response?.result ?? null;
+  }
+
+  async retrieveLocation(
+    client: Client,
+    locationSquareId: string,
+  ): Promise<Location | null> {
+    let response: ApiResponse<RetrieveLocationResponse> | null = null;
+    try {
+      response =
+        (await client.locationsApi.retrieveLocation(locationSquareId)) ?? null;
+    } catch (error) {
+      console.log(error);
+      this.logger.error(error);
+    }
+    return response?.result.location ?? null;
   }
 
   client(accessToken: string): Client {

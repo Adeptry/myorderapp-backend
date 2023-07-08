@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { MoaLocation } from 'src/locations/entities/location.entity';
 import { User } from 'src/users/entities/user.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -10,6 +11,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  OneToMany,
   OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -108,4 +110,14 @@ export class MoaMerchant extends EntityHelper {
   @JoinColumn()
   @ApiProperty()
   catalog?: MoaCatalog;
+
+  /*
+   * Locations
+   */
+
+  @OneToMany(() => MoaLocation, (entity) => entity.merchant, {
+    nullable: true,
+  })
+  @ApiProperty()
+  locations?: MoaLocation[];
 }

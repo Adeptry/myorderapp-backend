@@ -45,6 +45,12 @@ export class UsersService {
     });
   }
 
+  findOneOrFail(fields: EntityCondition<User>): Promise<User> {
+    return this.usersRepository.findOneOrFail({
+      where: fields,
+    });
+  }
+
   update(id: string, payload: DeepPartial<User>): Promise<User> {
     return this.usersRepository.save(
       this.usersRepository.create({

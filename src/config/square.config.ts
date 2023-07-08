@@ -22,8 +22,8 @@ export default registerAs('square', () => {
 
   return {
     webhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY,
-    clientEnvironment: process.env.SQUARE_OAUTH_CLIENT_ID,
-    oauthClientId: process.env.SQUARE_OAUTH_CLIENT_SECRET,
-    oauthClientSecret: process.env.SQUARE_CLIENT_ENVIRONMENT,
+    clientEnvironment: process.env.SQUARE_CLIENT_ENVIRONMENT,
+    oauthClientId: process.env.SQUARE_OAUTH_CLIENT_ID,
+    oauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET,
   };
 });

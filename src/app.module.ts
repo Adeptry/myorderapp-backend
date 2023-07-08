@@ -10,6 +10,7 @@ import { AuthFacebookModule } from './auth-facebook/auth-facebook.module';
 import { AuthGoogleModule } from './auth-google/auth-google.module';
 import { AuthTwitterModule } from './auth-twitter/auth-twitter.module';
 import { AuthModule } from './auth/auth.module';
+import { CatalogsModule } from './catalogs/catalogs.module';
 import appConfig from './config/app.config';
 import appleConfig from './config/apple.config';
 import authConfig from './config/auth.config';
@@ -27,6 +28,7 @@ import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { FilesModule } from './files/files.module';
 import { ForgotModule } from './forgot/forgot.module';
 import { HomeModule } from './home/home.module';
+import { LocationsModule } from './locations/locations.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
 import { MerchantsModule } from './merchants/merchants.module';
@@ -34,7 +36,6 @@ import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { UsersModule } from './users/users.module';
-import { CatalogsModule } from './catalogs/catalogs.module';
 
 @Module({
   imports: [
@@ -101,6 +102,7 @@ import { CatalogsModule } from './catalogs/catalogs.module';
     StripeModule,
     MerchantsModule,
     CatalogsModule,
+    LocationsModule,
   ],
 })
 export class AppModule {}

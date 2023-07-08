@@ -46,7 +46,7 @@ export class CatalogsService {
     const squareClient = this.squareService.client(params.squareAccessToken);
 
     const squareCatalogObjects =
-      (await this.squareService.listSquareCatalog(squareClient)) ?? [];
+      (await this.squareService.listCatalog(squareClient)) ?? [];
 
     const moaCatalog = await this.findOneOrFail({
       where: { moaId: params.catalogMoaId },
