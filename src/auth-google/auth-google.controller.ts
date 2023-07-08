@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
+import { LoginResponseType } from '../auth/types/login-response.type';
 import { AuthGoogleService } from './auth-google.service';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto';
-import { LoginResponseType } from '../auth/types/login-response.type';
 
 @ApiTags('Auth')
 @Controller({
@@ -23,6 +23,10 @@ export class AuthGoogleController {
   ): Promise<LoginResponseType> {
     const socialData = await this.authGoogleService.getProfileByToken(loginDto);
 
-    return this.authService.validateSocialLogin('google', socialData);
+    return this.authService.validateSocialLogin(
+      'google',
+      socialData,
+      loginDto.role,
+    );
   }
 }

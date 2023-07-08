@@ -1,28 +1,34 @@
+import bcrypt from 'bcryptjs';
+import { Exclude, Expose } from 'class-transformer';
+import { nanoid } from 'nanoid';
+import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
+import { EntityHelper } from 'src/utils/entity-helper';
 import {
-  Column,
   AfterLoad,
+  BeforeInsert,
+  BeforeUpdate,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
   Index,
   ManyToOne,
-  PrimaryGeneratedColumn,
+  PrimaryColumn,
   UpdateDateColumn,
-  BeforeInsert,
-  BeforeUpdate,
 } from 'typeorm';
+import { FileEntity } from '../../files/entities/file.entity';
 import { Role } from '../../roles/entities/role.entity';
 import { Status } from '../../statuses/entities/status.entity';
-import { FileEntity } from '../../files/entities/file.entity';
-import bcrypt from 'bcryptjs';
-import { EntityHelper } from 'src/utils/entity-helper';
-import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
-import { Exclude, Expose } from 'class-transformer';
 
 @Entity()
 export class User extends EntityHelper {
-  @PrimaryGeneratedColumn()
-  id: number;
+  @PrimaryColumn('varchar')
+  id: string;
+
+  @BeforeInsert()
+  setMoaId() {
+    this.id = nanoid();
+  }
 
   // For "string | null" we need to use String type.
   // More info: https://github.com/typeorm/typeorm/issues/2567
@@ -67,6 +73,10 @@ export class User extends EntityHelper {
   @Index()
   @Column({ type: String, nullable: true })
   lastName: string | null;
+
+  @Index()
+  @Column({ type: String, nullable: true })
+  phoneNumber: string | null;
 
   @ManyToOne(() => FileEntity, {
     eager: true,

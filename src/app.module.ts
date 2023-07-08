@@ -29,6 +29,7 @@ import { ForgotModule } from './forgot/forgot.module';
 import { HomeModule } from './home/home.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
+import { MerchantsModule } from './merchants/merchants.module';
 import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { TwilioModule } from './twilio/twilio.module';
@@ -97,6 +98,7 @@ import { UsersModule } from './users/users.module';
     HomeModule,
     TwilioModule,
     StripeModule,
+    MerchantsModule,
   ],
 })
 export class AppModule {}

@@ -1,8 +1,15 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
-import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 import { Transform } from 'class-transformer';
+import {
+  IsEmail,
+  IsIn,
+  IsNotEmpty,
+  MinLength,
+  Validate,
+} from 'class-validator';
+import { RoleEnum } from 'src/roles/roles.enum';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
+import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'test1@example.com' })
@@ -24,4 +31,11 @@ export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'Doe' })
   @IsNotEmpty()
   lastName: string;
+
+  @ApiProperty({ enum: Object.values(RoleEnum), example: RoleEnum.merchant })
+  @IsNotEmpty()
+  @IsIn([RoleEnum.merchant, RoleEnum.customer], {
+    message: 'Invalid role. Only "merchant" and "customer" are allowed.',
+  })
+  role: RoleEnum;
 }

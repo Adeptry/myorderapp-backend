@@ -1,9 +1,9 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
+import { LoginResponseType } from '../auth/types/login-response.type';
 import { AuthFacebookService } from './auth-facebook.service';
 import { AuthFacebookLoginDto } from './dto/auth-facebook-login.dto';
-import { LoginResponseType } from '../auth/types/login-response.type';
 
 @ApiTags('Auth')
 @Controller({
@@ -25,6 +25,10 @@ export class AuthFacebookController {
       loginDto,
     );
 
-    return this.authService.validateSocialLogin('facebook', socialData);
+    return this.authService.validateSocialLogin(
+      'facebook',
+      socialData,
+      loginDto.role,
+    );
   }
 }
