@@ -1,6 +1,6 @@
 import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MerchantsService } from 'src/merchants/services/merchants.service';
+import { MerchantsService } from 'src/merchants/merchants.service';
 import { RoleEnum } from 'src/roles/roles.enum';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
 import { IPaginationOptions } from 'src/utils/types/pagination-options';

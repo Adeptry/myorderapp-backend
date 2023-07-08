@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
-import { MoaCategory } from 'src/merchants/entities/category.entity';
+import { MoaCategory } from 'src/catalogs/entities/category.entity';
 import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {

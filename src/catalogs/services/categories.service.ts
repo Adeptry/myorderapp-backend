@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
 import {
   FindManyOptions,
   FindOneOptions,
   RemoveOptions,
   Repository,
 } from 'typeorm';
-import { MoaCatalog } from '../../merchants/entities/catalog.entity';
 import { MoaCategoryUpdateInput } from '../dto/category-update.dto';
 import { MoaCategory } from '../entities/category.entity';
 

@@ -34,6 +34,7 @@ import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { UsersModule } from './users/users.module';
+import { CatalogsModule } from './catalogs/catalogs.module';
 
 @Module({
   imports: [
@@ -99,6 +100,7 @@ import { UsersModule } from './users/users.module';
     TwilioModule,
     StripeModule,
     MerchantsModule,
+    CatalogsModule,
   ],
 })
 export class AppModule {}

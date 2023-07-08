@@ -1,5 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
 import { User } from 'src/users/entities/user.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -14,7 +15,6 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaCatalog } from './catalog.entity';
 
 @Entity('merchant')
 export class MoaMerchant extends EntityHelper {

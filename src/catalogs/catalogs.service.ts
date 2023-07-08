@@ -1,25 +1,22 @@
 import { forwardRef, Inject, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { SquareService } from 'src/square/square.service';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { SquareService } from '../../square/square.service';
-import { MoaSelectionType } from '../dto/catalogs.types';
-import { MoaCatalog } from '../entities/catalog.entity';
-import { MoaCategory } from '../entities/category.entity';
-import { MoaItem } from '../entities/item.entity';
-import { CategoriesService } from './categories.service';
-import { ItemsService } from './items.service';
-import { MerchantsService } from './merchants.service';
-import { ModifierListsService } from './modifier-lists.service';
-import { ModifiersService } from './modifiers.service';
-import { VariationsService } from './variations.service';
+import { MoaSelectionType } from './dto/catalogs.types';
+import { MoaCatalog } from './entities/catalog.entity';
+import { MoaCategory } from './entities/category.entity';
+import { MoaItem } from './entities/item.entity';
+import { CategoriesService } from './services/categories.service';
+import { ItemsService } from './services/items.service';
+import { ModifierListsService } from './services/modifier-lists.service';
+import { ModifiersService } from './services/modifiers.service';
+import { VariationsService } from './services/variations.service';
 
 @Injectable()
 export class CatalogsService {
   constructor(
     @InjectRepository(MoaCatalog)
     private readonly catalogRepository: Repository<MoaCatalog>,
-    @Inject(forwardRef(() => MerchantsService))
-    private readonly merchantService: MerchantsService,
     @Inject(forwardRef(() => SquareService))
     private readonly squareService: SquareService,
     @Inject(forwardRef(() => ItemsService))
@@ -34,29 +31,26 @@ export class CatalogsService {
     private readonly categoriesService: CategoriesService,
   ) {}
 
-  async squareSync(merchantMoaId: string) {
-    const merchantEntity = await this.merchantService.findOneOrFail({
-      where: { moaId: merchantMoaId },
-    });
+  create() {
+    return this.catalogRepository.create();
+  }
 
-    const squareAccessToken = merchantEntity.squareAccessToken;
+  save(entity: MoaCatalog) {
+    return this.catalogRepository.save(entity);
+  }
 
-    if (squareAccessToken == null) {
-      throw new Error('Square access token is null');
-    }
-
-    const squareClient = this.squareService.client(squareAccessToken);
+  async squareSync(params: {
+    squareAccessToken: string;
+    catalogMoaId: string;
+  }) {
+    const squareClient = this.squareService.client(params.squareAccessToken);
 
     const squareCatalogObjects =
       (await this.squareService.listSquareCatalog(squareClient)) ?? [];
 
-    let moaCatalog = await this.merchantService.loadOneCatalog(merchantEntity);
-    if (moaCatalog == null) {
-      moaCatalog = this.catalogRepository.create();
-      merchantEntity.catalog = moaCatalog;
-      await this.catalogRepository.save(moaCatalog);
-      await this.merchantService.save(merchantEntity);
-    }
+    const moaCatalog = await this.findOneOrFail({
+      where: { moaId: params.catalogMoaId },
+    });
 
     // Categories
 

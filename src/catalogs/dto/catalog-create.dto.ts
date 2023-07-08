@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class MoaCatalogUpdateInput {
+export class MoaCatalogCreateInput {
   @ApiProperty()
   merchantMoaId?: string;
 

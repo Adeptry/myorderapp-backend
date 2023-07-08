@@ -1,14 +1,15 @@
 import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { nanoid } from 'nanoid';
+import { CatalogsService } from 'src/catalogs/catalogs.service';
+import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
+import { SquareService } from 'src/square/square.service';
+import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { SquareService } from '../../square/square.service';
-import { StripeService } from '../../stripe/stripe.service';
-import { MoaCreateMerchantInput } from '../dto/create-merchant.input';
-import { MoaUpdateMerchantInput } from '../dto/update-merchant.input';
-import { MoaCatalog } from '../entities/catalog.entity';
-import { MoaMerchant } from '../entities/merchant.entity';
+import { MoaCreateMerchantInput } from './dto/create-merchant.input';
+import { MoaUpdateMerchantInput } from './dto/update-merchant.input';
 
 @Injectable()
 export class MerchantsService {
@@ -16,15 +17,17 @@ export class MerchantsService {
 
   constructor(
     @InjectRepository(MoaMerchant)
-    private readonly merchantRepository: Repository<MoaMerchant>,
+    private readonly merchantsRepository: Repository<MoaMerchant>,
     @Inject(forwardRef(() => StripeService))
     private readonly stripeService: StripeService,
     @Inject(forwardRef(() => SquareService))
     private readonly squareService: SquareService,
+    @Inject(forwardRef(() => CatalogsService))
+    private readonly catalogsService: CatalogsService,
   ) {}
 
   async create(input: MoaCreateMerchantInput) {
-    const entity = this.merchantRepository.create(input);
+    const entity = this.merchantsRepository.create(input);
 
     if (!input.moaId) {
       entity.moaId = nanoid();
@@ -37,45 +40,76 @@ export class MerchantsService {
     // });
     // entity.stripeId = stripeCustomer?.id;
 
-    return await this.merchantRepository.save(entity);
+    return await this.merchantsRepository.save(entity);
+  }
+
+  async squareSync(moaId: string) {
+    const merchant = await this.findOneOrFail({
+      where: { moaId },
+    });
+
+    const squareAccessToken = merchant.squareAccessToken;
+
+    if (squareAccessToken == null) {
+      throw new Error('Square access token is null');
+    }
+
+    let catalog = await this.loadOneCatalog(merchant);
+    if (catalog == null) {
+      catalog = this.catalogsService.create();
+      merchant.catalog = catalog;
+      await this.catalogsService.save(catalog);
+      await this.save(merchant);
+    }
+
+    if (catalog.moaId == null) {
+      throw new Error('Catalog moaId is null');
+    }
+
+    merchant.catalog = await this.catalogsService.squareSync({
+      squareAccessToken,
+      catalogMoaId: catalog.moaId,
+    });
+
+    return merchant;
   }
 
   findAll(options?: FindManyOptions<MoaMerchant>) {
-    return this.merchantRepository.find(options);
+    return this.merchantsRepository.find(options);
   }
 
   findOne(
     options: FindOneOptions<MoaMerchant>,
   ): Promise<MoaMerchant | null | undefined> {
-    return this.merchantRepository.findOne(options);
+    return this.merchantsRepository.findOne(options);
   }
 
   findOneOrFail(options: FindOneOptions<MoaMerchant>): Promise<MoaMerchant> {
-    return this.merchantRepository.findOneOrFail(options);
+    return this.merchantsRepository.findOneOrFail(options);
   }
 
   async update(moaId: string, updateMerchantInput: MoaUpdateMerchantInput) {
     const entity = await this.findOneOrFail({ where: { moaId } });
 
     if (updateMerchantInput.moaId !== undefined) {
-      await this.merchantRepository.delete(moaId);
+      await this.merchantsRepository.delete(moaId);
     }
 
     Object.assign(entity, updateMerchantInput);
 
     if (updateMerchantInput.moaId !== undefined) {
-      await this.merchantRepository.delete(moaId);
+      await this.merchantsRepository.delete(moaId);
     }
 
     return await this.save(entity);
   }
 
   async save(merchant: MoaMerchant) {
-    return this.merchantRepository.save(merchant);
+    return this.merchantsRepository.save(merchant);
   }
 
   async delete(moaId: string): Promise<boolean> {
-    const deleteResult = await this.merchantRepository.delete({ moaId });
+    const deleteResult = await this.merchantsRepository.delete({ moaId });
     return deleteResult.affected !== undefined;
   }
 
@@ -122,7 +156,7 @@ export class MerchantsService {
   async loadOneCatalog(
     entity: MoaMerchant,
   ): Promise<MoaCatalog | null | undefined> {
-    return this.merchantRepository
+    return this.merchantsRepository
       .createQueryBuilder()
       .relation(MoaMerchant, 'catalog')
       .of(entity)
@@ -130,7 +164,7 @@ export class MerchantsService {
   }
 
   async loadOneUser(entity: MoaMerchant): Promise<User | null | undefined> {
-    return this.merchantRepository
+    return this.merchantsRepository
       .createQueryBuilder()
       .relation(MoaMerchant, 'user')
       .of(entity)
