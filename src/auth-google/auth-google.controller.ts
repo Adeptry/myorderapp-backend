@@ -8,7 +8,7 @@ import { AuthGoogleLoginDto } from './dto/auth-google-login.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth/google',
-  version: '1',
+  version: '2',
 })
 export class AuthGoogleController {
   constructor(

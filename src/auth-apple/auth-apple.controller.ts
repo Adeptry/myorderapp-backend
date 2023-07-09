@@ -8,7 +8,7 @@ import { AuthAppleLoginDto } from './dto/auth-apple-login.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth/apple',
-  version: '1',
+  version: '2',
 })
 export class AuthAppleController {
   constructor(

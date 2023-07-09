@@ -5,5 +5,6 @@ import { SquareService } from './square.service';
   imports: [],
   exports: [SquareService],
   providers: [SquareService],
+  controllers: [],
 })
 export class SquareModule {}

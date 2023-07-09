@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -21,6 +22,7 @@ import { MoaItem } from './item.entity';
 export class MoaCategory extends EntityHelper {
   /* Base entity */
 
+  @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   moaId?: string;
 
@@ -29,23 +31,29 @@ export class MoaCategory extends EntityHelper {
     this.moaId = nanoid();
   }
 
+  @Exclude({ toPlainOnly: true })
   @CreateDateColumn({ nullable: true })
   createDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @UpdateDateColumn({ nullable: true })
   updateDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @DeleteDateColumn({ nullable: true })
   deleteDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @VersionColumn({ nullable: true })
   version?: number;
 
   /* Entity */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -53,9 +61,11 @@ export class MoaCategory extends EntityHelper {
    * Square
    */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
+  @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
@@ -63,18 +73,21 @@ export class MoaCategory extends EntityHelper {
    * Relations
    */
 
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  catalogMoaId?: string;
+
   @ManyToOne(() => MoaCatalog, (entity) => entity.categories, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  @ApiProperty()
   catalog?: MoaCatalog;
 
+  @ApiProperty({ type: () => MoaItem, isArray: true, required: false })
   @OneToMany(() => MoaItem, (item) => item.category, {
     nullable: true,
     eager: true,
   })
-  @ApiProperty()
   items?: MoaItem[];
 }

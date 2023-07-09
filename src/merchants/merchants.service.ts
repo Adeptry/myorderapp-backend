@@ -1,4 +1,10 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { nanoid } from 'nanoid';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
@@ -19,7 +25,7 @@ export class MerchantsService {
 
   constructor(
     @InjectRepository(MoaMerchant)
-    private readonly merchantsRepository: Repository<MoaMerchant>,
+    private readonly repository: Repository<MoaMerchant>,
     @Inject(forwardRef(() => StripeService))
     private readonly stripeService: StripeService,
     @Inject(forwardRef(() => SquareService))
@@ -33,9 +39,9 @@ export class MerchantsService {
   ) {}
 
   async create(input: MoaCreateMerchantInput) {
-    const entity = this.merchantsRepository.create(input);
+    const entity = this.repository.create(input);
 
-    if (!input.moaId) {
+    if (!entity.moaId) {
       entity.moaId = nanoid();
     }
 
@@ -47,14 +53,57 @@ export class MerchantsService {
       name: user.firstName ?? '',
     });
     entity.stripeId = stripeCustomer?.id;
-    entity.squareAccessToken =
-      'EAAAEOWFQd6GaSQsraEd9mnRaZ487STemt5ZbL5gTQLW8Y52ra64TC5nABsSvYVY';
 
-    const merchant = await this.merchantsRepository.save(entity);
+    return await this.repository.save(entity);
+  }
 
-    merchant.moaId && (await this.squareSync(merchant.moaId));
+  async squareConfirmOauth(params: {
+    oauthAccessCode: string;
+    userId: string;
+  }) {
+    const merchant = await this.findOne({
+      where: { userId: params.userId },
+    });
 
-    return merchant;
+    if (!merchant) {
+      throw new NotFoundException(
+        `Merchant with userId ${params.userId} not found`,
+      );
+    }
+
+    const accessTokenResponse = await this.squareService.obtainToken(
+      params.oauthAccessCode,
+    );
+
+    if (!accessTokenResponse) {
+      throw new Error('Failed to obtain token from Square service');
+    }
+
+    merchant.squareAccessToken = accessTokenResponse.accessToken;
+    merchant.squareExpiresAt = new Date(
+      Date.parse(accessTokenResponse.expiresAt ?? ''),
+    );
+    merchant.merchantSquareId = accessTokenResponse.merchantId;
+    merchant.squareRefreshToken = accessTokenResponse.refreshToken;
+
+    return await this.save(merchant);
+  }
+
+  async squareRefreshOauth(moaId: string) {
+    const merchant = await this.findOneOrFail({
+      where: { moaId },
+    });
+    const oauthRefreshToken = merchant.squareRefreshToken ?? '';
+    const accessToken = await this.squareService.refreshToken(
+      oauthRefreshToken,
+    );
+    merchant.squareAccessToken = accessToken.accessToken;
+    merchant.squareExpiresAt = new Date(
+      Date.parse(accessToken.expiresAt ?? ''),
+    );
+    merchant.merchantSquareId = accessToken.merchantId;
+    merchant.squareRefreshToken = accessToken.refreshToken;
+    return await this.save(merchant);
   }
 
   async squareSync(merchantMoaId: string) {
@@ -93,89 +142,107 @@ export class MerchantsService {
     return merchant;
   }
 
+  async stripeCreateCheckoutSessionId(params: {
+    userId: string;
+  }): Promise<string | null> {
+    const merchant = await this.findOne({
+      where: { userId: params.userId },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException(
+        `Merchant with userId ${params.userId} not found`,
+      );
+    }
+
+    const session = await this.stripeService.createCheckoutSession({
+      payment_method_types: ['card'],
+      mode: 'subscription',
+      line_items: [
+        {
+          price: process.env.STRIPE_PRICE_ID,
+          quantity: 1,
+        },
+        {
+          price: process.env.STRIPE_ONE_TIME_PRICE_ID,
+          quantity: 1,
+        },
+      ],
+      allow_promotion_codes: true,
+      customer: merchant.stripeId,
+      client_reference_id: merchant.moaId,
+      success_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/`,
+    });
+
+    if (!session) {
+      throw new Error('Failed to retrieve session from Stripe service');
+    }
+
+    return session.id;
+  }
+
+  async stripeConfirmCheckoutSessionId(params: {
+    userId: string;
+    checkoutSessionId: string;
+  }): Promise<MoaMerchant | null> {
+    const entity = await this.findOne({
+      where: { userId: params.userId },
+    });
+
+    if (!entity) {
+      throw new NotFoundException(
+        `Merchant with userId ${params.userId} not found`,
+      );
+    }
+
+    const session = await this.stripeService.retrieveCheckoutSession(
+      params.checkoutSessionId,
+    );
+
+    if (entity == null) {
+      return null;
+    }
+
+    entity.stripeCheckoutSessionId = session.id;
+    return this.save(entity);
+  }
+
   findAll(options?: FindManyOptions<MoaMerchant>) {
-    return this.merchantsRepository.find(options);
+    return this.repository.find(options);
   }
 
   findOne(
     options: FindOneOptions<MoaMerchant>,
   ): Promise<MoaMerchant | null | undefined> {
-    return this.merchantsRepository.findOne(options);
+    return this.repository.findOne(options);
   }
 
   findOneOrFail(options: FindOneOptions<MoaMerchant>): Promise<MoaMerchant> {
-    return this.merchantsRepository.findOneOrFail(options);
+    return this.repository.findOneOrFail(options);
   }
 
   async update(moaId: string, updateMerchantInput: MoaUpdateMerchantInput) {
     const entity = await this.findOneOrFail({ where: { moaId } });
 
-    if (updateMerchantInput.moaId !== undefined) {
-      await this.merchantsRepository.delete(moaId);
-    }
-
     Object.assign(entity, updateMerchantInput);
-
-    if (updateMerchantInput.moaId !== undefined) {
-      await this.merchantsRepository.delete(moaId);
-    }
 
     return await this.save(entity);
   }
 
   async save(merchant: MoaMerchant) {
-    return this.merchantsRepository.save(merchant);
+    return this.repository.save(merchant);
   }
 
   async delete(moaId: string): Promise<boolean> {
-    const deleteResult = await this.merchantsRepository.delete({ moaId });
+    const deleteResult = await this.repository.delete({ moaId });
     return deleteResult.affected !== undefined;
-  }
-
-  async squareConfirmOauth(moaId: string, oauthAccessCode: string) {
-    const entity = await this.findOneOrFail({
-      where: { moaId },
-    });
-    const accessTokenResponse = await this.squareService.obtainToken(
-      oauthAccessCode,
-    );
-
-    entity.squareAccessToken = accessTokenResponse.accessToken;
-    entity.squareExpiresAt = new Date(
-      Date.parse(accessTokenResponse.expiresAt ?? ''),
-    );
-    entity.merchantSquareId = accessTokenResponse.merchantId;
-    entity.squareRefreshToken = accessTokenResponse.refreshToken;
-
-    await this.save(entity);
-
-    // this.locationsService.sync({ merchantMoaId: entity.moaId! });
-    // this.catalogsService.update({ merchantMoaId: entity.moaId! });
-
-    return entity;
-  }
-
-  async squareRefreshOauth(moaId: string) {
-    const merchant = await this.findOneOrFail({
-      where: { moaId },
-    });
-    const oauthRefreshToken = merchant.squareRefreshToken ?? '';
-    const accessToken = await this.squareService.refreshToken(
-      oauthRefreshToken,
-    );
-    merchant.squareAccessToken = accessToken.accessToken;
-    merchant.squareExpiresAt = new Date(
-      Date.parse(accessToken.expiresAt ?? ''),
-    );
-    merchant.merchantSquareId = accessToken.merchantId;
-    merchant.squareRefreshToken = accessToken.refreshToken;
-    return await this.save(merchant);
   }
 
   async loadOneCatalog(
     entity: MoaMerchant,
   ): Promise<MoaCatalog | null | undefined> {
-    return this.merchantsRepository
+    return this.repository
       .createQueryBuilder()
       .relation(MoaMerchant, 'catalog')
       .of(entity)
@@ -183,7 +250,7 @@ export class MerchantsService {
   }
 
   async loadOneUser(entity: MoaMerchant): Promise<User | null | undefined> {
-    return this.merchantsRepository
+    return this.repository
       .createQueryBuilder()
       .relation(MoaMerchant, 'user')
       .of(entity)
@@ -191,7 +258,7 @@ export class MerchantsService {
   }
 
   async loadLocations(entity: MoaMerchant): Promise<Location[]> {
-    return this.merchantsRepository
+    return this.repository
       .createQueryBuilder()
       .relation(MoaMerchant, 'locations')
       .of(entity)

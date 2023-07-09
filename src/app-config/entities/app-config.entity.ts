@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -14,19 +15,16 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaItem } from './item.entity';
 
-@Entity('variation')
-export class MoaVariation extends EntityHelper {
-  /* Base entity */
-
+@Entity('app_config')
+export class AppConfig extends EntityHelper {
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
   setMoaId() {
-    this.moaId = nanoid();
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -45,43 +43,23 @@ export class MoaVariation extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /* Entity */
   @ApiProperty({ required: false })
-  @Column({ nullable: true, default: 0 })
-  ordinal?: number;
-
-  @ApiProperty({ required: false })
-  @Column({ nullable: true, default: true })
-  moaEnabled?: boolean;
-
-  /*
-   * Square
-   */
-
-  @ApiProperty({ required: false })
-  @Column({ nullable: true, unique: true })
-  squareId?: string;
-
-  @ApiProperty({ type: String, required: false })
-  @Column({ type: String, nullable: true })
-  name?: string | null;
+  @Column({ nullable: true })
+  primaryColor?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  priceInCents?: number;
-
-  /*
-   * Relations
-   */
+  secondaryColor?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  itemMoaId?: string;
+  fontFamily?: string;
 
-  @ManyToOne(() => MoaItem, (entity) => entity.variations, {
-    onDelete: 'CASCADE',
-    nullable: false,
-  })
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  merchantMoaId?: string;
+
+  @ManyToOne(() => MoaMerchant, { onDelete: 'SET NULL' })
   @JoinColumn()
-  item?: MoaItem;
+  merchant?: MoaMerchant;
 }

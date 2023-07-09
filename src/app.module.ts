@@ -27,7 +27,6 @@ import twitterConfig from './config/twitter.config';
 import { TypeOrmConfigService } from './database/typeorm-config.service';
 import { FilesModule } from './files/files.module';
 import { ForgotModule } from './forgot/forgot.module';
-import { HomeModule } from './home/home.module';
 import { LocationsModule } from './locations/locations.module';
 import { MailModule } from './mail/mail.module';
 import { MailerModule } from './mailer/mailer.module';
@@ -36,6 +35,7 @@ import { SessionModule } from './session/session.module';
 import { StripeModule } from './stripe/stripe.module';
 import { TwilioModule } from './twilio/twilio.module';
 import { UsersModule } from './users/users.module';
+import { AppConfigModule } from './app-config/app-config.module';
 
 @Module({
   imports: [
@@ -97,12 +97,12 @@ import { UsersModule } from './users/users.module';
     SessionModule,
     MailModule,
     MailerModule,
-    HomeModule,
     TwilioModule,
     StripeModule,
     MerchantsModule,
     CatalogsModule,
     LocationsModule,
+    AppConfigModule,
   ],
 })
 export class AppModule {}

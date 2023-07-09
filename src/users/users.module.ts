@@ -4,7 +4,6 @@ import { MerchantsModule } from 'src/merchants/merchants.module';
 import { IsExist } from 'src/utils/validators/is-exists.validator';
 import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 import { User } from './entities/user.entity';
-import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
 
 @Module({
@@ -12,7 +11,7 @@ import { UsersService } from './users.service';
     TypeOrmModule.forFeature([User]),
     forwardRef(() => MerchantsModule),
   ],
-  controllers: [UsersController],
+  controllers: [],
   providers: [IsExist, IsNotExist, UsersService],
   exports: [UsersService],
 })

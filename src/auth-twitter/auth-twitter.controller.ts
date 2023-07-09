@@ -8,7 +8,7 @@ import { AuthTwitterLoginDto } from './dto/auth-twitter-login.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth/twitter',
-  version: '1',
+  version: '2',
 })
 export class AuthTwitterController {
   constructor(

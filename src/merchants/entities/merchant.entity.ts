@@ -1,5 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { AppConfig } from 'src/app-config/entities/app-config.entity';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
 import { MoaLocation } from 'src/locations/entities/location.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -22,6 +24,7 @@ import {
 export class MoaMerchant extends EntityHelper {
   /* Base entity */
 
+  @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   moaId?: string;
 
@@ -30,20 +33,25 @@ export class MoaMerchant extends EntityHelper {
     this.moaId = nanoid();
   }
 
+  @Exclude({ toPlainOnly: true })
   @CreateDateColumn({ nullable: true })
   createDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @UpdateDateColumn({ nullable: true })
   updateDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @DeleteDateColumn({ nullable: true })
   deleteDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @VersionColumn({ nullable: true })
   version?: number;
 
   /* Step 1: User */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   userId?: string;
 
@@ -52,34 +60,36 @@ export class MoaMerchant extends EntityHelper {
   user: User;
 
   /*
-   * Step 2: App info
+   * Step 2: App config
    */
 
-  @Column({ nullable: true })
-  primaryColor?: string;
-
-  @Column({ nullable: true })
-  secondaryColor?: string;
-
-  @Column({ nullable: true })
-  fontFamily?: string;
+  @OneToOne(() => AppConfig, (entity) => entity.merchant, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @ApiProperty({ type: () => AppConfig, required: false })
+  appConfig?: AppConfig;
 
   /*
    * Step 3: Square
    */
 
+  @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
   squareAccessToken?: string;
 
+  @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
   squareRefreshToken?: string;
 
+  @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
   squareExpiresAt?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
   merchantSquareId?: string;
@@ -88,6 +98,7 @@ export class MoaMerchant extends EntityHelper {
    * Step 4: Checkout
    */
 
+  @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
   stripeId?: string;
@@ -100,6 +111,7 @@ export class MoaMerchant extends EntityHelper {
    * Catalog
    */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   catalogMoaId?: string;
 
@@ -108,7 +120,7 @@ export class MoaMerchant extends EntityHelper {
     nullable: true,
   })
   @JoinColumn()
-  @ApiProperty()
+  @ApiProperty({ type: () => MoaCatalog, required: false })
   catalog?: MoaCatalog;
 
   /*
@@ -118,6 +130,6 @@ export class MoaMerchant extends EntityHelper {
   @OneToMany(() => MoaLocation, (entity) => entity.merchant, {
     nullable: true,
   })
-  @ApiProperty()
+  @ApiProperty({ type: () => MoaLocation, required: false, isArray: true })
   locations?: MoaLocation[];
 }

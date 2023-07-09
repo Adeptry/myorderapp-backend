@@ -1,6 +1,17 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  forwardRef,
+  Inject,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Location } from 'square';
+import { MerchantsService } from 'src/merchants/merchants.service';
+import { infinityPagination } from 'src/utils/infinity-pagination';
+import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { IPaginationOptions } from 'src/utils/types/pagination-options';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { MoaMerchant } from '../merchants/entities/merchant.entity';
 import { SquareService } from '../square/square.service';
@@ -16,17 +27,21 @@ export class LocationsService {
     private readonly repository: Repository<MoaLocation>,
     @Inject(forwardRef(() => SquareService))
     private readonly squareService: SquareService,
+    @Inject(forwardRef(() => MerchantsService))
+    private readonly merchantsService: MerchantsService,
   ) {}
 
   async sync(params: {
     merchantMoaId: string;
     squareAccessToken: string;
   }): Promise<MoaLocation[]> {
-    const moaLocations = await this.getManyLocations({
-      merchantMoaId: params.merchantMoaId,
-      onlyMoaEnabled: false,
-      onlySquareActive: false,
-    });
+    const moaLocations = (
+      await this.getManyLocations({
+        merchantMoaId: params.merchantMoaId,
+        onlyMoaEnabled: false,
+        onlySquareActive: false,
+      })
+    ).data;
 
     const squareClient = this.squareService.client(params.squareAccessToken);
     const squareLocations =
@@ -87,6 +102,38 @@ export class LocationsService {
     } else {
       return null;
     }
+  }
+
+  async getMerchantsLocations(params: {
+    paginationOptions?: IPaginationOptions;
+    userId?: string;
+    merchantMoaId?: string;
+  }): Promise<InfinityPaginationResultType<MoaLocation>> {
+    if (params.merchantMoaId) {
+      return await this.getManyLocations({
+        paginationOptions: params.paginationOptions,
+        merchantMoaId: params.merchantMoaId,
+        onlyMoaEnabled: true,
+        onlySquareActive: true,
+      });
+    } else if (params.userId) {
+      const merchant = await this.merchantsService.findOneOrFail({
+        where: { userId: params.userId },
+      });
+
+      if (!merchant.moaId) {
+        throw new NotFoundException('Merchant not found');
+      }
+
+      return await this.getManyLocations({
+        paginationOptions: params.paginationOptions,
+        merchantMoaId: merchant.moaId,
+        onlyMoaEnabled: true,
+        onlySquareActive: true,
+      });
+    }
+
+    throw new BadRequestException('Either userId or merchantMoaId is required');
   }
 
   async findAll(options?: FindManyOptions<MoaLocation>) {
@@ -161,10 +208,15 @@ export class LocationsService {
   }
 
   async getManyLocations(params: {
+    paginationOptions?: IPaginationOptions;
     merchantMoaId: string;
     onlySquareActive: boolean;
     onlyMoaEnabled: boolean;
-  }): Promise<MoaLocation[]> {
+  }): Promise<InfinityPaginationResultType<MoaLocation>> {
+    if (!params.merchantMoaId) {
+      throw new BadRequestException('merchantMoaId is required');
+    }
+
     const query = this.repository
       .createQueryBuilder('location')
       .where('location.merchantMoaId = :merchantMoaId', {
@@ -172,6 +224,13 @@ export class LocationsService {
       })
       .orderBy('location.moaOrdinal', 'ASC');
     // .leftJoinAndSelect(`location.image`, `image`);
+
+    if (params.paginationOptions) {
+      query.skip(
+        (params.paginationOptions.page - 1) * params.paginationOptions.limit,
+      );
+      query.take(params.paginationOptions.limit);
+    }
 
     if (params.onlySquareActive) {
       query.andWhere(`location.status = 'ACTIVE'`);
@@ -181,7 +240,10 @@ export class LocationsService {
       query.andWhere('location.moaEnabled = true');
     }
 
-    return query.getMany();
+    return infinityPagination(await query.getMany(), {
+      page: params.paginationOptions?.page ?? 0,
+      limit: params.paginationOptions?.limit ?? 50,
+    });
   }
 
   private assignSquareLocationToMoaLocation(

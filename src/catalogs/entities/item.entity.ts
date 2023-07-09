@@ -1,4 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -23,6 +24,7 @@ import { MoaVariation } from './variation.entity';
 export class MoaItem extends EntityHelper {
   /* Base entity */
 
+  @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   moaId?: string;
 
@@ -31,15 +33,19 @@ export class MoaItem extends EntityHelper {
     this.moaId = nanoid();
   }
 
+  @Exclude({ toPlainOnly: true })
   @CreateDateColumn({ nullable: true })
   createDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @UpdateDateColumn({ nullable: true })
   updateDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @DeleteDateColumn({ nullable: true })
   deleteDate?: Date;
 
+  @Exclude({ toPlainOnly: true })
   @VersionColumn({ nullable: true })
   version?: number;
 
@@ -48,9 +54,11 @@ export class MoaItem extends EntityHelper {
    * Moameta
    */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -58,15 +66,19 @@ export class MoaItem extends EntityHelper {
    * Square
    */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
+  @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   priceInCents?: number;
 
+  @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   description?: string | null;
 
@@ -74,6 +86,7 @@ export class MoaItem extends EntityHelper {
    * Category
    */
 
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   categoryMoaId?: string;
 
@@ -82,27 +95,26 @@ export class MoaItem extends EntityHelper {
     nullable: false,
   })
   @JoinColumn()
-  @ApiProperty()
   category?: MoaCategory;
 
   /*
    * Modifier lists
    */
 
+  @ApiProperty({ type: () => MoaModifierList, isArray: true, required: false })
   @ManyToMany(() => MoaModifierList, (entity) => entity.items, {
     nullable: true,
     eager: true,
   })
-  @ApiProperty()
   modifierLists?: MoaModifierList[];
 
   /*
    * Variations
    */
+  @ApiProperty({ type: () => MoaVariation, isArray: true, required: false })
   @OneToMany(() => MoaVariation, (entity) => entity.item, {
     nullable: true,
     eager: true,
   })
-  @ApiProperty()
   variations?: MoaVariation[];
 }

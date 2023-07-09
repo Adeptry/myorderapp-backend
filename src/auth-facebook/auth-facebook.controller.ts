@@ -8,7 +8,7 @@ import { AuthFacebookLoginDto } from './dto/auth-facebook-login.dto';
 @ApiTags('Auth')
 @Controller({
   path: 'auth/facebook',
-  version: '1',
+  version: '2',
 })
 export class AuthFacebookController {
   constructor(

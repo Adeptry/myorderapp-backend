@@ -33,7 +33,7 @@ import { UsersService } from './users.service';
 @ApiTags('Users')
 @Controller({
   path: 'users',
-  version: '1',
+  version: '2',
 })
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
