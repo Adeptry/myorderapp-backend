@@ -6,6 +6,7 @@ import {
   HttpStatus,
   NotFoundException,
   Param,
+  ParseIntPipe,
   Query,
   Request,
   UnauthorizedException,
@@ -40,18 +41,8 @@ export class LocationsController {
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: MoaLocationPaginatedResponse })
-  @ApiQuery({
-    name: 'page',
-    required: false,
-    type: Number,
-    description: 'The page number.',
-  })
-  @ApiQuery({
-    name: 'limit',
-    required: false,
-    type: Number,
-    description: 'The limit of items per page.',
-  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({
     name: 'merchantId',
     required: false,
@@ -60,8 +51,8 @@ export class LocationsController {
   })
   async getLocations(
     @Request() request,
-    @Query('page') page?: number,
-    @Query('limit') limit?: number,
+    @Query('page', ParseIntPipe) page: number,
+    @Query('limit', ParseIntPipe) limit: number,
     @Query('merchantId') merchantMoaId?: string,
   ): Promise<MoaLocationPaginatedResponse> {
     const user = await this.authService.me(request.user);
@@ -72,24 +63,17 @@ export class LocationsController {
       );
     }
 
-    const paginationOptions = {
-      page: page || page === 0 ? page : 0,
-      limit: limit || limit === 0 ? limit : 50,
-    };
-
-    console.log('paginationOptions', page ?? 0);
-
     // If the user is a merchant, get locations for their merchant account.
     if (user.role?.id === RoleEnum.merchant) {
       return this.locationsService.getMerchantsLocations({
         userId: user.id,
-        paginationOptions,
+        pagination: { page, limit },
       });
     } else if (user.role?.id === RoleEnum.customer && merchantMoaId) {
       // If the user is a customer and a merchantId is provided, get locations for that merchant.
       return this.locationsService.getMerchantsLocations({
         merchantMoaId,
-        paginationOptions,
+        pagination: { page, limit },
       });
     }
 

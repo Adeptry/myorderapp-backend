@@ -11,7 +11,7 @@ import { Location } from 'square';
 import { MerchantsService } from 'src/merchants/merchants.service';
 import { infinityPagination } from 'src/utils/infinity-pagination';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { IPaginationOptions } from 'src/utils/types/pagination-options';
+import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { MoaMerchant } from '../merchants/entities/merchant.entity';
 import { SquareService } from '../square/square.service';
@@ -40,6 +40,7 @@ export class LocationsService {
         merchantMoaId: params.merchantMoaId,
         onlyMoaEnabled: false,
         onlySquareActive: false,
+        pagination: { limit: 1000, page: 1 }, // todo: paul fix
       })
     ).data;
 
@@ -105,13 +106,13 @@ export class LocationsService {
   }
 
   async getMerchantsLocations(params: {
-    paginationOptions?: IPaginationOptions;
+    pagination: PaginationOptions;
     userId?: string;
     merchantMoaId?: string;
   }): Promise<InfinityPaginationResultType<MoaLocation>> {
     if (params.merchantMoaId) {
       return await this.getManyLocations({
-        paginationOptions: params.paginationOptions,
+        pagination: params.pagination,
         merchantMoaId: params.merchantMoaId,
         onlyMoaEnabled: true,
         onlySquareActive: true,
@@ -126,7 +127,7 @@ export class LocationsService {
       }
 
       return await this.getManyLocations({
-        paginationOptions: params.paginationOptions,
+        pagination: params.pagination,
         merchantMoaId: merchant.moaId,
         onlyMoaEnabled: true,
         onlySquareActive: true,
@@ -208,7 +209,7 @@ export class LocationsService {
   }
 
   async getManyLocations(params: {
-    paginationOptions?: IPaginationOptions;
+    pagination: PaginationOptions;
     merchantMoaId: string;
     onlySquareActive: boolean;
     onlyMoaEnabled: boolean;
@@ -225,11 +226,9 @@ export class LocationsService {
       .orderBy('location.moaOrdinal', 'ASC');
     // .leftJoinAndSelect(`location.image`, `image`);
 
-    if (params.paginationOptions) {
-      query.skip(
-        (params.paginationOptions.page - 1) * params.paginationOptions.limit,
-      );
-      query.take(params.paginationOptions.limit);
+    if (params.pagination) {
+      query.skip((params.pagination.page - 1) * params.pagination.limit);
+      query.take(params.pagination.limit);
     }
 
     if (params.onlySquareActive) {
@@ -240,10 +239,9 @@ export class LocationsService {
       query.andWhere('location.moaEnabled = true');
     }
 
-    return infinityPagination(await query.getMany(), {
-      page: params.paginationOptions?.page ?? 0,
-      limit: params.paginationOptions?.limit ?? 50,
-    });
+    const [many, count] = await query.getManyAndCount();
+
+    return infinityPagination({ many, count, pagination: params.pagination });
   }
 
   private assignSquareLocationToMoaLocation(

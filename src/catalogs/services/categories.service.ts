@@ -1,6 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { infinityPagination } from 'src/utils/infinity-pagination';
+import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { PaginationOptions } from 'src/utils/types/pagination-options';
 import {
   FindManyOptions,
   FindOneOptions,
@@ -90,5 +93,38 @@ export class CategoriesService {
     options?: RemoveOptions,
   ): Promise<MoaCategory[]> {
     return this.repository.remove(entities, options);
+  }
+
+  async getManyCategories(params: {
+    catalogMoaId: string;
+    pagination: PaginationOptions;
+    onlyShowEnabled?: boolean;
+  }): Promise<InfinityPaginationResultType<MoaCategory>> {
+    if (!params.catalogMoaId) {
+      throw new BadRequestException('catalogMoaId is required');
+    }
+
+    const query = this.repository
+      .createQueryBuilder('category')
+      .where('category.catalogMoaId = :catalogMoaId', {
+        catalogMoaId: params.catalogMoaId,
+      })
+      .orderBy('category.moaOrdinal', 'ASC');
+    // .leftJoinAndSelect(`category.image`, `image`);
+
+    console.log(params.pagination);
+
+    if (params) {
+      query.skip((params.pagination.page - 1) * params.pagination.limit);
+      query.take(params.pagination.limit);
+    }
+
+    if (params.onlyShowEnabled) {
+      query.andWhere('location.moaEnabled = true');
+    }
+
+    const [many, count] = await query.getManyAndCount();
+
+    return infinityPagination({ many, count, pagination: params.pagination });
   }
 }

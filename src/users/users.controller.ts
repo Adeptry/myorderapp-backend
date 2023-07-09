@@ -16,12 +16,12 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import { NullableType } from 'src/utils/types/nullable.type';
 import { Roles } from '../roles/roles.decorator';
 import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
 import { infinityPagination } from '../utils/infinity-pagination';
 import { InfinityPaginationResultType } from '../utils/types/infinity-pagination-result.type';
-import { NullableType } from '../utils/types/nullable.type';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from './entities/user.entity';
@@ -60,13 +60,15 @@ export class UsersController {
       limit = 50;
     }
 
-    return infinityPagination(
-      await this.usersService.findManyWithPagination({
-        page,
-        limit,
-      }),
-      { page, limit },
-    );
+    const [find, count] = await this.usersService.findManyWithPagination({
+      page,
+      limit,
+    });
+    return infinityPagination({
+      many: find,
+      count: count,
+      pagination: { page, limit },
+    });
   }
 
   @SerializeOptions({

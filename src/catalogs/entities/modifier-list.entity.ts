@@ -84,7 +84,6 @@ export class MoaModifierList extends EntityHelper {
   @ApiProperty({ type: () => MoaModifier, isArray: true, required: false })
   @OneToMany(() => MoaModifier, (entity) => entity.modifierList, {
     nullable: true,
-    eager: true,
   })
   modifiers?: MoaModifier[];
 }

@@ -16,7 +16,7 @@ import { VariationsService } from './services/variations.service';
 export class CatalogsService {
   constructor(
     @InjectRepository(MoaCatalog)
-    private readonly catalogRepository: Repository<MoaCatalog>,
+    private readonly repository: Repository<MoaCatalog>,
     @Inject(forwardRef(() => SquareService))
     private readonly squareService: SquareService,
     @Inject(forwardRef(() => ItemsService))
@@ -32,11 +32,69 @@ export class CatalogsService {
   ) {}
 
   create() {
-    return this.catalogRepository.create();
+    return this.repository.create();
   }
 
   save(entity: MoaCatalog) {
-    return this.catalogRepository.save(entity);
+    return this.repository.save(entity);
+  }
+
+  // Access
+
+  findOne(options: FindOneOptions<MoaCatalog>) {
+    return this.repository.findOne(options);
+  }
+
+  findOneOrFail(options: FindOneOptions<MoaCatalog>) {
+    return this.repository.findOneOrFail(options);
+  }
+
+  getOneOrderedOrFail(params: {
+    catalogMoaId?: string;
+    onlyShowEnabled?: boolean;
+  }) {
+    const queryBuilder = this.repository
+      .createQueryBuilder('catalog')
+      .where('catalog.moaId = :moaId', { moaId: params.catalogMoaId })
+      .leftJoinAndSelect('catalog.categories', 'categories')
+      .leftJoinAndSelect('categories.items', 'items')
+      .leftJoinAndSelect('items.modifierLists', 'modifierLists')
+      .leftJoinAndSelect('modifierLists.modifiers', 'modifiers')
+      .leftJoinAndSelect('items.variations', 'variations')
+      // .leftJoinAndSelect('items.image', 'image')
+      .orderBy('categories.moaOrdinal', 'ASC')
+      .addOrderBy('items.moaOrdinal', 'ASC')
+      .addOrderBy('modifiers.ordinal', 'ASC')
+      .addOrderBy('variations.ordinal', 'ASC');
+
+    if (params.onlyShowEnabled) {
+      queryBuilder.andWhere('categories.moaEnabled = true');
+      queryBuilder.andWhere('items.moaEnabled = true');
+    }
+
+    return queryBuilder.getOneOrFail();
+  }
+
+  findAll(options?: FindManyOptions<MoaCatalog>) {
+    return this.repository.find(options);
+  }
+
+  async loadCatalogForCategory(
+    category: MoaCategory,
+  ): Promise<MoaCatalog | null | undefined> {
+    return await this.repository
+      .createQueryBuilder()
+      .relation(MoaCategory, 'catalog')
+      .of(category)
+      .loadOne();
+  }
+
+  async loadCategories(entity: MoaCatalog): Promise<MoaCategory[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(MoaCatalog, 'categories')
+      .of(entity)
+      .loadMany();
   }
 
   async squareSync(params: {
@@ -191,7 +249,7 @@ export class CatalogsService {
         moaItem.category = moaCategory;
         await this.itemsService.save(moaItem);
 
-        let minPriceInCents = Number(9999);
+        let minPriceInCents = Number(9999999);
         for (const squareVariation of squareItemData.variations ?? []) {
           let moaVariation =
             moaVariations.find((value) => {
@@ -321,55 +379,5 @@ export class CatalogsService {
     }
 
     return moaCatalog;
-  }
-
-  // Access
-
-  findOne(options: FindOneOptions<MoaCatalog>) {
-    return this.catalogRepository.findOne(options);
-  }
-
-  findOneOrFail(options: FindOneOptions<MoaCatalog>) {
-    return this.catalogRepository.findOneOrFail(options);
-  }
-
-  getOneOrderedOrFail(params: {
-    catalogMoaId?: string;
-    onlyShowEnabled?: boolean;
-  }) {
-    const queryBuilder = this.catalogRepository
-      .createQueryBuilder('catalog')
-      .where('catalog.moaId = :moaId', { moaId: params.catalogMoaId })
-      .leftJoinAndSelect('catalog.categories', 'categories')
-      .leftJoinAndSelect('categories.items', 'items')
-      .leftJoinAndSelect('items.modifierLists', 'modifierLists')
-      .leftJoinAndSelect('modifierLists.modifiers', 'modifiers')
-      .leftJoinAndSelect('items.variations', 'variations')
-      .leftJoinAndSelect('items.image', 'image')
-      .orderBy('categories.moaOrdinal', 'ASC')
-      .addOrderBy('items.moaOrdinal', 'ASC')
-      .addOrderBy('modifiers.ordinal', 'ASC')
-      .addOrderBy('variations.ordinal', 'ASC');
-
-    if (params.onlyShowEnabled) {
-      queryBuilder.andWhere('categories.moaEnabled = true');
-      queryBuilder.andWhere('items.moaEnabled = true');
-    }
-
-    return queryBuilder.getOneOrFail();
-  }
-
-  findAll(options?: FindManyOptions<MoaCatalog>) {
-    return this.catalogRepository.find(options);
-  }
-
-  async loadCatalogForCategory(
-    category: MoaCategory,
-  ): Promise<MoaCatalog | null | undefined> {
-    return await this.catalogRepository
-      .createQueryBuilder()
-      .relation(MoaCategory, 'catalog')
-      .of(category)
-      .loadOne();
   }
 }

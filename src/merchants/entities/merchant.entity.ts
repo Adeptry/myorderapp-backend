@@ -132,4 +132,16 @@ export class MoaMerchant extends EntityHelper {
   })
   @ApiProperty({ type: () => MoaLocation, required: false, isArray: true })
   locations?: MoaLocation[];
+
+  /*
+   * Firebase
+   */
+
+  @Exclude({ toPlainOnly: true })
+  @Column('simple-json', { nullable: true })
+  firebaseAppOptions?: Record<string, any>;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true })
+  firebaseDatabaseUrl?: string;
 }

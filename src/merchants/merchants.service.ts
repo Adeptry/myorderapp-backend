@@ -4,17 +4,24 @@ import {
   Injectable,
   Logger,
   NotFoundException,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { credential } from 'firebase-admin';
 import { nanoid } from 'nanoid';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { MoaCategory } from 'src/catalogs/entities/category.entity';
+import { CategoriesService } from 'src/catalogs/services/categories.service';
+import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { LocationsService } from 'src/locations/locations.service';
 import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
+import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
 import { MoaCreateMerchantInput } from './dto/create-merchant.input';
 import { MoaUpdateMerchantInput } from './dto/update-merchant.input';
@@ -32,10 +39,14 @@ export class MerchantsService {
     private readonly squareService: SquareService,
     @Inject(forwardRef(() => CatalogsService))
     private readonly catalogsService: CatalogsService,
+    @Inject(forwardRef(() => CategoriesService))
+    private readonly categoriesService: CategoriesService,
     @Inject(forwardRef(() => LocationsService))
     private readonly locationsService: LocationsService,
     @Inject(forwardRef(() => UsersService))
     private readonly usersService: UsersService,
+    @Inject(forwardRef(() => FirebaseAdminService))
+    private readonly firebaseAdminService: FirebaseAdminService,
   ) {}
 
   async create(input: MoaCreateMerchantInput) {
@@ -106,40 +117,44 @@ export class MerchantsService {
     return await this.save(merchant);
   }
 
-  async squareSync(merchantMoaId: string) {
-    const merchant = await this.findOneOrFail({
-      where: { moaId: merchantMoaId },
+  async squareSync(params: { userId: string }) {
+    const entity = await this.findOneOrFail({
+      where: { userId: params.userId },
     });
 
-    const squareAccessToken = merchant.squareAccessToken;
-
-    if (squareAccessToken == null) {
-      throw new Error('Square access token is null');
+    if (entity.moaId == null) {
+      throw new NotFoundException('Merchant moaId is null');
     }
 
-    let catalog = await this.loadOneCatalog(merchant);
+    const squareAccessToken = entity.squareAccessToken;
+
+    if (squareAccessToken == null) {
+      throw new UnauthorizedException('Square access token is null');
+    }
+
+    let catalog = await this.loadOneCatalogForEntity({ entity });
     if (catalog == null) {
       catalog = this.catalogsService.create();
-      merchant.catalog = catalog;
+      entity.catalog = catalog;
       await this.catalogsService.save(catalog);
-      await this.save(merchant);
+      await this.save(entity);
     }
 
     if (catalog.moaId == null) {
       throw new Error('Catalog moaId is null');
     }
 
-    merchant.catalog = await this.catalogsService.squareSync({
+    entity.catalog = await this.catalogsService.squareSync({
       squareAccessToken,
       catalogMoaId: catalog.moaId,
     });
 
     await this.locationsService.sync({
-      merchantMoaId,
+      merchantMoaId: entity.moaId,
       squareAccessToken,
     });
 
-    return merchant;
+    return entity;
   }
 
   async stripeCreateCheckoutSessionId(params: {
@@ -208,6 +223,31 @@ export class MerchantsService {
     return this.save(entity);
   }
 
+  async firebaseAdminApp(moaId: string) {
+    const entity = await this.findOneOrFail({ where: { moaId } });
+
+    try {
+      const app = this.firebaseAdminService.getApp(moaId);
+      return app;
+    } catch {
+      // do nothing, the app doesn't exist
+    }
+    try {
+      const appOptions = JSON.parse(JSON.stringify(entity.firebaseAppOptions));
+      const app = this.firebaseAdminService.initializeApp(
+        {
+          credential: credential.cert(appOptions),
+          databaseURL: entity.firebaseDatabaseUrl,
+        },
+        moaId,
+      );
+      return app;
+    } catch (error) {
+      this.logger.log(error);
+      return null;
+    }
+  }
+
   findAll(options?: FindManyOptions<MoaMerchant>) {
     return this.repository.find(options);
   }
@@ -239,13 +279,55 @@ export class MerchantsService {
     return deleteResult.affected !== undefined;
   }
 
-  async loadOneCatalog(
-    entity: MoaMerchant,
-  ): Promise<MoaCatalog | null | undefined> {
+  async getOneOrderedCatalogOrFailForUser(params: {
+    user: User;
+    onlyShowEnabled: boolean;
+  }): Promise<MoaCatalog | null | undefined> {
+    const entity = await this.findOneOrFail({
+      where: { userId: params.user.id },
+    });
+    return this.catalogsService.getOneOrderedOrFail({
+      catalogMoaId: entity.catalogMoaId,
+      onlyShowEnabled: params.onlyShowEnabled,
+    });
+  }
+
+  async getManyCategoriesForUser(params: {
+    user: User;
+    onlyShowEnabled: boolean;
+    pagination: PaginationOptions;
+  }): Promise<InfinityPaginationResultType<MoaCategory>> {
+    const entity = await this.findOneOrFail({
+      where: { userId: params.user.id },
+    });
+
+    if (entity.catalogMoaId == null) {
+      throw new Error('Catalog moaId is null');
+    }
+
+    return this.categoriesService.getManyCategories({
+      catalogMoaId: entity.catalogMoaId,
+      onlyShowEnabled: params.onlyShowEnabled,
+      pagination: params.pagination,
+    });
+  }
+
+  async loadOneCatalogForUser(params: {
+    user: User;
+  }): Promise<MoaCatalog | null | undefined> {
+    const entity = await this.findOneOrFail({
+      where: { userId: params.user.id },
+    });
+    return this.loadOneCatalogForEntity({ entity });
+  }
+
+  async loadOneCatalogForEntity(params: {
+    entity: MoaMerchant;
+  }): Promise<MoaCatalog | null | undefined> {
     return this.repository
       .createQueryBuilder()
       .relation(MoaMerchant, 'catalog')
-      .of(entity)
+      .of(params.entity)
       .loadOne();
   }
 

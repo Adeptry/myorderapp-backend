@@ -10,5 +10,5 @@ export class MoaLocationPaginatedResponse extends InfinityPaginationResultType<M
   count?: number;
 
   @ApiProperty({ required: false })
-  pages?: number;
+  page?: number;
 }

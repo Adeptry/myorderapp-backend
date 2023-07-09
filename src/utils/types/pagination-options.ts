@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class IPaginationOptions {
+export class PaginationOptions {
   @ApiProperty()
   page: number;
 

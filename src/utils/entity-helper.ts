@@ -1,7 +1,8 @@
-import { instanceToPlain } from 'class-transformer';
+import { Exclude, instanceToPlain } from 'class-transformer';
 import { AfterLoad, BaseEntity } from 'typeorm';
 
 export class EntityHelper extends BaseEntity {
+  @Exclude({ toPlainOnly: true })
   __entity?: string;
 
   @AfterLoad()

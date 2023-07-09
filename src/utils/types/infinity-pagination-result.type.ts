@@ -4,5 +4,5 @@ export class InfinityPaginationResultType<T> {
   @ApiProperty()
   data: T[];
   @ApiProperty()
-  hasNextPage: boolean;
+  pages: number;
 }

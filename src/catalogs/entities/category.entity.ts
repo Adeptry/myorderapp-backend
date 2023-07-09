@@ -87,7 +87,6 @@ export class MoaCategory extends EntityHelper {
   @ApiProperty({ type: () => MoaItem, isArray: true, required: false })
   @OneToMany(() => MoaItem, (item) => item.category, {
     nullable: true,
-    eager: true,
   })
   items?: MoaItem[];
 }

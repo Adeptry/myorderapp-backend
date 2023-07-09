@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { MerchantsService } from 'src/merchants/merchants.service';
 import { RoleEnum } from 'src/roles/roles.enum';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
-import { IPaginationOptions } from 'src/utils/types/pagination-options';
+import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { DeepPartial, Repository } from 'typeorm';
 import { NullableType } from '../utils/types/nullable.type';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -31,9 +31,9 @@ export class UsersService {
   }
 
   findManyWithPagination(
-    paginationOptions: IPaginationOptions,
-  ): Promise<User[]> {
-    return this.usersRepository.find({
+    paginationOptions: PaginationOptions,
+  ): Promise<[User[], number]> {
+    return this.usersRepository.findAndCount({
       skip: (paginationOptions.page - 1) * paginationOptions.limit,
       take: paginationOptions.limit,
     });

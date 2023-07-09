@@ -104,7 +104,6 @@ export class MoaItem extends EntityHelper {
   @ApiProperty({ type: () => MoaModifierList, isArray: true, required: false })
   @ManyToMany(() => MoaModifierList, (entity) => entity.items, {
     nullable: true,
-    eager: true,
   })
   modifierLists?: MoaModifierList[];
 
@@ -114,7 +113,6 @@ export class MoaItem extends EntityHelper {
   @ApiProperty({ type: () => MoaVariation, isArray: true, required: false })
   @OneToMany(() => MoaVariation, (entity) => entity.item, {
     nullable: true,
-    eager: true,
   })
   variations?: MoaVariation[];
 }

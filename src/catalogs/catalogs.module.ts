@@ -1,5 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthModule } from 'src/auth/auth.module';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
 import { MoaCategory } from 'src/catalogs/entities/category.entity';
@@ -12,7 +13,9 @@ import { ItemsService } from 'src/catalogs/services/items.service';
 import { ModifierListsService } from 'src/catalogs/services/modifier-lists.service';
 import { ModifiersService } from 'src/catalogs/services/modifiers.service';
 import { VariationsService } from 'src/catalogs/services/variations.service';
+import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
+import { CatalogsController } from './catalogs.controller';
 
 @Module({
   imports: [
@@ -25,6 +28,8 @@ import { SquareModule } from 'src/square/square.module';
       MoaModifier,
     ]),
     forwardRef(() => SquareModule),
+    forwardRef(() => AuthModule),
+    forwardRef(() => MerchantsModule),
   ],
   exports: [
     CatalogsService,
@@ -42,5 +47,6 @@ import { SquareModule } from 'src/square/square.module';
     ModifierListsService,
     CategoriesService,
   ],
+  controllers: [CatalogsController],
 })
 export class CatalogsModule {}
