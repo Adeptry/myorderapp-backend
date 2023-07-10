@@ -15,20 +15,20 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaCatalog } from './catalog.entity';
-import { MoaItem } from './item.entity';
+import { Catalog } from './catalog.entity';
+import { Item } from './item.entity';
 
 @Entity('category')
-export class MoaCategory extends EntityHelper {
+export class Category extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -75,18 +75,18 @@ export class MoaCategory extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  catalogMoaId?: string;
+  catalogId?: string;
 
-  @ManyToOne(() => MoaCatalog, (entity) => entity.categories, {
+  @ManyToOne(() => Catalog, (entity) => entity.categories, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  catalog?: MoaCatalog;
+  catalog?: Catalog;
 
-  @ApiProperty({ type: () => MoaItem, isArray: true, required: false })
-  @OneToMany(() => MoaItem, (item) => item.category, {
+  @ApiProperty({ type: () => Item, isArray: true, required: false })
+  @OneToMany(() => Item, (item) => item.category, {
     nullable: true,
   })
-  items?: MoaItem[];
+  items?: Item[];
 }

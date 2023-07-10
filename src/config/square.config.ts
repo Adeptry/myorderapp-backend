@@ -15,6 +15,9 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   SQUARE_CLIENT_ENVIRONMENT: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_BASE_URL: string;
 }
 
 export default registerAs('square', () => {
@@ -25,5 +28,6 @@ export default registerAs('square', () => {
     clientEnvironment: process.env.SQUARE_CLIENT_ENVIRONMENT,
     oauthClientId: process.env.SQUARE_OAUTH_CLIENT_ID,
     oauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET,
+    baseUrl: process.env.SQUARE_BASE_URL,
   };
 });

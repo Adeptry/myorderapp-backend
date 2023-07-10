@@ -53,7 +53,7 @@ export class LocationsController {
     @Request() request,
     @Query('page', ParseIntPipe) page: number,
     @Query('limit', ParseIntPipe) limit: number,
-    @Query('merchantId') merchantMoaId?: string,
+    @Query('merchantId') merchantId?: string,
   ): Promise<MoaLocationPaginatedResponse> {
     const user = await this.authService.me(request.user);
 
@@ -69,10 +69,10 @@ export class LocationsController {
         userId: user.id,
         pagination: { page, limit },
       });
-    } else if (user.role?.id === RoleEnum.customer && merchantMoaId) {
+    } else if (user.role?.id === RoleEnum.customer && merchantId) {
       // If the user is a customer and a merchantId is provided, get locations for that merchant.
       return this.locationsService.getMerchantsLocations({
-        merchantMoaId,
+        merchantId,
         pagination: { page, limit },
       });
     }
@@ -83,14 +83,14 @@ export class LocationsController {
   }
 
   @ApiBearerAuth()
-  @Get(':moaId')
+  @Get(':id')
   @Roles(RoleEnum.customer, RoleEnum.merchant)
   @UseGuards(AuthGuard('jwt'), RolesGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: MoaLocation })
   async getLocation(
     @Request() request,
-    @Param('moaId') moaId: string,
+    @Param('id') id: string,
   ): Promise<MoaLocation> {
     const user = await this.authService.me(request.user);
 
@@ -100,10 +100,10 @@ export class LocationsController {
       );
     }
 
-    const location = await this.locationsService.findOne({ where: { moaId } });
+    const location = await this.locationsService.findOne({ where: { id } });
 
     if (!location) {
-      throw new NotFoundException(`Location with moaId ${moaId} not found`);
+      throw new NotFoundException(`Location with id ${id} not found`);
     }
 
     return location;

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { MoaCategory } from 'src/catalogs/entities/category.entity';
+import { Category } from 'src/catalogs/entities/category.entity';
 import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -17,16 +17,16 @@ import {
 } from 'typeorm';
 
 @Entity('catalog')
-export class MoaCatalog extends EntityHelper {
+export class Catalog extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -49,11 +49,11 @@ export class MoaCatalog extends EntityHelper {
   /*
    * Categories
    */
-  @ApiProperty({ required: false, type: () => [MoaCategory], isArray: true })
-  @OneToMany(() => MoaCategory, (category) => category.catalog, {
+  @ApiProperty({ required: false, type: () => [Category], isArray: true })
+  @OneToMany(() => Category, (entity) => entity.catalog, {
     nullable: true,
   })
-  categories?: MoaCategory[];
+  categories?: Category[];
 
   /*
    * Merchant

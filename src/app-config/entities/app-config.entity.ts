@@ -23,7 +23,7 @@ export class AppConfig extends EntityHelper {
   id?: string;
 
   @BeforeInsert()
-  setMoaId() {
+  setId() {
     this.id = nanoid();
   }
 
@@ -57,7 +57,7 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  merchantMoaId?: string;
+  merchantId?: string;
 
   @ManyToOne(() => MoaMerchant, { onDelete: 'SET NULL' })
   @JoinColumn()

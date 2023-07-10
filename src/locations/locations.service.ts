@@ -32,12 +32,12 @@ export class LocationsService {
   ) {}
 
   async sync(params: {
-    merchantMoaId: string;
+    merchantId: string;
     squareAccessToken: string;
   }): Promise<MoaLocation[]> {
     const moaLocations = (
       await this.getManyLocations({
-        merchantMoaId: params.merchantMoaId,
+        merchantId: params.merchantId,
         onlyMoaEnabled: false,
         onlySquareActive: false,
         pagination: { limit: 1000, page: 1 }, // todo: paul fix
@@ -64,7 +64,7 @@ export class LocationsService {
           squareAccessToken: params.squareAccessToken,
           locationSquareId: squareLocation.id,
           squareLocation: squareLocation,
-          merchantMoaId: params.merchantMoaId,
+          merchantId: params.merchantId,
         });
 
         if (moaLocation != null) {
@@ -82,7 +82,7 @@ export class LocationsService {
   async create(params: {
     squareAccessToken: string;
     locationSquareId: string;
-    merchantMoaId: string;
+    merchantId: string;
     squareLocation?: Location | null;
   }): Promise<MoaLocation | null> {
     const squareClient = this.squareService.client(params.squareAccessToken);
@@ -97,7 +97,7 @@ export class LocationsService {
     if (squareLocation != undefined) {
       const moaLocation = this.repository.create();
       this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
-      moaLocation.merchantMoaId = params.merchantMoaId;
+      moaLocation.merchantId = params.merchantId;
 
       return await this.save(moaLocation);
     } else {
@@ -108,12 +108,12 @@ export class LocationsService {
   async getMerchantsLocations(params: {
     pagination: PaginationOptions;
     userId?: string;
-    merchantMoaId?: string;
+    merchantId?: string;
   }): Promise<InfinityPaginationResultType<MoaLocation>> {
-    if (params.merchantMoaId) {
+    if (params.merchantId) {
       return await this.getManyLocations({
         pagination: params.pagination,
-        merchantMoaId: params.merchantMoaId,
+        merchantId: params.merchantId,
         onlyMoaEnabled: true,
         onlySquareActive: true,
       });
@@ -122,19 +122,19 @@ export class LocationsService {
         where: { userId: params.userId },
       });
 
-      if (!merchant.moaId) {
+      if (!merchant.id) {
         throw new NotFoundException('Merchant not found');
       }
 
       return await this.getManyLocations({
         pagination: params.pagination,
-        merchantMoaId: merchant.moaId,
+        merchantId: merchant.id,
         onlyMoaEnabled: true,
         onlySquareActive: true,
       });
     }
 
-    throw new BadRequestException('Either userId or merchantMoaId is required');
+    throw new BadRequestException('Either userId or merchantId is required');
   }
 
   async findAll(options?: FindManyOptions<MoaLocation>) {
@@ -154,7 +154,7 @@ export class LocationsService {
   }
 
   async update(input: MoaLocationUpdateInput): Promise<MoaLocation | null> {
-    const entity = await this.findOneOrFail({ where: { moaId: input.moaId } });
+    const entity = await this.findOneOrFail({ where: { id: input.id } });
     this.applyUpdateToEntity(input, entity);
     return this.save(entity);
   }
@@ -176,7 +176,7 @@ export class LocationsService {
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({
-        where: { moaId: input.moaId },
+        where: { id: input.id },
       });
       this.applyUpdateToEntity(input, entity);
       entities.push(entity);
@@ -189,8 +189,8 @@ export class LocationsService {
     return this.repository.save(entities);
   }
 
-  async remove(moaId: string) {
-    const one = await this.findOne({ where: { moaId } });
+  async remove(id: string) {
+    const one = await this.findOne({ where: { id } });
     if (one) {
       return await this.repository.remove(one);
     } else {
@@ -210,18 +210,18 @@ export class LocationsService {
 
   async getManyLocations(params: {
     pagination: PaginationOptions;
-    merchantMoaId: string;
+    merchantId: string;
     onlySquareActive: boolean;
     onlyMoaEnabled: boolean;
   }): Promise<InfinityPaginationResultType<MoaLocation>> {
-    if (!params.merchantMoaId) {
-      throw new BadRequestException('merchantMoaId is required');
+    if (!params.merchantId) {
+      throw new BadRequestException('merchantId is required');
     }
 
     const query = this.repository
       .createQueryBuilder('location')
-      .where('location.merchantMoaId = :merchantMoaId', {
-        merchantMoaId: params.merchantMoaId,
+      .where('location.merchantId = :merchantId', {
+        merchantId: params.merchantId,
       })
       .orderBy('location.moaOrdinal', 'ASC');
     // .leftJoinAndSelect(`location.image`, `image`);

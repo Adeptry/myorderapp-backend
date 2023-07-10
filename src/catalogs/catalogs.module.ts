@@ -2,12 +2,12 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
-import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
-import { MoaCategory } from 'src/catalogs/entities/category.entity';
-import { MoaItem } from 'src/catalogs/entities/item.entity';
-import { MoaModifierList } from 'src/catalogs/entities/modifier-list.entity';
-import { MoaModifier } from 'src/catalogs/entities/modifier.entity';
-import { MoaVariation } from 'src/catalogs/entities/variation.entity';
+import { Catalog } from 'src/catalogs/entities/catalog.entity';
+import { Category } from 'src/catalogs/entities/category.entity';
+import { Item } from 'src/catalogs/entities/item.entity';
+import { ModifierList } from 'src/catalogs/entities/modifier-list.entity';
+import { Modifier } from 'src/catalogs/entities/modifier.entity';
+import { Variation } from 'src/catalogs/entities/variation.entity';
 import { CategoriesService } from 'src/catalogs/services/categories.service';
 import { ItemsService } from 'src/catalogs/services/items.service';
 import { ModifierListsService } from 'src/catalogs/services/modifier-lists.service';
@@ -22,12 +22,12 @@ import { ItemsController } from './controllers/items.controller';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      MoaItem,
-      MoaCategory,
-      MoaCatalog,
-      MoaModifierList,
-      MoaVariation,
-      MoaModifier,
+      Item,
+      Category,
+      Catalog,
+      ModifierList,
+      Variation,
+      Modifier,
     ]),
     forwardRef(() => SquareModule),
     forwardRef(() => AuthModule),

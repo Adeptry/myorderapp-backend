@@ -14,19 +14,19 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaItem } from './item.entity';
+import { Item } from './item.entity';
 
 @Entity('variation')
-export class MoaVariation extends EntityHelper {
+export class Variation extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -76,12 +76,12 @@ export class MoaVariation extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  itemMoaId?: string;
+  itemId?: string;
 
-  @ManyToOne(() => MoaItem, (entity) => entity.variations, {
+  @ManyToOne(() => Item, (entity) => entity.variations, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  item?: MoaItem;
+  item?: Item;
 }

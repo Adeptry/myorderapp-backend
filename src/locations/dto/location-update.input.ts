@@ -1,5 +1,5 @@
 export class MoaLocationUpdateInput {
-  moaId!: string;
+  id!: string;
 
   moaOrdinal?: number;
 

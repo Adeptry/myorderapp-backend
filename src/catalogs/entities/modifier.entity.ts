@@ -15,19 +15,19 @@ import {
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { EntityHelper } from 'src/utils/entity-helper';
-import { MoaModifierList } from './modifier-list.entity';
+import { ModifierList } from './modifier-list.entity';
 
 @Entity('modifier')
-export class MoaModifier extends EntityHelper {
+export class Modifier extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -64,13 +64,13 @@ export class MoaModifier extends EntityHelper {
   ordinal?: number | null;
 
   @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true })
   modifierListId?: string;
 
-  @ManyToOne(() => MoaModifierList, (entity) => entity.modifiers, {
+  @ManyToOne(() => ModifierList, (entity) => entity.modifiers, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  modifierList?: MoaModifierList;
+  modifierList?: ModifierList;
 }

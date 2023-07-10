@@ -6,37 +6,37 @@ import {
   RemoveOptions,
   Repository,
 } from 'typeorm';
-import { MoaItem } from '../entities/item.entity';
-import { MoaVariation } from '../entities/variation.entity';
+import { Item } from '../entities/item.entity';
+import { Variation } from '../entities/variation.entity';
 
 @Injectable()
 export class VariationsService {
   constructor(
-    @InjectRepository(MoaVariation)
-    private readonly repository: Repository<MoaVariation>,
+    @InjectRepository(Variation)
+    private readonly repository: Repository<Variation>,
   ) {}
 
-  create(params: { squareId: string; item: MoaItem }) {
+  create(params: { squareId: string; item: Item }) {
     const entity = this.repository.create();
     entity.squareId = params.squareId;
     entity.item = params.item;
-    entity.itemMoaId = params.item.moaId;
+    entity.itemId = params.item.id;
     return this.repository.save(entity);
   }
 
-  save(entity: MoaVariation) {
+  save(entity: Variation) {
     return this.repository.save(entity);
   }
 
-  findMany(options?: FindManyOptions<MoaVariation>) {
+  findMany(options?: FindManyOptions<Variation>) {
     return this.repository.find(options);
   }
 
-  findOne(options: FindOneOptions<MoaVariation>) {
+  findOne(options: FindOneOptions<Variation>) {
     return this.repository.findOne(options);
   }
 
-  findOneOrFail(options: FindOneOptions<MoaVariation>) {
+  findOneOrFail(options: FindOneOptions<Variation>) {
     return this.repository.findOneOrFail(options);
   }
 
@@ -44,17 +44,14 @@ export class VariationsService {
   //     return `This action updates a #${id} administrator`;
   //   }
 
-  removeOne(
-    entity: MoaVariation,
-    options?: RemoveOptions,
-  ): Promise<MoaVariation> {
+  removeOne(entity: Variation, options?: RemoveOptions): Promise<Variation> {
     return this.repository.remove(entity, options);
   }
 
   removeAll(
-    entities: MoaVariation[],
+    entities: Variation[],
     options?: RemoveOptions,
-  ): Promise<MoaVariation[]> {
+  ): Promise<Variation[]> {
     return this.repository.remove(entities, options);
   }
 }

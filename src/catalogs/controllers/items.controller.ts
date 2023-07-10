@@ -14,7 +14,7 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { ApiBearerAuth, ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
-import { MoaItem } from '../entities/item.entity';
+import { Item } from '../entities/item.entity';
 import { ItemsService } from '../services/items.service';
 
 @ApiTags('Catalogs')
@@ -34,11 +34,8 @@ export class ItemsController {
   @UseGuards(AuthGuard('jwt'))
   @Get(':id')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: MoaItem })
-  async item(
-    @Req() request: any,
-    @Param('id') itemMoaId: string,
-  ): Promise<MoaItem> {
+  @ApiOkResponse({ type: Item })
+  async item(@Req() request: any, @Param('id') itemId: string): Promise<Item> {
     const user = await this.authService.me(request.user);
 
     if (!user) {
@@ -48,11 +45,11 @@ export class ItemsController {
     }
 
     const foundOne = await this.service.findOne({
-      where: { moaId: itemMoaId },
+      where: { id: itemId },
     });
 
     if (!foundOne) {
-      throw new NotFoundException(`Item with moaId ${itemMoaId} not found`);
+      throw new NotFoundException(`Item with id ${itemId} not found`);
     }
 
     foundOne.variations = await this.service.loadVariations(foundOne);

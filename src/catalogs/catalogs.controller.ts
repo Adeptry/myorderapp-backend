@@ -20,7 +20,7 @@ import {
 import { AuthService } from 'src/auth/auth.service';
 import { MerchantsService } from 'src/merchants/merchants.service';
 import { CatalogsService } from './catalogs.service';
-import { MoaCatalog } from './entities/catalog.entity';
+import { Catalog } from './entities/catalog.entity';
 
 @ApiTags('Catalogs')
 @Controller({
@@ -40,12 +40,12 @@ export class CatalogsController {
   @UseGuards(AuthGuard('jwt'))
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: MoaCatalog })
+  @ApiOkResponse({ type: Catalog })
   @ApiQuery({ name: 'onlyShowEnabled', required: false, type: Boolean })
   async catalog(
     @Req() request: any,
     @Query('onlyShowEnabled') onlyShowEnabled = false,
-  ): Promise<MoaCatalog | null | undefined> {
+  ): Promise<Catalog | null | undefined> {
     const user = await this.authService.me(request.user);
 
     if (!user) {

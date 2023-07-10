@@ -1,6 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { Catalog } from 'src/catalogs/entities/catalog.entity';
 import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
@@ -11,23 +11,23 @@ import {
   Repository,
 } from 'typeorm';
 import { MoaCategoryUpdateInput } from '../dto/category-update.dto';
-import { MoaCategory } from '../entities/category.entity';
+import { Category } from '../entities/category.entity';
 
 @Injectable()
 export class CategoriesService {
   constructor(
-    @InjectRepository(MoaCategory)
-    private readonly repository: Repository<MoaCategory>,
+    @InjectRepository(Category)
+    private readonly repository: Repository<Category>,
   ) {}
 
-  create(squareId: string, catalog: MoaCatalog) {
+  create(squareId: string, catalog: Catalog) {
     const entity = this.repository.create();
     entity.squareId = squareId;
     entity.catalog = catalog;
     return this.repository.save(entity);
   }
 
-  save(entity: MoaCategory) {
+  save(entity: Category) {
     return this.repository.save(entity);
   }
 
@@ -35,20 +35,20 @@ export class CategoriesService {
     return this.repository.findByIds(ids);
   }
 
-  findMany(options?: FindManyOptions<MoaCategory>) {
+  findMany(options?: FindManyOptions<Category>) {
     return this.repository.find(options);
   }
 
-  findOne(options: FindOneOptions<MoaCategory>) {
+  findOne(options: FindOneOptions<Category>) {
     return this.repository.findOne(options);
   }
 
-  findOneOrFail(options: FindOneOptions<MoaCategory>) {
+  findOneOrFail(options: FindOneOptions<Category>) {
     return this.repository.findOneOrFail(options);
   }
 
   async update(input: MoaCategoryUpdateInput) {
-    const entity = await this.findOneOrFail({ where: { moaId: input.moaId } });
+    const entity = await this.findOneOrFail({ where: { id: input.id } });
     if (input.moaOrdinal !== undefined) {
       entity.moaOrdinal = input.moaOrdinal;
     }
@@ -58,16 +58,16 @@ export class CategoriesService {
     return await this.save(entity);
   }
 
-  saveAll(entities: MoaCategory[]) {
+  saveAll(entities: Category[]) {
     return this.repository.save(entities);
   }
 
   async updateAll(inputs: MoaCategoryUpdateInput[]) {
-    const entities: MoaCategory[] = [];
+    const entities: Category[] = [];
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({
-        where: { moaId: input.moaId },
+        where: { id: input.id },
       });
       if (input.moaOrdinal !== undefined) {
         entity.moaOrdinal = input.moaOrdinal;
@@ -81,33 +81,30 @@ export class CategoriesService {
     return await this.saveAll(entities);
   }
 
-  removeOne(
-    entity: MoaCategory,
-    options?: RemoveOptions,
-  ): Promise<MoaCategory> {
+  removeOne(entity: Category, options?: RemoveOptions): Promise<Category> {
     return this.repository.remove(entity, options);
   }
 
   removeAll(
-    entities: MoaCategory[],
+    entities: Category[],
     options?: RemoveOptions,
-  ): Promise<MoaCategory[]> {
+  ): Promise<Category[]> {
     return this.repository.remove(entities, options);
   }
 
   async getManyCategories(params: {
-    catalogMoaId: string;
+    catalogId: string;
     pagination: PaginationOptions;
     onlyShowEnabled?: boolean;
-  }): Promise<InfinityPaginationResultType<MoaCategory>> {
-    if (!params.catalogMoaId) {
-      throw new BadRequestException('catalogMoaId is required');
+  }): Promise<InfinityPaginationResultType<Category>> {
+    if (!params.catalogId) {
+      throw new BadRequestException('catalogId is required');
     }
 
     const query = this.repository
       .createQueryBuilder('category')
-      .where('category.catalogMoaId = :catalogMoaId', {
-        catalogMoaId: params.catalogMoaId,
+      .where('category.catalogId = :catalogId', {
+        catalogId: params.catalogId,
       })
       .orderBy('category.moaOrdinal', 'ASC');
     // .leftJoinAndSelect(`category.image`, `image`);

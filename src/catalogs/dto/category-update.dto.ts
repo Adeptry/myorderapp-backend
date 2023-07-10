@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MoaCategoryUpdateInput {
   @ApiProperty()
-  moaId!: string;
+  id!: string;
 
   @ApiProperty()
   moaOrdinal?: number;

@@ -6,14 +6,14 @@ import {
   RemoveOptions,
   Repository,
 } from 'typeorm';
-import { MoaItem } from '../entities/item.entity';
-import { MoaModifierList } from '../entities/modifier-list.entity';
+import { Item } from '../entities/item.entity';
+import { ModifierList } from '../entities/modifier-list.entity';
 
 @Injectable()
 export class ModifierListsService {
   constructor(
-    @InjectRepository(MoaModifierList)
-    private readonly repository: Repository<MoaModifierList>,
+    @InjectRepository(ModifierList)
+    private readonly repository: Repository<ModifierList>,
   ) {}
 
   create(squareId: string) {
@@ -22,7 +22,7 @@ export class ModifierListsService {
     return this.repository.save(entity);
   }
 
-  save(entity: MoaModifierList) {
+  save(entity: ModifierList) {
     return this.repository.save(entity);
   }
 
@@ -30,15 +30,15 @@ export class ModifierListsService {
     return this.repository.findByIds(ids);
   }
 
-  findMany(options?: FindManyOptions<MoaModifierList>) {
+  findMany(options?: FindManyOptions<ModifierList>) {
     return this.repository.find(options);
   }
 
-  findOne(options: FindOneOptions<MoaModifierList>) {
+  findOne(options: FindOneOptions<ModifierList>) {
     return this.repository.findOne(options);
   }
 
-  findOneOrFail(options: FindOneOptions<MoaModifierList>) {
+  findOneOrFail(options: FindOneOptions<ModifierList>) {
     return this.repository.findOneOrFail(options);
   }
 
@@ -47,26 +47,24 @@ export class ModifierListsService {
   //   }
 
   removeOne(
-    entity: MoaModifierList,
+    entity: ModifierList,
     options?: RemoveOptions,
-  ): Promise<MoaModifierList> {
+  ): Promise<ModifierList> {
     return this.repository.remove(entity, options);
   }
 
   removeAll(
-    entities: MoaModifierList[],
+    entities: ModifierList[],
     options?: RemoveOptions,
-  ): Promise<MoaModifierList[]> {
+  ): Promise<ModifierList[]> {
     return this.repository.remove(entities, options);
   }
 
-  async loadItemForModifierList(
-    modifierList: MoaModifierList,
-  ): Promise<MoaItem | null | undefined> {
+  async loadItemsForModifierList(modifierList: ModifierList): Promise<Item[]> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaModifierList, 'item')
+      .relation(ModifierList, 'items')
       .of(modifierList)
-      .loadOne();
+      .loadMany();
   }
 }

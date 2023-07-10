@@ -80,7 +80,7 @@ export class CategoriesController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   async category(
     @Req() request: any,
-    @Param('id') categoryMoaId: string,
+    @Param('id') categoryId: string,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
   ): Promise<MoaItemPaginatedResponse> {
@@ -94,7 +94,7 @@ export class CategoriesController {
 
     const pagination = { page, limit };
     const findAndCount = await this.itemsService.findAndCount({
-      where: { categoryMoaId },
+      where: { categoryId },
       take: limit,
       skip: (page - 1) * limit,
     });

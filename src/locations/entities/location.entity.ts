@@ -19,11 +19,11 @@ import { MoaMerchant } from '../../merchants/entities/merchant.entity';
 export class MoaLocation extends EntityHelper {
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -150,7 +150,7 @@ export class MoaLocation extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  merchantMoaId?: string;
+  merchantId?: string;
 
   @ManyToOne(() => MoaMerchant, { onDelete: 'SET NULL' })
   merchant?: MoaMerchant;

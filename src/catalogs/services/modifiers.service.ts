@@ -6,24 +6,24 @@ import {
   RemoveOptions,
   Repository,
 } from 'typeorm';
-import { MoaModifierList } from '../entities/modifier-list.entity';
-import { MoaModifier } from '../entities/modifier.entity';
+import { ModifierList } from '../entities/modifier-list.entity';
+import { Modifier } from '../entities/modifier.entity';
 
 @Injectable()
 export class ModifiersService {
   constructor(
-    @InjectRepository(MoaModifier)
-    private readonly repository: Repository<MoaModifier>,
+    @InjectRepository(Modifier)
+    private readonly repository: Repository<Modifier>,
   ) {}
 
-  create(squareId: string, modifierList: MoaModifierList) {
+  create(squareId: string, modifierList: ModifierList) {
     const entity = this.repository.create();
     entity.squareId = squareId;
     entity.modifierList = modifierList;
     return this.repository.save(entity);
   }
 
-  save(entity: MoaModifier) {
+  save(entity: Modifier) {
     return this.repository.save(entity);
   }
 
@@ -31,15 +31,15 @@ export class ModifiersService {
     return this.repository.findByIds(ids);
   }
 
-  findMany(options?: FindManyOptions<MoaModifier>) {
+  findMany(options?: FindManyOptions<Modifier>) {
     return this.repository.find(options);
   }
 
-  findOne(options: FindOneOptions<MoaModifier>) {
+  findOne(options: FindOneOptions<Modifier>) {
     return this.repository.findOne(options);
   }
 
-  findOneOrFail(options: FindOneOptions<MoaModifier>) {
+  findOneOrFail(options: FindOneOptions<Modifier>) {
     return this.repository.findOneOrFail(options);
   }
 
@@ -47,26 +47,23 @@ export class ModifiersService {
   //     return `This action updates a #${id} administrator`;
   //   }
 
-  removeOne(
-    entity: MoaModifier,
-    options?: RemoveOptions,
-  ): Promise<MoaModifier> {
+  removeOne(entity: Modifier, options?: RemoveOptions): Promise<Modifier> {
     return this.repository.remove(entity, options);
   }
 
   removeAll(
-    entities: MoaModifier[],
+    entities: Modifier[],
     options?: RemoveOptions,
-  ): Promise<MoaModifier[]> {
+  ): Promise<Modifier[]> {
     return this.repository.remove(entities, options);
   }
 
   async loadModifierListForModifier(
-    modifier: MoaModifier,
-  ): Promise<MoaModifierList | null | undefined> {
+    modifier: Modifier,
+  ): Promise<ModifierList | null | undefined> {
     return await this.repository
       .createQueryBuilder()
-      .relation(MoaModifier, 'modifierList')
+      .relation(Modifier, 'modifierList')
       .of(modifier)
       .loadOne();
   }

@@ -10,8 +10,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { credential } from 'firebase-admin';
 import { nanoid } from 'nanoid';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
-import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
-import { MoaCategory } from 'src/catalogs/entities/category.entity';
+import { Catalog } from 'src/catalogs/entities/catalog.entity';
+import { Category } from 'src/catalogs/entities/category.entity';
 import { CategoriesService } from 'src/catalogs/services/categories.service';
 import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { LocationsService } from 'src/locations/locations.service';
@@ -52,8 +52,8 @@ export class MerchantsService {
   async create(input: MoaCreateMerchantInput) {
     const entity = this.repository.create(input);
 
-    if (!entity.moaId) {
-      entity.moaId = nanoid();
+    if (!entity.id) {
+      entity.id = nanoid();
     }
 
     const user = await this.usersService.findOneOrFail({ id: input.userId });
@@ -94,15 +94,15 @@ export class MerchantsService {
     merchant.squareExpiresAt = new Date(
       Date.parse(accessTokenResponse.expiresAt ?? ''),
     );
-    merchant.merchantSquareId = accessTokenResponse.merchantId;
+    merchant.squareId = accessTokenResponse.merchantId;
     merchant.squareRefreshToken = accessTokenResponse.refreshToken;
 
     return await this.save(merchant);
   }
 
-  async squareRefreshOauth(moaId: string) {
+  async squareRefreshOauth(id: string) {
     const merchant = await this.findOneOrFail({
-      where: { moaId },
+      where: { id },
     });
     const oauthRefreshToken = merchant.squareRefreshToken ?? '';
     const accessToken = await this.squareService.refreshToken(
@@ -112,7 +112,7 @@ export class MerchantsService {
     merchant.squareExpiresAt = new Date(
       Date.parse(accessToken.expiresAt ?? ''),
     );
-    merchant.merchantSquareId = accessToken.merchantId;
+    merchant.squareId = accessToken.merchantId;
     merchant.squareRefreshToken = accessToken.refreshToken;
     return await this.save(merchant);
   }
@@ -122,8 +122,8 @@ export class MerchantsService {
       where: { userId: params.userId },
     });
 
-    if (entity.moaId == null) {
-      throw new NotFoundException('Merchant moaId is null');
+    if (entity.id == null) {
+      throw new NotFoundException('Merchant id is null');
     }
 
     const squareAccessToken = entity.squareAccessToken;
@@ -140,17 +140,17 @@ export class MerchantsService {
       await this.save(entity);
     }
 
-    if (catalog.moaId == null) {
-      throw new Error('Catalog moaId is null');
+    if (catalog.id == null) {
+      throw new Error('Catalog id is null');
     }
 
     entity.catalog = await this.catalogsService.squareSync({
       squareAccessToken,
-      catalogMoaId: catalog.moaId,
+      catalogId: catalog.id,
     });
 
     await this.locationsService.sync({
-      merchantMoaId: entity.moaId,
+      merchantId: entity.id,
       squareAccessToken,
     });
 
@@ -185,7 +185,7 @@ export class MerchantsService {
       ],
       allow_promotion_codes: true,
       customer: merchant.stripeId,
-      client_reference_id: merchant.moaId,
+      client_reference_id: merchant.id,
       success_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/`,
     });
@@ -223,11 +223,11 @@ export class MerchantsService {
     return this.save(entity);
   }
 
-  async firebaseAdminApp(moaId: string) {
-    const entity = await this.findOneOrFail({ where: { moaId } });
+  async firebaseAdminApp(id: string) {
+    const entity = await this.findOneOrFail({ where: { id } });
 
     try {
-      const app = this.firebaseAdminService.getApp(moaId);
+      const app = this.firebaseAdminService.getApp(id);
       return app;
     } catch {
       // do nothing, the app doesn't exist
@@ -239,7 +239,7 @@ export class MerchantsService {
           credential: credential.cert(appOptions),
           databaseURL: entity.firebaseDatabaseUrl,
         },
-        moaId,
+        id,
       );
       return app;
     } catch (error) {
@@ -252,18 +252,36 @@ export class MerchantsService {
     return this.repository.find(options);
   }
 
-  findOne(
+  async findOne(
     options: FindOneOptions<MoaMerchant>,
   ): Promise<MoaMerchant | null | undefined> {
-    return this.repository.findOne(options);
+    const foundOne = await this.repository.findOne(options);
+    console.log(
+      this.squareService.oauthUrl({
+        scope: [
+          'MERCHANT_PROFILE_READ',
+          'CUSTOMERS_WRITE',
+          'CUSTOMERS_READ',
+          'ORDERS_WRITE',
+          'ORDERS_READ',
+          'PAYMENTS_READ',
+          'PAYMENTS_WRITE',
+          'PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS',
+          'ITEMS_WRITE',
+          'ITEMS_READ',
+        ],
+        state: foundOne?.id,
+      }),
+    );
+    return foundOne;
   }
 
   findOneOrFail(options: FindOneOptions<MoaMerchant>): Promise<MoaMerchant> {
     return this.repository.findOneOrFail(options);
   }
 
-  async update(moaId: string, updateMerchantInput: MoaUpdateMerchantInput) {
-    const entity = await this.findOneOrFail({ where: { moaId } });
+  async update(id: string, updateMerchantInput: MoaUpdateMerchantInput) {
+    const entity = await this.findOneOrFail({ where: { id } });
 
     Object.assign(entity, updateMerchantInput);
 
@@ -274,20 +292,20 @@ export class MerchantsService {
     return this.repository.save(merchant);
   }
 
-  async delete(moaId: string): Promise<boolean> {
-    const deleteResult = await this.repository.delete({ moaId });
+  async delete(id: string): Promise<boolean> {
+    const deleteResult = await this.repository.delete({ id });
     return deleteResult.affected !== undefined;
   }
 
   async getOneOrderedCatalogOrFailForUser(params: {
     user: User;
     onlyShowEnabled: boolean;
-  }): Promise<MoaCatalog | null | undefined> {
+  }): Promise<Catalog | null | undefined> {
     const entity = await this.findOneOrFail({
       where: { userId: params.user.id },
     });
     return this.catalogsService.getOneOrderedOrFail({
-      catalogMoaId: entity.catalogMoaId,
+      catalogId: entity.catalogId,
       onlyShowEnabled: params.onlyShowEnabled,
     });
   }
@@ -296,17 +314,17 @@ export class MerchantsService {
     user: User;
     onlyShowEnabled: boolean;
     pagination: PaginationOptions;
-  }): Promise<InfinityPaginationResultType<MoaCategory>> {
+  }): Promise<InfinityPaginationResultType<Category>> {
     const entity = await this.findOneOrFail({
       where: { userId: params.user.id },
     });
 
-    if (entity.catalogMoaId == null) {
-      throw new Error('Catalog moaId is null');
+    if (entity.catalogId == null) {
+      throw new Error('Catalog id is null');
     }
 
     return this.categoriesService.getManyCategories({
-      catalogMoaId: entity.catalogMoaId,
+      catalogId: entity.catalogId,
       onlyShowEnabled: params.onlyShowEnabled,
       pagination: params.pagination,
     });
@@ -314,7 +332,7 @@ export class MerchantsService {
 
   async loadOneCatalogForUser(params: {
     user: User;
-  }): Promise<MoaCatalog | null | undefined> {
+  }): Promise<Catalog | null | undefined> {
     const entity = await this.findOneOrFail({
       where: { userId: params.user.id },
     });
@@ -323,7 +341,7 @@ export class MerchantsService {
 
   async loadOneCatalogForEntity(params: {
     entity: MoaMerchant;
-  }): Promise<MoaCatalog | null | undefined> {
+  }): Promise<Catalog | null | undefined> {
     return this.repository
       .createQueryBuilder()
       .relation(MoaMerchant, 'catalog')

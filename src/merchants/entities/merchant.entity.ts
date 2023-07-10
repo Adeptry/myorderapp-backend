@@ -2,7 +2,7 @@ import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { AppConfig } from 'src/app-config/entities/app-config.entity';
-import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
+import { Catalog } from 'src/catalogs/entities/catalog.entity';
 import { MoaLocation } from 'src/locations/entities/location.entity';
 import { User } from 'src/users/entities/user.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
@@ -26,11 +26,11 @@ export class MoaMerchant extends EntityHelper {
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -89,10 +89,9 @@ export class MoaMerchant extends EntityHelper {
   @Column({ nullable: true })
   squareExpiresAt?: Date;
 
-  @Exclude({ toPlainOnly: true })
-  @ApiHideProperty()
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
-  merchantSquareId?: string;
+  squareId?: string;
 
   /*
    * Step 4: Checkout
@@ -113,15 +112,15 @@ export class MoaMerchant extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  catalogMoaId?: string;
+  catalogId?: string;
 
-  @OneToOne(() => MoaCatalog, (entity) => entity.merchant, {
+  @OneToOne(() => Catalog, (entity) => entity.merchant, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   @JoinColumn()
-  @ApiProperty({ type: () => MoaCatalog, required: false })
-  catalog?: MoaCatalog;
+  @ApiProperty({ type: () => Catalog, required: false })
+  catalog?: Catalog;
 
   /*
    * Locations

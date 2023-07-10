@@ -26,7 +26,7 @@ export class User extends EntityHelper {
   id: string;
 
   @BeforeInsert()
-  setMoaId() {
+  setId() {
     this.id = nanoid();
   }
 

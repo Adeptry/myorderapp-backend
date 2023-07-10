@@ -42,6 +42,18 @@ export class SquareService {
     });
   }
 
+  oauthUrl(params: { scope: string[]; state?: string }) {
+    const urlString = `${this.configService.getOrThrow('square.baseUrl', {
+      infer: true,
+    })}/oauth2/authorize?client_id=${this.configService.getOrThrow(
+      'square.oauthClientId',
+      {
+        infer: true,
+      },
+    )}&scope=${params.scope.join('+')}&state=${params.state}`;
+    return urlString;
+  }
+
   async obtainToken(oauthAccessCode: string): Promise<ObtainTokenResponse> {
     try {
       const response = await this.defaultClient.oAuthApi.obtainToken({

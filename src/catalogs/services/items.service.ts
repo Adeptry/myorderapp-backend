@@ -7,61 +7,61 @@ import {
   Repository,
 } from 'typeorm';
 import { MoaItemUpdateInput } from '../dto/item-update.dto';
-import { MoaCategory } from '../entities/category.entity';
-import { MoaItem } from '../entities/item.entity';
-import { MoaModifierList } from '../entities/modifier-list.entity';
-import { MoaVariation } from '../entities/variation.entity';
+import { Category } from '../entities/category.entity';
+import { Item } from '../entities/item.entity';
+import { ModifierList } from '../entities/modifier-list.entity';
+import { Variation } from '../entities/variation.entity';
 
 @Injectable()
 export class ItemsService {
   constructor(
-    @InjectRepository(MoaItem)
-    private readonly repository: Repository<MoaItem>,
+    @InjectRepository(Item)
+    private readonly repository: Repository<Item>,
   ) {}
 
-  create(squareId: string, category: MoaCategory) {
+  create(squareId: string, category: Category) {
     const entity = this.repository.create();
     entity.squareId = squareId;
     entity.category = category;
     return this.repository.save(entity);
   }
 
-  save(entity: MoaItem) {
+  save(entity: Item) {
     return this.repository.save(entity);
   }
 
-  findAndCount(options?: FindManyOptions<MoaItem>) {
+  findAndCount(options?: FindManyOptions<Item>) {
     return this.repository.findAndCount(options);
   }
 
-  findMany(options?: FindManyOptions<MoaItem>) {
+  findMany(options?: FindManyOptions<Item>) {
     return this.repository.find(options);
   }
 
-  findOne(options: FindOneOptions<MoaItem>) {
+  findOne(options: FindOneOptions<Item>) {
     return this.repository.findOne(options);
   }
 
-  findOneOrFail(options: FindOneOptions<MoaItem>) {
+  findOneOrFail(options: FindOneOptions<Item>) {
     return this.repository.findOneOrFail(options);
   }
 
   async update(input: MoaItemUpdateInput) {
-    const entity = await this.findOneOrFail({ where: { moaId: input.moaId } });
+    const entity = await this.findOneOrFail({ where: { id: input.id } });
     this.applyUpdateToEntity(input, entity);
     return await this.save(entity);
   }
 
-  saveAll(entities: MoaItem[]) {
+  saveAll(entities: Item[]) {
     return this.repository.save(entities);
   }
 
   async updateAll(inputs: MoaItemUpdateInput[]) {
-    const entities: MoaItem[] = [];
+    const entities: Item[] = [];
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({
-        where: { moaId: input.moaId },
+        where: { id: input.id },
       });
       this.applyUpdateToEntity(input, entity);
       entities.push(entity);
@@ -70,7 +70,7 @@ export class ItemsService {
     return await this.saveAll(entities);
   }
 
-  private applyUpdateToEntity(input: MoaItemUpdateInput, entity: MoaItem) {
+  private applyUpdateToEntity(input: MoaItemUpdateInput, entity: Item) {
     if (input.moaOrdinal !== undefined) {
       entity.moaOrdinal = input.moaOrdinal;
     }
@@ -79,36 +79,36 @@ export class ItemsService {
     }
   }
 
-  removeOne(entity: MoaItem, options?: RemoveOptions): Promise<MoaItem> {
+  removeOne(entity: Item, options?: RemoveOptions): Promise<Item> {
     return this.repository.remove(entity, options);
   }
 
-  removeAll(entities: MoaItem[], options?: RemoveOptions): Promise<MoaItem[]> {
+  removeAll(entities: Item[], options?: RemoveOptions): Promise<Item[]> {
     return this.repository.remove(entities, options);
   }
 
   async loadCategoryForItem(
-    entity: MoaItem,
-  ): Promise<MoaCategory | null | undefined> {
+    entity: Item,
+  ): Promise<Category | null | undefined> {
     return await this.repository
       .createQueryBuilder()
-      .relation(MoaItem, 'category')
+      .relation(Item, 'category')
       .of(entity)
       .loadOne();
   }
 
-  async loadVariations(entity: MoaItem): Promise<MoaVariation[]> {
+  async loadVariations(entity: Item): Promise<Variation[]> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaItem, 'variations')
+      .relation(Item, 'variations')
       .of(entity)
       .loadMany();
   }
 
-  async loadModifierLists(entity: MoaItem): Promise<MoaModifierList[]> {
+  async loadModifierLists(entity: Item): Promise<ModifierList[]> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaItem, 'modifierLists')
+      .relation(Item, 'modifierLists')
       .of(entity)
       .loadMany();
   }

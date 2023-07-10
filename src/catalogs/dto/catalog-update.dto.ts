@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class MoaCatalogUpdateInput {
   @ApiProperty()
-  merchantMoaId?: string;
+  merchantId?: string;
 
   @ApiProperty()
   merchantSquareId?: string;

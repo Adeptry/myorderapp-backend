@@ -16,20 +16,20 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { MoaSelectionType } from '../dto/catalogs.types';
-import { MoaItem } from './item.entity';
-import { MoaModifier } from './modifier.entity';
+import { Item } from './item.entity';
+import { Modifier } from './modifier.entity';
 
 @Entity('modifier_list')
-export class MoaModifierList extends EntityHelper {
+export class ModifierList extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -73,18 +73,28 @@ export class MoaModifierList extends EntityHelper {
   @Column({ type: 'simple-enum', nullable: true, enum: MoaSelectionType })
   selectionType?: MoaSelectionType;
 
-  @ManyToMany(() => MoaItem, (entity) => entity.modifierLists, {
+  @ManyToMany(() => Item, (entity) => entity.modifierLists, {
     onDelete: 'CASCADE',
     nullable: true,
     cascade: true,
   })
-  @JoinTable()
-  items?: MoaItem[];
+  @JoinTable({
+    name: 'items_modifier_lists', // name of the table that will be created in the database
+    joinColumn: {
+      name: 'modifierList',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'item',
+      referencedColumnName: 'id',
+    },
+  })
+  items?: Item[];
 
-  @ApiProperty({ type: () => MoaModifier, isArray: true, required: false })
-  @OneToMany(() => MoaModifier, (entity) => entity.modifierList, {
+  @ApiProperty({ type: () => Modifier, isArray: true, required: false })
+  @OneToMany(() => Modifier, (entity) => entity.modifierList, {
     nullable: true,
     eager: true,
   })
-  modifiers?: MoaModifier[];
+  modifiers?: Modifier[];
 }

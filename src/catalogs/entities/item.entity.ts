@@ -16,21 +16,21 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaCategory } from './category.entity';
-import { MoaModifierList } from './modifier-list.entity';
-import { MoaVariation } from './variation.entity';
+import { Category } from './category.entity';
+import { ModifierList } from './modifier-list.entity';
+import { Variation } from './variation.entity';
 
 @Entity('item')
-export class MoaItem extends EntityHelper {
+export class Item extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
-  moaId?: string;
+  id?: string;
 
   @BeforeInsert()
-  setMoaId() {
-    this.moaId = nanoid();
+  setId() {
+    this.id = nanoid();
   }
 
   @Exclude({ toPlainOnly: true })
@@ -88,31 +88,31 @@ export class MoaItem extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  categoryMoaId?: string;
+  categoryId?: string;
 
-  @ManyToOne(() => MoaCategory, (category) => category.items, {
+  @ManyToOne(() => Category, (category) => category.items, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  category?: MoaCategory;
+  category?: Category;
 
   /*
    * Modifier lists
    */
 
-  @ApiProperty({ type: () => MoaModifierList, isArray: true, required: false })
-  @ManyToMany(() => MoaModifierList, (entity) => entity.items, {
+  @ApiProperty({ type: () => ModifierList, isArray: true, required: false })
+  @ManyToMany(() => ModifierList, (entity) => entity.items, {
     nullable: true,
   })
-  modifierLists?: MoaModifierList[];
+  modifierLists?: ModifierList[];
 
   /*
    * Variations
    */
-  @ApiProperty({ type: () => MoaVariation, isArray: true, required: false })
-  @OneToMany(() => MoaVariation, (entity) => entity.item, {
+  @ApiProperty({ type: () => Variation, isArray: true, required: false })
+  @OneToMany(() => Variation, (entity) => entity.item, {
     nullable: true,
   })
-  variations?: MoaVariation[];
+  variations?: Variation[];
 }
