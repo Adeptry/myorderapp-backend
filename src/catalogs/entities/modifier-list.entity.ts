@@ -49,7 +49,7 @@ export class MoaModifierList extends EntityHelper {
   version?: number;
 
   /* Entity */
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
@@ -84,6 +84,7 @@ export class MoaModifierList extends EntityHelper {
   @ApiProperty({ type: () => MoaModifier, isArray: true, required: false })
   @OneToMany(() => MoaModifier, (entity) => entity.modifierList, {
     nullable: true,
+    eager: true,
   })
   modifiers?: MoaModifier[];
 }

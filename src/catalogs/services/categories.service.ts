@@ -1,7 +1,7 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { MoaCatalog } from 'src/catalogs/entities/catalog.entity';
-import { infinityPagination } from 'src/utils/infinity-pagination';
+import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
 import {
@@ -112,8 +112,6 @@ export class CategoriesService {
       .orderBy('category.moaOrdinal', 'ASC');
     // .leftJoinAndSelect(`category.image`, `image`);
 
-    console.log(params.pagination);
-
     if (params) {
       query.skip((params.pagination.page - 1) * params.pagination.limit);
       query.take(params.pagination.limit);
@@ -123,8 +121,12 @@ export class CategoriesService {
       query.andWhere('location.moaEnabled = true');
     }
 
-    const [many, count] = await query.getManyAndCount();
+    const result = await query.getManyAndCount();
 
-    return infinityPagination({ many, count, pagination: params.pagination });
+    return paginated({
+      data: result[0],
+      count: result[1],
+      pagination: params.pagination,
+    });
   }
 }

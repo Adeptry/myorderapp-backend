@@ -9,7 +9,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Location } from 'square';
 import { MerchantsService } from 'src/merchants/merchants.service';
-import { infinityPagination } from 'src/utils/infinity-pagination';
+import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
@@ -239,9 +239,12 @@ export class LocationsService {
       query.andWhere('location.moaEnabled = true');
     }
 
-    const [many, count] = await query.getManyAndCount();
-
-    return infinityPagination({ many, count, pagination: params.pagination });
+    const result = await query.getManyAndCount();
+    return paginated({
+      data: result[0],
+      count: result[1],
+      pagination: params.pagination,
+    });
   }
 
   private assignSquareLocationToMoaLocation(

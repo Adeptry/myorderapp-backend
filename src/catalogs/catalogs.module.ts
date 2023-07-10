@@ -16,6 +16,8 @@ import { VariationsService } from 'src/catalogs/services/variations.service';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
 import { CatalogsController } from './catalogs.controller';
+import { CategoriesController } from './controllers/categories.controller';
+import { ItemsController } from './controllers/items.controller';
 
 @Module({
   imports: [
@@ -47,6 +49,6 @@ import { CatalogsController } from './catalogs.controller';
     ModifierListsService,
     CategoriesService,
   ],
-  controllers: [CatalogsController],
+  controllers: [CatalogsController, CategoriesController, ItemsController],
 })
 export class CatalogsModule {}

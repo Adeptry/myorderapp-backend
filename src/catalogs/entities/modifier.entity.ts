@@ -47,7 +47,7 @@ export class MoaModifier extends EntityHelper {
   version?: number;
 
   /* Entity */
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
@@ -63,7 +63,7 @@ export class MoaModifier extends EntityHelper {
   @Column({ type: Number, nullable: true })
   ordinal?: number | null;
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   modifierListId?: string;
 

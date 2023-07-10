@@ -5,4 +5,6 @@ export class InfinityPaginationResultType<T> {
   data: T[];
   @ApiProperty()
   pages: number;
+  @ApiProperty()
+  count: number;
 }

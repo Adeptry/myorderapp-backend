@@ -9,6 +9,8 @@ import {
 import { MoaItemUpdateInput } from '../dto/item-update.dto';
 import { MoaCategory } from '../entities/category.entity';
 import { MoaItem } from '../entities/item.entity';
+import { MoaModifierList } from '../entities/modifier-list.entity';
+import { MoaVariation } from '../entities/variation.entity';
 
 @Injectable()
 export class ItemsService {
@@ -28,6 +30,10 @@ export class ItemsService {
     return this.repository.save(entity);
   }
 
+  findAndCount(options?: FindManyOptions<MoaItem>) {
+    return this.repository.findAndCount(options);
+  }
+
   findMany(options?: FindManyOptions<MoaItem>) {
     return this.repository.find(options);
   }
@@ -42,7 +48,7 @@ export class ItemsService {
 
   async update(input: MoaItemUpdateInput) {
     const entity = await this.findOneOrFail({ where: { moaId: input.moaId } });
-    await this.applyUpdateToEntity(input, entity);
+    this.applyUpdateToEntity(input, entity);
     return await this.save(entity);
   }
 
@@ -57,7 +63,7 @@ export class ItemsService {
       const entity = await this.findOneOrFail({
         where: { moaId: input.moaId },
       });
-      await this.applyUpdateToEntity(input, entity);
+      this.applyUpdateToEntity(input, entity);
       entities.push(entity);
     }
 
@@ -82,12 +88,28 @@ export class ItemsService {
   }
 
   async loadCategoryForItem(
-    item: MoaItem,
+    entity: MoaItem,
   ): Promise<MoaCategory | null | undefined> {
     return await this.repository
       .createQueryBuilder()
       .relation(MoaItem, 'category')
-      .of(item)
+      .of(entity)
       .loadOne();
+  }
+
+  async loadVariations(entity: MoaItem): Promise<MoaVariation[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(MoaItem, 'variations')
+      .of(entity)
+      .loadMany();
+  }
+
+  async loadModifierLists(entity: MoaItem): Promise<MoaModifierList[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(MoaItem, 'modifierLists')
+      .of(entity)
+      .loadMany();
   }
 }

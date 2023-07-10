@@ -61,7 +61,7 @@ export class MoaCategory extends EntityHelper {
    * Square
    */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
@@ -73,7 +73,7 @@ export class MoaCategory extends EntityHelper {
    * Relations
    */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   catalogMoaId?: string;
 

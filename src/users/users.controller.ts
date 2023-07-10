@@ -20,7 +20,7 @@ import { NullableType } from 'src/utils/types/nullable.type';
 import { Roles } from '../roles/roles.decorator';
 import { RoleEnum } from '../roles/roles.enum';
 import { RolesGuard } from '../roles/roles.guard';
-import { infinityPagination } from '../utils/infinity-pagination';
+import { paginated } from '../utils/paginated';
 import { InfinityPaginationResultType } from '../utils/types/infinity-pagination-result.type';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -60,13 +60,13 @@ export class UsersController {
       limit = 50;
     }
 
-    const [find, count] = await this.usersService.findManyWithPagination({
+    const result = await this.usersService.findManyWithPagination({
       page,
       limit,
     });
-    return infinityPagination({
-      many: find,
-      count: count,
+    return paginated({
+      data: result[0],
+      count: result[1],
       pagination: { page, limit },
     });
   }

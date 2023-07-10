@@ -5,10 +5,4 @@ import { MoaLocation } from '../entities/location.entity';
 export class MoaLocationPaginatedResponse extends InfinityPaginationResultType<MoaLocation> {
   @ApiProperty({ type: () => MoaLocation, isArray: true, required: false })
   data: MoaLocation[];
-
-  @ApiProperty({ required: false })
-  count?: number;
-
-  @ApiProperty({ required: false })
-  page?: number;
 }

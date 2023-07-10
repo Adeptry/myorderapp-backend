@@ -58,7 +58,7 @@ export class MoaVariation extends EntityHelper {
    * Square
    */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   squareId?: string;
 
@@ -74,7 +74,7 @@ export class MoaVariation extends EntityHelper {
    * Relations
    */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   itemMoaId?: string;
 
