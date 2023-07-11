@@ -15,6 +15,7 @@ import {
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { EntityHelper } from 'src/utils/entity-helper';
+import { Catalog } from './catalog.entity';
 import { ModifierList } from './modifier-list.entity';
 
 @Entity('modifier')
@@ -73,4 +74,15 @@ export class Modifier extends EntityHelper {
   })
   @JoinColumn()
   modifierList?: ModifierList;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => Catalog, (entity) => entity.modifiers, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Catalog;
 }

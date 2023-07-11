@@ -19,10 +19,11 @@ export class ItemsService {
     private readonly repository: Repository<Item>,
   ) {}
 
-  create(squareId: string, category: Category) {
+  create(params: { squareId: string; categoryId: string; catalogId: string }) {
     const entity = this.repository.create();
-    entity.squareId = squareId;
-    entity.category = category;
+    entity.squareId = params.squareId;
+    entity.categoryId = params.categoryId;
+    entity.catalogId = params.catalogId;
     return this.repository.save(entity);
   }
 

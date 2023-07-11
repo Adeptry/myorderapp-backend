@@ -16,9 +16,10 @@ export class ModifierListsService {
     private readonly repository: Repository<ModifierList>,
   ) {}
 
-  create(squareId: string) {
+  create(params: { squareId: string; catalogId: string }) {
     const entity = this.repository.create();
-    entity.squareId = squareId;
+    entity.squareId = params.squareId;
+    entity.catalogId = params.catalogId;
     return this.repository.save(entity);
   }
 

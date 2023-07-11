@@ -9,6 +9,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -16,6 +17,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { Catalog } from './catalog.entity';
 import { Category } from './category.entity';
 import { ModifierList } from './modifier-list.entity';
 import { Variation } from './variation.entity';
@@ -105,6 +107,17 @@ export class Item extends EntityHelper {
   @ManyToMany(() => ModifierList, (entity) => entity.items, {
     nullable: true,
   })
+  @JoinTable({
+    name: 'items_modifier_lists', // name of the table that will be created in the database
+    joinColumn: {
+      name: 'item',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'modifierList',
+      referencedColumnName: 'id',
+    },
+  })
   modifierLists?: ModifierList[];
 
   /*
@@ -115,4 +128,15 @@ export class Item extends EntityHelper {
     nullable: true,
   })
   variations?: Variation[];
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => Catalog, (entity) => entity.items, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Catalog;
 }

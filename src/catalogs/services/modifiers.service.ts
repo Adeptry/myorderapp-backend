@@ -16,10 +16,15 @@ export class ModifiersService {
     private readonly repository: Repository<Modifier>,
   ) {}
 
-  create(squareId: string, modifierList: ModifierList) {
+  create(params: {
+    squareId: string;
+    modifierListId: string;
+    catalogId: string;
+  }) {
     const entity = this.repository.create();
-    entity.squareId = squareId;
-    entity.modifierList = modifierList;
+    entity.squareId = params.squareId;
+    entity.modifierListId = params.modifierListId;
+    entity.catalogId = params.catalogId;
     return this.repository.save(entity);
   }
 

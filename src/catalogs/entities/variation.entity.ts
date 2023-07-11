@@ -14,6 +14,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
 
 @Entity('variation')
@@ -84,4 +85,15 @@ export class Variation extends EntityHelper {
   })
   @JoinColumn()
   item?: Item;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => Catalog, (entity) => entity.variations, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Catalog;
 }

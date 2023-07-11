@@ -8,14 +8,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinTable,
+  JoinColumn,
   ManyToMany,
+  ManyToOne,
   OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { MoaSelectionType } from '../dto/catalogs.types';
+import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
 import { Modifier } from './modifier.entity';
 
@@ -78,17 +80,6 @@ export class ModifierList extends EntityHelper {
     nullable: true,
     cascade: true,
   })
-  @JoinTable({
-    name: 'items_modifier_lists', // name of the table that will be created in the database
-    joinColumn: {
-      name: 'modifierList',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'item',
-      referencedColumnName: 'id',
-    },
-  })
   items?: Item[];
 
   @ApiProperty({ type: () => Modifier, isArray: true, required: false })
@@ -97,4 +88,15 @@ export class ModifierList extends EntityHelper {
     eager: true,
   })
   modifiers?: Modifier[];
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => Catalog, (entity) => entity.modifierLists, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Catalog;
 }

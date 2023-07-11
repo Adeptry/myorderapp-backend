@@ -6,7 +6,6 @@ import {
   RemoveOptions,
   Repository,
 } from 'typeorm';
-import { Item } from '../entities/item.entity';
 import { Variation } from '../entities/variation.entity';
 
 @Injectable()
@@ -16,11 +15,11 @@ export class VariationsService {
     private readonly repository: Repository<Variation>,
   ) {}
 
-  create(params: { squareId: string; item: Item }) {
+  create(params: { squareId: string; itemId: string; catalogId: string }) {
     const entity = this.repository.create();
     entity.squareId = params.squareId;
-    entity.item = params.item;
-    entity.itemId = params.item.id;
+    entity.itemId = params.itemId;
+    entity.catalogId = params.catalogId;
     return this.repository.save(entity);
   }
 

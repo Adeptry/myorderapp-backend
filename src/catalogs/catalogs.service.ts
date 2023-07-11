@@ -6,6 +6,9 @@ import { MoaSelectionType } from './dto/catalogs.types';
 import { Catalog } from './entities/catalog.entity';
 import { Category } from './entities/category.entity';
 import { Item } from './entities/item.entity';
+import { ModifierList } from './entities/modifier-list.entity';
+import { Modifier } from './entities/modifier.entity';
+import { Variation } from './entities/variation.entity';
 import { CategoriesService } from './services/categories.service';
 import { ItemsService } from './services/items.service';
 import { ModifierListsService } from './services/modifier-lists.service';
@@ -81,20 +84,42 @@ export class CatalogsService {
     return this.repository.find(options);
   }
 
-  async loadCatalogForCategory(
-    category: Category,
-  ): Promise<Catalog | null | undefined> {
-    return await this.repository
-      .createQueryBuilder()
-      .relation(Category, 'catalog')
-      .of(category)
-      .loadOne();
-  }
-
   async loadCategories(entity: Catalog): Promise<Category[]> {
     return this.repository
       .createQueryBuilder()
       .relation(Catalog, 'categories')
+      .of(entity)
+      .loadMany();
+  }
+
+  async loadItems(entity: Catalog): Promise<Item[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(Catalog, 'items')
+      .of(entity)
+      .loadMany();
+  }
+
+  async loadModifierLists(entity: Catalog): Promise<ModifierList[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(Catalog, 'modifierLists')
+      .of(entity)
+      .loadMany();
+  }
+
+  async loadModifiers(entity: Catalog): Promise<Modifier[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(Catalog, 'modifiers')
+      .of(entity)
+      .loadMany();
+  }
+
+  async loadVariations(entity: Catalog): Promise<Variation[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(Catalog, 'variations')
       .of(entity)
       .loadMany();
   }
@@ -105,82 +130,86 @@ export class CatalogsService {
     const squareCatalogObjects =
       (await this.squareService.listCatalog(squareClient)) ?? [];
 
-    const moaCatalog = await this.getOneOrderedOrFail({
-      catalogId: params.catalogId,
-      onlyShowEnabled: false,
+    const moaCatalog = await this.findOneOrFail({
+      where: { id: params.catalogId },
     });
+
+    if (moaCatalog.id == null) {
+      throw new Error('Catalog id is null.');
+    }
 
     // Categories
 
     const squareCategories = squareCatalogObjects.filter((value) => {
       return value.type === 'CATEGORY';
     });
-    const moaCategories = moaCatalog.categories ?? [];
+    let moaCategories = await this.loadCategories(moaCatalog);
     const deletedMoaCategories = moaCategories.filter((moaValue) => {
       return !squareCategories.some((squareValue) => {
         return squareValue.id === moaValue.squareId;
       });
     });
     await this.categoriesService.removeAll(deletedMoaCategories);
-    this.logger.log(`Deleted ${deletedMoaCategories.length} categories.`);
+    moaCategories = moaCategories.filter((moaValue) => {
+      return !deletedMoaCategories.some((deletedValue) => {
+        return deletedValue.squareId === moaValue.squareId;
+      });
+    });
+    this.logger.verbose(`Deleted ${deletedMoaCategories.length} categories.`);
 
     // Items
 
     const squareItems = squareCatalogObjects.filter((value) => {
       return value.type === 'ITEM';
     });
-    const moaItems = moaCategories.flatMap((value: Category) => {
-      return value.items ?? [];
-    });
-    this.logger.log(`Found ${moaItems.length} items.`);
+    let moaItems = await this.loadItems(moaCatalog);
+    this.logger.verbose(`Found ${moaItems.length} items.`);
     const deletedMoaItems = moaItems.filter((moaValue) => {
       return !squareItems.some((squareValue) => {
         return squareValue.id === moaValue.squareId;
       });
     });
     await this.itemsService.removeAll(deletedMoaItems);
-    this.logger.log(`Deleted ${deletedMoaItems.length} items.`);
+    moaItems = moaItems.filter((moaValue) => {
+      return !deletedMoaItems.some((deletedValue) => {
+        return deletedValue.squareId === moaValue.squareId;
+      });
+    });
+    this.logger.verbose(`Deleted ${deletedMoaItems.length} items.`);
 
     // Variations
 
     const squareItemVariations = squareCatalogObjects.filter((value) => {
       return value.type === 'ITEM_VARIATION';
     });
-    const moaVariations = moaItems.flatMap((value) => {
-      return value.variations ?? [];
-    });
+    const moaVariations = await this.loadVariations(moaCatalog);
     const deletedMoaVariations = moaVariations.filter((moaValue) => {
       return !squareItemVariations.some((squareValue) => {
         return squareValue.id === moaValue.squareId;
       });
     });
     await this.variationsService.removeAll(deletedMoaVariations);
-    this.logger.log(`Deleted ${deletedMoaVariations.length} variations.`);
+    this.logger.verbose(`Deleted ${deletedMoaVariations.length} variations.`);
 
     // Modifiers lists
 
     const squareModifierLists = squareCatalogObjects.filter((value) => {
       return value.type === 'MODIFIER_LIST';
     });
-    const moaDuplicatedModifierLists =
-      moaItems.flatMap((value: Item) => {
-        return value.modifierLists ?? [];
-      }) ?? [];
-    this.logger.log(
-      `Found ${moaDuplicatedModifierLists.length} duplicated modifier lists.`,
-    );
-    const moaModifierLists = moaDuplicatedModifierLists.filter(
-      (value1, index, array) =>
-        index === array.findIndex((value2) => value2.id === value1.id),
-    );
-    this.logger.log(`Found ${moaModifierLists.length} modifier lists.`);
+    let moaModifierLists = await this.loadModifierLists(moaCatalog);
+    this.logger.verbose(`Found ${moaModifierLists.length} modifier lists.`);
     const deletedMoaModifierLists = moaModifierLists.filter((moaValue) => {
       return !squareModifierLists.some((squareValue) => {
         return squareValue.id === moaValue.squareId;
       });
     });
     await this.modifierListsService.removeAll(deletedMoaModifierLists);
-    this.logger.log(
+    moaModifierLists = moaModifierLists.filter((moaValue) => {
+      return !deletedMoaModifierLists.some((deletedValue) => {
+        return deletedValue.squareId === moaValue.squareId;
+      });
+    });
+    this.logger.verbose(
       `Deleted ${deletedMoaModifierLists.length} modifier lists.`,
     );
 
@@ -189,21 +218,19 @@ export class CatalogsService {
     const squareModifiers = squareCatalogObjects.filter((value) => {
       return value.type === 'MODIFIER';
     });
-    const moaModifiers = moaModifierLists
-      .flatMap((value) => {
-        return value?.modifiers ?? [];
-      })
-      .filter(
-        (value1, index, array) =>
-          index === array.findIndex((value2) => value2.id === value1.id),
-      );
+    let moaModifiers = await this.loadModifiers(moaCatalog);
     const deletedMoaModifiers = moaModifiers.filter((moaValue) => {
       return !squareModifiers.some((squareValue) => {
         return squareValue.id === moaValue.squareId;
       });
     });
     await this.modifiersService.removeAll(deletedMoaModifiers);
-    this.logger.log(`Deleted ${deletedMoaModifiers.length} modifiers.`);
+    moaModifiers = moaModifiers.filter((moaValue) => {
+      return !deletedMoaModifiers.some((deletedValue) => {
+        return deletedValue.squareId === moaValue.squareId;
+      });
+    });
+    this.logger.verbose(`Deleted ${deletedMoaModifiers.length} modifiers.`);
 
     // Main loop
 
@@ -211,23 +238,29 @@ export class CatalogsService {
       squareCategoryIndex,
       squareCategory,
     ] of squareCategories.entries()) {
+      this.logger.verbose(
+        `Processing category ${squareCategory.categoryData?.name} ${squareCategoryIndex}.`,
+      );
       let moaCategory = moaCategories.find((value) => {
         return value.squareId === squareCategory.id;
       });
 
       if (moaCategory == null) {
-        moaCategory = await this.categoriesService.create(
-          squareCategory.id,
-          moaCatalog,
-        );
+        moaCategory = await this.categoriesService.create({
+          squareId: squareCategory.id,
+          catalogId: moaCatalog.id,
+        });
         moaCategory.moaOrdinal = squareCategoryIndex;
-        this.logger.log(
+        this.logger.verbose(
           `Created category ${moaCategory.name} ${moaCategory.id}.`,
         );
       }
 
       moaCategory.name = squareCategory.categoryData?.name;
       await this.categoriesService.save(moaCategory);
+      if (moaCategory.id == null) {
+        throw new Error('Category id is null.');
+      }
 
       const squareItemsForCategory = squareItems.filter((value) => {
         return value.itemData?.categoryId === squareCategory.id;
@@ -237,6 +270,9 @@ export class CatalogsService {
         squareItemForCategoryIndex,
         squareItemForCategory,
       ] of squareItemsForCategory.entries()) {
+        this.logger.verbose(
+          `Processing item ${squareItemForCategory.itemData?.name} ${squareItemForCategoryIndex}.`,
+        );
         let moaItem =
           moaItems.find((value) => {
             return value.squareId === squareItemForCategory.id;
@@ -245,12 +281,13 @@ export class CatalogsService {
             where: { squareId: squareItemForCategory.id },
           }));
         if (moaItem === null) {
-          moaItem = await this.itemsService.create(
-            squareItemForCategory.id,
-            moaCategory,
-          );
+          moaItem = await this.itemsService.create({
+            squareId: squareItemForCategory.id,
+            categoryId: moaCategory.id,
+            catalogId: moaCatalog.id,
+          });
           moaItem.moaOrdinal = squareItemForCategoryIndex;
-          this.logger.log(`Created item ${moaItem.name} ${moaItem.id}.`);
+          this.logger.verbose(`Created item ${moaItem.name} ${moaItem.id}.`);
         }
 
         const squareItemData = squareItemForCategory.itemData;
@@ -263,8 +300,15 @@ export class CatalogsService {
         moaItem.category = moaCategory;
         await this.itemsService.save(moaItem);
 
+        if (moaItem.id == null) {
+          throw new Error('Item id is null.');
+        }
+
         let minPriceInCents = Number(9999999);
         for (const squareVariation of squareItemData.variations ?? []) {
+          this.logger.verbose(
+            `Processing variation ${squareVariation.itemVariationData?.name} ${squareVariation.id}.`,
+          );
           let moaVariation =
             moaVariations.find((value) => {
               return value.squareId === squareVariation.id;
@@ -273,12 +317,13 @@ export class CatalogsService {
               where: { squareId: squareVariation.id },
             }));
 
-          if (moaVariation === null) {
+          if (moaVariation == null) {
             moaVariation = await this.variationsService.create({
               squareId: squareVariation.id,
-              item: moaItem,
+              itemId: moaItem.id,
+              catalogId: moaCatalog.id,
             });
-            this.logger.log(
+            this.logger.verbose(
               `Created variation ${moaVariation.name} ${moaVariation.id}.`,
             );
           }
@@ -312,73 +357,115 @@ export class CatalogsService {
 
           if (changed) {
             try {
-              this.logger.log(
-                `Variation changed ${moaVariation.name} ${moaVariation.id}.`,
+              this.logger.verbose(
+                `Variation saved ${moaVariation.name} ${moaVariation.id}.`,
               );
               await this.variationsService.save(moaVariation);
             } catch (error) {
-              console.log(error);
+              this.logger.log(error);
             }
           }
         }
 
-        moaItem.priceInCents = minPriceInCents;
-        await this.itemsService.save(moaItem);
+        if (moaItem.priceInCents != minPriceInCents) {
+          moaItem.priceInCents = minPriceInCents;
+          await this.itemsService.save(moaItem);
+          this.logger.verbose(
+            `Updated item price ${moaItem.name} ${minPriceInCents}.`,
+          );
+        }
 
-        for (const squareModifierListInfo of squareItemForCategory.itemData
-          ?.modifierListInfo ?? []) {
+        const moaModifierListsForItem =
+          await this.itemsService.loadModifierLists(moaItem);
+        this.logger.verbose(
+          `Found ${moaModifierListsForItem.length} modifier lists in db.`,
+        );
+        const squareModifierListInfosForItem =
+          squareItemForCategory.itemData?.modifierListInfo ?? [];
+        this.logger.verbose(
+          `Found ${squareModifierListInfosForItem.length} modifier lists in Square.`,
+        );
+        this.logger.verbose(
+          `${squareModifierListInfosForItem
+            .flatMap((value) => value.modifierListId)
+            .join(' ')}`,
+        );
+        const modifierListsRemovedFromItem = moaModifierListsForItem.filter(
+          (moaValue) => {
+            return !squareModifierListInfosForItem.some((squareValue) => {
+              return squareValue.modifierListId === moaValue.squareId;
+            });
+          },
+        );
+        if (modifierListsRemovedFromItem.length > 0) {
+          this.logger.verbose(
+            `Removed ${modifierListsRemovedFromItem.length}.`,
+          );
+          moaItem.modifierLists = moaModifierListsForItem.filter((moaValue) => {
+            return !modifierListsRemovedFromItem.some((deletedValue) => {
+              return deletedValue.squareId === moaValue.squareId;
+            });
+          });
+          moaItem = await this.itemsService.save(moaItem);
+        } else {
+          moaItem.modifierLists = moaModifierListsForItem;
+        }
+
+        for (const squareModifierListInfoForItem of squareModifierListInfosForItem) {
           const squareModifierList = squareModifierLists.find((value) => {
-            return value.id === squareModifierListInfo.modifierListId;
+            return value.id === squareModifierListInfoForItem.modifierListId;
           });
           const squareModifierListData = squareModifierList?.modifierListData;
 
           let moaModifierList =
             moaModifierLists.find((value) => {
-              return value.squareId === squareModifierListInfo.modifierListId;
+              return (
+                value.squareId === squareModifierListInfoForItem.modifierListId
+              );
             }) ??
             (await this.modifierListsService.findOne({
-              where: { squareId: squareModifierListInfo.modifierListId },
-              relations: ['items'],
+              where: { squareId: squareModifierListInfoForItem.modifierListId },
             }));
 
-          if (moaModifierList === null) {
-            moaModifierList = await this.modifierListsService.create(
-              squareModifierListInfo.modifierListId,
-            );
-            this.logger.log(
+          if (moaModifierList == null) {
+            moaModifierList = await this.modifierListsService.create({
+              squareId: squareModifierListInfoForItem.modifierListId,
+              catalogId: moaCatalog.id,
+            });
+            this.logger.verbose(
               `Created modifier list ${moaModifierList.name} ${moaModifierList.id}.`,
             );
           }
 
-          if (!moaModifierList.items) {
-            moaModifierList.items =
-              await this.modifierListsService.loadItemsForModifierList(
-                moaModifierList,
-              );
-          }
-
           if (
-            !moaModifierList.items?.some((value) => {
-              return value.id === moaItem?.id;
+            !moaItem.modifierLists?.some((value) => {
+              return value.id === moaModifierList?.id;
             })
           ) {
-            moaModifierList.items?.push(moaItem);
-            this.logger.log(
-              `Added ${moaItem.name} ${moaItem.id} to modifier list ${moaModifierList.name} ${moaModifierList.id}.`,
+            moaItem.modifierLists?.push(moaModifierList);
+            await this.itemsService.save(moaItem);
+            this.logger.verbose(
+              `Added ${moaModifierList.name} ${moaModifierList.id} to item ${moaItem.name} ${moaItem.id}.`,
             );
           }
 
           moaModifierList.maxSelectedModifiers =
-            squareModifierListInfo.maxSelectedModifiers;
+            squareModifierListInfoForItem.maxSelectedModifiers;
           moaModifierList.minSelectedModifiers =
-            squareModifierListInfo.minSelectedModifiers;
-          moaModifierList.enabled = squareModifierListInfo.enabled;
+            squareModifierListInfoForItem.minSelectedModifiers;
+          moaModifierList.enabled = squareModifierListInfoForItem.enabled;
           moaModifierList.name = squareModifierListData?.name;
           moaModifierList.selectionType =
             (squareModifierList?.modifierListData
               ?.selectionType as MoaSelectionType) ?? MoaSelectionType.MULTIPLE;
 
-          await this.modifierListsService.save(moaModifierList);
+          moaModifierList = await this.modifierListsService.save(
+            moaModifierList,
+          );
+
+          if (moaModifierList.id == null) {
+            throw new Error('Modifier list id is null.');
+          }
 
           for (const squareModifier of squareModifierListData?.modifiers ??
             []) {
@@ -389,13 +476,15 @@ export class CatalogsService {
               (await this.modifiersService.findOne({
                 where: { squareId: squareModifier.id },
               }));
-            if (moaModifier === null) {
-              moaModifier = await this.modifiersService.create(
-                squareModifier.id,
-                moaModifierList,
-              );
+
+            if (moaModifier == null) {
+              moaModifier = await this.modifiersService.create({
+                squareId: squareModifier.id,
+                modifierListId: moaModifierList.id,
+                catalogId: moaCatalog.id,
+              });
               moaModifiers.push(moaModifier);
-              this.logger.log(
+              this.logger.verbose(
                 `Created modifier ${moaModifier.name} ${moaModifier.id}.`,
               );
             }

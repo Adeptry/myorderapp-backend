@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Catalog } from 'src/catalogs/entities/catalog.entity';
 import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
@@ -20,10 +19,10 @@ export class CategoriesService {
     private readonly repository: Repository<Category>,
   ) {}
 
-  create(squareId: string, catalog: Catalog) {
+  create(params: { squareId: string; catalogId: string }) {
     const entity = this.repository.create();
-    entity.squareId = squareId;
-    entity.catalog = catalog;
+    entity.squareId = params.squareId;
+    entity.catalogId = params.catalogId;
     return this.repository.save(entity);
   }
 

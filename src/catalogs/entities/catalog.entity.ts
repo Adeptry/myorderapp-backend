@@ -15,6 +15,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { Item } from './item.entity';
+import { ModifierList } from './modifier-list.entity';
+import { Modifier } from './modifier.entity';
+import { Variation } from './variation.entity';
 
 @Entity('catalog')
 export class Catalog extends EntityHelper {
@@ -54,6 +58,30 @@ export class Catalog extends EntityHelper {
     nullable: true,
   })
   categories?: Category[];
+
+  @Exclude({ toPlainOnly: true })
+  @OneToMany(() => Item, (entity) => entity.catalog, {
+    nullable: true,
+  })
+  items?: Item[];
+
+  @Exclude({ toPlainOnly: true })
+  @OneToMany(() => ModifierList, (entity) => entity.catalog, {
+    nullable: true,
+  })
+  modifierLists?: ModifierList[];
+
+  @Exclude({ toPlainOnly: true })
+  @OneToMany(() => Modifier, (entity) => entity.catalog, {
+    nullable: true,
+  })
+  modifiers?: Modifier[];
+
+  @Exclude({ toPlainOnly: true })
+  @OneToMany(() => Variation, (entity) => entity.catalog, {
+    nullable: true,
+  })
+  variations?: Variation[];
 
   /*
    * Merchant
