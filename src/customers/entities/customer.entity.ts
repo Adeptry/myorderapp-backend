@@ -1,7 +1,8 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
+import { User } from 'src/users/entities/user.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -9,15 +10,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 
-@Entity('app_config')
-export class AppConfig extends EntityHelper {
+@Entity('customer')
+export class Customer extends EntityHelper {
+  /* Base entity */
+
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   id?: string;
@@ -43,23 +45,22 @@ export class AppConfig extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  primaryColor?: string;
+  userId?: string;
 
-  @ApiProperty({ required: false })
-  @Column({ nullable: true })
-  secondaryColor?: string;
+  @ManyToOne(() => User)
+  user?: User;
 
-  @ApiProperty({ required: false })
-  @Column({ nullable: true })
-  fontFamily?: string;
-
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
-  @JoinColumn()
+  @ManyToOne(() => Merchant)
   merchant?: Merchant;
+
+  @ApiHideProperty()
+  @Exclude()
+  @Column('text', { nullable: true })
+  squareId?: string | null;
 }

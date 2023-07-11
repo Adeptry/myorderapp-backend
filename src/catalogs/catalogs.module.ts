@@ -13,6 +13,7 @@ import { ItemsService } from 'src/catalogs/services/items.service';
 import { ModifierListsService } from 'src/catalogs/services/modifier-lists.service';
 import { ModifiersService } from 'src/catalogs/services/modifiers.service';
 import { VariationsService } from 'src/catalogs/services/variations.service';
+import { CustomersModule } from 'src/customers/customers.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
 import { CatalogsController } from './catalogs.controller';
@@ -29,9 +30,10 @@ import { ItemsController } from './controllers/items.controller';
       Variation,
       Modifier,
     ]),
-    forwardRef(() => SquareModule),
-    forwardRef(() => AuthModule),
+    SquareModule,
+    AuthModule,
     forwardRef(() => MerchantsModule),
+    forwardRef(() => CustomersModule),
   ],
   exports: [
     CatalogsService,

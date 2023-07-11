@@ -1,6 +1,5 @@
-import { Transform } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { Role } from '../../roles/entities/role.entity';
+import { Transform } from 'class-transformer';
 import {
   IsEmail,
   IsNotEmpty,
@@ -8,11 +7,12 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { Status } from 'src/statuses/entities/status.entity';
-import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 import { FileEntity } from 'src/files/entities/file.entity';
-import { IsExist } from 'src/utils/validators/is-exists.validator';
+import { Status } from 'src/statuses/entities/status.entity';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
+import { IsExist } from 'src/utils/validators/is-exists.validator';
+import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
+import { Role } from '../../roles/entities/role.entity';
 
 export class CreateUserDto {
   @ApiProperty({ example: 'test1@example.com' })

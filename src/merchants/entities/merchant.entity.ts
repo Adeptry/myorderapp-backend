@@ -3,7 +3,8 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { AppConfig } from 'src/app-config/entities/app-config.entity';
 import { Catalog } from 'src/catalogs/entities/catalog.entity';
-import { MoaLocation } from 'src/locations/entities/location.entity';
+import { Customer } from 'src/customers/entities/customer.entity';
+import { Location } from 'src/locations/entities/location.entity';
 import { User } from 'src/users/entities/user.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -13,6 +14,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  ManyToOne,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -21,7 +23,7 @@ import {
 } from 'typeorm';
 
 @Entity('merchant')
-export class MoaMerchant extends EntityHelper {
+export class Merchant extends EntityHelper {
   /* Base entity */
 
   @ApiProperty({ required: false })
@@ -51,13 +53,12 @@ export class MoaMerchant extends EntityHelper {
 
   /* Step 1: User */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   userId?: string;
 
-  @OneToOne(() => User, { onDelete: 'SET NULL' })
-  @JoinColumn()
-  user: User;
+  @ManyToOne(() => User)
+  user?: User;
 
   /*
    * Step 2: App config
@@ -97,12 +98,11 @@ export class MoaMerchant extends EntityHelper {
    * Step 4: Checkout
    */
 
-  @Exclude({ toPlainOnly: true })
-  @ApiHideProperty()
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   stripeId?: string;
 
-  @ApiHideProperty()
+  @ApiProperty({ required: false })
   @Column({ nullable: true })
   stripeCheckoutSessionId?: string;
 
@@ -114,23 +114,36 @@ export class MoaMerchant extends EntityHelper {
   @Column({ nullable: true })
   catalogId?: string;
 
+  @ApiHideProperty()
+  @Exclude({ toPlainOnly: true })
   @OneToOne(() => Catalog, (entity) => entity.merchant, {
     onDelete: 'SET NULL',
     nullable: true,
   })
   @JoinColumn()
-  @ApiProperty({ type: () => Catalog, required: false })
   catalog?: Catalog;
 
   /*
    * Locations
    */
 
-  @OneToMany(() => MoaLocation, (entity) => entity.merchant, {
+  @OneToMany(() => Location, (entity) => entity.merchant, {
     nullable: true,
   })
-  @ApiProperty({ type: () => MoaLocation, required: false, isArray: true })
-  locations?: MoaLocation[];
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
+  locations?: Location[];
+
+  /*
+   * Customers
+   */
+
+  @OneToMany(() => Customer, (entity) => entity.merchant, {
+    nullable: true,
+  })
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
+  customers?: Customer[];
 
   /*
    * Firebase

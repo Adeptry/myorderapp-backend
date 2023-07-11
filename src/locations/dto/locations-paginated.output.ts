@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { MoaLocation } from '../entities/location.entity';
+import { Location } from '../entities/location.entity';
 
-export class MoaLocationPaginatedResponse extends InfinityPaginationResultType<MoaLocation> {
-  @ApiProperty({ type: () => MoaLocation, isArray: true, required: false })
-  data: MoaLocation[];
+export class MoaLocationPaginatedResponse extends InfinityPaginationResultType<Location> {
+  @ApiProperty({ type: () => Location, isArray: true, required: false })
+  data: Location[];
 }

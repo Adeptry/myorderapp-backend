@@ -15,7 +15,7 @@ import { AllConfigType } from 'src/config/config.type';
 import { ForgotService } from 'src/forgot/forgot.service';
 import { MailService } from 'src/mail/mail.service';
 import { Role } from 'src/roles/entities/role.entity';
-import { RoleEnum } from 'src/roles/roles.enum';
+import { RoleNameEnum } from 'src/roles/roles.enum';
 import { Session } from 'src/session/entities/session.entity';
 import { SessionService } from 'src/session/session.service';
 import { SocialInterface } from 'src/social/interfaces/social.interface';
@@ -55,10 +55,8 @@ export class AuthService {
       !user ||
       (user?.role &&
         !(onlyAdmin
-          ? user.role.id === RoleEnum.admin
-          : [RoleEnum.merchant, RoleEnum.customer].includes(
-              user.role.id as RoleEnum,
-            )))
+          ? user.role.id === RoleNameEnum.admin
+          : [RoleNameEnum.user].includes(user.role.id as RoleNameEnum)))
     ) {
       throw new HttpException(
         {
@@ -121,7 +119,7 @@ export class AuthService {
   async validateSocialLogin(
     authProvider: string,
     socialData: SocialInterface,
-    roleEnum: RoleEnum,
+    roleEnum: RoleNameEnum,
   ): Promise<LoginResponseType> {
     let user: NullableType<User>;
     const socialEmail = socialData.email?.toLowerCase();

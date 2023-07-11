@@ -1,12 +1,8 @@
-import { forwardRef, Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { SquareService } from 'src/square/square.service';
-import {
-  DataSource,
-  FindManyOptions,
-  FindOneOptions,
-  Repository,
-} from 'typeorm';
+import { BaseService } from 'src/utils/base-service';
+import { DataSource, Repository } from 'typeorm';
 import { MoaSelectionType } from './dto/catalogs.types';
 import { Catalog } from './entities/catalog.entity';
 import { Category } from './entities/category.entity';
@@ -21,48 +17,32 @@ import { ModifiersService } from './services/modifiers.service';
 import { VariationsService } from './services/variations.service';
 
 @Injectable()
-export class CatalogsService {
+export class CatalogsService extends BaseService<Catalog> {
   private readonly logger = new Logger(CatalogsService.name);
 
   constructor(
     @InjectDataSource()
     private dataSource: DataSource,
     @InjectRepository(Catalog)
-    private readonly repository: Repository<Catalog>,
-    @Inject(forwardRef(() => SquareService))
+    protected readonly repository: Repository<Catalog>,
+    @Inject(SquareService)
     private readonly squareService: SquareService,
-    @Inject(forwardRef(() => ItemsService))
+    @Inject(ItemsService)
     private readonly itemsService: ItemsService,
-    @Inject(forwardRef(() => VariationsService))
+    @Inject(VariationsService)
     private readonly variationsService: VariationsService,
-    @Inject(forwardRef(() => ModifiersService))
+    @Inject(ModifiersService)
     private readonly modifiersService: ModifiersService,
-    @Inject(forwardRef(() => ModifierListsService))
+    @Inject(ModifierListsService)
     private readonly modifierListsService: ModifierListsService,
-    @Inject(forwardRef(() => CategoriesService))
+    @Inject(CategoriesService)
     private readonly categoriesService: CategoriesService,
-  ) {}
-
-  create() {
-    return this.repository.create();
-  }
-
-  save(entity: Catalog) {
-    return this.repository.save(entity);
-  }
-
-  // Access
-
-  findOne(options: FindOneOptions<Catalog>) {
-    return this.repository.findOne(options);
-  }
-
-  findOneOrFail(options: FindOneOptions<Catalog>) {
-    return this.repository.findOneOrFail(options);
+  ) {
+    super(repository);
   }
 
   getOneOrderedOrFail(params: {
-    catalogId?: string;
+    catalogId: string;
     onlyShowEnabled?: boolean;
   }) {
     const queryBuilder = this.repository
@@ -85,10 +65,6 @@ export class CatalogsService {
     }
 
     return queryBuilder.getOneOrFail();
-  }
-
-  findAll(options?: FindManyOptions<Catalog>) {
-    return this.repository.find(options);
   }
 
   async loadCategories(entity: Catalog): Promise<Category[]> {
@@ -253,7 +229,7 @@ export class CatalogsService {
         });
 
         if (moaCategory == null) {
-          moaCategory = await this.categoriesService.create({
+          moaCategory = this.categoriesService.create({
             squareId: squareCategory.id,
             catalogId: moaCatalog.id,
           });

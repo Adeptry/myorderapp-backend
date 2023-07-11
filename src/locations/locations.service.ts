@@ -1,35 +1,36 @@
 import {
   BadRequestException,
-  forwardRef,
   Inject,
   Injectable,
   Logger,
-  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Location } from 'square';
-import { MerchantsService } from 'src/merchants/merchants.service';
+import { Location as SquareLocation } from 'square';
+import { BaseService } from 'src/utils/base-service';
 import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { MoaMerchant } from '../merchants/entities/merchant.entity';
+import { Repository } from 'typeorm';
+import { Merchant } from '../merchants/entities/merchant.entity';
 import { SquareService } from '../square/square.service';
-import { MoaLocationUpdateInput } from './dto/location-update.input';
-import { MoaLocation } from './entities/location.entity';
+import {
+  LocationUpdateAllInput,
+  LocationUpdateInput,
+} from './dto/location-update.input';
+import { Location as MoaLocation } from './entities/location.entity';
 
 @Injectable()
-export class LocationsService {
+export class LocationsService extends BaseService<MoaLocation> {
   private readonly logger = new Logger(LocationsService.name);
 
   constructor(
     @InjectRepository(MoaLocation)
-    private readonly repository: Repository<MoaLocation>,
-    @Inject(forwardRef(() => SquareService))
+    protected readonly repository: Repository<MoaLocation>,
+    @Inject(SquareService)
     private readonly squareService: SquareService,
-    @Inject(forwardRef(() => MerchantsService))
-    private readonly merchantsService: MerchantsService,
-  ) {}
+  ) {
+    super(repository);
+  }
 
   async sync(params: {
     merchantId: string;
@@ -61,11 +62,13 @@ export class LocationsService {
         await this.save(moaLocation);
       } else if (squareLocation.id != null) {
         moaLocation = await this.create({
-          squareAccessToken: params.squareAccessToken,
           locationSquareId: squareLocation.id,
-          squareLocation: squareLocation,
+          merchantSquareId: squareLocation.merchantId,
           merchantId: params.merchantId,
         });
+
+        this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
+        await this.save(moaLocation);
 
         if (moaLocation != null) {
           moaLocations.push(moaLocation);
@@ -79,131 +82,45 @@ export class LocationsService {
     return moaLocations;
   }
 
-  async create(params: {
-    squareAccessToken: string;
-    locationSquareId: string;
-    merchantId: string;
-    squareLocation?: Location | null;
-  }): Promise<MoaLocation | null> {
-    const squareClient = this.squareService.client(params.squareAccessToken);
-
-    const squareLocation =
-      params.squareLocation ??
-      (await this.squareService.retrieveLocation(
-        squareClient,
-        params.locationSquareId,
-      ));
-
-    if (squareLocation != undefined) {
-      const moaLocation = this.repository.create();
-      this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
-      moaLocation.merchantId = params.merchantId;
-
-      return await this.save(moaLocation);
-    } else {
-      return null;
+  async assignAndSave(params: {
+    id: string;
+    input: LocationUpdateInput;
+  }): Promise<MoaLocation> {
+    const entity = await this.findOneOrFail({ where: { id: params.id } });
+    if (params.input.moaOrdinal !== undefined) {
+      entity.moaOrdinal = params.input.moaOrdinal;
     }
-  }
-
-  async getMerchantsLocations(params: {
-    pagination: PaginationOptions;
-    userId?: string;
-    merchantId?: string;
-  }): Promise<InfinityPaginationResultType<MoaLocation>> {
-    if (params.merchantId) {
-      return await this.getManyLocations({
-        pagination: params.pagination,
-        merchantId: params.merchantId,
-        onlyMoaEnabled: true,
-        onlySquareActive: true,
-      });
-    } else if (params.userId) {
-      const merchant = await this.merchantsService.findOneOrFail({
-        where: { userId: params.userId },
-      });
-
-      if (!merchant.id) {
-        throw new NotFoundException('Merchant not found');
-      }
-
-      return await this.getManyLocations({
-        pagination: params.pagination,
-        merchantId: merchant.id,
-        onlyMoaEnabled: true,
-        onlySquareActive: true,
-      });
+    if (params.input.moaEnabled !== undefined) {
+      entity.moaEnabled = params.input.moaEnabled;
     }
-
-    throw new BadRequestException('Either userId or merchantId is required');
-  }
-
-  async findAll(options?: FindManyOptions<MoaLocation>) {
-    return await this.repository.find(options);
-  }
-
-  async findOne(options: FindOneOptions<MoaLocation>) {
-    return await this.repository.findOne(options);
-  }
-
-  async findOneOrFail(options: FindOneOptions<MoaLocation>) {
-    return await this.repository.findOneOrFail(options);
-  }
-
-  async save(entity: MoaLocation): Promise<MoaLocation> {
-    return this.repository.save(entity);
-  }
-
-  async update(input: MoaLocationUpdateInput): Promise<MoaLocation | null> {
-    const entity = await this.findOneOrFail({ where: { id: input.id } });
-    this.applyUpdateToEntity(input, entity);
     return this.save(entity);
   }
 
-  private applyUpdateToEntity(
-    input: MoaLocationUpdateInput,
-    entity: MoaLocation,
-  ) {
-    if (input.moaOrdinal !== undefined) {
-      entity.moaOrdinal = input.moaOrdinal;
-    }
-    if (input.moaEnabled !== undefined) {
-      entity.moaEnabled = input.moaEnabled;
-    }
-  }
-
-  async updateAll(inputs: MoaLocationUpdateInput[]) {
+  async updateAll(inputs: LocationUpdateAllInput[]) {
     const entities: MoaLocation[] = [];
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({
         where: { id: input.id },
       });
-      this.applyUpdateToEntity(input, entity);
+      if (input.moaOrdinal !== undefined) {
+        entity.moaOrdinal = input.moaOrdinal;
+      }
+      if (input.moaEnabled !== undefined) {
+        entity.moaEnabled = input.moaEnabled;
+      }
       entities.push(entity);
     }
 
     return await this.saveAll(entities);
   }
 
-  saveAll(entities: MoaLocation[]) {
-    return this.repository.save(entities);
-  }
-
-  async remove(id: string) {
-    const one = await this.findOne({ where: { id } });
-    if (one) {
-      return await this.repository.remove(one);
-    } else {
-      return null;
-    }
-  }
-
   async loadOneMerchant(
     location: MoaLocation,
-  ): Promise<MoaMerchant | null | undefined> {
+  ): Promise<Merchant | null | undefined> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaLocation, 'merchant')
+      .relation(Location, 'merchant')
       .of(location)
       .loadOne();
   }
@@ -248,7 +165,7 @@ export class LocationsService {
   }
 
   private assignSquareLocationToMoaLocation(
-    squareLocation: Location,
+    squareLocation: SquareLocation,
     moaLocation: MoaLocation,
   ) {
     moaLocation.name = squareLocation.name;

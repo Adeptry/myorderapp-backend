@@ -1,83 +1,50 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindManyOptions,
-  FindOneOptions,
-  RemoveOptions,
-  Repository,
-} from 'typeorm';
-import { MoaItemUpdateInput } from '../dto/item-update.dto';
+import { BaseService } from 'src/utils/base-service';
+import { RemoveOptions, Repository } from 'typeorm';
+import { ItemUpdateAllInput, ItemUpdateInput } from '../dto/item-update.dto';
 import { Category } from '../entities/category.entity';
 import { Item } from '../entities/item.entity';
 import { ModifierList } from '../entities/modifier-list.entity';
 import { Variation } from '../entities/variation.entity';
 
 @Injectable()
-export class ItemsService {
+export class ItemsService extends BaseService<Item> {
   constructor(
     @InjectRepository(Item)
-    private readonly repository: Repository<Item>,
-  ) {}
-
-  create(params: { squareId: string; categoryId: string; catalogId: string }) {
-    const entity = this.repository.create();
-    entity.squareId = params.squareId;
-    entity.categoryId = params.categoryId;
-    entity.catalogId = params.catalogId;
-    return this.repository.save(entity);
+    protected readonly repository: Repository<Item>,
+  ) {
+    super(repository);
   }
 
-  save(entity: Item) {
-    return this.repository.save(entity);
-  }
-
-  findAndCount(options?: FindManyOptions<Item>) {
-    return this.repository.findAndCount(options);
-  }
-
-  findMany(options?: FindManyOptions<Item>) {
-    return this.repository.find(options);
-  }
-
-  findOne(options: FindOneOptions<Item>) {
-    return this.repository.findOne(options);
-  }
-
-  findOneOrFail(options: FindOneOptions<Item>) {
-    return this.repository.findOneOrFail(options);
-  }
-
-  async update(input: MoaItemUpdateInput) {
-    const entity = await this.findOneOrFail({ where: { id: input.id } });
-    this.applyUpdateToEntity(input, entity);
+  async assignAndSave(params: { id: string; input: ItemUpdateInput }) {
+    const entity = await this.findOneOrFail({ where: { id: params.id } });
+    if (params.input.moaOrdinal !== undefined) {
+      entity.moaOrdinal = params.input.moaOrdinal;
+    }
+    if (params.input.moaEnabled !== undefined) {
+      entity.moaEnabled = params.input.moaEnabled;
+    }
     return await this.save(entity);
   }
 
-  saveAll(entities: Item[]) {
-    return this.repository.save(entities);
-  }
-
-  async updateAll(inputs: MoaItemUpdateInput[]) {
+  async updateAll(inputs: ItemUpdateAllInput[]) {
     const entities: Item[] = [];
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({
         where: { id: input.id },
       });
-      this.applyUpdateToEntity(input, entity);
+      if (input.moaOrdinal !== undefined) {
+        entity.moaOrdinal = input.moaOrdinal;
+      }
+      if (input.moaEnabled !== undefined) {
+        entity.moaEnabled = input.moaEnabled;
+      }
       entities.push(entity);
     }
 
     return await this.saveAll(entities);
-  }
-
-  private applyUpdateToEntity(input: MoaItemUpdateInput, entity: Item) {
-    if (input.moaOrdinal !== undefined) {
-      entity.moaOrdinal = input.moaOrdinal;
-    }
-    if (input.moaEnabled !== undefined) {
-      entity.moaEnabled = input.moaEnabled;
-    }
   }
 
   removeOne(entity: Item, options?: RemoveOptions): Promise<Item> {

@@ -1,7 +1,5 @@
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { RoleEnum } from 'src/roles/roles.enum';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { DeepPartial, Repository } from 'typeorm';
@@ -14,8 +12,6 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
-    @Inject(forwardRef(() => MerchantsService))
-    private merchantsService: MerchantsService,
   ) {}
 
   async create(createProfileDto: CreateUserDto): Promise<User> {
@@ -23,9 +19,9 @@ export class UsersService {
       this.usersRepository.create(createProfileDto),
     );
 
-    if ((createProfileDto.role?.id as RoleEnum) === RoleEnum.merchant) {
-      await this.merchantsService.create({ userId: user.id });
-    }
+    // if ((createProfileDto.role?.id as RoleNameEnum) === RoleNameEnum.merchant) {
+    //   await this.merchantsService.create({ userId: user.id });
+    // }
 
     return user;
   }

@@ -1,0 +1,17 @@
+console.log(
+this.squareService.oauthUrl({
+scope: [
+'MERCHANT_PROFILE_READ',
+'CUSTOMERS_WRITE',
+'CUSTOMERS_READ',
+'ORDERS_WRITE',
+'ORDERS_READ',
+'PAYMENTS_READ',
+'PAYMENTS_WRITE',
+'PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS',
+'ITEMS_WRITE',
+'ITEMS_READ',
+],
+state: foundOne?.id,
+}),
+);

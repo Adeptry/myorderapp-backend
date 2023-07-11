@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -8,64 +9,46 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { credential } from 'firebase-admin';
-import { nanoid } from 'nanoid';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
 import { Catalog } from 'src/catalogs/entities/catalog.entity';
-import { Category } from 'src/catalogs/entities/category.entity';
-import { CategoriesService } from 'src/catalogs/services/categories.service';
 import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { LocationsService } from 'src/locations/locations.service';
-import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
+import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { PaginationOptions } from 'src/utils/types/pagination-options';
-import { FindManyOptions, FindOneOptions, Repository } from 'typeorm';
-import { MoaCreateMerchantInput } from './dto/create-merchant.input';
-import { MoaUpdateMerchantInput } from './dto/update-merchant.input';
+import { BaseService } from 'src/utils/base-service';
+import { Repository } from 'typeorm';
+import { MerchantUpdateInput } from './dto/update-merchant.input';
 
 @Injectable()
-export class MerchantsService {
+export class MerchantsService extends BaseService<Merchant> {
   private readonly logger = new Logger(MerchantsService.name);
 
   constructor(
-    @InjectRepository(MoaMerchant)
-    private readonly repository: Repository<MoaMerchant>,
-    @Inject(forwardRef(() => StripeService))
+    @InjectRepository(Merchant)
+    protected readonly repository: Repository<Merchant>,
+    @Inject(StripeService)
     private readonly stripeService: StripeService,
-    @Inject(forwardRef(() => SquareService))
+    @Inject(SquareService)
     private readonly squareService: SquareService,
+    @Inject(FirebaseAdminService)
+    private readonly firebaseAdminService: FirebaseAdminService,
+    @Inject(UsersService)
+    private readonly usersService: UsersService,
     @Inject(forwardRef(() => CatalogsService))
     private readonly catalogsService: CatalogsService,
-    @Inject(forwardRef(() => CategoriesService))
-    private readonly categoriesService: CategoriesService,
     @Inject(forwardRef(() => LocationsService))
     private readonly locationsService: LocationsService,
-    @Inject(forwardRef(() => UsersService))
-    private readonly usersService: UsersService,
-    @Inject(forwardRef(() => FirebaseAdminService))
-    private readonly firebaseAdminService: FirebaseAdminService,
-  ) {}
+  ) {
+    super(repository);
+  }
 
-  async create(input: MoaCreateMerchantInput) {
-    const entity = this.repository.create(input);
-
-    if (!entity.id) {
-      entity.id = nanoid();
-    }
-
-    const user = await this.usersService.findOneOrFail({ id: input.userId });
-
-    const stripeCustomer = await this.stripeService.createCustomer({
-      email: user.email ?? '',
-      phone: user.phoneNumber ?? '',
-      name: user.firstName ?? '',
-    });
-    entity.stripeId = stripeCustomer?.id;
-
-    return await this.repository.save(entity);
+  async assignAndSave(id: string, updateInput: MerchantUpdateInput) {
+    const entity = await this.findOneOrFail({ where: { id } });
+    Object.assign(entity, updateInput);
+    return await this.save(entity);
   }
 
   async squareConfirmOauth(params: {
@@ -117,7 +100,7 @@ export class MerchantsService {
     return await this.save(merchant);
   }
 
-  async squareSync(params: { userId: string }) {
+  async squareCatalogSync(params: { userId: string }) {
     const entity = await this.findOneOrFail({
       where: { userId: params.userId },
     });
@@ -127,14 +110,13 @@ export class MerchantsService {
     }
 
     const squareAccessToken = entity.squareAccessToken;
-
     if (squareAccessToken == null) {
       throw new UnauthorizedException('Square access token is null');
     }
 
-    let catalog = await this.loadOneCatalogForEntity({ entity });
+    let catalog = await this.loadOneCatalog(entity);
     if (catalog == null) {
-      catalog = this.catalogsService.create();
+      catalog = this.catalogsService.createEmpty();
       entity.catalog = catalog;
       await this.catalogsService.save(catalog);
       await this.save(entity);
@@ -149,16 +131,33 @@ export class MerchantsService {
       catalogId: catalog.id,
     });
 
+    return entity;
+  }
+
+  async squareLocationsSync(params: { userId: string }) {
+    const entity = await this.findOneOrFail({
+      where: { userId: params.userId },
+    });
+
+    if (entity.id == null) {
+      throw new NotFoundException('Merchant id is null');
+    }
+
+    const squareAccessToken = entity.squareAccessToken;
+    if (squareAccessToken == null) {
+      throw new UnauthorizedException('Square access token is null');
+    }
+
     await this.locationsService.sync({
       merchantId: entity.id,
       squareAccessToken,
     });
-
-    return entity;
   }
 
   async stripeCreateCheckoutSessionId(params: {
     userId: string;
+    successUrl: string;
+    cancelUrl?: string;
   }): Promise<string | null> {
     const merchant = await this.findOne({
       where: { userId: params.userId },
@@ -170,24 +169,45 @@ export class MerchantsService {
       );
     }
 
+    if (merchant.stripeCheckoutSessionId) {
+      throw new BadRequestException(
+        `Merchant with userId ${params.userId} already has completed checkeout`,
+      );
+    }
+
+    const user = await this.loadOneUser(merchant);
+    if (!user) {
+      throw new NotFoundException(`User with id ${merchant.userId} not found`);
+    }
+
+    if (!merchant.stripeId) {
+      const stripeCustomer = await this.stripeService.createCustomer({
+        email: user.email ?? '',
+        phone: user.phoneNumber ?? '',
+        name: user.firstName ?? '',
+      });
+      merchant.stripeId = stripeCustomer?.id;
+      await this.save(merchant);
+    }
+
     const session = await this.stripeService.createCheckoutSession({
       payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [
         {
-          price: process.env.STRIPE_PRICE_ID,
+          price: 'price_1J2igaIO3O3Eil4Y7Q7BhLUE',
           quantity: 1,
         },
         {
-          price: process.env.STRIPE_ONE_TIME_PRICE_ID,
+          price: 'price_1IdKuBIO3O3Eil4YJCztT5VY',
           quantity: 1,
         },
       ],
       allow_promotion_codes: true,
       customer: merchant.stripeId,
       client_reference_id: merchant.id,
-      success_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/stripe/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.REACT_APP_CLIENT_URI}/merchant/`,
+      success_url: `${params.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: params.cancelUrl,
     });
 
     if (!session) {
@@ -200,7 +220,7 @@ export class MerchantsService {
   async stripeConfirmCheckoutSessionId(params: {
     userId: string;
     checkoutSessionId: string;
-  }): Promise<MoaMerchant | null> {
+  }): Promise<Merchant | null> {
     const entity = await this.findOne({
       where: { userId: params.userId },
     });
@@ -214,6 +234,12 @@ export class MerchantsService {
     const session = await this.stripeService.retrieveCheckoutSession(
       params.checkoutSessionId,
     );
+
+    if (session.status != 'complete') {
+      throw new UnauthorizedException(
+        'Stripe checkout session is not complete',
+      );
+    }
 
     if (entity == null) {
       return null;
@@ -248,119 +274,26 @@ export class MerchantsService {
     }
   }
 
-  findAll(options?: FindManyOptions<MoaMerchant>) {
-    return this.repository.find(options);
-  }
-
-  async findOne(
-    options: FindOneOptions<MoaMerchant>,
-  ): Promise<MoaMerchant | null | undefined> {
-    const foundOne = await this.repository.findOne(options);
-    console.log(
-      this.squareService.oauthUrl({
-        scope: [
-          'MERCHANT_PROFILE_READ',
-          'CUSTOMERS_WRITE',
-          'CUSTOMERS_READ',
-          'ORDERS_WRITE',
-          'ORDERS_READ',
-          'PAYMENTS_READ',
-          'PAYMENTS_WRITE',
-          'PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS',
-          'ITEMS_WRITE',
-          'ITEMS_READ',
-        ],
-        state: foundOne?.id,
-      }),
-    );
-    return foundOne;
-  }
-
-  findOneOrFail(options: FindOneOptions<MoaMerchant>): Promise<MoaMerchant> {
-    return this.repository.findOneOrFail(options);
-  }
-
-  async update(id: string, updateMerchantInput: MoaUpdateMerchantInput) {
-    const entity = await this.findOneOrFail({ where: { id } });
-
-    Object.assign(entity, updateMerchantInput);
-
-    return await this.save(entity);
-  }
-
-  async save(merchant: MoaMerchant) {
-    return this.repository.save(merchant);
-  }
-
-  async delete(id: string): Promise<boolean> {
-    const deleteResult = await this.repository.delete({ id });
-    return deleteResult.affected !== undefined;
-  }
-
-  async getOneOrderedCatalogOrFailForUser(params: {
-    user: User;
-    onlyShowEnabled: boolean;
-  }): Promise<Catalog | null | undefined> {
-    const entity = await this.findOneOrFail({
-      where: { userId: params.user.id },
-    });
-    return this.catalogsService.getOneOrderedOrFail({
-      catalogId: entity.catalogId,
-      onlyShowEnabled: params.onlyShowEnabled,
-    });
-  }
-
-  async getManyCategoriesForUser(params: {
-    user: User;
-    onlyShowEnabled: boolean;
-    pagination: PaginationOptions;
-  }): Promise<InfinityPaginationResultType<Category>> {
-    const entity = await this.findOneOrFail({
-      where: { userId: params.user.id },
-    });
-
-    if (entity.catalogId == null) {
-      throw new Error('Catalog id is null');
-    }
-
-    return this.categoriesService.getManyCategories({
-      catalogId: entity.catalogId,
-      onlyShowEnabled: params.onlyShowEnabled,
-      pagination: params.pagination,
-    });
-  }
-
-  async loadOneCatalogForUser(params: {
-    user: User;
-  }): Promise<Catalog | null | undefined> {
-    const entity = await this.findOneOrFail({
-      where: { userId: params.user.id },
-    });
-    return this.loadOneCatalogForEntity({ entity });
-  }
-
-  async loadOneCatalogForEntity(params: {
-    entity: MoaMerchant;
-  }): Promise<Catalog | null | undefined> {
+  async loadOneUser(entity: Merchant): Promise<User | null | undefined> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaMerchant, 'catalog')
-      .of(params.entity)
-      .loadOne();
-  }
-
-  async loadOneUser(entity: MoaMerchant): Promise<User | null | undefined> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(MoaMerchant, 'user')
+      .relation(Merchant, 'user')
       .of(entity)
       .loadOne();
   }
 
-  async loadLocations(entity: MoaMerchant): Promise<Location[]> {
+  async loadOneCatalog(entity: Merchant): Promise<Catalog | null | undefined> {
     return this.repository
       .createQueryBuilder()
-      .relation(MoaMerchant, 'locations')
+      .relation(Merchant, 'catalog')
+      .of(entity)
+      .loadOne();
+  }
+
+  async loadManyLocations(entity: Merchant): Promise<Location[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(Merchant, 'locations')
       .of(entity)
       .loadMany();
   }

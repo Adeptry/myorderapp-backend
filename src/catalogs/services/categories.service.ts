@@ -1,67 +1,44 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { BaseService } from 'src/utils/base-service';
 import { paginated } from 'src/utils/paginated';
 import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
+import { Repository } from 'typeorm';
 import {
-  FindManyOptions,
-  FindOneOptions,
-  RemoveOptions,
-  Repository,
-} from 'typeorm';
-import { MoaCategoryUpdateInput } from '../dto/category-update.dto';
+  CategoryUpdateAllInput,
+  CategoryUpdateInput,
+} from '../dto/category-update.dto';
 import { Category } from '../entities/category.entity';
 
 @Injectable()
-export class CategoriesService {
+export class CategoriesService extends BaseService<Category> {
+  private readonly logger = new Logger(CategoriesService.name);
+
   constructor(
     @InjectRepository(Category)
-    private readonly repository: Repository<Category>,
-  ) {}
-
-  create(params: { squareId: string; catalogId: string }) {
-    const entity = this.repository.create();
-    entity.squareId = params.squareId;
-    entity.catalogId = params.catalogId;
-    return this.repository.save(entity);
+    protected readonly repository: Repository<Category>,
+  ) {
+    super(repository);
   }
 
-  save(entity: Category) {
-    return this.repository.save(entity);
-  }
-
-  findByIds(ids: string[]) {
-    return this.repository.findByIds(ids);
-  }
-
-  findMany(options?: FindManyOptions<Category>) {
-    return this.repository.find(options);
-  }
-
-  findOne(options: FindOneOptions<Category>) {
-    return this.repository.findOne(options);
-  }
-
-  findOneOrFail(options: FindOneOptions<Category>) {
-    return this.repository.findOneOrFail(options);
-  }
-
-  async update(input: MoaCategoryUpdateInput) {
-    const entity = await this.findOneOrFail({ where: { id: input.id } });
-    if (input.moaOrdinal !== undefined) {
-      entity.moaOrdinal = input.moaOrdinal;
+  async assignAndSave(params: { id: string; input: CategoryUpdateInput }) {
+    const entity = await this.findOneOrFail({
+      where: { id: params.id },
+    });
+    if (params.input.moaOrdinal != undefined) {
+      this.logger.verbose(
+        `Updating category ${params.id} moaOrdinal: ${params.input.moaOrdinal}`,
+      );
+      entity.moaOrdinal = params.input.moaOrdinal;
     }
-    if (input.moaEnabled !== undefined) {
-      entity.moaEnabled = input.moaEnabled;
+    if (params.input.moaEnabled != undefined) {
+      entity.moaEnabled = params.input.moaEnabled;
     }
     return await this.save(entity);
   }
 
-  saveAll(entities: Category[]) {
-    return this.repository.save(entities);
-  }
-
-  async updateAll(inputs: MoaCategoryUpdateInput[]) {
+  async updateAll(inputs: CategoryUpdateAllInput[]) {
     const entities: Category[] = [];
 
     for (const input of inputs) {
@@ -78,17 +55,6 @@ export class CategoriesService {
     }
 
     return await this.saveAll(entities);
-  }
-
-  removeOne(entity: Category, options?: RemoveOptions): Promise<Category> {
-    return this.repository.remove(entity, options);
-  }
-
-  removeAll(
-    entities: Category[],
-    options?: RemoveOptions,
-  ): Promise<Category[]> {
-    return this.repository.remove(entities, options);
   }
 
   async getManyCategories(params: {

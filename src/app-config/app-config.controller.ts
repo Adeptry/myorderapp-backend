@@ -1,4 +1,4 @@
-import { Controller, Get, Param, Patch } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { AppConfigService } from './app-config.service';
 
@@ -13,10 +13,5 @@ export class AppConfigController {
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.appConfigService.findOne({ where: { id } });
-  }
-
-  @Patch(':id')
-  update(@Param('id') id: string) {
-    return this.appConfigService.update(id);
   }
 }

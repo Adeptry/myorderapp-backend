@@ -13,10 +13,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaMerchant } from '../../merchants/entities/merchant.entity';
+import { Merchant } from '../../merchants/entities/merchant.entity';
 
 @Entity('location')
-export class MoaLocation extends EntityHelper {
+export class Location extends EntityHelper {
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   id?: string;
@@ -148,12 +148,12 @@ export class MoaLocation extends EntityHelper {
    * Merchant
    */
 
-  @ApiProperty({ required: false })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => MoaMerchant, { onDelete: 'SET NULL' })
-  merchant?: MoaMerchant;
+  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
+  merchant?: Merchant;
 
   /*
    * Square

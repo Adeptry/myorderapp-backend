@@ -7,7 +7,7 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { RoleEnum } from 'src/roles/roles.enum';
+import { RoleNameEnum } from 'src/roles/roles.enum';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
 import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 
@@ -32,10 +32,10 @@ export class AuthRegisterLoginDto {
   @IsNotEmpty()
   lastName: string;
 
-  @ApiProperty({ enum: Object.values(RoleEnum), example: RoleEnum.merchant })
-  @IsNotEmpty()
-  @IsIn([RoleEnum.merchant, RoleEnum.customer], {
-    message: 'Invalid role. Only "merchant" and "customer" are allowed.',
+  @ApiProperty({
+    enum: Object.values(RoleNameEnum),
   })
-  role: RoleEnum;
+  @IsNotEmpty()
+  @IsIn([RoleNameEnum.user])
+  role: RoleNameEnum;
 }

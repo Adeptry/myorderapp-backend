@@ -1,15 +1,31 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class MoaItemUpdateInput {
-  @ApiProperty()
-  id!: string;
-
+export class ItemUpdateInput {
+  @IsNumber()
+  @IsOptional()
   @ApiProperty()
   moaOrdinal?: number;
 
+  @IsBoolean()
+  @IsOptional()
   @ApiProperty()
   moaEnabled?: boolean;
+}
 
+export class ItemUpdateAllInput {
+  @IsString()
+  @IsOptional()
   @ApiProperty()
-  imageUlid?: string;
+  id!: string;
+
+  @IsNumber()
+  @IsOptional()
+  @ApiProperty()
+  moaOrdinal?: number;
+
+  @IsBoolean()
+  @IsOptional()
+  @ApiProperty()
+  moaEnabled?: boolean;
 }

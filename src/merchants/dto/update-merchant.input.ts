@@ -1,7 +1,6 @@
-import { MoaCreateMerchantInput } from './create-merchant.input';
+import { MerchantCreateInput } from './create-merchant.input';
 
-export class MoaUpdateMerchantInput extends MoaCreateMerchantInput {
+export class MerchantUpdateInput extends MerchantCreateInput {
   stripeId?: string;
-
   stripeCheckoutSessionId?: string;
 }

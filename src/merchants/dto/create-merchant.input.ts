@@ -1,3 +1,1 @@
-export class MoaCreateMerchantInput {
-  userId?: string;
-}
+export class MerchantCreateInput {}

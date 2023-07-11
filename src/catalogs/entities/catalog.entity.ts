@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { Category } from 'src/catalogs/entities/category.entity';
-import { MoaMerchant } from 'src/merchants/entities/merchant.entity';
+import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -86,8 +86,8 @@ export class Catalog extends EntityHelper {
   /*
    * Merchant
    */
-  @OneToOne(() => MoaMerchant, (merchant) => merchant.catalog, {
+  @OneToOne(() => Merchant, (merchant) => merchant.catalog, {
     onDelete: 'CASCADE',
   })
-  merchant?: MoaMerchant;
+  merchant?: Merchant;
 }

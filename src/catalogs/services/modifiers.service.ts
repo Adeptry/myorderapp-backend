@@ -1,66 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  FindManyOptions,
-  FindOneOptions,
-  RemoveOptions,
-  Repository,
-} from 'typeorm';
+import { BaseService } from 'src/utils/base-service';
+import { Repository } from 'typeorm';
 import { ModifierList } from '../entities/modifier-list.entity';
 import { Modifier } from '../entities/modifier.entity';
 
 @Injectable()
-export class ModifiersService {
+export class ModifiersService extends BaseService<Modifier> {
   constructor(
     @InjectRepository(Modifier)
-    private readonly repository: Repository<Modifier>,
-  ) {}
-
-  create(params: {
-    squareId: string;
-    modifierListId: string;
-    catalogId: string;
-  }) {
-    const entity = this.repository.create();
-    entity.squareId = params.squareId;
-    entity.modifierListId = params.modifierListId;
-    entity.catalogId = params.catalogId;
-    return this.repository.save(entity);
-  }
-
-  save(entity: Modifier) {
-    return this.repository.save(entity);
-  }
-
-  findByIds(ids: string[]) {
-    return this.repository.findByIds(ids);
-  }
-
-  findMany(options?: FindManyOptions<Modifier>) {
-    return this.repository.find(options);
-  }
-
-  findOne(options: FindOneOptions<Modifier>) {
-    return this.repository.findOne(options);
-  }
-
-  findOneOrFail(options: FindOneOptions<Modifier>) {
-    return this.repository.findOneOrFail(options);
-  }
-
-  //   update(input: MoaUpdateModifierInput) {
-  //     return `This action updates a #${id} administrator`;
-  //   }
-
-  removeOne(entity: Modifier, options?: RemoveOptions): Promise<Modifier> {
-    return this.repository.remove(entity, options);
-  }
-
-  removeAll(
-    entities: Modifier[],
-    options?: RemoveOptions,
-  ): Promise<Modifier[]> {
-    return this.repository.remove(entities, options);
+    protected readonly repository: Repository<Modifier>,
+  ) {
+    super(repository);
   }
 
   async loadModifierListForModifier(

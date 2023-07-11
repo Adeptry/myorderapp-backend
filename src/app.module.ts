@@ -37,6 +37,7 @@ import { StripeModule } from 'src/stripe/stripe.module';
 import { TwilioModule } from 'src/twilio/twilio.module';
 import { UsersModule } from 'src/users/users.module';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { CustomersModule } from './customers/customers.module';
 
 @Module({
   imports: [
@@ -88,7 +89,6 @@ import { DataSource, DataSourceOptions } from 'typeorm';
       inject: [ConfigService],
     }),
     UsersModule,
-    FilesModule,
     AuthModule,
     AuthFacebookModule,
     AuthGoogleModule,
@@ -101,10 +101,12 @@ import { DataSource, DataSourceOptions } from 'typeorm';
     TwilioModule,
     StripeModule,
     MerchantsModule,
-    CatalogsModule,
+    CustomersModule,
     LocationsModule,
-    AppConfigModule,
+    CatalogsModule,
     FirebaseAdminModule,
+    AppConfigModule,
+    FilesModule,
   ],
 })
 export class AppModule {}
