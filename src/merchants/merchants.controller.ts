@@ -56,7 +56,6 @@ export class MerchantsController {
   @ApiQuery({ name: 'input', required: true, type: MerchantCreateInput })
   @ApiOperation({ summary: 'Create Merchant account for current User' })
   async create(@Req() request: any): Promise<Merchant | null> {
-    this.logger.log('Creating Merchant account for current User');
     const user = await this.authService.me(request.user);
 
     if (!user) {
@@ -72,13 +71,7 @@ export class MerchantsController {
       );
     }
 
-    let merchant = this.service.create({ userId: user.id });
-    this.logger.log(`Created Merchant account for current User ${user.id}`);
-    merchant = await this.service.save(merchant);
-    this.logger.log(
-      `Saved Merchant account ${merchant.id} for current User ${user.id}`,
-    );
-    return merchant;
+    return await this.service.save(this.service.create({ userId: user.id }));
   }
 
   @ApiBearerAuth()
@@ -90,7 +83,7 @@ export class MerchantsController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Merchant })
   @ApiOperation({ summary: 'Get current Merchant' })
-  public async me(@Request() request): Promise<NullableType<Merchant>> {
+  public async me(@Req() request: any): Promise<NullableType<Merchant>> {
     const user = await this.authService.me(request.user);
 
     if (!user) {

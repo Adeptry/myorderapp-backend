@@ -4,6 +4,8 @@ import {
   ApiResponse,
   CatalogObject,
   Client,
+  CreateCustomerRequest,
+  Customer,
   Environment,
   ListLocationsResponse,
   Location,
@@ -54,13 +56,15 @@ export class SquareService {
     return urlString;
   }
 
-  async obtainToken(oauthAccessCode: string): Promise<ObtainTokenResponse> {
+  async obtainToken(params: {
+    oauthAccessCode: string;
+  }): Promise<ObtainTokenResponse> {
     try {
       const response = await this.defaultClient.oAuthApi.obtainToken({
         clientId: this.clientId,
         clientSecret: this.clientSecret,
         grantType: 'authorization_code',
-        code: oauthAccessCode,
+        code: params.oauthAccessCode,
       });
       return response.result;
     } catch (error) {
@@ -69,13 +73,15 @@ export class SquareService {
     }
   }
 
-  async refreshToken(oauthRefreshToken: string): Promise<ObtainTokenResponse> {
+  async refreshToken(params: {
+    oauthRefreshToken: string;
+  }): Promise<ObtainTokenResponse> {
     try {
       const response = await this.defaultClient.oAuthApi.obtainToken({
         clientId: this.clientId,
         clientSecret: this.clientSecret,
         grantType: 'refresh_token',
-        refreshToken: oauthRefreshToken,
+        refreshToken: params.oauthRefreshToken,
       });
       return response.result;
     } catch (error) {
@@ -84,9 +90,9 @@ export class SquareService {
     }
   }
 
-  async listCatalog(client: Client): Promise<CatalogObject[]> {
+  async listCatalog(params: { client: Client }): Promise<CatalogObject[]> {
     const catalogObjects: CatalogObject[] = [];
-    let listCatalogResponse = await client?.catalogApi.listCatalog(
+    let listCatalogResponse = await params.client.catalogApi.listCatalog(
       undefined,
       'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
     );
@@ -94,7 +100,7 @@ export class SquareService {
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await client?.catalogApi.listCatalog(
+      listCatalogResponse = await params.client.catalogApi.listCatalog(
         cursor,
         'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
       );
@@ -105,24 +111,28 @@ export class SquareService {
     return catalogObjects;
   }
 
-  async listLocations(client: Client): Promise<ListLocationsResponse | null> {
+  async listLocations(params: {
+    client: Client;
+  }): Promise<ListLocationsResponse | null> {
     let response: ApiResponse<ListLocationsResponse> | null = null;
     try {
-      response = (await client?.locationsApi?.listLocations()) ?? null;
+      response = (await params.client.locationsApi?.listLocations()) ?? null;
     } catch (error) {
       this.logger.error(error);
     }
     return response?.result ?? null;
   }
 
-  async retrieveLocation(
-    client: Client,
-    locationSquareId: string,
-  ): Promise<Location | null> {
+  async retrieveLocation(params: {
+    client: Client;
+    locationSquareId: string;
+  }): Promise<Location | null> {
     let response: ApiResponse<RetrieveLocationResponse> | null = null;
     try {
       response =
-        (await client.locationsApi.retrieveLocation(locationSquareId)) ?? null;
+        (await params.client.locationsApi.retrieveLocation(
+          params.locationSquareId,
+        )) ?? null;
     } catch (error) {
       console.log(error);
       this.logger.error(error);
@@ -130,9 +140,24 @@ export class SquareService {
     return response?.result.location ?? null;
   }
 
-  client(accessToken: string): Client {
+  async createCustomer(params: {
+    client: Client;
+    request: CreateCustomerRequest;
+  }): Promise<Customer | null> {
+    try {
+      const response = await params.client.customersApi.createCustomer(
+        params.request,
+      );
+      return response?.result.customer ?? null;
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  client(params: { accessToken: string }): Client {
     return new Client({
-      accessToken,
+      accessToken: params.accessToken,
       environment: this.squareEnvironment,
     });
   }

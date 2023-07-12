@@ -17,7 +17,6 @@ import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
-import { UsersService } from 'src/users/users.service';
 import { BaseService } from 'src/utils/base-service';
 import { Repository } from 'typeorm';
 import { MerchantUpdateInput } from './dto/update-merchant.input';
@@ -35,8 +34,6 @@ export class MerchantsService extends BaseService<Merchant> {
     private readonly squareService: SquareService,
     @Inject(FirebaseAdminService)
     private readonly firebaseAdminService: FirebaseAdminService,
-    @Inject(UsersService)
-    private readonly usersService: UsersService,
     @Inject(forwardRef(() => CatalogsService))
     private readonly catalogsService: CatalogsService,
     @Inject(forwardRef(() => LocationsService))
@@ -65,9 +62,9 @@ export class MerchantsService extends BaseService<Merchant> {
       );
     }
 
-    const accessTokenResponse = await this.squareService.obtainToken(
-      params.oauthAccessCode,
-    );
+    const accessTokenResponse = await this.squareService.obtainToken({
+      oauthAccessCode: params.oauthAccessCode,
+    });
 
     if (!accessTokenResponse) {
       throw new Error('Failed to obtain token from Square service');
@@ -88,9 +85,9 @@ export class MerchantsService extends BaseService<Merchant> {
       where: { id },
     });
     const oauthRefreshToken = merchant.squareRefreshToken ?? '';
-    const accessToken = await this.squareService.refreshToken(
+    const accessToken = await this.squareService.refreshToken({
       oauthRefreshToken,
-    );
+    });
     merchant.squareAccessToken = accessToken.accessToken;
     merchant.squareExpiresAt = new Date(
       Date.parse(accessToken.expiresAt ?? ''),
@@ -101,11 +98,11 @@ export class MerchantsService extends BaseService<Merchant> {
   }
 
   async squareCatalogSync(params: { userId: string }) {
-    const entity = await this.findOneOrFail({
+    const entity = await this.findOne({
       where: { userId: params.userId },
     });
 
-    if (entity.id == null) {
+    if (entity?.id == null) {
       throw new NotFoundException('Merchant id is null');
     }
 

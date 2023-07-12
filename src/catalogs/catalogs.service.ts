@@ -108,14 +108,16 @@ export class CatalogsService extends BaseService<Catalog> {
   }
 
   async squareSync(params: { squareAccessToken: string; catalogId: string }) {
-    const squareClient = this.squareService.client(params.squareAccessToken);
+    const client = this.squareService.client({
+      accessToken: params.squareAccessToken,
+    });
     const moaCatalog = await this.findOneOrFail({
       where: { id: params.catalogId },
     });
 
     await this.dataSource.transaction(async () => {
       const squareCatalogObjects =
-        (await this.squareService.listCatalog(squareClient)) ?? [];
+        (await this.squareService.listCatalog({ client })) ?? [];
 
       if (moaCatalog.id == null) {
         throw new Error('Catalog id is null.');

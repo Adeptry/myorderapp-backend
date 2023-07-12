@@ -13,7 +13,7 @@ import { LocationsService } from './locations.service';
     TypeOrmModule.forFeature([Location]),
     AuthModule,
     SquareModule,
-    CustomersModule,
+    forwardRef(() => CustomersModule),
     forwardRef(() => MerchantsModule),
   ],
   controllers: [LocationsController],

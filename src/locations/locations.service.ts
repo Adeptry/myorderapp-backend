@@ -45,9 +45,11 @@ export class LocationsService extends BaseService<MoaLocation> {
       })
     ).data;
 
-    const squareClient = this.squareService.client(params.squareAccessToken);
+    const client = this.squareService.client({
+      accessToken: params.squareAccessToken,
+    });
     const squareLocations =
-      (await this.squareService.listLocations(squareClient))?.locations ?? [];
+      (await this.squareService.listLocations({ client }))?.locations ?? [];
     for (const squareLocation of squareLocations) {
       if (squareLocation == null) {
         continue;
