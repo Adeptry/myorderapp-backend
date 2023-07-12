@@ -45,6 +45,8 @@ export class Customer extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
+  /* User */
+
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   userId?: string;
@@ -52,12 +54,16 @@ export class Customer extends EntityHelper {
   @ManyToOne(() => User)
   user?: User;
 
+  /* Merchant */
+
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   merchantId?: string;
 
   @ManyToOne(() => Merchant)
   merchant?: Merchant;
+
+  /* Square */
 
   @ApiHideProperty()
   @Exclude()

@@ -131,7 +131,7 @@ export class CustomersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiQuery({ name: 'cursor', required: false, type: String })
-  @Get('me/cards')
+  @Get('me/square/cards')
   async listMyCards(
     @Req() request: any,
     @Query('merchantId') merchantId: string,
@@ -210,7 +210,7 @@ export class CustomersController {
       },
     },
   })
-  @Post('me/cards')
+  @Post('me/square/cards')
   async createMyCard(
     @Body() createCardDto: SquareCreateCustomerCardInput,
     @Req() request: any,
@@ -274,7 +274,7 @@ export class CustomersController {
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiOperation({ operationId: 'disableMyCard', summary: 'Disable my Card' })
   @ApiParam({ name: 'id', required: true, type: String })
-  @Delete('me/cards/:id')
+  @Delete('me/square/cards/:id')
   async disableMyCard(
     @Req() request: any,
     @Param('id') cardId: string,

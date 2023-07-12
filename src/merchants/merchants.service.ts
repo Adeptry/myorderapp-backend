@@ -1,6 +1,8 @@
 import {
   BadRequestException,
   forwardRef,
+  HttpException,
+  HttpStatus,
   Inject,
   Injectable,
   Logger,
@@ -50,34 +52,37 @@ export class MerchantsService extends BaseService<Merchant> {
 
   async squareConfirmOauth(params: {
     oauthAccessCode: string;
-    userId: string;
+    merchant: Merchant;
   }) {
-    const merchant = await this.findOne({
-      where: { userId: params.userId },
-    });
-
-    if (!merchant) {
-      throw new NotFoundException(
-        `Merchant with userId ${params.userId} not found`,
-      );
-    }
+    const { merchant, oauthAccessCode } = params;
 
     const accessTokenResponse = await this.squareService.obtainToken({
-      oauthAccessCode: params.oauthAccessCode,
+      oauthAccessCode,
     });
 
     if (!accessTokenResponse) {
-      throw new Error('Failed to obtain token from Square service');
+      throw new HttpException(
+        'Failed to obtain token from Square service',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
     }
 
-    merchant.squareAccessToken = accessTokenResponse.accessToken;
-    merchant.squareExpiresAt = new Date(
-      Date.parse(accessTokenResponse.expiresAt ?? ''),
-    );
-    merchant.squareId = accessTokenResponse.merchantId;
-    merchant.squareRefreshToken = accessTokenResponse.refreshToken;
+    const { accessToken, expiresAt, merchantId, refreshToken } =
+      accessTokenResponse;
 
-    return await this.save(merchant);
+    if (!expiresAt) {
+      throw new HttpException(
+        'No expiry date provided in the access token',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
+
+    merchant.squareAccessToken = accessToken;
+    merchant.squareExpiresAt = new Date(Date.parse(expiresAt));
+    merchant.squareId = merchantId;
+    merchant.squareRefreshToken = refreshToken;
+
+    return this.save(merchant);
   }
 
   async squareRefreshOauth(id: string) {
@@ -97,10 +102,8 @@ export class MerchantsService extends BaseService<Merchant> {
     return await this.save(merchant);
   }
 
-  async squareCatalogSync(params: { userId: string }) {
-    const entity = await this.findOne({
-      where: { userId: params.userId },
-    });
+  async squareCatalogSync(params: { merchant: Merchant }) {
+    const entity = params.merchant;
 
     if (entity?.id == null) {
       throw new NotFoundException('Merchant id is null');
@@ -123,18 +126,16 @@ export class MerchantsService extends BaseService<Merchant> {
       throw new Error('Catalog id is null');
     }
 
-    entity.catalog = await this.catalogsService.squareSync({
+    await this.catalogsService.squareSync({
       squareAccessToken,
       catalogId: catalog.id,
     });
 
-    return entity;
+    return;
   }
 
-  async squareLocationsSync(params: { userId: string }) {
-    const entity = await this.findOneOrFail({
-      where: { userId: params.userId },
-    });
+  async squareLocationsSync(params: { merchant: Merchant }) {
+    const entity = params.merchant;
 
     if (entity.id == null) {
       throw new NotFoundException('Merchant id is null');
@@ -152,23 +153,15 @@ export class MerchantsService extends BaseService<Merchant> {
   }
 
   async stripeCreateCheckoutSessionId(params: {
-    userId: string;
+    merchant: Merchant;
     successUrl: string;
     cancelUrl?: string;
   }): Promise<string | null> {
-    const merchant = await this.findOne({
-      where: { userId: params.userId },
-    });
-
-    if (!merchant) {
-      throw new NotFoundException(
-        `Merchant with userId ${params.userId} not found`,
-      );
-    }
+    const merchant = params.merchant;
 
     if (merchant.stripeCheckoutSessionId) {
       throw new BadRequestException(
-        `Merchant with userId ${params.userId} already has completed checkeout`,
+        `Merchant with userId ${merchant.id} already has completed checkeout`,
       );
     }
 
@@ -215,18 +208,10 @@ export class MerchantsService extends BaseService<Merchant> {
   }
 
   async stripeConfirmCheckoutSessionId(params: {
-    userId: string;
+    merchant: Merchant;
     checkoutSessionId: string;
   }): Promise<Merchant | null> {
-    const entity = await this.findOne({
-      where: { userId: params.userId },
-    });
-
-    if (!entity) {
-      throw new NotFoundException(
-        `Merchant with userId ${params.userId} not found`,
-      );
-    }
+    const entity = params.merchant;
 
     const session = await this.stripeService.retrieveCheckoutSession(
       params.checkoutSessionId,

@@ -68,7 +68,6 @@ export class Merchant extends EntityHelper {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  @ApiProperty({ type: () => AppConfig, required: false })
   appConfig?: AppConfig;
 
   /*

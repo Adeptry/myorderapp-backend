@@ -10,6 +10,7 @@ import { MerchantsService } from 'src/merchants/merchants.service';
 import { SquareModule } from 'src/square/square.module';
 import { StripeModule } from 'src/stripe/stripe.module';
 import { UsersModule } from 'src/users/users.module';
+import { MerchantsGuard } from './merchants.guard';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { UsersModule } from 'src/users/users.module';
     forwardRef(() => LocationsModule),
   ],
   controllers: [MerchantsController],
-  providers: [MerchantsService],
+  providers: [MerchantsService, MerchantsGuard],
   exports: [MerchantsService],
 })
 export class MerchantsModule {}
