@@ -18,6 +18,7 @@ import {
 
 @Entity('app_config')
 export class AppConfig extends EntityHelper {
+  /* Base entity */
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
   id?: string;
@@ -43,19 +44,19 @@ export class AppConfig extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  @ApiProperty({ required: false })
-  @Column({ nullable: true })
-  primaryColor?: string;
+  /* App config entity */
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  secondaryColor?: string;
+  seedColor?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   fontFamily?: string;
 
-  @ApiProperty({ required: false })
+  /* Relations */
+
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   merchantId?: string;
 
