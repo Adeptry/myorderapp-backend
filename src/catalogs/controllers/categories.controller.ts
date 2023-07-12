@@ -156,7 +156,7 @@ export class CategoriesController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get items in Category' })
+  @ApiOperation({ summary: 'Get Items in Category' })
   async category(
     @Req() request: any,
     @Param('id') categoryId: string,

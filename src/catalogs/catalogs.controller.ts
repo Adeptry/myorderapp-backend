@@ -49,7 +49,7 @@ export class CatalogsController {
   @ApiOkResponse({ type: Catalog })
   @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get your catalog' })
+  @ApiOperation({ summary: 'Get your Catalog' })
   async catalog(
     @Req() request: any,
     @Query('as') userType: UserTypeEnum,

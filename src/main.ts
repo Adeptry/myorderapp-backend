@@ -9,6 +9,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { AppModule } from './app.module';
 import { AllConfigType } from './config/config.type';
+import { BigIntInterceptor } from './utils/big-int.intercepter';
 import validationOptions from './utils/validation-options';
 
 async function bootstrap() {
@@ -28,6 +29,7 @@ async function bootstrap() {
   });
   app.useGlobalPipes(new ValidationPipe(validationOptions));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+  app.useGlobalInterceptors(new BigIntInterceptor());
 
   const options = new DocumentBuilder()
     .setTitle('MyOrderApp')

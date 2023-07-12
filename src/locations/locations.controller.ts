@@ -69,7 +69,7 @@ export class LocationsController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get all your locations' })
+  @ApiOperation({ summary: 'Get all your Locations' })
   async getLocations(
     @Request() request,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,

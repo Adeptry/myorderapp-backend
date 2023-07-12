@@ -38,6 +38,7 @@ import { TwilioModule } from 'src/twilio/twilio.module';
 import { UsersModule } from 'src/users/users.module';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { CustomersModule } from './customers/customers.module';
+import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -107,6 +108,7 @@ import { CustomersModule } from './customers/customers.module';
     FirebaseAdminModule,
     AppConfigModule,
     FilesModule,
+    OrdersModule,
   ],
 })
 export class AppModule {}

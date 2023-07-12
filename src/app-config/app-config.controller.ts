@@ -18,6 +18,7 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -54,7 +55,7 @@ export class AppConfigController {
   @ApiOkResponse({ type: AppConfig })
   @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get your App Config' })
+  @ApiOperation({ summary: 'Get your Config' })
   async get(
     @Req() request: any,
     @Query('as') userType: UserTypeEnum,
@@ -122,7 +123,8 @@ export class AppConfigController {
   @UseGuards(AuthGuard('jwt'))
   @Post('me')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ summary: 'Create AppConfig' })
+  @ApiCreatedResponse({ type: AppConfig })
+  @ApiOperation({ summary: 'Create your Config' })
   @ApiBody({ type: ConfigUpdateInput })
   async create(
     @Req() request: any,
@@ -161,7 +163,8 @@ export class AppConfigController {
   @UseGuards(AuthGuard('jwt'))
   @Patch('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ summary: 'Update AppConfig' })
+  @ApiOkResponse({ type: AppConfig })
+  @ApiOperation({ summary: 'Update your Config' })
   @ApiBody({ type: ConfigUpdateInput })
   async update(
     @Req() request: any,

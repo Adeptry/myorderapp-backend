@@ -4,6 +4,7 @@ import {
   ApiResponse,
   CatalogObject,
   Client,
+  CreateCardRequest,
   CreateCustomerRequest,
   Customer,
   Environment,
@@ -90,9 +91,10 @@ export class SquareService {
     }
   }
 
-  async listCatalog(params: { client: Client }): Promise<CatalogObject[]> {
+  async listCatalog(params: { accessToken: string }): Promise<CatalogObject[]> {
+    const client = this.client({ accessToken: params.accessToken });
     const catalogObjects: CatalogObject[] = [];
-    let listCatalogResponse = await params.client.catalogApi.listCatalog(
+    let listCatalogResponse = await client.catalogApi.listCatalog(
       undefined,
       'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
     );
@@ -100,7 +102,7 @@ export class SquareService {
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await params.client.catalogApi.listCatalog(
+      listCatalogResponse = await client.catalogApi.listCatalog(
         cursor,
         'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
       );
@@ -112,11 +114,12 @@ export class SquareService {
   }
 
   async listLocations(params: {
-    client: Client;
+    accessToken: string;
   }): Promise<ListLocationsResponse | null> {
     let response: ApiResponse<ListLocationsResponse> | null = null;
+    const client = this.client({ accessToken: params.accessToken });
     try {
-      response = (await params.client.locationsApi?.listLocations()) ?? null;
+      response = (await client.locationsApi?.listLocations()) ?? null;
     } catch (error) {
       this.logger.error(error);
     }
@@ -124,15 +127,15 @@ export class SquareService {
   }
 
   async retrieveLocation(params: {
-    client: Client;
+    accessToken: string;
     locationSquareId: string;
   }): Promise<Location | null> {
+    const client = this.client({ accessToken: params.accessToken });
     let response: ApiResponse<RetrieveLocationResponse> | null = null;
     try {
       response =
-        (await params.client.locationsApi.retrieveLocation(
-          params.locationSquareId,
-        )) ?? null;
+        (await client.locationsApi.retrieveLocation(params.locationSquareId)) ??
+        null;
     } catch (error) {
       console.log(error);
       this.logger.error(error);
@@ -141,18 +144,54 @@ export class SquareService {
   }
 
   async createCustomer(params: {
-    client: Client;
+    accessToken: string;
     request: CreateCustomerRequest;
   }): Promise<Customer | null> {
+    const client = this.client({ accessToken: params.accessToken });
     try {
-      const response = await params.client.customersApi.createCustomer(
-        params.request,
-      );
+      const response = await client.customersApi.createCustomer(params.request);
       return response?.result.customer ?? null;
     } catch (error) {
       this.logger.error(error);
       throw error;
     }
+  }
+
+  async retrieveCustomer(params: { accessToken: string; squareId: string }) {
+    const client = this.client({ accessToken: params.accessToken });
+    const response = await client.customersApi.retrieveCustomer(
+      params.squareId,
+    );
+
+    return response?.result.customer ?? null;
+  }
+
+  listCards(params: {
+    accessToken: string;
+    cursor?: string;
+    customerId?: string;
+    includeDisabled?: boolean;
+    referenceId?: string;
+    sortOrder?: string;
+  }) {
+    const client = this.client({ accessToken: params.accessToken });
+    return client.cardsApi.listCards(
+      params.cursor,
+      params.customerId,
+      params.includeDisabled,
+      params.referenceId,
+      params.sortOrder,
+    );
+  }
+
+  createCard(params: { accessToken: string; body: CreateCardRequest }) {
+    const client = this.client({ accessToken: params.accessToken });
+    return client.cardsApi.createCard(params.body);
+  }
+
+  disableCard(params: { accessToken: string; cardId: string }) {
+    const client = this.client({ accessToken: params.accessToken });
+    return client.cardsApi.disableCard(params.cardId);
   }
 
   client(params: { accessToken: string }): Client {

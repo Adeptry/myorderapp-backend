@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Patch,
   Post,
   Request,
@@ -30,6 +31,7 @@ import { LoginResponseType } from './types/login-response.type';
   version: '2',
 })
 export class AuthController {
+  private readonly logger = new Logger(AuthController.name);
   constructor(private readonly service: AuthService) {}
 
   @SerializeOptions({
@@ -40,6 +42,7 @@ export class AuthController {
   public login(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
+    this.logger.log(JSON.stringify(loginDto));
     return this.service.validateLogin(loginDto, false);
   }
 

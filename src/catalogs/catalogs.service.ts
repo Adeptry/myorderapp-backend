@@ -21,10 +21,10 @@ export class CatalogsService extends BaseService<Catalog> {
   private readonly logger = new Logger(CatalogsService.name);
 
   constructor(
-    @InjectDataSource()
-    private dataSource: DataSource,
     @InjectRepository(Catalog)
     protected readonly repository: Repository<Catalog>,
+    @InjectDataSource()
+    private dataSource: DataSource,
     @Inject(SquareService)
     private readonly squareService: SquareService,
     @Inject(ItemsService)
@@ -108,16 +108,15 @@ export class CatalogsService extends BaseService<Catalog> {
   }
 
   async squareSync(params: { squareAccessToken: string; catalogId: string }) {
-    const client = this.squareService.client({
-      accessToken: params.squareAccessToken,
-    });
     const moaCatalog = await this.findOneOrFail({
       where: { id: params.catalogId },
     });
 
     await this.dataSource.transaction(async () => {
       const squareCatalogObjects =
-        (await this.squareService.listCatalog({ client })) ?? [];
+        (await this.squareService.listCatalog({
+          accessToken: params.squareAccessToken,
+        })) ?? [];
 
       if (moaCatalog.id == null) {
         throw new Error('Catalog id is null.');

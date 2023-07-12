@@ -56,11 +56,8 @@ export class CustomersService extends BaseService<Customer> {
       }),
     );
 
-    const client = this.squareService.client({
-      accessToken: merchant.squareAccessToken,
-    });
     const result = await this.squareService.createCustomer({
-      client,
+      accessToken: merchant.squareAccessToken,
       request: {
         emailAddress: user.email ?? undefined,
         givenName: user.firstName ?? undefined,

@@ -54,7 +54,7 @@ export class MerchantsController {
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiQuery({ name: 'input', required: true, type: MerchantCreateInput })
-  @ApiOperation({ summary: 'Create Merchant account for current User' })
+  @ApiOperation({ summary: 'Create Merchant for current User' })
   async create(@Req() request: any): Promise<Merchant | null> {
     const user = await this.authService.me(request.user);
 
