@@ -41,30 +41,34 @@ export class CatalogsService extends BaseService<Catalog> {
     super(repository);
   }
 
-  getOneOrderedOrFail(params: {
-    catalogId: string;
-    onlyShowEnabled?: boolean;
-  }) {
-    const queryBuilder = this.repository
-      .createQueryBuilder('catalog')
-      .where('catalog.id = :id', { id: params.catalogId })
-      .leftJoinAndSelect('catalog.categories', 'categories')
-      .leftJoinAndSelect('categories.items', 'items')
-      .leftJoinAndSelect('items.modifierLists', 'modifierLists')
-      .leftJoinAndSelect('modifierLists.modifiers', 'modifiers')
-      .leftJoinAndSelect('items.variations', 'variations')
-      // .leftJoinAndSelect('items.image', 'image')
-      .orderBy('categories.moaOrdinal', 'ASC')
-      .addOrderBy('items.moaOrdinal', 'ASC')
-      .addOrderBy('modifiers.ordinal', 'ASC')
-      .addOrderBy('variations.ordinal', 'ASC');
-
-    if (params.onlyShowEnabled) {
-      queryBuilder.andWhere('categories.moaEnabled = true');
-      queryBuilder.andWhere('items.moaEnabled = true');
-    }
-
-    return queryBuilder.getOneOrFail();
+  joinOne(params: { catalogId: string; onlyShowEnabled?: boolean }) {
+    const moaEnabled = params.onlyShowEnabled ? true : undefined;
+    return this.findOne({
+      where: {
+        id: params.catalogId,
+        categories: { moaEnabled, items: { moaEnabled } },
+      },
+      relations: {
+        categories: {
+          items: {
+            modifierLists: {
+              modifiers: true,
+            },
+            variations: true,
+          },
+        },
+      },
+      order: {
+        categories: {
+          moaOrdinal: 'ASC',
+          items: {
+            moaOrdinal: 'ASC',
+            modifierLists: { modifiers: { ordinal: 'ASC' } },
+            variations: { ordinal: 'ASC' },
+          },
+        },
+      },
+    });
   }
 
   async loadCategories(entity: Catalog): Promise<Category[]> {

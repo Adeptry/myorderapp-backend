@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,14 +6,12 @@ import {
   HttpCode,
   HttpException,
   HttpStatus,
-  Inject,
   InternalServerErrorException,
   Logger,
   Param,
   Post,
   Query,
   Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,9 +27,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
-import { AuthService } from 'src/auth/auth.service';
 import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { CustomersGuard } from 'src/guards/customers.guard';
+import { UsersGuard } from 'src/guards/users.guard';
 import { MerchantCreateInput } from 'src/merchants/dto/create-merchant.input';
 import { MerchantsService } from 'src/merchants/merchants.service';
 import { SquareDisableCardResponse } from 'src/square/entities/squard-disable-card.output';
@@ -41,7 +39,6 @@ import { SquareCreateCustomerCardInput } from 'src/square/entities/square-create
 import { SquareListCardsResponse } from 'src/square/entities/square-list-cards.output';
 import { SquareService } from 'src/square/square.service';
 import { MoaError } from 'src/utils/error';
-import { NullableType } from 'src/utils/types/nullable.type';
 
 @ApiTags('Customers')
 @Controller({
@@ -53,30 +50,18 @@ export class CustomersController {
 
   constructor(
     private readonly service: CustomersService,
-    @Inject(AuthService)
-    private readonly authService: AuthService,
-    @Inject(MerchantsService)
     private readonly merchantsService: MerchantsService,
-    @Inject(SquareService)
     private readonly squareService: SquareService,
   ) {}
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Post()
   @HttpCode(HttpStatus.OK)
   @ApiQuery({ name: 'input', required: true, type: MerchantCreateInput })
   @ApiOperation({ summary: 'Create Customer for current User' })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
   async create(@Req() request: any, @Query('merchantId') merchantId: string) {
-    const user = await this.authService.me(request.user);
-
-    if (!user?.id) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
     const merchant = await this.merchantsService.findOne({
       where: { id: merchantId },
     });
@@ -85,46 +70,26 @@ export class CustomersController {
     }
 
     return this.service.createAndSave({
-      userId: user.id,
-      merchantId: merchant.id,
+      user: request.user,
+      merchant,
     });
   }
 
   @ApiBearerAuth()
   @Get('me')
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Customer })
   @ApiOperation({ summary: 'Get current Customer' })
-  public async me(
-    @Req() request: any,
-    @Query('merchantId') merchantId: string,
-  ): Promise<NullableType<Customer>> {
-    const user = await this.authService.me(request.user);
-    const userId = user?.id;
-    if (!userId) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const entity = await this.service.findOne({
-      where: { userId, merchantId },
-    });
-
-    if (!entity) {
-      throw new UnauthorizedException(
-        `Customer with userId ${userId} not found`,
-      );
-    }
-
-    return entity;
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  public me(@Req() request: any): Promise<Customer> {
+    return request.customer;
   }
 
   @ApiOkResponse({ type: SquareListCardsResponse })
   @ApiBearerAuth()
   @ApiOperation({ operationId: 'listMyCards', summary: 'List my Cards' })
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: MoaError,
@@ -134,42 +99,12 @@ export class CustomersController {
   @Get('me/square/cards')
   async listMyCards(
     @Req() request: any,
-    @Query('merchantId') merchantId: string,
     @Query('cursor') cursor?: string,
   ): Promise<SquareListCardsResponse> {
-    const user = await this.authService.me(request.user);
-    const userId = user?.id;
-    if (!userId) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const entity = await this.service.findOne({
-      where: { userId, merchantId },
-    });
-
-    const customerId = entity?.squareId;
-    if (!customerId) {
-      throw new UnauthorizedException(
-        `Square customer with userId ${userId} not found`,
-      );
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
-    });
-    const squareAccessToken = merchant?.squareAccessToken;
-    if (!squareAccessToken) {
-      throw new BadRequestException(
-        `Merchant with id ${squareAccessToken} not found`,
-      );
-    }
-
     try {
       const listCards = await this.squareService.listCards({
-        accessToken: squareAccessToken,
-        customerId,
+        accessToken: request.merchant.squareAccessToken,
+        customerId: request.customer.squareId,
         cursor,
       });
       return listCards.result as SquareListCardsResponse;
@@ -187,7 +122,7 @@ export class CustomersController {
 
   @ApiCreatedResponse({ type: SquareCard })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: MoaError,
@@ -214,41 +149,11 @@ export class CustomersController {
   async createMyCard(
     @Body() createCardDto: SquareCreateCustomerCardInput,
     @Req() request: any,
-    @Query('merchantId') merchantId: string,
   ) {
-    const user = await this.authService.me(request.user);
-    const userId = user?.id;
-    if (!userId) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const entity = await this.service.findOne({
-      where: { userId },
-    });
-
-    const customerSquareId = entity?.squareId;
-    if (!customerSquareId) {
-      throw new UnauthorizedException(
-        `Square customer with userId ${userId} not found`,
-      );
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
-    });
-    const squareAccessToken = merchant?.squareAccessToken;
-    if (!squareAccessToken) {
-      throw new BadRequestException(
-        `Merchant with id ${squareAccessToken} not found`,
-      );
-    }
-
     try {
-      createCardDto.card.customerId = customerSquareId;
+      createCardDto.card.customerId = request.customer.squareId;
       const response = await this.squareService.createCard({
-        accessToken: squareAccessToken,
+        accessToken: request.merchant.squareAccessToken,
         body: createCardDto,
       });
       return response.result.card;
@@ -266,7 +171,7 @@ export class CustomersController {
 
   @ApiOkResponse({ type: SquareDisableCardResponse })
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: MoaError,
@@ -278,40 +183,10 @@ export class CustomersController {
   async disableMyCard(
     @Req() request: any,
     @Param('id') cardId: string,
-    @Query('merchantId') merchantId: string,
   ): Promise<SquareDisableCardResponse> {
-    const user = await this.authService.me(request.user);
-    const userId = user?.id;
-    if (!userId) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const entity = await this.service.findOne({
-      where: { userId },
-    });
-
-    const squareId = entity?.squareId;
-    if (!squareId) {
-      throw new UnauthorizedException(
-        `Square customer with userId ${userId} not found`,
-      );
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
-    });
-    const squareAccessToken = merchant?.squareAccessToken;
-    if (!squareAccessToken) {
-      throw new BadRequestException(
-        `Merchant with id ${squareAccessToken} not found`,
-      );
-    }
-
     try {
       const response = await this.squareService.disableCard({
-        accessToken: squareAccessToken,
+        accessToken: request.merchant.squareAccessToken,
         cardId,
       });
       return response.result as SquareDisableCardResponse;

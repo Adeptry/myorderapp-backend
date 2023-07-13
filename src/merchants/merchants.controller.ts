@@ -23,15 +23,14 @@ import {
   ApiQuery,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { UsersGuard } from 'src/auth/users.guard';
+import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateInput } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
 import { NullableType } from 'src/utils/types/nullable.type';
+import { MerchantsGuard } from '../guards/merchants.guard';
 import { MerchantCreateInput } from './dto/create-merchant.input';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
 import { Merchant } from './entities/merchant.entity';
-import { MerchantsGuard } from './merchants.guard';
 import { MerchantsService } from './merchants.service';
 
 @ApiTags('Merchant')
@@ -43,9 +42,7 @@ export class MerchantsController {
   private readonly logger = new Logger(MerchantsController.name);
 
   constructor(
-    protected readonly merchantsService: MerchantsService,
-    @Inject(AuthService)
-    protected readonly authService: AuthService,
+    protected readonly service: MerchantsService,
     @Inject(SquareService)
     protected readonly squareService: SquareService,
   ) {}
@@ -57,7 +54,7 @@ export class MerchantsController {
   @ApiQuery({ name: 'input', required: true, type: MerchantCreateInput })
   @ApiOperation({ summary: 'Create Merchant for current User' })
   async create(@Req() request: any): Promise<Merchant> {
-    const existing = await this.merchantsService.find({
+    const existing = await this.service.find({
       where: { userId: request.user.id },
     });
     if (existing.length > 0) {
@@ -65,8 +62,8 @@ export class MerchantsController {
         `Merchant with userId ${request.user.id} already exists`,
       );
     }
-    return await this.merchantsService.save(
-      this.merchantsService.create({ userId: request.user.id }),
+    return await this.service.save(
+      this.service.create({ userId: request.user.id }),
     );
   }
 
@@ -90,7 +87,7 @@ export class MerchantsController {
     @Req() request: any,
     @Query('oauthAccessCode') oauthAccessCode: string,
   ): Promise<Merchant | null> {
-    return this.merchantsService.squareConfirmOauth({
+    return this.service.squareConfirmOauth({
       oauthAccessCode,
       merchant: request.merchant,
     });
@@ -102,7 +99,7 @@ export class MerchantsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sync your Square Catalog' })
   async squareCatalogSync(@Req() request: any): Promise<void> {
-    return this.merchantsService.squareCatalogSync({
+    return this.service.squareCatalogSync({
       merchant: request.merchant,
     });
   }
@@ -113,7 +110,7 @@ export class MerchantsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({ summary: 'Sync your Square Locations' })
   async squareLocationsSync(@Req() request: any): Promise<void> {
-    await this.merchantsService.squareLocationsSync({
+    await this.service.squareLocationsSync({
       merchant: request.merchant,
     });
     return;
@@ -130,11 +127,10 @@ export class MerchantsController {
     @Req() request,
     @Body() input: StripeCheckoutCreateInput,
   ): Promise<StripeCheckoutDto | null> {
-    const checkoutSessionId =
-      await this.merchantsService.stripeCreateCheckoutSessionId({
-        merchant: request.merchant,
-        ...input,
-      });
+    const checkoutSessionId = await this.service.stripeCreateCheckoutSessionId({
+      merchant: request.merchant,
+      ...input,
+    });
 
     if (!checkoutSessionId) {
       throw new InternalServerErrorException(
@@ -157,7 +153,7 @@ export class MerchantsController {
     @Body()
     dto: StripeCheckoutDto,
   ): Promise<NullableType<Merchant>> {
-    return this.merchantsService.stripeConfirmCheckoutSessionId({
+    return this.service.stripeConfirmCheckoutSessionId({
       checkoutSessionId: dto.checkoutSessionId,
       merchant: request.merchant,
     });

@@ -1,8 +1,10 @@
 import {
   CanActivate,
   ExecutionContext,
+  Inject,
   Injectable,
   UnauthorizedException,
+  forwardRef,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service';
 import { MerchantsService } from '../merchants/merchants.service';
@@ -10,7 +12,9 @@ import { MerchantsService } from '../merchants/merchants.service';
 @Injectable()
 export class MerchantsGuard implements CanActivate {
   constructor(
+    @Inject(forwardRef(() => AuthService))
     private authService: AuthService,
+    @Inject(forwardRef(() => MerchantsService))
     private merchantsService: MerchantsService,
   ) {}
 

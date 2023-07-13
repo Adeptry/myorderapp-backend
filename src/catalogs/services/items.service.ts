@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/utils/base-service';
-import { RemoveOptions, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 import { ItemUpdateAllInput, ItemUpdateInput } from '../dto/item-update.dto';
 import { Category } from '../entities/category.entity';
 import { Item } from '../entities/item.entity';
@@ -45,14 +45,6 @@ export class ItemsService extends BaseService<Item> {
     }
 
     return await this.saveAll(entities);
-  }
-
-  removeOne(entity: Item, options?: RemoveOptions): Promise<Item> {
-    return this.repository.remove(entity, options);
-  }
-
-  removeAll(entities: Item[], options?: RemoveOptions): Promise<Item[]> {
-    return this.repository.remove(entities, options);
   }
 
   async loadCategoryForItem(

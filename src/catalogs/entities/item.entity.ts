@@ -24,7 +24,9 @@ import { Variation } from './variation.entity';
 
 @Entity('item')
 export class Item extends EntityHelper {
-  /* Base entity */
+  /*
+   * Base entity
+   */
 
   @ApiProperty({ required: false })
   @PrimaryColumn('varchar')
@@ -51,9 +53,8 @@ export class Item extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /* Entity */
   /*
-   * Moameta
+   * Moa
    */
 
   @ApiProperty({ required: false })
@@ -123,11 +124,16 @@ export class Item extends EntityHelper {
   /*
    * Variations
    */
+
   @ApiProperty({ type: () => Variation, isArray: true, required: false })
   @OneToMany(() => Variation, (entity) => entity.item, {
     nullable: true,
   })
   variations?: Variation[];
+
+  /*
+   * Catalog
+   */
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })

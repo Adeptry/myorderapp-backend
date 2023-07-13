@@ -12,7 +12,6 @@ import { AuthService } from './auth.service';
 import { AnonymousStrategy } from './strategies/anonymous.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { UsersGuard } from './users.guard';
 
 @Module({
   imports: [
@@ -31,8 +30,7 @@ import { UsersGuard } from './users.guard';
     JwtStrategy,
     JwtRefreshStrategy,
     AnonymousStrategy,
-    UsersGuard,
   ],
-  exports: [AuthService, UsersGuard],
+  exports: [AuthService],
 })
 export class AuthModule {}

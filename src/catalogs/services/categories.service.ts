@@ -1,9 +1,6 @@
-import { BadRequestException, Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/utils/base-service';
-import { paginated } from 'src/utils/paginated';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { Repository } from 'typeorm';
 import {
   CategoryUpdateAllInput,
@@ -55,40 +52,5 @@ export class CategoriesService extends BaseService<Category> {
     }
 
     return await this.saveAll(entities);
-  }
-
-  async getManyCategories(params: {
-    catalogId: string;
-    pagination: PaginationOptions;
-    onlyShowEnabled?: boolean;
-  }): Promise<InfinityPaginationResultType<Category>> {
-    if (!params.catalogId) {
-      throw new BadRequestException('catalogId is required');
-    }
-
-    const query = this.repository
-      .createQueryBuilder('category')
-      .where('category.catalogId = :catalogId', {
-        catalogId: params.catalogId,
-      })
-      .orderBy('category.moaOrdinal', 'ASC');
-    // .leftJoinAndSelect(`category.image`, `image`);
-
-    if (params) {
-      query.skip((params.pagination.page - 1) * params.pagination.limit);
-      query.take(params.pagination.limit);
-    }
-
-    if (params.onlyShowEnabled) {
-      query.andWhere('location.moaEnabled = true');
-    }
-
-    const result = await query.getManyAndCount();
-
-    return paginated({
-      data: result[0],
-      count: result[1],
-      pagination: params.pagination,
-    });
   }
 }

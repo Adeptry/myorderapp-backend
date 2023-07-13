@@ -4,13 +4,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Logger,
   NotFoundException,
   Param,
   Patch,
-  Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -22,8 +19,8 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { MerchantsService } from 'src/merchants/merchants.service';
+import { MerchantsGuard } from 'src/guards/merchants.guard';
+import { UsersGuard } from 'src/guards/users.guard';
 import { ItemUpdateAllInput, ItemUpdateInput } from '../dto/item-update.dto';
 import { Item } from '../entities/item.entity';
 import { ItemsService } from '../services/items.service';
@@ -36,72 +33,38 @@ import { ItemsService } from '../services/items.service';
 export class ItemsController {
   private readonly logger = new Logger(ItemsController.name);
 
-  constructor(
-    private readonly service: ItemsService,
-    @Inject(AuthService)
-    private readonly authService: AuthService,
-    @Inject(MerchantsService)
-    private readonly merchantsService: MerchantsService,
-  ) {}
+  constructor(private readonly service: ItemsService) {}
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Get(':id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Item })
   @ApiOperation({ summary: 'Get Item with ID' })
-  async item(@Req() request: any, @Param('id') itemId: string): Promise<Item> {
-    const user = await this.authService.me(request.user);
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const foundOne = await this.service.findOne({
+  async item(@Param('id') itemId: string): Promise<Item> {
+    const entity = await this.service.findOne({
       where: { id: itemId },
+      relations: ['variations', 'modifierLists'],
     });
 
-    if (!foundOne) {
+    if (!entity) {
       throw new NotFoundException(`Item with id ${itemId} not found`);
     }
 
-    foundOne.variations = await this.service.loadVariations(foundOne);
-    foundOne.modifierLists = await this.service.loadModifierLists(foundOne);
-
-    return foundOne;
+    return entity;
   }
+
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @Patch(':id')
   @ApiOkResponse({ type: Item }) // Assuming you have an Item model similar to Category
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
   @ApiOperation({ summary: 'Update an Item' })
   async updateItem(
-    @Req() request: any,
     @Param('id') itemId: string,
     @Body() input: ItemUpdateInput,
   ): Promise<Item> {
-    const user = await this.authService.me(request.user);
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { userId: user.id },
-    });
-
-    if (!merchant) {
-      throw new UnauthorizedException(
-        'Merchant object does not exist after successful authentication',
-      );
-    }
-
     return this.service.assignAndSave({
       id: itemId,
       input,
@@ -109,34 +72,15 @@ export class ItemsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @Patch()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [Item] }) // Array of Item
   @ApiBody({ type: [ItemUpdateAllInput] })
   @ApiOperation({ summary: 'Update multiple Items' })
   async updateMultipleItems(
-    @Req() request: any,
     @Body() input: ItemUpdateAllInput[],
   ): Promise<Item[]> {
-    const user = await this.authService.me(request.user);
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { userId: user.id },
-    });
-
-    if (!merchant) {
-      throw new UnauthorizedException(
-        'Merchant object does not exist after successful authentication',
-      );
-    }
-
     return await this.service.updateAll(input);
   }
 }
