@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
@@ -14,8 +13,6 @@ import {
   Patch,
   Query,
   Req,
-  Request,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -27,9 +24,15 @@ import {
   ApiParam,
   ApiQuery,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { CustomersService } from 'src/customers/customers.service';
+import { MerchantsGuard } from 'src/guards/merchants.guard';
+import {
+  UserTypeGuard,
+  UserTypeGuardedRequest,
+} from 'src/guards/user-type.guard';
 import {
   LocationUpdateAllInput,
   LocationUpdateInput,
@@ -38,11 +41,9 @@ import { MoaLocationPaginatedResponse } from 'src/locations/dto/locations-pagina
 import { Location as MoaLocation } from 'src/locations/entities/location.entity';
 import { LocationsService } from 'src/locations/locations.service';
 import { MerchantsService } from 'src/merchants/merchants.service';
-import { Roles } from 'src/roles/roles.decorator';
-import { RoleNameEnum } from 'src/roles/roles.enum';
-import { RolesGuard } from 'src/roles/roles.guard';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
-import { paginated } from 'src/utils/paginated';
+import { NestError } from 'src/utils/error';
+import { paginatedResults } from 'src/utils/paginated';
 
 @ApiTags('Locations')
 @Controller('v2/locations')
@@ -61,222 +62,112 @@ export class LocationsController {
 
   @ApiBearerAuth()
   @Get()
-  @Roles(RoleNameEnum[RoleNameEnum.user])
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: MoaLocationPaginatedResponse })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get all your Locations' })
+  @ApiOperation({
+    summary: 'Get all your Locations',
+    operationId: 'getLocations',
+  })
   async getLocations(
-    @Request() request,
+    @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
-    @Query('as') userType: UserTypeEnum,
-    @Query('merchantId') merchantId?: string,
   ): Promise<MoaLocationPaginatedResponse> {
-    const user = await this.authService.me(request.user);
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    switch (userType) {
-      case UserTypeEnum.merchant:
-        const merchant = await this.merchantsService.findOne({
-          where: { userId: user.id },
-        });
-
-        if (!merchant?.id) {
-          throw new UnauthorizedException(
-            `Merchant with userId ${user.id} not found`,
-          );
-        }
-
-        const merchantFindAndCount = await this.service.findAndCount({
-          where: { merchantId: merchant.id, status: 'ACTIVE' },
-        });
-
-        return paginated({
-          data: merchantFindAndCount[0],
-          count: merchantFindAndCount[1],
-          pagination: { page, limit },
-        });
-      case UserTypeEnum.customer:
-        if (!merchantId) {
-          throw new BadRequestException(`merchantId is required`);
-        }
-
-        const customer = await this.customersService.findOne({
-          where: { userId: user.id, merchantId },
-        });
-
-        if (!customer) {
-          throw new UnauthorizedException(`Customer not found`);
-        }
-
-        const customersMerchant = await this.customersService.loadOneMerchant(
-          customer,
-        );
-
-        if (!customersMerchant?.id || customersMerchant?.id !== merchantId) {
-          throw new UnauthorizedException(
-            `Customer with merchant id ${merchantId} not found`,
-          );
-        }
-
-        const customerFindAndCount = await this.service.findAndCount({
-          where: {
-            merchantId: customersMerchant.id,
-            status: 'ACTIVE',
-            moaEnabled: true,
-          },
-        });
-
-        return paginated({
-          data: customerFindAndCount[0],
-          count: customerFindAndCount[1],
-          pagination: { page, limit },
-        });
-    }
+    return paginatedResults({
+      results: await this.service.findAndCount({
+        where: { merchantId: request.merchant.id, status: 'ACTIVE' },
+      }),
+      pagination: { page, limit },
+    });
   }
 
   @ApiBearerAuth()
   @Get(':id')
-  @Roles(RoleNameEnum.user)
-  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: MoaLocation })
-  @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiOperation({ summary: 'Get a Location with ID' })
+  @ApiOperation({
+    summary: 'Get a Location with ID',
+    operationId: 'getLocation',
+  })
   async getLocation(
-    @Request() request,
+    @Req() request: UserTypeGuardedRequest,
     @Param('id') id: string,
-    @Query('as') userType: UserTypeEnum,
-    @Query('merchantId') merchantId?: string,
   ): Promise<MoaLocation> {
-    const user = await this.authService.me(request.user);
+    const entity = await this.service.findOne({
+      where: { id, merchantId: request.merchant.id },
+    });
 
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
+    if (!entity) {
+      throw new NotFoundException(`Location with id ${id} not found`);
     }
 
-    switch (userType) {
-      case UserTypeEnum.merchant:
-        const merchant = await this.merchantsService.findOne({
-          where: { userId: user.id },
-        });
-
-        if (!merchant?.id) {
-          throw new UnauthorizedException(
-            `Merchant with userId ${user.id} not found`,
-          );
-        }
-
-        const merchantLocation = await this.service.findOne({
-          where: { id, merchantId: merchant.id },
-        });
-
-        if (!merchantLocation) {
-          throw new NotFoundException(`Location with id ${id} not found`);
-        }
-
-        return merchantLocation;
-
-      case UserTypeEnum.customer:
-        if (!merchantId) {
-          throw new BadRequestException(`merchantId is required`);
-        }
-
-        const customer = await this.customersService.findOne({
-          where: { userId: user.id, merchantId },
-        });
-
-        if (!customer) {
-          throw new UnauthorizedException(`Customer not found`);
-        }
-
-        const customersMerchant = await this.customersService.loadOneMerchant(
-          customer,
-        );
-
-        if (!customersMerchant?.id || customersMerchant?.id !== merchantId) {
-          throw new UnauthorizedException(
-            `Customer with merchant id ${merchantId} not found`,
-          );
-        }
-
-        const customerLocation = await this.service.findOne({
-          where: { id, merchantId },
-        });
-
-        if (!customerLocation) {
-          throw new NotFoundException(`Location with id ${id} not found`);
-        }
-
-        return customerLocation;
-    }
+    return entity;
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
   @Patch(':id')
   @ApiOkResponse({ type: MoaLocation }) // Assuming you have a Location model similar to Category
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
-  @ApiOperation({ summary: 'Update a Location' })
+  @ApiOperation({ summary: 'Update a Location', operationId: 'updateLocation' })
   async updateLocation(
     @Req() request: any,
     @Param('id') id: string,
     @Body() input: LocationUpdateInput,
   ): Promise<MoaLocation> {
-    const user = await this.authService.me(request.user);
+    const entity = await this.service.findOne({
+      where: { id, merchantId: request.merchant.id },
+    });
 
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
+    if (!entity) {
+      throw new NotFoundException(`Location with id ${id} not found`);
     }
 
-    this.logger.verbose(
-      `Updating Location ${id} for user ${user.id} with ${Object.keys(input)}`,
-    );
     return this.service.assignAndSave({
-      id,
+      entity,
       input,
     });
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @Patch()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [MoaLocation] }) // Array of Location
   @ApiBody({ type: [LocationUpdateAllInput] })
-  @ApiOperation({ summary: 'Update multiple Locations' })
-  async updateMultipleLocations(
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiOperation({
+    summary: 'Update Locations',
+    operationId: 'updateLocations',
+  })
+  async updateLocations(
     @Req() request: any,
     @Body() input: LocationUpdateAllInput[],
   ): Promise<MoaLocation[]> {
-    const user = await this.authService.me(request.user);
-
-    if (!user) {
-      throw new UnauthorizedException(
-        'User object does not exist after successful authentication',
-      );
-    }
-
-    this.logger.verbose(
-      `Updating Locations for user ${user.id} with ${Object.keys(input)}`,
-    );
-
     return await this.service.updateAll(input);
   }
 }

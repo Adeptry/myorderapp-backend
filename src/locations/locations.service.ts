@@ -1,15 +1,7 @@
-import {
-  BadRequestException,
-  Inject,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
+import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Location as SquareLocation } from 'square';
 import { BaseService } from 'src/utils/base-service';
-import { paginated } from 'src/utils/paginated';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { Repository } from 'typeorm';
 import { Merchant } from '../merchants/entities/merchant.entity';
 import { SquareService } from '../square/square.service';
@@ -36,14 +28,9 @@ export class LocationsService extends BaseService<MoaLocation> {
     merchantId: string;
     squareAccessToken: string;
   }): Promise<MoaLocation[]> {
-    const moaLocations = (
-      await this.getManyLocations({
-        merchantId: params.merchantId,
-        onlyMoaEnabled: false,
-        onlySquareActive: false,
-        pagination: { limit: 1000, page: 1 }, // todo: paul fix
-      })
-    ).data;
+    const locations = await this.find({
+      where: { merchantId: params.merchantId },
+    });
 
     const squareLocations =
       (
@@ -57,7 +44,7 @@ export class LocationsService extends BaseService<MoaLocation> {
       }
 
       let moaLocation =
-        moaLocations.find((moaValue) => {
+        locations.find((moaValue) => {
           return moaValue.locationSquareId === squareLocation.id;
         }) ?? null;
       if (moaLocation) {
@@ -74,7 +61,7 @@ export class LocationsService extends BaseService<MoaLocation> {
         await this.save(moaLocation);
 
         if (moaLocation != null) {
-          moaLocations.push(moaLocation);
+          locations.push(moaLocation);
         } else {
           this.logger.error('Failed to create location');
           throw new Error('Failed to create location');
@@ -82,21 +69,20 @@ export class LocationsService extends BaseService<MoaLocation> {
       }
     }
 
-    return moaLocations;
+    return locations;
   }
 
   async assignAndSave(params: {
-    id: string;
+    entity: MoaLocation;
     input: LocationUpdateInput;
   }): Promise<MoaLocation> {
-    const entity = await this.findOneOrFail({ where: { id: params.id } });
     if (params.input.moaOrdinal !== undefined) {
-      entity.moaOrdinal = params.input.moaOrdinal;
+      params.entity.moaOrdinal = params.input.moaOrdinal;
     }
     if (params.input.moaEnabled !== undefined) {
-      entity.moaEnabled = params.input.moaEnabled;
+      params.entity.moaEnabled = params.input.moaEnabled;
     }
-    return this.save(entity);
+    return this.save(params.entity);
   }
 
   async updateAll(inputs: LocationUpdateAllInput[]) {
@@ -126,45 +112,6 @@ export class LocationsService extends BaseService<MoaLocation> {
       .relation(Location, 'merchant')
       .of(location)
       .loadOne();
-  }
-
-  async getManyLocations(params: {
-    pagination: PaginationOptions;
-    merchantId: string;
-    onlySquareActive: boolean;
-    onlyMoaEnabled: boolean;
-  }): Promise<InfinityPaginationResultType<MoaLocation>> {
-    if (!params.merchantId) {
-      throw new BadRequestException('merchantId is required');
-    }
-
-    const query = this.repository
-      .createQueryBuilder('location')
-      .where('location.merchantId = :merchantId', {
-        merchantId: params.merchantId,
-      })
-      .orderBy('location.moaOrdinal', 'ASC');
-    // .leftJoinAndSelect(`location.image`, `image`);
-
-    if (params.pagination) {
-      query.skip((params.pagination.page - 1) * params.pagination.limit);
-      query.take(params.pagination.limit);
-    }
-
-    if (params.onlySquareActive) {
-      query.andWhere(`location.status = 'ACTIVE'`);
-    }
-
-    if (params.onlyMoaEnabled) {
-      query.andWhere('location.moaEnabled = true');
-    }
-
-    const result = await query.getManyAndCount();
-    return paginated({
-      data: result[0],
-      count: result[1],
-      pagination: params.pagination,
-    });
   }
 
   private assignSquareLocationToMoaLocation(

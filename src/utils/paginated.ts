@@ -12,3 +12,14 @@ export const paginated = <T>(params: {
     pages: Math.floor(params.count / (params.pagination.limit ?? 1)),
   };
 };
+
+export const paginatedResults = <T>(params: {
+  results: [T[], number];
+  pagination: PaginationOptions;
+}): InfinityPaginationResultType<T> => {
+  return {
+    data: params.results[0],
+    count: params.results[1],
+    pages: Math.floor(params.results[1] / (params.pagination.limit ?? 1)),
+  };
+};

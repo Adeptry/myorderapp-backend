@@ -10,7 +10,14 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBearerAuth, ApiBody, ApiConsumes, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConsumes,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { NestError } from 'src/utils/error';
 import { FilesService } from './files.service';
 
 @ApiTags('Files')
@@ -23,6 +30,10 @@ export class FilesController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'))
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
   @Post('upload')
   @ApiConsumes('multipart/form-data')
   @ApiBody({

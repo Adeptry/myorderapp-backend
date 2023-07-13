@@ -1,14 +1,16 @@
 import {
+  BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
-  HttpException,
   HttpStatus,
   InternalServerErrorException,
   Logger,
   Param,
+  ParseIntPipe,
   Post,
   Query,
   Req,
@@ -16,9 +18,11 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ApiBadGatewayResponse,
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiOperation,
   ApiParam,
@@ -30,15 +34,17 @@ import { nanoid } from 'nanoid';
 import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
 import { CustomersGuard } from 'src/guards/customers.guard';
+import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { MerchantCreateInput } from 'src/merchants/dto/create-merchant.input';
-import { MerchantsService } from 'src/merchants/merchants.service';
 import { SquareDisableCardResponse } from 'src/square/entities/squard-disable-card.output';
 import { SquareCard } from 'src/square/entities/square-card.output';
 import { SquareCreateCustomerCardInput } from 'src/square/entities/square-create-card.input';
 import { SquareListCardsResponse } from 'src/square/entities/square-list-cards.output';
 import { SquareService } from 'src/square/square.service';
-import { MoaError } from 'src/utils/error';
+import { NestError } from 'src/utils/error';
+import { paginatedResults } from 'src/utils/paginated';
+import { CustomersPaginatedResponse } from './dto/customers-paginated.output';
 
 @ApiTags('Customers')
 @Controller({
@@ -50,51 +56,127 @@ export class CustomersController {
 
   constructor(
     private readonly service: CustomersService,
-    private readonly merchantsService: MerchantsService,
     private readonly squareService: SquareService,
   ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Post()
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiInternalServerErrorResponse({
+    description: 'Merchant does not have Square access token',
+    type: NestError,
+  })
+  @ApiBadGatewayResponse({
+    description: 'Customer already exists',
+    type: NestError,
+  })
   @HttpCode(HttpStatus.OK)
   @ApiQuery({ name: 'input', required: true, type: MerchantCreateInput })
-  @ApiOperation({ summary: 'Create Customer for current User' })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
-  async create(@Req() request: any, @Query('merchantId') merchantId: string) {
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
-    });
-    if (!merchant?.id) {
-      throw new InternalServerErrorException(`Merchant does not exist`);
+  @ApiOperation({
+    summary: 'Create Customer for current User',
+    operationId: 'createCustomer',
+  })
+  async create(@Req() request: any) {
+    if (
+      await this.service.findOne({
+        where: { userId: request.user.id, merchantId: request.merchant.id },
+      })
+    ) {
+      throw new BadRequestException('Customer already exists');
     }
 
-    return this.service.createAndSave({
-      user: request.user,
-      merchant,
+    if (!request.merchant?.squareAccessToken) {
+      throw new InternalServerErrorException(
+        `Merchant does not have Square access token`,
+      );
+    }
+
+    const entity = await this.service.save(
+      this.service.create({
+        merchantId: request.merchant.id,
+        userId: request.user.id,
+      }),
+    );
+
+    const result = await this.squareService.createCustomer({
+      accessToken: request.merchant.squareAccessToken,
+      request: {
+        emailAddress: request.user.email ?? undefined,
+        givenName: request.user.firstName ?? undefined,
+        familyName: request.user.lastName ?? undefined,
+        idempotencyKey: entity.id,
+      },
     });
+    if (!result?.id) {
+      throw new InternalServerErrorException(
+        `Failed to create Square customer`,
+      );
+    }
+
+    entity.squareId = result.id;
+    return await this.service.save(entity);
   }
 
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: Customer })
-  @ApiOperation({ summary: 'Get current Customer' })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @HttpCode(HttpStatus.OK)
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiOkResponse({ type: Customer })
+  @ApiOperation({
+    summary: 'Get current Customer',
+    operationId: 'getMyCustomer',
+  })
   public me(@Req() request: any): Promise<Customer> {
     return request.customer;
+  }
+
+  @ApiBearerAuth()
+  @Get()
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiOkResponse({ type: CustomersPaginatedResponse })
+  @ApiOperation({ summary: 'Get my Customers', operationId: 'getMyCustomers' })
+  async get(
+    @Req() request: any,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+  ): Promise<CustomersPaginatedResponse> {
+    return paginatedResults({
+      results: await this.service.findAndCount({
+        where: { merchantId: request.merchant.id },
+      }),
+      pagination: { page, limit },
+    });
   }
 
   @ApiOkResponse({ type: SquareListCardsResponse })
   @ApiBearerAuth()
   @ApiOperation({ operationId: 'listMyCards', summary: 'List my Cards' })
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: MoaError,
+    type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiInternalServerErrorResponse({
+    description: 'There was an error listing the cards.',
+    type: NestError,
+  })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get('me/square/cards')
   async listMyCards(
@@ -110,24 +192,18 @@ export class CustomersController {
       return listCards.result as SquareListCardsResponse;
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `There was an error listing cards. ${error}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
   @ApiCreatedResponse({ type: SquareCard })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: MoaError,
+    type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiOperation({ operationId: 'createMyCard', summary: 'Create my Card' })
   @ApiBody({
     type: SquareCreateCustomerCardInput,
@@ -159,24 +235,22 @@ export class CustomersController {
       return response.result.card;
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `There was an error creating the card. ${error}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 
   @ApiOkResponse({ type: SquareDisableCardResponse })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: MoaError,
+    type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiInternalServerErrorResponse({
+    description: 'There was an error disabling the card.',
+    type: NestError,
+  })
   @ApiOperation({ operationId: 'disableMyCard', summary: 'Disable my Card' })
   @ApiParam({ name: 'id', required: true, type: String })
   @Delete('me/square/cards/:id')
@@ -192,13 +266,7 @@ export class CustomersController {
       return response.result as SquareDisableCardResponse;
     } catch (error) {
       this.logger.error(error);
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `There was an error creating the card. ${error}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      );
+      throw new InternalServerErrorException(error);
     }
   }
 }

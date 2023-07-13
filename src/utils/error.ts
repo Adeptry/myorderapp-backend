@@ -7,3 +7,14 @@ export class MoaError {
   @ApiProperty()
   status?: number;
 }
+
+export class NestError {
+  @ApiProperty()
+  statusCode?: number;
+
+  @ApiProperty()
+  message?: string;
+
+  @ApiProperty()
+  error?: string;
+}

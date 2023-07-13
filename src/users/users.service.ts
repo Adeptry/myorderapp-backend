@@ -15,15 +15,9 @@ export class UsersService {
   ) {}
 
   async create(createProfileDto: CreateUserDto): Promise<User> {
-    const user = await this.usersRepository.save(
+    return this.usersRepository.save(
       this.usersRepository.create(createProfileDto),
     );
-
-    // if ((createProfileDto.role?.id as RoleNameEnum) === RoleNameEnum.merchant) {
-    //   await this.merchantsService.create({ userId: user.id });
-    // }
-
-    return user;
   }
 
   findManyWithPagination(
