@@ -73,6 +73,7 @@ export class LocationsController {
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id, status: 'ACTIVE' },
+        relations: ['address', 'businessHours'],
       }),
       pagination: { page, limit },
     });
@@ -82,7 +83,7 @@ export class LocationsController {
   @Get(':id')
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,

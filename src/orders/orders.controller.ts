@@ -214,7 +214,7 @@ export class OrdersController {
   ) {
     const { merchant } = { ...request };
 
-    let order = await this.service.findOneOrThrowNotFound({
+    let order = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
     });
 
@@ -269,7 +269,7 @@ export class OrdersController {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
 
-    let order = await this.service.findOneOrThrowNotFound({
+    let order = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
       relations: ['location'],
     });
@@ -357,7 +357,7 @@ export class OrdersController {
     if (!request.customer.currentOrderId) {
       throw new NotFoundException(`No current order`);
     }
-    const entity = await this.service.findOneOrThrowNotFound({
+    const entity = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
     });
 

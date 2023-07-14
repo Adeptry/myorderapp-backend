@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import {
   DeepPartial,
   DeleteResult,
@@ -233,13 +233,6 @@ export abstract class BaseService<Entity extends ObjectLiteral> {
   findOneOrFail(options: FindOneOptions<Entity>): Promise<Entity> {
     return this.repository.findOneOrFail(options);
   }
-  findOneOrThrowNotFound(options: FindOneOptions<Entity>): Promise<Entity> {
-    try {
-      return this.repository.findOneOrFail(options);
-    } catch (error) {
-      throw new NotFoundException(error.message);
-    }
-  }
   findOneByOrFail(
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],
   ): Promise<Entity> {
@@ -269,5 +262,25 @@ export abstract class BaseService<Entity extends ObjectLiteral> {
     custom: CustomRepository & ThisType<CustomRepository>,
   ): CustomRepository {
     return this.repository.extend(custom);
+  }
+  async loadOneRelation<Relation>(
+    entity: Entity,
+    relation: string,
+  ): Promise<Relation | undefined> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(relation)
+      .of(entity)
+      .loadOne();
+  }
+  async loadManyRelation<Relation>(
+    entity: Entity,
+    relation: string,
+  ): Promise<Relation[]> {
+    return this.repository
+      .createQueryBuilder()
+      .relation(relation)
+      .of(entity)
+      .loadMany();
   }
 }

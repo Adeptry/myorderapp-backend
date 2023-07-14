@@ -1,15 +1,16 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Location as SquareLocation } from 'square';
+import { BusinessHoursPeriod } from 'square';
 import { BaseService } from 'src/utils/base-service';
 import { Repository } from 'typeorm';
-import { Merchant } from '../merchants/entities/merchant.entity';
 import { SquareService } from '../square/square.service';
 import {
   LocationUpdateAllInput,
   LocationUpdateInput,
 } from './dto/location-update.input';
 import { Location as MoaLocation } from './entities/location.entity';
+import { AddressService } from './services/address.service';
+import { BusinessHoursPeriodsService } from './services/business-hours-period.service';
 
 @Injectable()
 export class LocationsService extends BaseService<MoaLocation> {
@@ -18,6 +19,10 @@ export class LocationsService extends BaseService<MoaLocation> {
   constructor(
     @InjectRepository(MoaLocation)
     protected readonly repository: Repository<MoaLocation>,
+    @Inject(AddressService)
+    private readonly addressService: AddressService,
+    @Inject(BusinessHoursPeriodsService)
+    private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
     @Inject(SquareService)
     private readonly squareService: SquareService,
   ) {
@@ -30,46 +35,124 @@ export class LocationsService extends BaseService<MoaLocation> {
   }): Promise<MoaLocation[]> {
     const locations = await this.find({
       where: { merchantId: params.merchantId },
+      relations: ['address', 'businessHours'],
     });
 
-    const squareLocations =
-      (
-        await this.squareService.listLocations({
-          accessToken: params.squareAccessToken,
-        })
-      )?.result.locations ?? [];
+    const squareLocationsResponse = await this.squareService.listLocations({
+      accessToken: params.squareAccessToken,
+    });
+    const squareLocations = squareLocationsResponse?.result.locations ?? [];
+
     for (const squareLocation of squareLocations) {
-      if (squareLocation == null) {
-        continue;
-      }
+      if (!squareLocation?.id) continue;
 
-      let moaLocation =
-        locations.find((moaValue) => {
-          return moaValue.locationSquareId === squareLocation.id;
-        }) ?? null;
-      if (moaLocation) {
-        this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
-        this.logger.debug(
-          `Business Hours: ${JSON.stringify(squareLocation.businessHours)}`,
-        );
+      let moaLocation = locations.find(
+        (location) => location.locationSquareId === squareLocation.id,
+      );
 
-        await this.save(moaLocation);
-      } else if (squareLocation.id != null) {
+      if (!moaLocation) {
         moaLocation = this.create({
           locationSquareId: squareLocation.id,
           merchantSquareId: squareLocation.merchantId,
           merchantId: params.merchantId,
         });
+        locations.push(moaLocation);
+      }
 
-        this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
-        await this.save(moaLocation);
+      const {
+        merchantId,
+        id,
+        name,
+        description,
+        phoneNumber,
+        status,
+        timezone,
+        country,
+        languageCode,
+        currency,
+        businessName,
+        type,
+        websiteUrl,
+        businessEmail,
+        twitterUsername,
+        instagramUsername,
+        facebookUrl,
+        logoUrl,
+        posBackgroundUrl,
+        mcc,
+        fullFormatLogoUrl,
+      } = squareLocation;
 
-        if (moaLocation != null) {
-          locations.push(moaLocation);
+      Object.assign(moaLocation, {
+        merchantSquareId: merchantId,
+        locationSquareId: id,
+        name,
+        description,
+        phoneNumber,
+        status,
+        timezone,
+        country,
+        languageCode,
+        currency,
+        businessName,
+        type,
+        websiteUrl,
+        businessEmail,
+        twitterUsername,
+        instagramUsername,
+        facebookUrl,
+        logoUrl,
+        posBackgroundUrl,
+        mcc,
+        fullFormatLogoUrl,
+      });
+
+      // Sync Address
+      if (squareLocation.address) {
+        if (moaLocation.address) {
+          this.addressService.merge(
+            moaLocation.address,
+            squareLocation.address,
+          );
+          await this.addressService.save(moaLocation.address);
         } else {
-          this.logger.error('Failed to create location');
-          throw new Error('Failed to create location');
+          const newAddress = this.addressService.create(squareLocation.address);
+          await this.addressService.save(newAddress);
+          moaLocation.address = newAddress;
         }
+      } else if (moaLocation.address) {
+        await this.addressService.remove(moaLocation.address);
+        moaLocation.address = null;
+      }
+
+      // Sync BusinessHoursPeriod
+      const squareBusinessHours: BusinessHoursPeriod[] =
+        squareLocation.businessHours?.periods ?? [];
+
+      // Remove all existing BusinessHoursPeriod
+      if (moaLocation.businessHours) {
+        await this.businessHoursPeriodsService.removeAll(
+          moaLocation.businessHours,
+        );
+      }
+
+      // Re-create BusinessHoursPeriod from Square data
+      for (const squareBhp of squareBusinessHours) {
+        const moaBhp = this.businessHoursPeriodsService.create({
+          locationId: moaLocation.id,
+          ...squareBhp,
+        });
+        await this.businessHoursPeriodsService.save(moaBhp);
+
+        if (!moaLocation.businessHours) moaLocation.businessHours = [];
+        moaLocation.businessHours.push(moaBhp);
+      }
+
+      try {
+        await this.save(moaLocation);
+      } catch (error) {
+        this.logger.error('Failed to save location');
+        throw new Error('Failed to save location');
       }
     }
 
@@ -106,44 +189,5 @@ export class LocationsService extends BaseService<MoaLocation> {
     }
 
     return await this.saveAll(entities);
-  }
-
-  async loadOneMerchant(
-    location: MoaLocation,
-  ): Promise<Merchant | null | undefined> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Location, 'merchant')
-      .of(location)
-      .loadOne();
-  }
-
-  private assignSquareLocationToMoaLocation(
-    squareLocation: SquareLocation,
-    moaLocation: MoaLocation,
-  ) {
-    moaLocation.name = squareLocation.name;
-    moaLocation.description = squareLocation.description;
-    moaLocation.phoneNumber = squareLocation.phoneNumber;
-    moaLocation.latitude = squareLocation.coordinates?.latitude;
-    moaLocation.longitude = squareLocation.coordinates?.longitude;
-    moaLocation.merchantSquareId = squareLocation.merchantId;
-    moaLocation.locationSquareId = squareLocation.id;
-    moaLocation.status = squareLocation.status;
-    moaLocation.address = squareLocation.address?.addressLine1;
-    moaLocation.country = squareLocation.country;
-    moaLocation.languageCode = squareLocation.languageCode;
-    moaLocation.currency = squareLocation.currency;
-    moaLocation.businessName = squareLocation.businessName;
-    moaLocation.type = squareLocation.type;
-    moaLocation.websiteUrl = squareLocation.websiteUrl;
-    moaLocation.businessEmail = squareLocation.businessEmail;
-    moaLocation.twitterUsername = squareLocation.twitterUsername;
-    moaLocation.instagramUsername = squareLocation.instagramUsername;
-    moaLocation.facebookUrl = squareLocation.facebookUrl;
-    moaLocation.logoUrl = squareLocation.logoUrl;
-    moaLocation.posBackgroundUrl = squareLocation.posBackgroundUrl;
-    moaLocation.mcc = squareLocation.mcc;
-    moaLocation.fullFormatLogoUrl = squareLocation.fullFormatLogoUrl;
   }
 }

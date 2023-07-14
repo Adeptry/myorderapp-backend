@@ -116,7 +116,7 @@ export class MerchantsService extends BaseService<Merchant> {
       throw new UnauthorizedException('Square access token is null');
     }
 
-    let catalog = await this.loadOneCatalog(entity);
+    let catalog = await this.loadOneRelation<Catalog>(entity, 'catalog');
     if (catalog == null) {
       catalog = this.catalogsService.createEmpty();
       entity.catalog = catalog;
@@ -167,7 +167,7 @@ export class MerchantsService extends BaseService<Merchant> {
       );
     }
 
-    const user = await this.loadOneUser(merchant);
+    const user = await this.loadOneRelation<User>(merchant, 'user');
     if (!user) {
       throw new NotFoundException(`User with id ${merchant.userId} not found`);
     }
@@ -256,29 +256,5 @@ export class MerchantsService extends BaseService<Merchant> {
       this.logger.log(error);
       return null;
     }
-  }
-
-  async loadOneUser(entity: Merchant): Promise<User | null | undefined> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Merchant, 'user')
-      .of(entity)
-      .loadOne();
-  }
-
-  async loadOneCatalog(entity: Merchant): Promise<Catalog | null | undefined> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Merchant, 'catalog')
-      .of(entity)
-      .loadOne();
-  }
-
-  async loadManyLocations(entity: Merchant): Promise<Location[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Merchant, 'locations')
-      .of(entity)
-      .loadMany();
   }
 }

@@ -71,46 +71,6 @@ export class CatalogsService extends BaseService<Catalog> {
     });
   }
 
-  async loadCategories(entity: Catalog): Promise<Category[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Catalog, 'categories')
-      .of(entity)
-      .loadMany();
-  }
-
-  async loadItems(entity: Catalog): Promise<Item[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Catalog, 'items')
-      .of(entity)
-      .loadMany();
-  }
-
-  async loadModifierLists(entity: Catalog): Promise<ModifierList[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Catalog, 'modifierLists')
-      .of(entity)
-      .loadMany();
-  }
-
-  async loadModifiers(entity: Catalog): Promise<Modifier[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Catalog, 'modifiers')
-      .of(entity)
-      .loadMany();
-  }
-
-  async loadVariations(entity: Catalog): Promise<Variation[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Catalog, 'variations')
-      .of(entity)
-      .loadMany();
-  }
-
   async squareSync(params: { squareAccessToken: string; catalogId: string }) {
     const moaCatalog = await this.findOneOrFail({
       where: { id: params.catalogId },
@@ -131,7 +91,10 @@ export class CatalogsService extends BaseService<Catalog> {
       const squareCategories = squareCatalogObjects.filter((value) => {
         return value.type === 'CATEGORY';
       });
-      let moaCategories = await this.loadCategories(moaCatalog);
+      let moaCategories = await this.loadManyRelation<Category>(
+        moaCatalog,
+        'categories',
+      );
       const deletedMoaCategories = moaCategories.filter((moaValue) => {
         return !squareCategories.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -150,7 +113,7 @@ export class CatalogsService extends BaseService<Catalog> {
       const squareItems = squareCatalogObjects.filter((value) => {
         return value.type === 'ITEM';
       });
-      let moaItems = await this.loadItems(moaCatalog);
+      let moaItems = await this.loadManyRelation<Item>(moaCatalog, 'items');
       this.logger.verbose(`Found ${moaItems.length} items.`);
       const deletedMoaItems = moaItems.filter((moaValue) => {
         return !squareItems.some((squareValue) => {
@@ -170,7 +133,10 @@ export class CatalogsService extends BaseService<Catalog> {
       const squareItemVariations = squareCatalogObjects.filter((value) => {
         return value.type === 'ITEM_VARIATION';
       });
-      const moaVariations = await this.loadVariations(moaCatalog);
+      const moaVariations = await this.loadManyRelation<Variation>(
+        moaCatalog,
+        'variations',
+      );
       const deletedMoaVariations = moaVariations.filter((moaValue) => {
         return !squareItemVariations.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -184,7 +150,10 @@ export class CatalogsService extends BaseService<Catalog> {
       const squareModifierLists = squareCatalogObjects.filter((value) => {
         return value.type === 'MODIFIER_LIST';
       });
-      let moaModifierLists = await this.loadModifierLists(moaCatalog);
+      let moaModifierLists = await this.loadManyRelation<ModifierList>(
+        moaCatalog,
+        'modifierLists',
+      );
       this.logger.verbose(`Found ${moaModifierLists.length} modifier lists.`);
       const deletedMoaModifierLists = moaModifierLists.filter((moaValue) => {
         return !squareModifierLists.some((squareValue) => {
@@ -206,7 +175,10 @@ export class CatalogsService extends BaseService<Catalog> {
       const squareModifiers = squareCatalogObjects.filter((value) => {
         return value.type === 'MODIFIER';
       });
-      let moaModifiers = await this.loadModifiers(moaCatalog);
+      let moaModifiers = await this.loadManyRelation<Modifier>(
+        moaCatalog,
+        'modifiers',
+      );
       const deletedMoaModifiers = moaModifiers.filter((moaValue) => {
         return !squareModifiers.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -364,7 +336,10 @@ export class CatalogsService extends BaseService<Catalog> {
           }
 
           const moaModifierListsForItem =
-            await this.itemsService.loadModifierLists(moaItem);
+            await this.itemsService.loadManyRelation<ModifierList>(
+              moaItem,
+              'modiferLists',
+            );
           this.logger.verbose(
             `Found ${moaModifierListsForItem.length} modifier lists in db.`,
           );

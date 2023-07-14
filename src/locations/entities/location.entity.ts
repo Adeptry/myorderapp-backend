@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -8,12 +9,16 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
+  OneToMany,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Merchant } from '../../merchants/entities/merchant.entity';
+import { Address } from './address.entity';
+import { BusinessHoursPeriod } from './business-hours-period.entity';
 
 @Entity('location')
 export class Location extends EntityHelper {
@@ -67,26 +72,13 @@ export class Location extends EntityHelper {
   @Column({ type: String, nullable: true })
   phoneNumber?: string | null;
 
-  @ApiProperty({ type: Number, required: false })
-  @Column({ type: Number, nullable: true })
-  latitude?: number | null;
-
-  @ApiProperty({ type: Number, required: false })
-  @Column({ type: Number, nullable: true })
-  longitude?: number | null;
-
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   status?: string | null;
 
-  // businessHours?: BusinessHours;
-  // timezone?: string;
-  // capabilities?: string[];
-  // taxIds?: TaxIds;
-
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
-  address?: string | null;
+  timezone?: string | null;
 
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
@@ -152,8 +144,36 @@ export class Location extends EntityHelper {
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
+  @ManyToOne(() => Merchant, (entity) => entity.locations, {
+    onDelete: 'SET NULL',
+  })
   merchant?: Merchant;
+
+  /*
+   * Business Hours
+   */
+
+  @OneToMany(() => BusinessHoursPeriod, (entity) => entity.location, {
+    nullable: true,
+  })
+  @ApiProperty({ type: BusinessHoursPeriod, required: false, isArray: true })
+  businessHours?: BusinessHoursPeriod[];
+
+  /*
+   * Address
+   */
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true })
+  addressId?: string;
+
+  @OneToOne(() => Address, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'addressId' })
+  @ApiProperty({ type: Address, required: false })
+  address?: Address | null;
 
   /*
    * Square

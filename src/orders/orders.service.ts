@@ -108,7 +108,7 @@ export class OrdersService extends BaseService<Order> {
       }
 
       if (!location?.locationSquareId) {
-        location = await this.locationsService.findOneOrThrowNotFound({
+        location = await this.locationsService.findOneOrFail({
           where: { locationSquareId: squareOrder.locationId },
         });
         if (!location.id) {
@@ -143,7 +143,7 @@ export class OrdersService extends BaseService<Order> {
     if (!params.order.squareId) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
-    const location = await this.locationsService.findOneOrThrowNotFound({
+    const location = await this.locationsService.findOneOrFail({
       where: { id: params.locationMoaId, merchantId: params.merchant.id },
     });
     if (!location.locationSquareId) {
@@ -218,7 +218,7 @@ export class OrdersService extends BaseService<Order> {
     };
 
     for (const dto of variations) {
-      const variation = await this.variationsService.findOneOrThrowNotFound({
+      const variation = await this.variationsService.findOneOrFail({
         where: { id: dto.id },
       });
       if (!variation.squareId) {
