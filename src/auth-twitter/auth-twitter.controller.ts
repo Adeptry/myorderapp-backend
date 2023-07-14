@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponseType } from '../auth/types/login-response.type';
 import { AuthTwitterService } from './auth-twitter.service';
@@ -18,6 +18,11 @@ export class AuthTwitterController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Twitter login',
+    operationId: 'loginTwitter',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   async login(
     @Body() loginDto: AuthTwitterLoginDto,
   ): Promise<LoginResponseType> {

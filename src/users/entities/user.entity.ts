@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
@@ -23,6 +24,7 @@ import { Status } from '../../statuses/entities/status.entity';
 @Entity()
 export class User extends EntityHelper {
   @PrimaryColumn('varchar')
+  @ApiProperty()
   id: string;
 
   @BeforeInsert()
@@ -34,6 +36,7 @@ export class User extends EntityHelper {
   // More info: https://github.com/typeorm/typeorm/issues/2567
   @Column({ type: String, unique: true, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
+  @ApiProperty({ required: false, type: String })
   email: string | null;
 
   @Column({ nullable: true })
@@ -59,38 +62,46 @@ export class User extends EntityHelper {
 
   @Column({ default: AuthProvidersEnum.email })
   @Expose({ groups: ['me', 'admin'] })
+  @ApiProperty()
   provider: string;
 
   @Index()
   @Column({ type: String, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
+  @ApiProperty({ type: String, nullable: true })
   socialId: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
+  @ApiProperty({ required: false, type: String })
   firstName: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
+  @ApiProperty({ required: false, type: String })
   lastName: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
+  @ApiProperty({ required: false, type: String })
   phoneNumber: string | null;
 
   @ManyToOne(() => FileEntity, {
     eager: true,
   })
+  @Exclude({ toPlainOnly: true })
   photo?: FileEntity | null;
 
   @ManyToOne(() => Role, {
     eager: true,
   })
+  @Exclude({ toPlainOnly: true })
   role?: Role | null;
 
   @ManyToOne(() => Status, {
     eager: true,
   })
+  @Exclude({ toPlainOnly: true })
   status?: Status;
 
   @Column({ type: String, nullable: true })
@@ -99,11 +110,14 @@ export class User extends EntityHelper {
   hash: string | null;
 
   @CreateDateColumn()
+  @Exclude({ toPlainOnly: true })
   createdAt: Date;
 
   @UpdateDateColumn()
+  @Exclude({ toPlainOnly: true })
   updatedAt: Date;
 
   @DeleteDateColumn()
+  @Exclude({ toPlainOnly: true })
   deletedAt: Date;
 }

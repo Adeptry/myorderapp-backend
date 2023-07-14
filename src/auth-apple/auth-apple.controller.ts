@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponseType } from '../auth/types/login-response.type';
 import { AuthAppleService } from './auth-apple.service';
@@ -18,6 +18,11 @@ export class AuthAppleController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Apple login',
+    operationId: 'loginApple',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   async login(@Body() loginDto: AuthAppleLoginDto): Promise<LoginResponseType> {
     const socialData = await this.authAppleService.getProfileByToken(loginDto);
 

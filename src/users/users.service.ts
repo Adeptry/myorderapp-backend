@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EntityCondition } from 'src/utils/types/entity-condition.type';
 import { PaginationOptions } from 'src/utils/types/pagination-options';
@@ -9,6 +9,8 @@ import { User } from './entities/user.entity';
 
 @Injectable()
 export class UsersService {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectRepository(User)
     private usersRepository: Repository<User>,
@@ -42,6 +44,7 @@ export class UsersService {
   }
 
   update(id: string, payload: DeepPartial<User>): Promise<User> {
+    this.logger.verbose(`Updating user ${id} with ${JSON.stringify(payload)}`);
     return this.usersRepository.save(
       this.usersRepository.create({
         id,

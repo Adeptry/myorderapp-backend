@@ -13,7 +13,15 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiCreatedResponse,
+  ApiNoContentResponse,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+} from '@nestjs/swagger';
 import { User } from 'src/users/entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthService } from './auth.service';
@@ -39,6 +47,11 @@ export class AuthController {
   })
   @Post('email/login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get access token',
+    operationId: 'login',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   public login(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
@@ -51,6 +64,11 @@ export class AuthController {
   })
   @Post('admin/email/login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get admin access token',
+    operationId: 'adminLogin',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   public adminLogin(
     @Body() loginDTO: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
@@ -59,6 +77,11 @@ export class AuthController {
 
   @Post('email/register')
   @HttpCode(HttpStatus.CREATED)
+  @ApiOperation({
+    summary: 'Create Auth',
+    operationId: 'register',
+  })
+  @ApiCreatedResponse({ type: LoginResponseType })
   async register(
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
@@ -67,6 +90,11 @@ export class AuthController {
 
   @Post('email/confirm')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Confirm email',
+    operationId: 'confirmEmail',
+  })
+  @ApiNoContentResponse()
   async confirmEmail(
     @Body() confirmEmailDto: AuthConfirmEmailDto,
   ): Promise<void> {
@@ -75,6 +103,11 @@ export class AuthController {
 
   @Post('forgot/password')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Forgot password',
+    operationId: 'forgotPassword',
+  })
+  @ApiNoContentResponse()
   async forgotPassword(
     @Body() forgotPasswordDto: AuthForgotPasswordDto,
   ): Promise<void> {
@@ -83,6 +116,11 @@ export class AuthController {
 
   @Post('reset/password')
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Reset password',
+    operationId: 'resetPassword',
+  })
+  @ApiNoContentResponse()
   resetPassword(@Body() resetPasswordDto: AuthResetPasswordDto): Promise<void> {
     return this.service.resetPassword(
       resetPasswordDto.hash,
@@ -97,6 +135,11 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Get current Auth',
+    operationId: 'currentAuth',
+  })
+  @ApiOkResponse({ type: User })
   public me(@Request() request): Promise<NullableType<User>> {
     return this.service.me(request.user);
   }
@@ -108,6 +151,11 @@ export class AuthController {
   @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Refresh token',
+    operationId: 'refreshToken',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   public refresh(@Request() request): Promise<Omit<LoginResponseType, 'user'>> {
     return this.service.refreshToken(request.user.sessionId);
   }
@@ -116,6 +164,11 @@ export class AuthController {
   @Post('logout')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Delete Session',
+    operationId: 'logout',
+  })
+  @ApiNoContentResponse()
   public async logout(@Request() request): Promise<void> {
     await this.service.logout({
       sessionId: request.user.sessionId,
@@ -129,10 +182,19 @@ export class AuthController {
   @Patch('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Update Auth',
+    operationId: 'updateCurrentAuth',
+  })
+  @ApiOkResponse({ type: User })
+  @ApiBody({ type: AuthUpdateDto })
   public update(
     @Request() request,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
+    this.logger.verbose(
+      `Update user ${request.user.id} ${JSON.stringify(userDto)}`,
+    );
     return this.service.update(request.user, userDto);
   }
 
@@ -140,6 +202,11 @@ export class AuthController {
   @Delete('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Delete User',
+    operationId: 'deleteCurrentAuth',
+  })
+  @ApiNoContentResponse()
   public async delete(@Request() request): Promise<void> {
     return this.service.softDelete(request.user);
   }

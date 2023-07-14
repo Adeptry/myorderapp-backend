@@ -34,7 +34,7 @@ import {
   LocationUpdateAllInput,
   LocationUpdateInput,
 } from 'src/locations/dto/location-update.input';
-import { MoaLocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
+import { LocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
 import { Location as MoaLocation } from 'src/locations/entities/location.entity';
 import { LocationsService } from 'src/locations/locations.service';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
@@ -52,7 +52,7 @@ export class LocationsController {
   @Get()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: MoaLocationPaginatedResponse })
+  @ApiOkResponse({ type: LocationPaginatedResponse })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -69,7 +69,7 @@ export class LocationsController {
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
-  ): Promise<MoaLocationPaginatedResponse> {
+  ): Promise<LocationPaginatedResponse> {
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id, status: 'ACTIVE' },

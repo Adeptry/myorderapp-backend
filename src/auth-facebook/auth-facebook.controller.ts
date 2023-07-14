@@ -1,5 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { LoginResponseType } from '../auth/types/login-response.type';
 import { AuthFacebookService } from './auth-facebook.service';
@@ -18,6 +18,11 @@ export class AuthFacebookController {
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Facebook login',
+    operationId: 'loginFacebook',
+  })
+  @ApiOkResponse({ type: LoginResponseType })
   async login(
     @Body() loginDto: AuthFacebookLoginDto,
   ): Promise<LoginResponseType> {
