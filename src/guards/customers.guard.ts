@@ -6,9 +6,17 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthService } from 'src/auth/auth.service';
 import { CustomersService } from 'src/customers/customers.service';
+import { Customer } from 'src/customers/entities/customer.entity';
+import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { MerchantsService } from 'src/merchants/merchants.service';
+
+export interface CustomersGuardedRequest extends Request {
+  customer: Customer;
+  merchant: Merchant;
+}
 
 @Injectable()
 export class CustomersGuard implements CanActivate {

@@ -1,18 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-  ApiResponse,
+  CalculateOrderRequest,
   CatalogObject,
   Client,
   CreateCardRequest,
   CreateCustomerRequest,
-  Customer,
+  CreateOrderRequest,
+  CreatePaymentRequest,
   Environment,
-  ListLocationsResponse,
-  Location,
-  ObtainTokenResponse,
-  RetrieveLocationResponse,
+  UpdateOrderRequest,
 } from 'square';
+import { RequestOptions } from 'square/dist/types/core';
 
 @Injectable()
 export class SquareService {
@@ -57,38 +56,22 @@ export class SquareService {
     return urlString;
   }
 
-  async obtainToken(params: {
-    oauthAccessCode: string;
-  }): Promise<ObtainTokenResponse> {
-    try {
-      const response = await this.defaultClient.oAuthApi.obtainToken({
-        clientId: this.clientId,
-        clientSecret: this.clientSecret,
-        grantType: 'authorization_code',
-        code: params.oauthAccessCode,
-      });
-      return response.result;
-    } catch (error) {
-      this.logger.error(`Failed to obtain token: ${error}`);
-      throw error;
-    }
+  obtainToken(params: { oauthAccessCode: string }) {
+    return this.defaultClient.oAuthApi.obtainToken({
+      clientId: this.clientId,
+      clientSecret: this.clientSecret,
+      grantType: 'authorization_code',
+      code: params.oauthAccessCode,
+    });
   }
 
-  async refreshToken(params: {
-    oauthRefreshToken: string;
-  }): Promise<ObtainTokenResponse> {
-    try {
-      const response = await this.defaultClient.oAuthApi.obtainToken({
-        clientId: this.clientId,
-        clientSecret: this.clientSecret,
-        grantType: 'refresh_token',
-        refreshToken: params.oauthRefreshToken,
-      });
-      return response.result;
-    } catch (error) {
-      this.logger.error(`Failed to refresh token: ${error}`);
-      throw error;
-    }
+  async refreshToken(params: { oauthRefreshToken: string }) {
+    return this.defaultClient.oAuthApi.obtainToken({
+      clientId: this.clientId,
+      clientSecret: this.clientSecret,
+      grantType: 'refresh_token',
+      refreshToken: params.oauthRefreshToken,
+    });
   }
 
   async listCatalog(params: { accessToken: string }): Promise<CatalogObject[]> {
@@ -113,57 +96,92 @@ export class SquareService {
     return catalogObjects;
   }
 
-  async listLocations(params: {
-    accessToken: string;
-  }): Promise<ListLocationsResponse | null> {
-    let response: ApiResponse<ListLocationsResponse> | null = null;
-    const client = this.client({ accessToken: params.accessToken });
-    try {
-      response = (await client.locationsApi?.listLocations()) ?? null;
-    } catch (error) {
-      this.logger.error(error);
-    }
-    return response?.result ?? null;
+  listLocations(params: { accessToken: string }) {
+    const { accessToken } = params;
+    return this.client({
+      accessToken: accessToken,
+    }).locationsApi?.listLocations();
   }
 
-  async retrieveLocation(params: {
-    accessToken: string;
-    locationSquareId: string;
-  }): Promise<Location | null> {
-    const client = this.client({ accessToken: params.accessToken });
-    let response: ApiResponse<RetrieveLocationResponse> | null = null;
-    try {
-      response =
-        (await client.locationsApi.retrieveLocation(params.locationSquareId)) ??
-        null;
-    } catch (error) {
-      console.log(error);
-      this.logger.error(error);
-    }
-    return response?.result.location ?? null;
+  retrieveLocation(params: { accessToken: string; locationSquareId: string }) {
+    const { accessToken, locationSquareId } = params;
+    return this.client({
+      accessToken: accessToken,
+    }).locationsApi.retrieveLocation(locationSquareId);
   }
 
-  async createCustomer(params: {
+  createCustomer(params: {
     accessToken: string;
     request: CreateCustomerRequest;
-  }): Promise<Customer | null> {
-    const client = this.client({ accessToken: params.accessToken });
-    try {
-      const response = await client.customersApi.createCustomer(params.request);
-      return response?.result.customer ?? null;
-    } catch (error) {
-      this.logger.error(error);
-      throw error;
-    }
+  }) {
+    const { accessToken, request } = params;
+    return this.client({
+      accessToken: accessToken,
+    }).customersApi.createCustomer(request);
   }
 
-  async retrieveCustomer(params: { accessToken: string; squareId: string }) {
-    const client = this.client({ accessToken: params.accessToken });
-    const response = await client.customersApi.retrieveCustomer(
-      params.squareId,
-    );
+  retrieveCustomer(params: { accessToken: string; squareId: string }) {
+    const { accessToken, squareId } = params;
+    return this.client({
+      accessToken: accessToken,
+    }).customersApi.retrieveCustomer(squareId);
+  }
 
-    return response?.result.customer ?? null;
+  createOrder(params: {
+    accessToken: string;
+    body: CreateOrderRequest;
+    requestOptions?: RequestOptions;
+  }) {
+    const { accessToken, body, requestOptions } = params;
+    return this.client({
+      accessToken,
+    }).ordersApi.createOrder(body, requestOptions);
+  }
+
+  retrieveOrder(params: {
+    accessToken: string;
+    orderId: string;
+    requestOptions?: RequestOptions;
+  }) {
+    const { accessToken, orderId, requestOptions } = params;
+    return this.client({ accessToken }).ordersApi.retrieveOrder(
+      orderId,
+      requestOptions,
+    );
+  }
+
+  updateOrder(params: {
+    accessToken: string;
+    orderId: string;
+    body: UpdateOrderRequest;
+    requestOptions?: RequestOptions;
+  }) {
+    const { accessToken, orderId, requestOptions, body } = params;
+    return this.client({
+      accessToken,
+    }).ordersApi.updateOrder(orderId, body, requestOptions);
+  }
+
+  calculateOrder(params: {
+    accessToken: string;
+    body: CalculateOrderRequest;
+    requestOptions?: RequestOptions;
+  }) {
+    const { accessToken, body, requestOptions } = params;
+    return this.client({
+      accessToken,
+    }).ordersApi.calculateOrder(body, requestOptions);
+  }
+
+  createPayment(params: {
+    accessToken: string;
+    body: CreatePaymentRequest;
+    requestOptions?: RequestOptions;
+  }) {
+    const { accessToken, body, requestOptions } = params;
+    return this.client({
+      accessToken: accessToken,
+    }).paymentsApi.createPayment(body, requestOptions);
   }
 
   listCards(params: {
@@ -174,24 +192,33 @@ export class SquareService {
     referenceId?: string;
     sortOrder?: string;
   }) {
-    const client = this.client({ accessToken: params.accessToken });
-    return client.cardsApi.listCards(
-      params.cursor,
-      params.customerId,
-      params.includeDisabled,
-      params.referenceId,
-      params.sortOrder,
+    const {
+      accessToken,
+      cursor,
+      customerId,
+      includeDisabled,
+      referenceId,
+      sortOrder,
+    } = params;
+    return this.client({ accessToken }).cardsApi.listCards(
+      cursor,
+      customerId,
+      includeDisabled,
+      referenceId,
+      sortOrder,
     );
   }
 
   createCard(params: { accessToken: string; body: CreateCardRequest }) {
-    const client = this.client({ accessToken: params.accessToken });
-    return client.cardsApi.createCard(params.body);
+    return this.client({ accessToken: params.accessToken }).cardsApi.createCard(
+      params.body,
+    );
   }
 
   disableCard(params: { accessToken: string; cardId: string }) {
-    const client = this.client({ accessToken: params.accessToken });
-    return client.cardsApi.disableCard(params.cardId);
+    return this.client({
+      accessToken: params.accessToken,
+    }).cardsApi.disableCard(params.cardId);
   }
 
   client(params: { accessToken: string }): Client {

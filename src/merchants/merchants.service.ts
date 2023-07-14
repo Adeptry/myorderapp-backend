@@ -56,11 +56,13 @@ export class MerchantsService extends BaseService<Merchant> {
   }) {
     const { merchant, oauthAccessCode } = params;
 
-    const accessTokenResponse = await this.squareService.obtainToken({
-      oauthAccessCode,
-    });
+    const accessTokenResult = (
+      await this.squareService.obtainToken({
+        oauthAccessCode,
+      })
+    ).result;
 
-    if (!accessTokenResponse) {
+    if (!accessTokenResult) {
       throw new HttpException(
         'Failed to obtain token from Square service',
         HttpStatus.INTERNAL_SERVER_ERROR,
@@ -68,7 +70,7 @@ export class MerchantsService extends BaseService<Merchant> {
     }
 
     const { accessToken, expiresAt, merchantId, refreshToken } =
-      accessTokenResponse;
+      accessTokenResult;
 
     if (!expiresAt) {
       throw new HttpException(
@@ -90,15 +92,15 @@ export class MerchantsService extends BaseService<Merchant> {
       where: { id },
     });
     const oauthRefreshToken = merchant.squareRefreshToken ?? '';
-    const accessToken = await this.squareService.refreshToken({
-      oauthRefreshToken,
-    });
-    merchant.squareAccessToken = accessToken.accessToken;
-    merchant.squareExpiresAt = new Date(
-      Date.parse(accessToken.expiresAt ?? ''),
-    );
-    merchant.squareId = accessToken.merchantId;
-    merchant.squareRefreshToken = accessToken.refreshToken;
+    const result = (
+      await this.squareService.refreshToken({
+        oauthRefreshToken,
+      })
+    ).result;
+    merchant.squareAccessToken = result.accessToken;
+    merchant.squareExpiresAt = new Date(Date.parse(result.expiresAt ?? ''));
+    merchant.squareId = result.merchantId;
+    merchant.squareRefreshToken = result.refreshToken;
     return await this.save(merchant);
   }
 

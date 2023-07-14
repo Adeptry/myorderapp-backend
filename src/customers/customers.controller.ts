@@ -37,10 +37,12 @@ import { CustomersGuard } from 'src/guards/customers.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { MerchantCreateInput } from 'src/merchants/dto/create-merchant.input';
-import { SquareDisableCardResponse } from 'src/square/entities/squard-disable-card.output';
-import { SquareCard } from 'src/square/entities/square-card.output';
-import { SquareCreateCustomerCardInput } from 'src/square/entities/square-create-card.input';
-import { SquareListCardsResponse } from 'src/square/entities/square-list-cards.output';
+import {
+  SquareCard,
+  SquareCreateCustomerCardInput,
+  SquareDisableCardResponse,
+  SquareListCardsResponse,
+} from 'src/square/square.dto';
 import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
@@ -102,7 +104,7 @@ export class CustomersController {
       }),
     );
 
-    const result = await this.squareService.createCustomer({
+    const response = await this.squareService.createCustomer({
       accessToken: request.merchant.squareAccessToken,
       request: {
         emailAddress: request.user.email ?? undefined,
@@ -111,13 +113,13 @@ export class CustomersController {
         idempotencyKey: entity.id,
       },
     });
-    if (!result?.id) {
+    if (!response.result.customer?.id) {
       throw new InternalServerErrorException(
         `Failed to create Square customer`,
       );
     }
 
-    entity.squareId = result.id;
+    entity.squareId = response.result.customer?.id;
     return await this.service.save(entity);
   }
 

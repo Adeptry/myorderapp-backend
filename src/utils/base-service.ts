@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   DeepPartial,
   DeleteResult,
@@ -43,6 +43,12 @@ export abstract class BaseService<Entity extends ObjectLiteral> {
   }
   create(entityLike: DeepPartial<Entity>): Entity {
     return this.repository.create(entityLike);
+  }
+  createAndSave(
+    entityLike: DeepPartial<Entity>,
+    options?: SaveOptions,
+  ): Promise<Entity> {
+    return this.save(this.repository.create(entityLike), options);
   }
   merge(
     mergeIntoEntity: Entity,
@@ -226,6 +232,13 @@ export abstract class BaseService<Entity extends ObjectLiteral> {
   }
   findOneOrFail(options: FindOneOptions<Entity>): Promise<Entity> {
     return this.repository.findOneOrFail(options);
+  }
+  findOneOrThrowNotFound(options: FindOneOptions<Entity>): Promise<Entity> {
+    try {
+      return this.repository.findOneOrFail(options);
+    } catch (error) {
+      throw new NotFoundException(error.message);
+    }
   }
   findOneByOrFail(
     where: FindOptionsWhere<Entity> | FindOptionsWhere<Entity>[],

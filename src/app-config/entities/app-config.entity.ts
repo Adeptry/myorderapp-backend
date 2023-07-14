@@ -54,6 +54,10 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   fontFamily?: string;
 
+  // @ApiProperty({ required: false })
+  // @Column({ nullable: true })
+  // enabled?: boolean;
+
   /* Relations */
 
   @Exclude({ toPlainOnly: true })

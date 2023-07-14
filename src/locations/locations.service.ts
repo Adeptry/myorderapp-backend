@@ -37,7 +37,7 @@ export class LocationsService extends BaseService<MoaLocation> {
         await this.squareService.listLocations({
           accessToken: params.squareAccessToken,
         })
-      )?.locations ?? [];
+      )?.result.locations ?? [];
     for (const squareLocation of squareLocations) {
       if (squareLocation == null) {
         continue;
@@ -49,9 +49,13 @@ export class LocationsService extends BaseService<MoaLocation> {
         }) ?? null;
       if (moaLocation) {
         this.assignSquareLocationToMoaLocation(squareLocation, moaLocation);
+        this.logger.debug(
+          `Business Hours: ${JSON.stringify(squareLocation.businessHours)}`,
+        );
+
         await this.save(moaLocation);
       } else if (squareLocation.id != null) {
-        moaLocation = await this.create({
+        moaLocation = this.create({
           locationSquareId: squareLocation.id,
           merchantSquareId: squareLocation.merchantId,
           merchantId: params.merchantId,

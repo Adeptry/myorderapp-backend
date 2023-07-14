@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Logger,
   NotFoundException,
   Param,
@@ -26,8 +25,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { CustomersService } from 'src/customers/customers.service';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
@@ -40,7 +37,6 @@ import {
 import { MoaLocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
 import { Location as MoaLocation } from 'src/locations/entities/location.entity';
 import { LocationsService } from 'src/locations/locations.service';
-import { MerchantsService } from 'src/merchants/merchants.service';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
@@ -50,15 +46,7 @@ import { paginatedResults } from 'src/utils/paginated';
 export class LocationsController {
   private readonly logger = new Logger(LocationsController.name);
 
-  constructor(
-    private readonly service: LocationsService,
-    @Inject(AuthService)
-    private readonly authService: AuthService,
-    @Inject(MerchantsService)
-    private readonly merchantsService: MerchantsService,
-    @Inject(CustomersService)
-    private readonly customersService: CustomersService,
-  ) {}
+  constructor(private readonly service: LocationsService) {}
 
   @ApiBearerAuth()
   @Get()
