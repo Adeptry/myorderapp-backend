@@ -415,6 +415,7 @@ export class OrdersController {
         merchant,
       });
     } catch (error) {
+      this.logger.error(error);
       throw new InternalServerErrorException(error);
     }
   }

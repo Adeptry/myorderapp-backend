@@ -1,1 +1,1 @@
-export class MerchantCreateInput {}
+export class MerchantCreateDto {}

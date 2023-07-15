@@ -29,8 +29,8 @@ import {
 } from '@nestjs/swagger';
 import { CategoryPaginatedResponse } from 'src/catalogs/dto/categories-paginated.output';
 import {
-  CategoryUpdateAllInput,
-  CategoryUpdateInput,
+  CategoryUpdateAllDto,
+  CategoryUpdateDto,
 } from 'src/catalogs/dto/category-update.dto';
 import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
 import { Category } from 'src/catalogs/entities/category.entity';
@@ -65,7 +65,7 @@ export class CategoriesController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOperation({
@@ -102,7 +102,7 @@ export class CategoriesController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @Get(':id/items')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ItemPaginatedResponse })
@@ -147,7 +147,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Update a Category', operationId: 'updateCategory' })
   async update(
     @Param('id') id: string,
-    @Body() input: CategoryUpdateInput,
+    @Body() input: CategoryUpdateDto,
   ): Promise<Category> {
     return this.service.assignAndSave({
       id,
@@ -164,13 +164,13 @@ export class CategoriesController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  @ApiBody({ type: [CategoryUpdateAllInput] })
+  @ApiBody({ type: [CategoryUpdateAllDto] })
   @ApiOperation({
     summary: 'Update multiple Categories',
     operationId: 'updateCategories',
   })
   async updateMultiple(
-    @Body() input: CategoryUpdateAllInput[],
+    @Body() input: CategoryUpdateAllDto[],
   ): Promise<Category[]> {
     return await this.service.updateAll(input);
   }

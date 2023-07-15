@@ -33,7 +33,7 @@ export class UserTypeGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const userType: UserTypeEnum = request.query.as;
+    const userType: UserTypeEnum = request.query.actingAs;
     const merchantId: string = request.query.merchantId;
 
     const user = await this.authService.me(request.user);

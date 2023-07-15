@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CategoryUpdateInput {
+export class CategoryUpdateDto {
   @ApiProperty()
   @IsNumber()
   @IsOptional()
@@ -19,7 +19,7 @@ export class CategoryUpdateInput {
   moaEnabled?: boolean;
 }
 
-export class CategoryUpdateAllInput {
+export class CategoryUpdateAllDto {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

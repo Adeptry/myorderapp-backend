@@ -31,8 +31,8 @@ import {
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
 import {
-  LocationUpdateAllInput,
-  LocationUpdateInput,
+  LocationUpdateAllDto,
+  LocationUpdateDto,
 } from 'src/locations/dto/location-update.input';
 import { LocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
 import { Location as MoaLocation } from 'src/locations/entities/location.entity';
@@ -58,7 +58,7 @@ export class LocationsController {
     type: NestError,
   })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOperation({
@@ -83,7 +83,7 @@ export class LocationsController {
   @Get(':id')
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: true, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -123,7 +123,7 @@ export class LocationsController {
   async updateLocation(
     @Req() request: any,
     @Param('id') id: string,
-    @Body() input: LocationUpdateInput,
+    @Body() input: LocationUpdateDto,
   ): Promise<MoaLocation> {
     const entity = await this.service.findOne({
       where: { id, merchantId: request.merchant.id },
@@ -144,7 +144,7 @@ export class LocationsController {
   @Patch()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [MoaLocation] }) // Array of Location
-  @ApiBody({ type: [LocationUpdateAllInput] })
+  @ApiBody({ type: [LocationUpdateAllDto] })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -155,7 +155,7 @@ export class LocationsController {
   })
   async updateLocations(
     @Req() request: any,
-    @Body() input: LocationUpdateAllInput[],
+    @Body() input: LocationUpdateAllDto[],
   ): Promise<MoaLocation[]> {
     return await this.service.updateAll(input);
   }

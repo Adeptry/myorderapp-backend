@@ -5,8 +5,8 @@ import { BaseService } from 'src/utils/base-service';
 import { Repository } from 'typeorm';
 import { SquareService } from '../square/square.service';
 import {
-  LocationUpdateAllInput,
-  LocationUpdateInput,
+  LocationUpdateAllDto,
+  LocationUpdateDto,
 } from './dto/location-update.input';
 import { Location as MoaLocation } from './entities/location.entity';
 import { AddressService } from './services/address.service';
@@ -161,7 +161,7 @@ export class LocationsService extends BaseService<MoaLocation> {
 
   async assignAndSave(params: {
     entity: MoaLocation;
-    input: LocationUpdateInput;
+    input: LocationUpdateDto;
   }): Promise<MoaLocation> {
     if (params.input.moaOrdinal !== undefined) {
       params.entity.moaOrdinal = params.input.moaOrdinal;
@@ -172,7 +172,7 @@ export class LocationsService extends BaseService<MoaLocation> {
     return this.save(params.entity);
   }
 
-  async updateAll(inputs: LocationUpdateAllInput[]) {
+  async updateAll(inputs: LocationUpdateAllDto[]) {
     const entities: MoaLocation[] = [];
 
     for (const input of inputs) {

@@ -23,7 +23,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { StripeCheckoutCreateInput } from 'src/merchants/dto/stripe-checkout-create.input';
+import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { NullableType } from 'src/utils/types/nullable.type';
@@ -133,7 +133,7 @@ export class MerchantsController {
     summary: 'Start Stripe checkout',
     operationId: 'startStripeCheckout',
   })
-  @ApiBody({ type: StripeCheckoutCreateInput })
+  @ApiBody({ type: StripeCheckoutCreateDto })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -141,7 +141,7 @@ export class MerchantsController {
   @ApiOkResponse({ type: StripeCheckoutDto })
   async stripeCreateCheckoutSessionId(
     @Req() request,
-    @Body() input: StripeCheckoutCreateInput,
+    @Body() input: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
     const checkoutSessionId = await this.service.stripeCreateCheckoutSessionId({
       merchant: request.merchant,

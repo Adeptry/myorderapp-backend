@@ -37,7 +37,7 @@ export class CatalogsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,

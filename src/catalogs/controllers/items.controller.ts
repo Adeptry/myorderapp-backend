@@ -24,7 +24,7 @@ import {
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { NestError } from 'src/utils/error';
-import { ItemUpdateAllInput, ItemUpdateInput } from '../dto/item-update.dto';
+import { ItemUpdateAllDto, ItemUpdateDto } from '../dto/item-update.dto';
 import { Item } from '../entities/item.entity';
 import { ItemsService } from '../services/items.service';
 
@@ -75,7 +75,7 @@ export class ItemsController {
   @ApiOperation({ summary: 'Update an Item', operationId: 'updateItem' })
   async updateItem(
     @Param('id') itemId: string,
-    @Body() input: ItemUpdateInput,
+    @Body() input: ItemUpdateDto,
   ): Promise<Item> {
     return this.service.assignAndSave({
       id: itemId,
@@ -92,12 +92,12 @@ export class ItemsController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  @ApiBody({ type: [ItemUpdateAllInput] })
+  @ApiBody({ type: [ItemUpdateAllDto] })
   @ApiOperation({
     summary: 'Update multiple Items',
     operationId: 'updateItems',
   })
-  async updateItems(@Body() input: ItemUpdateAllInput[]): Promise<Item[]> {
+  async updateItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
     return await this.service.updateAll(input);
   }
 }

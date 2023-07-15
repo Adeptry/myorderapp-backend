@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/utils/base-service';
 import { Repository } from 'typeorm';
 import {
-  CategoryUpdateAllInput,
-  CategoryUpdateInput,
+  CategoryUpdateAllDto,
+  CategoryUpdateDto,
 } from '../dto/category-update.dto';
 import { Category } from '../entities/category.entity';
 
@@ -19,7 +19,7 @@ export class CategoriesService extends BaseService<Category> {
     super(repository);
   }
 
-  async assignAndSave(params: { id: string; input: CategoryUpdateInput }) {
+  async assignAndSave(params: { id: string; input: CategoryUpdateDto }) {
     const entity = await this.findOneOrFail({
       where: { id: params.id },
     });
@@ -35,7 +35,7 @@ export class CategoriesService extends BaseService<Category> {
     return await this.save(entity);
   }
 
-  async updateAll(inputs: CategoryUpdateAllInput[]) {
+  async updateAll(inputs: CategoryUpdateAllDto[]) {
     const entities: Category[] = [];
 
     for (const input of inputs) {

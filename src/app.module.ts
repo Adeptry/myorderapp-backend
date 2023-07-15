@@ -40,6 +40,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { CustomersModule } from './customers/customers.module';
 import { OrdersModule } from './orders/orders.module';
 import { GuardsModule } from './guards/guards.module';
+import { CardsModule } from './cards/cards.module';
 
 @Module({
   imports: [
@@ -111,6 +112,7 @@ import { GuardsModule } from './guards/guards.module';
     FilesModule,
     OrdersModule,
     GuardsModule,
+    CardsModule,
   ],
 })
 export class AppModule {}

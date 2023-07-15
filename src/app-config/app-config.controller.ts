@@ -31,7 +31,7 @@ import {
 } from 'src/guards/user-type.guard';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
-import { ConfigUpdateInput } from './dto/app-config-update.input';
+import { ConfigUpdateDto } from './dto/app-config-update.input';
 import { AppConfig } from './entities/app-config.entity';
 
 @ApiTags('Config')
@@ -45,7 +45,7 @@ export class AppConfigController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'as', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -74,11 +74,11 @@ export class AppConfigController {
     type: NestError,
   })
   @ApiOperation({ summary: 'Create your Config', operationId: 'createConfig' })
-  @ApiBody({ type: ConfigUpdateInput })
+  @ApiBody({ type: ConfigUpdateDto })
   async create(
     @Req() request: any,
     @Body()
-    createAppConfigDto: ConfigUpdateInput,
+    createAppConfigDto: ConfigUpdateDto,
   ) {
     if (
       await this.service.exist({ where: { merchantId: request.merchant.id } })
@@ -107,10 +107,10 @@ export class AppConfigController {
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
-  @ApiBody({ type: ConfigUpdateInput })
+  @ApiBody({ type: ConfigUpdateDto })
   async update(
     @Req() request: any,
-    @Body() updateAppConfigDto: ConfigUpdateInput,
+    @Body() updateAppConfigDto: ConfigUpdateDto,
   ) {
     const merchantId = request.merchant.id;
     const entity = await this.service.findOne({ where: { merchantId } });

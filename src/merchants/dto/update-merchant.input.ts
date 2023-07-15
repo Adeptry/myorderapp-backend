@@ -1,6 +1,6 @@
-import { MerchantCreateInput } from './create-merchant.input';
+import { MerchantCreateDto } from './create-merchant.input';
 
-export class MerchantUpdateInput extends MerchantCreateInput {
+export class MerchantUpdateInput extends MerchantCreateDto {
   stripeId?: string;
   stripeCheckoutSessionId?: string;
 }

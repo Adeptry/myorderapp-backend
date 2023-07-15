@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -7,13 +8,24 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
+  addDays,
+  addHours,
+  format,
+  isAfter,
+  isBefore,
+  isWithinInterval,
+} from 'date-fns';
+import {
+  ApiResponse,
   OrderLineItem,
   Order as SquareOrder,
   UpdateOrderRequest,
+  UpdateOrderResponse,
 } from 'square';
 import { ModifiersService } from 'src/catalogs/services/modifiers.service';
 import { VariationsService } from 'src/catalogs/services/variations.service';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { BusinessHoursPeriod } from 'src/locations/entities/business-hours-period.entity';
 import { LocationsService } from 'src/locations/locations.service';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { Order } from 'src/orders/entities/order.entity';
@@ -212,7 +224,7 @@ export class OrdersService extends BaseService<Order> {
     const squareUpdateBody: UpdateOrderRequest = {
       order: {
         locationId: locationSquareId,
-        version: order.squareVersion++,
+        version: ++order.squareVersion,
         lineItems: [],
       },
     };
@@ -295,7 +307,7 @@ export class OrdersService extends BaseService<Order> {
       body: {
         order: {
           locationId: location?.locationSquareId,
-          version: order.squareVersion++,
+          version: ++order.squareVersion,
         },
         fieldsToClear: params.uids.map((uid) => `line_items[${uid}]`),
       },
@@ -314,16 +326,58 @@ export class OrdersService extends BaseService<Order> {
     }
   }
 
+  validatePickupTime(pickupAt: string, businessHours: BusinessHoursPeriod[]) {
+    const pickupDateTime = new Date(pickupAt);
+    const now = new Date();
+
+    if (isBefore(pickupDateTime, now)) {
+      throw new BadRequestException('Pickup time is in the past');
+    }
+
+    if (isAfter(pickupDateTime, addDays(now, 7))) {
+      throw new BadRequestException('Pickup time is too far in the future');
+    }
+
+    const pickupTime = format(pickupDateTime, 'HH:mm:ss');
+    const pickupDayOfWeek = format(pickupDateTime, 'eee').toUpperCase();
+
+    const matchingPeriod = businessHours.find(
+      (period) => period.dayOfWeek === pickupDayOfWeek,
+    );
+
+    if (
+      !matchingPeriod ||
+      !matchingPeriod.startLocalTime ||
+      !matchingPeriod.endLocalTime ||
+      !(
+        pickupTime >= matchingPeriod.startLocalTime &&
+        pickupTime <= matchingPeriod.endLocalTime
+      )
+    ) {
+      throw new BadRequestException('Pickup time is not within business hours');
+    }
+  }
+
+  isWithinHour(date: Date) {
+    return isWithinInterval(date, {
+      start: new Date(),
+      end: addHours(new Date(), 1),
+    });
+  }
+
   async createPayment(params: {
     order: Order;
     customer: Customer;
     input: PaymentCreateDto;
     merchant: Merchant;
   }) {
-    let order = params.order;
-    const { customer, input, merchant } = params;
+    const { order, customer, input, merchant } = params;
+    const { squareAccessToken } = merchant;
+    const { pickupAt } = input;
+
     const location = await this.locationsService.findOne({
       where: { id: order.locationId },
+      relations: ['businessHours'],
     });
 
     if (!location?.locationSquareId) {
@@ -334,7 +388,7 @@ export class OrdersService extends BaseService<Order> {
       throw new NotFoundException('Square ID not found for Order');
     }
 
-    if (!merchant.squareAccessToken) {
+    if (!squareAccessToken) {
       throw new NotFoundException('Square access token not found for Merchant');
     }
 
@@ -344,36 +398,48 @@ export class OrdersService extends BaseService<Order> {
       );
     }
 
-    const squareOrderResponse = await this.squareService.updateOrder({
-      accessToken: merchant.squareAccessToken,
-      orderId: order.squareId,
-      body: {
-        order: {
-          locationId: location.locationSquareId,
-          version: order.squareVersion++,
-          state: 'OPEN',
-          fulfillments: [
-            {
-              type: 'PICKUP',
-              pickupDetails: {
-                scheduleType: 'ASAP',
-                pickupAt: new Date(
-                  new Date().getTime() + 15 * 60000,
-                ).toISOString(),
-                recipient: {
-                  customerId: params.customer.squareId,
+    const businessHours = location?.businessHours ?? [];
+
+    this.validatePickupTime(pickupAt, businessHours);
+
+    let squareOrderResponse: ApiResponse<UpdateOrderResponse>;
+    try {
+      squareOrderResponse = await this.squareService.updateOrder({
+        accessToken: squareAccessToken,
+        orderId: order.squareId,
+        body: {
+          order: {
+            locationId: location.locationSquareId,
+            version: ++order.squareVersion,
+            state: 'OPEN',
+            fulfillments: [
+              {
+                type: 'PICKUP',
+                pickupDetails: {
+                  scheduleType: this.isWithinHour(new Date(pickupAt))
+                    ? 'ASAP'
+                    : 'SCHEDULED',
+                  pickupAt: pickupAt,
+                  recipient: {
+                    customerId: customer.squareId,
+                  },
                 },
               },
-            },
-          ],
+            ],
+          },
         },
-      },
-    });
+      });
+    } catch (error) {
+      this.logger.error('Error updating Square order:', error);
+      throw new NotFoundException('Failed to update Square order');
+    }
+
     const squareOrder = squareOrderResponse.result.order;
     if (!squareOrder) {
       throw new NotFoundException('Square order not found');
     }
-    order = await this.updateAndSaveOrderForSquareOrder({
+
+    const updatedOrder = await this.updateAndSaveOrderForSquareOrder({
       order,
       squareOrder,
     });
@@ -383,7 +449,7 @@ export class OrdersService extends BaseService<Order> {
 
     try {
       await this.squareService.createPayment({
-        accessToken: merchant.squareAccessToken,
+        accessToken: squareAccessToken,
         body: {
           sourceId: input.paymentSquareId,
           idempotencyKey: input.idempotencyKey,
@@ -402,14 +468,14 @@ export class OrdersService extends BaseService<Order> {
         },
       });
 
-      order.customerId = customer.id;
+      updatedOrder.customerId = customer.id;
       customer.currentOrderId = undefined;
       await customer.save();
 
-      return this.save(order);
+      return this.save(updatedOrder);
     } catch (error) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error);
+      this.logger.error('Error creating Square payment:', error);
+      throw new InternalServerErrorException('Failed to create Square payment');
     }
   }
 
@@ -419,7 +485,7 @@ export class OrdersService extends BaseService<Order> {
   }) {
     params.order.squareId = params.squareOrder?.id;
     params.order.squareVersion =
-      params.squareOrder?.version ?? params.order.squareVersion++;
+      params.squareOrder?.version ?? params.order.squareVersion + 1;
     params.order.squareDetails = params.squareOrder as any;
 
     return params.order.save();

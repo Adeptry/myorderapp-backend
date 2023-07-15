@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Transform } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   IsBoolean,
   IsNotEmpty,
@@ -117,7 +117,8 @@ export class SquareCard {
   @IsOptional()
   cardholderName?: string;
 
-  @ApiProperty({ type: () => SquareAddress, nullable: true })
+  // @ApiProperty({ type: () => SquareAddress, nullable: true })
+  @Exclude({ toPlainOnly: true })
   billingAddress?: SquareAddress;
 
   customerId?: string;

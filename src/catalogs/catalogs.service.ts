@@ -336,10 +336,7 @@ export class CatalogsService extends BaseService<Catalog> {
           }
 
           const moaModifierListsForItem =
-            await this.itemsService.loadManyRelation<ModifierList>(
-              moaItem,
-              'modiferLists',
-            );
+            await this.itemsService.loadModifierLists(moaItem);
           this.logger.verbose(
             `Found ${moaModifierListsForItem.length} modifier lists in db.`,
           );

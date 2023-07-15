@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class ConfigUpdateInput {
+export class ConfigUpdateDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
