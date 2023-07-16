@@ -1,4 +1,4 @@
-export class MoaLocationWebhookUpdateInput {
+export class LocationWebhookUpdateDto {
   locationSquareId!: string;
 
   merchantSquareId!: string;
