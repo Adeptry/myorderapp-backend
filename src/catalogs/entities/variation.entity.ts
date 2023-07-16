@@ -10,10 +10,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
 
@@ -75,6 +77,11 @@ export class Variation extends EntityHelper {
    * Relations
    */
 
+  @OneToMany(() => CatalogImage, (entity) => entity.variation, {
+    nullable: true,
+  })
+  catalogImages?: CatalogImage[];
+
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   itemId?: string;
@@ -94,6 +101,6 @@ export class Variation extends EntityHelper {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Catalog;
 }

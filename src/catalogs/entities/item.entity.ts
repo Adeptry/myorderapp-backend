@@ -17,6 +17,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Category } from './category.entity';
 import { ModifierList } from './modifier-list.entity';
@@ -79,11 +80,16 @@ export class Item extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  priceInCents?: number;
+  displayPriceInCents?: number;
 
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   description?: string | null;
+
+  @OneToMany(() => CatalogImage, (entity) => entity.item, {
+    nullable: true,
+  })
+  catalogImages?: CatalogImage[];
 
   /*
    * Category

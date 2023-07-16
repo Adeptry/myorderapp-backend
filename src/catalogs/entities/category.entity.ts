@@ -15,6 +15,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
 
@@ -72,6 +73,11 @@ export class Category extends EntityHelper {
   /*
    * Relations
    */
+
+  @OneToMany(() => CatalogImage, (entity) => entity.category, {
+    nullable: true,
+  })
+  catalogImages?: CatalogImage[];
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

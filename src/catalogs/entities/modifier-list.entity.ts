@@ -17,6 +17,7 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { MoaSelectionType } from '../dto/catalogs.types';
+import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
 import { Modifier } from './modifier.entity';
@@ -50,7 +51,7 @@ export class ModifierList extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /* Entity */
+  /* Squre */
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: true })
   squareId?: string;
@@ -74,6 +75,15 @@ export class ModifierList extends EntityHelper {
   @ApiProperty({ required: false })
   @Column({ type: 'simple-enum', nullable: true, enum: MoaSelectionType })
   selectionType?: MoaSelectionType;
+
+  @OneToMany(() => CatalogImage, (entity) => entity.modifierList, {
+    nullable: true,
+  })
+  catalogImages?: CatalogImage[];
+
+  /*
+   * Relations
+   */
 
   @ManyToMany(() => Item, (entity) => entity.modifierLists, {
     onDelete: 'CASCADE',

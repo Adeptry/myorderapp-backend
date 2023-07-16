@@ -20,6 +20,8 @@ import { SquareModule } from 'src/square/square.module';
 import { CatalogsController } from './catalogs.controller';
 import { CategoriesController } from './controllers/categories.controller';
 import { ItemsController } from './controllers/items.controller';
+import { CatalogImage } from './entities/catalog-image.entity';
+import { CatalogImagesService } from './services/catalog-images.service';
 
 @Module({
   imports: [
@@ -30,6 +32,7 @@ import { ItemsController } from './controllers/items.controller';
       ModifierList,
       Variation,
       Modifier,
+      CatalogImage,
     ]),
     AuthModule,
     SquareModule,
@@ -44,6 +47,7 @@ import { ItemsController } from './controllers/items.controller';
     ModifiersService,
     ModifierListsService,
     CategoriesService,
+    CatalogImagesService,
   ],
   providers: [
     CatalogsService,
@@ -52,6 +56,7 @@ import { ItemsController } from './controllers/items.controller';
     ModifiersService,
     ModifierListsService,
     CategoriesService,
+    CatalogImagesService,
   ],
   controllers: [CatalogsController, CategoriesController, ItemsController],
 })

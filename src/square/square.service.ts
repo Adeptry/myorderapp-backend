@@ -83,18 +83,16 @@ export class SquareService {
   async listCatalog(params: { accessToken: string }): Promise<CatalogObject[]> {
     const client = this.client({ accessToken: params.accessToken });
     const catalogObjects: CatalogObject[] = [];
+    const types = 'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY,IMAGE';
     let listCatalogResponse = await client.catalogApi.listCatalog(
       undefined,
-      'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
+      types,
     );
     catalogObjects.push(...(listCatalogResponse?.result.objects ?? []));
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await client.catalogApi.listCatalog(
-        cursor,
-        'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY',
-      );
+      listCatalogResponse = await client.catalogApi.listCatalog(cursor, types);
       cursor = listCatalogResponse?.result.cursor;
       catalogObjects.push(...(listCatalogResponse?.result.objects ?? []));
     }

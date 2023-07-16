@@ -4,12 +4,14 @@ import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
 import { DataSource, Repository } from 'typeorm';
 import { MoaSelectionType } from './dto/catalogs.types';
+import { CatalogImage } from './entities/catalog-image.entity';
 import { Catalog } from './entities/catalog.entity';
 import { Category } from './entities/category.entity';
 import { Item } from './entities/item.entity';
 import { ModifierList } from './entities/modifier-list.entity';
 import { Modifier } from './entities/modifier.entity';
 import { Variation } from './entities/variation.entity';
+import { CatalogImagesService } from './services/catalog-images.service';
 import { CategoriesService } from './services/categories.service';
 import { ItemsService } from './services/items.service';
 import { ModifierListsService } from './services/modifier-lists.service';
@@ -37,6 +39,8 @@ export class CatalogsService extends BaseService<Catalog> {
     private readonly modifierListsService: ModifierListsService,
     @Inject(CategoriesService)
     private readonly categoriesService: CategoriesService,
+    @Inject(CatalogImagesService)
+    private readonly catalogImagesService: CatalogImagesService,
   ) {
     super(repository);
   }
@@ -50,11 +54,16 @@ export class CatalogsService extends BaseService<Catalog> {
       },
       relations: {
         categories: {
+          catalogImages: true,
           items: {
+            catalogImages: true,
             modifierLists: {
+              catalogImages: true,
               modifiers: true,
             },
-            variations: true,
+            variations: {
+              catalogImages: true,
+            },
           },
         },
       },
@@ -192,6 +201,11 @@ export class CatalogsService extends BaseService<Catalog> {
       });
       this.logger.verbose(`Deleted ${deletedMoaModifiers.length} modifiers.`);
 
+      // Catalog images
+      const squareImages = squareCatalogObjects.filter((value) => {
+        return value.type === 'IMAGE';
+      });
+
       // Main loop
 
       for (const [
@@ -258,6 +272,45 @@ export class CatalogsService extends BaseService<Catalog> {
           moaItem.name = squareItemData.name;
           moaItem.description = squareItemData.description;
           moaItem.category = moaCategory;
+
+          if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
+            for (const squareImageId of squareItemData.imageIds) {
+              let catalogImage = await this.catalogImagesService.findOne({
+                where: { squareId: squareImageId },
+              });
+
+              const squareImageForItem = squareImages.find(
+                (value) => value.id === squareImageId,
+              );
+
+              if (!catalogImage) {
+                catalogImage = this.catalogImagesService.create({
+                  item: moaItem,
+                  squareId: squareImageId,
+                  name: squareImageForItem?.imageData?.name,
+                  url: squareImageForItem?.imageData?.url,
+                  caption: squareImageForItem?.imageData?.caption,
+                });
+              } else {
+                catalogImage.squareId = squareImageId;
+                catalogImage.name = squareImageForItem?.imageData?.name;
+                catalogImage.url = squareImageForItem?.imageData?.url;
+                catalogImage.caption = squareImageForItem?.imageData?.caption;
+                catalogImage.item = moaItem; // Associate the image to the item
+              }
+              // Save changes to the image
+              catalogImage.catalogId = moaCatalog.id;
+              await this.catalogImagesService.save(catalogImage);
+            }
+          } else {
+            await this.catalogImagesService.removeAll(
+              await this.itemsService.loadManyRelation<CatalogImage>(
+                moaItem,
+                'catalogImages',
+              ),
+            );
+          }
+
           await this.itemsService.save(moaItem);
 
           if (moaItem.id == null) {
@@ -327,8 +380,8 @@ export class CatalogsService extends BaseService<Catalog> {
             }
           }
 
-          if (moaItem.priceInCents != minPriceInCents) {
-            moaItem.priceInCents = minPriceInCents;
+          if (moaItem.displayPriceInCents != minPriceInCents) {
+            moaItem.displayPriceInCents = minPriceInCents;
             await this.itemsService.save(moaItem);
             this.logger.verbose(
               `Updated item price ${moaItem.name} ${minPriceInCents}.`,
