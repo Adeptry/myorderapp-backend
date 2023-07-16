@@ -45,7 +45,7 @@ export class SquareService {
   }
 
   oauthUrl(params: { scope: string[]; state?: string }) {
-    const urlString = `${this.configService.getOrThrow('square.baseUrl', {
+    return `${this.configService.getOrThrow('square.baseUrl', {
       infer: true,
     })}/oauth2/authorize?client_id=${this.configService.getOrThrow(
       'square.oauthClientId',
@@ -53,7 +53,6 @@ export class SquareService {
         infer: true,
       },
     )}&scope=${params.scope.join('+')}&state=${params.state}`;
-    return urlString;
   }
 
   obtainToken(params: { oauthAccessCode: string }) {
@@ -71,6 +70,13 @@ export class SquareService {
       clientSecret: this.clientSecret,
       grantType: 'refresh_token',
       refreshToken: params.oauthRefreshToken,
+    });
+  }
+
+  client(params: { accessToken: string }): Client {
+    return new Client({
+      accessToken: params.accessToken,
+      environment: this.squareEnvironment,
     });
   }
 
@@ -219,12 +225,5 @@ export class SquareService {
     return this.client({
       accessToken: params.accessToken,
     }).cardsApi.disableCard(params.cardId);
-  }
-
-  client(params: { accessToken: string }): Client {
-    return new Client({
-      accessToken: params.accessToken,
-      environment: this.squareEnvironment,
-    });
   }
 }
