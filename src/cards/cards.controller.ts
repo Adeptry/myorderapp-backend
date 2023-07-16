@@ -69,12 +69,12 @@ export class CardsController {
     @Query('cursor') cursor?: string,
   ): Promise<SquareListCardsResponse> {
     try {
-      const listCards = await this.squareService.listCards({
+      const response = await this.squareService.listCards({
         accessToken: request.merchant.squareAccessToken,
         customerId: request.customer.squareId,
         cursor,
       });
-      return listCards.result as SquareListCardsResponse;
+      return response.result as SquareListCardsResponse;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
