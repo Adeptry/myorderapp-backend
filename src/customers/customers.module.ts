@@ -7,10 +7,12 @@ import { Customer } from 'src/customers/entities/customer.entity';
 import { GuardsModule } from 'src/guards/guards.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
+import { AppInstall } from './entities/app-install.entity';
+import { AppInstallsService } from './services/app-installs.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Customer]),
+    TypeOrmModule.forFeature([Customer, AppInstall]),
     SquareModule,
     GuardsModule,
     AuthModule,
@@ -18,6 +20,6 @@ import { SquareModule } from 'src/square/square.module';
   ],
   exports: [CustomersService],
   controllers: [CustomersController],
-  providers: [CustomersService],
+  providers: [CustomersService, AppInstallsService],
 })
 export class CustomersModule {}

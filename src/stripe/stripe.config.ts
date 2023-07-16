@@ -2,6 +2,10 @@ import { registerAs } from '@nestjs/config';
 import { IsOptional, IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
 
+export type StripeConfig = {
+  apiKey: string;
+};
+
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()

@@ -19,6 +19,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { AppInstall } from './app-install.entity';
 
 @Entity('customer')
 export class Customer extends EntityHelper {
@@ -69,6 +70,7 @@ export class Customer extends EntityHelper {
 
   /* Current order */
 
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   currentOrderId?: string;
 
@@ -87,6 +89,13 @@ export class Customer extends EntityHelper {
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   orders?: Order[];
+
+  /* Installs */
+
+  @OneToMany(() => AppInstall, (entity) => entity.customer, {
+    nullable: true,
+  })
+  appInstalls?: AppInstall[];
 
   /* Square */
 

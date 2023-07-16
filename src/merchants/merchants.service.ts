@@ -9,6 +9,7 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { credential } from 'firebase-admin';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
@@ -16,6 +17,9 @@ import { Catalog } from 'src/catalogs/entities/catalog.entity';
 import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { LocationsService } from 'src/locations/locations.service';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
+import { SquareCatalogVersionUpdatedEventPayload } from 'src/square/payloads/square-catalog-version-updated-payload.entity';
+import { SquareLocationCreatedEventPayload } from 'src/square/payloads/square-location-created-event-payload.entity';
+import { SquareLocationUpdatedEventPayload } from 'src/square/payloads/square-location-updated-event-payload.entity';
 import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
@@ -136,6 +140,75 @@ export class MerchantsService extends BaseService<Merchant> {
     return;
   }
 
+  @OnEvent('square.location.created')
+  async handleSquareLocationCreated(
+    payload: SquareLocationCreatedEventPayload,
+  ) {
+    if (!payload.merchant_id) {
+      this.logger.error(
+        'Missing merchant_id in SquareLocationCreatedEventPayload',
+      );
+      return;
+    }
+
+    const merchant = await this.findOne({
+      where: { squareId: payload.merchant_id },
+    });
+
+    if (!merchant) {
+      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
+      return;
+    }
+
+    await this.squareLocationsSync({ merchant });
+  }
+
+  @OnEvent('square.location.updated')
+  async handleSquareLocationUpdated(
+    payload: SquareLocationUpdatedEventPayload,
+  ) {
+    if (!payload.merchant_id) {
+      this.logger.error(
+        'Missing merchant_id in SquareLocationCreatedEventPayload',
+      );
+      return;
+    }
+
+    const merchant = await this.findOne({
+      where: { squareId: payload.merchant_id },
+    });
+
+    if (!merchant) {
+      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
+      return;
+    }
+
+    await this.squareLocationsSync({ merchant });
+  }
+
+  @OnEvent('square.catalog.version.updated')
+  async handleSquareCatalogVersionUpdated(
+    payload: SquareCatalogVersionUpdatedEventPayload,
+  ) {
+    if (!payload.merchant_id) {
+      this.logger.error(
+        'Missing merchant_id in SquareLocationCreatedEventPayload',
+      );
+      return;
+    }
+
+    const merchant = await this.findOne({
+      where: { squareId: payload.merchant_id },
+    });
+
+    if (!merchant) {
+      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
+      return;
+    }
+
+    await this.squareCatalogSync({ merchant });
+  }
+
   async squareLocationsSync(params: { merchant: Merchant }) {
     const entity = params.merchant;
 
@@ -233,11 +306,11 @@ export class MerchantsService extends BaseService<Merchant> {
     return this.save(entity);
   }
 
-  async firebaseAdminApp(id: string) {
-    const entity = await this.findOneOrFail({ where: { id } });
+  firebaseAdminApp(params: { merchant: Merchant }) {
+    const entity = params.merchant;
 
     try {
-      const app = this.firebaseAdminService.getApp(id);
+      const app = this.firebaseAdminService.getApp(entity.id);
       return app;
     } catch {
       // do nothing, the app doesn't exist
@@ -249,7 +322,7 @@ export class MerchantsService extends BaseService<Merchant> {
           credential: credential.cert(appOptions),
           databaseURL: entity.firebaseDatabaseUrl,
         },
-        id,
+        entity.id,
       );
       return app;
     } catch (error) {

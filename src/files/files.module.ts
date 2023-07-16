@@ -1,15 +1,15 @@
-import { HttpException, HttpStatus, Module } from '@nestjs/common';
-import { FilesController } from './files.controller';
-import { MulterModule } from '@nestjs/platform-express';
-import { ConfigModule, ConfigService } from '@nestjs/config';
-import { diskStorage } from 'multer';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { S3Client } from '@aws-sdk/client-s3';
-import multerS3 from 'multer-s3';
+import { HttpException, HttpStatus, Module } from '@nestjs/common';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { diskStorage } from 'multer';
+import multerS3 from 'multer-s3';
+import { AllConfigType } from 'src/config.type';
 import { FileEntity } from './entities/file.entity';
+import { FilesController } from './files.controller';
 import { FilesService } from './files.service';
-import { AllConfigType } from 'src/config/config.type';
 
 @Module({
   imports: [

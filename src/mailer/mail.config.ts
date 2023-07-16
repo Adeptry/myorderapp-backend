@@ -1,15 +1,26 @@
 import { registerAs } from '@nestjs/config';
-import { MailConfig } from './config.type';
 import {
-  IsString,
-  IsInt,
-  Min,
-  Max,
-  IsOptional,
   IsBoolean,
   IsEmail,
+  IsInt,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
 } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
+
+export type MailConfig = {
+  port: number;
+  host?: string;
+  user?: string;
+  password?: string;
+  defaultEmail?: string;
+  defaultName?: string;
+  ignoreTLS: boolean;
+  secure: boolean;
+  requireTLS: boolean;
+};
 
 class EnvironmentVariablesValidator {
   @IsInt()

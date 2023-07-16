@@ -59,21 +59,21 @@ export class AuthController {
     return this.service.validateLogin(loginDto, false);
   }
 
-  @SerializeOptions({
-    groups: ['me'],
-  })
-  @Post('admin/email/login')
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Get admin access token',
-    operationId: 'adminLogin',
-  })
-  @ApiOkResponse({ type: LoginResponseType })
-  public adminLogin(
-    @Body() loginDTO: AuthEmailLoginDto,
-  ): Promise<LoginResponseType> {
-    return this.service.validateLogin(loginDTO, true);
-  }
+  // @SerializeOptions({
+  //   groups: ['me'],
+  // })
+  // @Post('admin/email/login')
+  // @HttpCode(HttpStatus.OK)
+  // @ApiOperation({
+  //   summary: 'Get admin access token',
+  //   operationId: 'adminLogin',
+  // })
+  // @ApiOkResponse({ type: LoginResponseType })
+  // public adminLogin(
+  //   @Body() loginDTO: AuthEmailLoginDto,
+  // ): Promise<LoginResponseType> {
+  //   return this.service.validateLogin(loginDTO, true);
+  // }
 
   @Post('email/register')
   @HttpCode(HttpStatus.CREATED)

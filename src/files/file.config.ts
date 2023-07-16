@@ -1,7 +1,16 @@
 import { registerAs } from '@nestjs/config';
-import { FileConfig } from './config.type';
 import { IsEnum, IsOptional, IsString, ValidateIf } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
+
+export type FileConfig = {
+  driver: string;
+  accessKeyId?: string;
+  secretAccessKey?: string;
+  awsDefaultS3Bucket?: string;
+  awsDefaultS3Url?: string;
+  awsS3Region?: string;
+  maxFileSize: number;
+};
 
 enum FileDriver {
   LOCAL = 'local',

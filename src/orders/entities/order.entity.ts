@@ -82,7 +82,7 @@ export class Order extends EntityHelper {
   location?: Location;
 
   /* Square */
-
+  @ApiProperty({ required: false })
   squareDetails?: SquareOrder;
 
   @ApiHideProperty()

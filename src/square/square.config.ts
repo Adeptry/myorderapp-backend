@@ -2,6 +2,13 @@ import { registerAs } from '@nestjs/config';
 import { IsOptional, IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
 
+export type SquareConfig = {
+  webhookSignatureKey: string;
+  clientEnvironment: string;
+  oauthClientId: string;
+  oauthClientSecret: string;
+};
+
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()

@@ -9,13 +9,24 @@ import {
   Min,
 } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
-import { AppConfig } from './config.type';
 
 enum Environment {
   Development = 'development',
   Production = 'production',
   Test = 'test',
 }
+
+export type AppConfig = {
+  nodeEnv: string;
+  name: string;
+  workingDirectory: string;
+  frontendDomain?: string;
+  backendDomain: string;
+  port: number;
+  apiPrefix: string;
+  fallbackLanguage: string;
+  headerLanguage: string;
+};
 
 class EnvironmentVariablesValidator {
   @IsEnum(Environment)
@@ -47,10 +58,6 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   APP_HEADER_LANGUAGE: string;
-
-  @IsString()
-  @IsOptional()
-  APP_HEADER_MERCHANT_ID: string;
 }
 
 export default registerAs<AppConfig>('app', () => {
@@ -70,6 +77,5 @@ export default registerAs<AppConfig>('app', () => {
     apiPrefix: process.env.API_PREFIX || 'api',
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
-    headerMerchantId: process.env.APP_HEADER_MERCHANT_ID || 'x-merchant-id',
   };
 });

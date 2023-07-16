@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -15,6 +16,7 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
+  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
@@ -23,6 +25,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
@@ -34,7 +37,7 @@ import { MerchantsService } from './merchants.service';
 
 @ApiTags('Merchant')
 @Controller({
-  path: 'merchant',
+  path: 'merchants',
   version: '2',
 })
 export class MerchantsController {
@@ -45,6 +48,35 @@ export class MerchantsController {
     @Inject(SquareService)
     protected readonly squareService: SquareService,
   ) {}
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @Post()
+  @ApiBadRequestResponse({
+    description: 'Merchant already exists',
+    type: NestError,
+  })
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Create Merchant for current User',
+    operationId: 'createMerchant',
+  })
+  @ApiOkResponse({ description: 'Merchant created' })
+  async create(@Req() request: any) {
+    if (
+      await this.service.findOne({
+        where: { userId: request.user.id },
+      })
+    ) {
+      throw new BadRequestException('Merchant already exists');
+    }
+    await this.service.save(
+      this.service.create({
+        userId: request.user.id,
+      }),
+    );
+    return;
+  }
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
@@ -60,6 +92,23 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: Merchant })
   public async me(@Req() request: any): Promise<Merchant> {
+    console.log(
+      this.squareService.oauthUrl({
+        scope: [
+          'MERCHANT_PROFILE_READ',
+          'CUSTOMERS_WRITE',
+          'CUSTOMERS_READ',
+          'ORDERS_WRITE',
+          'ORDERS_READ',
+          'PAYMENTS_READ',
+          'PAYMENTS_WRITE',
+          'PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS',
+          'ITEMS_WRITE',
+          'ITEMS_READ',
+        ],
+        state: request.merchant.id,
+      }),
+    );
     return await request.merchant;
   }
 

@@ -7,7 +7,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   Logger,
   NotFoundException,
   Param,
@@ -23,6 +22,7 @@ import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiCreatedResponse,
   ApiInternalServerErrorResponse,
   ApiNoContentResponse,
@@ -43,12 +43,17 @@ import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 import { OrderPatchDto } from './dto/order-patch.dto';
-import { OrderPostDto } from './dto/order-post.dto';
+import { OrderCreateDto, OrderPostDto } from './dto/order-post.dto';
+import { OrdersPaginatedReponse } from './dto/orders-paginated.dto';
 import { PaymentCreateDto } from './dto/payment-create.dto';
 import { Order } from './entities/order.entity';
 
 @ApiTags('Orders')
 @Controller('v2/orders')
+@ApiUnauthorizedResponse({
+  description: 'You need to be authenticated to access this endpoint.',
+  type: NestError,
+})
 export class OrdersController {
   private readonly logger = new Logger(OrdersController.name);
 
@@ -60,16 +65,8 @@ export class OrdersController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Post()
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiBadRequestResponse({
     description: 'Current order already exists',
-    type: NestError,
-  })
-  @ApiUnprocessableEntityResponse({
-    description: 'No Square tokens',
     type: NestError,
   })
   @ApiNotFoundResponse({ description: 'Invalid location ID', type: NestError })
@@ -77,16 +74,19 @@ export class OrdersController {
     summary: 'Create Order',
     operationId: 'createOrder',
   })
+  @ApiUnprocessableEntityResponse({
+    description: 'No Square tokens',
+    type: NestError,
+  })
   @ApiCreatedResponse({ type: Order })
-  @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
-  @ApiQuery({ name: 'locationId', required: false, type: String })
+  @ApiBody({ required: true, type: OrderCreateDto })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async create(
     @Req() request: CustomersGuardedRequest,
-    @Query('locationId') locationId?: string,
-    @Query('idempotencyKey') idempotencyKey?: string,
+    @Body() body: OrderCreateDto,
   ) {
     const { customer, merchant } = { ...request };
+    const { idempotencyKey, locationId, variations } = body;
 
     if (request.customer.currentOrderId) {
       throw new BadRequestException(`Current order already exists`);
@@ -99,6 +99,7 @@ export class OrdersController {
     }
 
     return this.service.createAndSaveCurrent({
+      variations,
       idempotencyKey,
       customer,
       locationId,
@@ -109,10 +110,6 @@ export class OrdersController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Get('current')
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiOkResponse({ type: Order })
   @ApiOperation({
     summary: 'Get current Order',
@@ -147,14 +144,11 @@ export class OrdersController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Get()
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiOperation({
     summary: 'Get my Orders',
     operationId: 'getMyOrders',
   })
+  @ApiOkResponse({ type: OrdersPaginatedReponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
@@ -261,7 +255,6 @@ export class OrdersController {
     @Body() body: OrderPostDto,
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
-    const { merchant } = { ...request };
     if (!request.customer.currentOrderId) {
       throw new BadRequestException(`No current order`);
     }
@@ -274,24 +267,13 @@ export class OrdersController {
       relations: ['location'],
     });
 
-    let locationSquareId = order.location?.locationSquareId ?? 'main';
-    if (body.locationId && body.locationId !== order.location?.id) {
-      order = await this.service.updateAndSaveLocation({
-        locationMoaId: body.locationId,
-        merchant,
-        order,
-        idempotencyKey,
-      });
-      locationSquareId = order.location?.locationSquareId ?? 'main';
-    }
-
     const { variations } = body;
     if (variations && variations.length > 0) {
       order = await this.service.updateAndSaveVariations({
-        locationSquareId,
         variations,
         order,
         squareAccessToken: request.merchant.squareAccessToken,
+        idempotencyKey,
       });
     }
 
@@ -379,12 +361,17 @@ export class OrdersController {
     summary: 'Pay for current Order',
     operationId: 'payForCurrentOrder',
   })
-  @ApiOkResponse({ description: 'Payment Successful' })
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
+  @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiNotFoundResponse({ description: 'No current order', type: NestError })
+  @ApiUnprocessableEntityResponse({
+    description: 'No Square Access Token',
     type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiBadRequestResponse({
+    description: 'Invalid pickup time',
+    type: NestError,
+  })
   async payForCurrentOrder(
     @Req() request: CustomersGuardedRequest,
     @Body() body: PaymentCreateDto,
@@ -416,7 +403,7 @@ export class OrdersController {
       });
     } catch (error) {
       this.logger.error(error);
-      throw new InternalServerErrorException(error);
+      throw new BadRequestException(error);
     }
   }
 }

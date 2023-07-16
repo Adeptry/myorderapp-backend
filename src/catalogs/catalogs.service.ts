@@ -393,7 +393,7 @@ export class CatalogsService extends BaseService<Catalog> {
               }));
 
             if (moaModifierList == null) {
-              moaModifierList = await this.modifierListsService.create({
+              moaModifierList = this.modifierListsService.create({
                 squareId: squareModifierListInfoForItem.modifierListId,
                 catalogId: moaCatalog.id,
               });

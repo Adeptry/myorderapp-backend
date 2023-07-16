@@ -1,7 +1,11 @@
 import { registerAs } from '@nestjs/config';
-import { FacebookConfig } from './config.type';
 import { IsOptional, IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
+
+export type FacebookConfig = {
+  appId?: string;
+  appSecret?: string;
+};
 
 class EnvironmentVariablesValidator {
   @IsString()

@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -15,12 +14,14 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { Customer } from './customer.entity';
 
-@Entity('app_config')
-export class AppConfig extends EntityHelper {
+@Entity('app_install')
+export class AppInstall extends EntityHelper {
   /* Base entity */
-  @Exclude({ toPlainOnly: true })
+
   @PrimaryColumn('varchar')
+  @Exclude({ toPlainOnly: true })
   id?: string;
 
   @BeforeInsert()
@@ -28,43 +29,49 @@ export class AppConfig extends EntityHelper {
     this.id = nanoid();
   }
 
-  @Exclude({ toPlainOnly: true })
   @CreateDateColumn({ nullable: true })
+  @Exclude({ toPlainOnly: true })
   createDate?: Date;
 
-  @Exclude({ toPlainOnly: true })
   @UpdateDateColumn({ nullable: true })
+  @Exclude({ toPlainOnly: true })
   updateDate?: Date;
 
-  @Exclude({ toPlainOnly: true })
   @DeleteDateColumn({ nullable: true })
+  @Exclude({ toPlainOnly: true })
   deleteDate?: Date;
 
-  @Exclude({ toPlainOnly: true })
   @VersionColumn({ nullable: true })
+  @Exclude({ toPlainOnly: true })
   version?: number;
 
-  /* App config entity */
+  /* Firebase */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    type: String,
+    required: true,
+    example: '123456789',
+  })
   @Column({ nullable: true })
-  seedColor?: string;
+  firebaseInstallationId?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({
+    type: String,
+    required: false,
+    example: nanoid(),
+  })
   @Column({ nullable: true })
-  fontFamily?: string;
+  firebaseCloudMessagingToken?: string;
 
-  // @ApiProperty({ required: false })
-  // @Column({ nullable: true })
-  // enabled?: boolean;
-
-  /* Relations */
+  /* Customer */
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  merchantId?: string;
+  customerId?: string;
 
-  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
-  @JoinColumn()
-  merchant?: Merchant;
+  @ManyToOne(() => Customer, (entity) => entity.appInstalls, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn({ name: 'customerId' })
+  customer: Customer;
 }

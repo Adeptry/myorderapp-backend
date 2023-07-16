@@ -1,9 +1,9 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import { FileEntity } from './entities/file.entity';
+import { AllConfigType } from 'src/config.type';
 import { Repository } from 'typeorm';
-import { AllConfigType } from 'src/config/config.type';
+import { FileEntity } from './entities/file.entity';
 
 @Injectable()
 export class FilesService {

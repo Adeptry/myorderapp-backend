@@ -1,7 +1,10 @@
 import { registerAs } from '@nestjs/config';
-import { AppleConfig } from './config.type';
 import { IsJSON, IsOptional } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
+
+export type AppleConfig = {
+  appAudience: string[];
+};
 
 class EnvironmentVariablesValidator {
   @IsJSON()

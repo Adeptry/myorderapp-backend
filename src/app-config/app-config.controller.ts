@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  NotFoundException,
   Patch,
   Post,
   Req,
@@ -17,6 +18,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiCreatedResponse,
+  ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -36,7 +38,7 @@ import { AppConfig } from './entities/app-config.entity';
 
 @ApiTags('Config')
 @Controller({
-  path: 'config',
+  path: 'app-config',
   version: '2',
 })
 export class AppConfigController {
@@ -53,11 +55,18 @@ export class AppConfigController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
+  @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
   @ApiOperation({ summary: 'Get your Config', operationId: 'getConfig' })
   async get(@Req() request: UserTypeGuardedRequest) {
-    return this.service.findOne({
+    const appConfig = await this.service.findOne({
       where: { merchantId: request.merchant.id },
     });
+
+    if (!appConfig) {
+      throw new NotFoundException(`App config not found`);
+    }
+
+    return appConfig;
   }
 
   @ApiBearerAuth()

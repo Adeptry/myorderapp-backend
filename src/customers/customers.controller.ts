@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Body,
   Controller,
   DefaultValuePipe,
   Get,
@@ -7,34 +8,47 @@ import {
   HttpStatus,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
   ParseIntPipe,
   Post,
   Query,
   Req,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import {
-  ApiBadGatewayResponse,
+  ApiBadRequestResponse,
   ApiBearerAuth,
-  ApiInternalServerErrorResponse,
+  ApiBody,
+  ApiCreatedResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Response } from 'express';
 import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
-import { CustomersGuard } from 'src/guards/customers.guard';
+import {
+  CustomersGuard,
+  CustomersGuardedRequest,
+} from 'src/guards/customers.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
-import { MerchantCreateDto } from 'src/merchants/dto/create-merchant.input';
+import { MerchantsService } from 'src/merchants/merchants.service';
 import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
+import { AppInstallUpdateDto } from './dto/app-install-update.dto';
 import { CustomersPaginatedResponse } from './dto/customers-paginated.output';
+import { AppInstallsService } from './services/app-installs.service';
 
+@ApiUnauthorizedResponse({
+  description: 'You need to be authenticated to access this endpoint.',
+  type: NestError,
+})
 @ApiTags('Customers')
 @Controller({
   path: 'customers',
@@ -46,68 +60,75 @@ export class CustomersController {
   constructor(
     private readonly service: CustomersService,
     private readonly squareService: SquareService,
+    private readonly merchantsService: MerchantsService,
+    private readonly appInstallsService: AppInstallsService,
   ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Post()
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
-  @ApiInternalServerErrorResponse({
+  @ApiBadRequestResponse({
     description: 'Merchant does not have Square access token',
     type: NestError,
   })
-  @ApiBadGatewayResponse({
+  @ApiBadRequestResponse({
     description: 'Customer already exists',
     type: NestError,
   })
   @HttpCode(HttpStatus.OK)
-  @ApiQuery({ name: 'input', required: true, type: MerchantCreateDto })
   @ApiOperation({
     summary: 'Create Customer for current User',
     operationId: 'createCustomer',
   })
-  async create(@Req() request: any) {
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  async create(@Req() request: any, @Query('merchantId') merchantId: string) {
     if (
       await this.service.findOne({
-        where: { userId: request.user.id, merchantId: request.merchant.id },
+        where: { userId: request.user.id, merchantId },
       })
     ) {
       throw new BadRequestException('Customer already exists');
     }
 
-    if (!request.merchant?.squareAccessToken) {
-      throw new InternalServerErrorException(
+    const merchant = await this.merchantsService.findOne({
+      where: { id: merchantId },
+    });
+    if (!merchant) {
+      throw new NotFoundException(`Merchant ${merchantId} not found`);
+    }
+
+    if (!merchant?.squareAccessToken) {
+      throw new BadRequestException(
         `Merchant does not have Square access token`,
       );
     }
 
-    const entity = await this.service.save(
+    const customer = await this.service.save(
       this.service.create({
-        merchantId: request.merchant.id,
+        merchantId: merchant.id,
         userId: request.user.id,
       }),
     );
 
     const response = await this.squareService.createCustomer({
-      accessToken: request.merchant.squareAccessToken,
+      accessToken: merchant.squareAccessToken,
       request: {
         emailAddress: request.user.email ?? undefined,
         givenName: request.user.firstName ?? undefined,
         familyName: request.user.lastName ?? undefined,
-        idempotencyKey: entity.id,
+        idempotencyKey: customer.id,
       },
     });
+
     if (!response.result.customer?.id) {
       throw new InternalServerErrorException(
         `Failed to create Square customer`,
       );
     }
 
-    entity.squareId = response.result.customer?.id;
-    return await this.service.save(entity);
+    customer.squareId = response.result.customer?.id;
+
+    return await this.service.save(customer);
   }
 
   @ApiBearerAuth()
@@ -115,10 +136,6 @@ export class CustomersController {
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @HttpCode(HttpStatus.OK)
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Get current Customer',
@@ -132,10 +149,6 @@ export class CustomersController {
   @Get()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @HttpCode(HttpStatus.OK)
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: CustomersPaginatedResponse })
@@ -151,5 +164,54 @@ export class CustomersController {
       }),
       pagination: { page, limit },
     });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @Post('me/app-install')
+  @ApiOperation({
+    summary: 'Create or update Customer App Install',
+    operationId: 'updateMyAppInstall',
+  })
+  @ApiBody({ type: AppInstallUpdateDto })
+  @ApiCreatedResponse({
+    description: 'The record has been successfully created.',
+  })
+  @ApiOkResponse({
+    description: 'The record has been successfully updated.',
+  })
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  async updateMyAppInstall(
+    @Req() request: CustomersGuardedRequest,
+    @Body() body: AppInstallUpdateDto,
+    @Res({ passthrough: true }) res: Response,
+  ) {
+    // Find the AppInstall entity with the provided tokenId
+    let appInstall = await this.appInstallsService.findOne({
+      where: {
+        firebaseInstallationId: body.firebaseInstallationId,
+        customerId: request.customer.id,
+      },
+    });
+
+    res.status(HttpStatus.OK);
+
+    if (!appInstall) {
+      // Create a new AppInstall entity
+      appInstall = this.appInstallsService.create({
+        customerId: request.customer.id,
+        firebaseInstallationId: body.firebaseInstallationId,
+      });
+      res.status(HttpStatus.CREATED);
+    }
+
+    // Update the AppInstall entity with the new FCM token
+    appInstall = await this.appInstallsService.save(
+      this.appInstallsService.merge(appInstall, {
+        firebaseCloudMessagingToken: body.firebaseCloudMessagingToken,
+      }),
+    );
+
+    return;
   }
 }

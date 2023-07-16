@@ -1,23 +1,27 @@
 import { registerAs } from '@nestjs/config';
-import { GoogleConfig } from './config.type';
 import { IsOptional, IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
+
+export type TwitterConfig = {
+  consumerKey?: string;
+  consumerSecret?: string;
+};
 
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  GOOGLE_CLIENT_ID: string;
+  TWITTER_CONSUMER_KEY: string;
 
   @IsString()
   @IsOptional()
-  GOOGLE_CLIENT_SECRET: string;
+  TWITTER_CONSUMER_SECRET: string;
 }
 
-export default registerAs<GoogleConfig>('google', () => {
+export default registerAs('twitter', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {
-    clientId: process.env.GOOGLE_CLIENT_ID,
-    clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    consumerKey: process.env.TWITTER_CONSUMER_KEY,
+    consumerSecret: process.env.TWITTER_CONSUMER_SECRET,
   };
 });

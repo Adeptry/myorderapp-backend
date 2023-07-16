@@ -1,5 +1,6 @@
 import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { AllConfigType } from 'src/config.type';
 import Stripe from 'stripe';
 
 @Injectable()
@@ -8,7 +9,7 @@ export class StripeService {
 
   private client: Stripe;
 
-  constructor(private configService: ConfigService) {
+  constructor(private configService: ConfigService<AllConfigType>) {
     const apiKey = this.configService.getOrThrow('stripe.apiKey', {
       infer: true,
     });

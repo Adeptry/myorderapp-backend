@@ -12,7 +12,8 @@ import { AppModule } from './app.module';
 import { AuthModule } from './auth/auth.module';
 import { CardsModule } from './cards/cards.module';
 import { CatalogsModule } from './catalogs/catalogs.module';
-import { AllConfigType } from './config/config.type';
+import { AllConfigType } from './config.type';
+import { CustomersModule } from './customers/customers.module';
 import { LocationsModule } from './locations/locations.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { OrdersModule } from './orders/orders.module';
@@ -78,6 +79,7 @@ async function bootstrap() {
         include: [
           AuthModule,
           AppConfigModule,
+          CustomersModule,
           CardsModule,
           OrdersModule,
           LocationsModule,

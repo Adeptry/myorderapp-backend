@@ -1,10 +1,10 @@
 import { Injectable } from '@nestjs/common';
-import { Facebook } from 'fb';
 import { ConfigService } from '@nestjs/config';
+import { Facebook } from 'fb';
+import { AllConfigType } from 'src/config.type';
 import { SocialInterface } from '../social/interfaces/social.interface';
-import { FacebookInterface } from './interfaces/facebook.interface';
 import { AuthFacebookLoginDto } from './dto/auth-facebook-login.dto';
-import { AllConfigType } from 'src/config/config.type';
+import { FacebookInterface } from './interfaces/facebook.interface';
 
 @Injectable()
 export class AuthFacebookService {

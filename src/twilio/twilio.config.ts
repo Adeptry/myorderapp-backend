@@ -2,6 +2,12 @@ import { registerAs } from '@nestjs/config';
 import { IsOptional, IsString } from 'class-validator';
 import validateConfig from 'src/utils/validate-config';
 
+export type TwilioConfig = {
+  accountSid?: string;
+  authToken?: string;
+  fromPhone?: string;
+};
+
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()

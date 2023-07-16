@@ -11,7 +11,7 @@ import bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import ms from 'ms';
-import { AllConfigType } from 'src/config/config.type';
+import { AllConfigType } from 'src/config.type';
 import { ForgotService } from 'src/forgot/forgot.service';
 import { MailService } from 'src/mail/mail.service';
 import { Role } from 'src/roles/entities/role.entity';
@@ -207,7 +207,7 @@ export class AuthService {
       ...dto,
       email: dto.email,
       role: {
-        id: dto.role,
+        id: RoleNameEnum.user,
       } as Role,
       status: {
         id: StatusEnum.inactive,

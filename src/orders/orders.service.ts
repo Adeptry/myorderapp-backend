@@ -6,6 +6,7 @@ import {
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import {
   addDays,
@@ -24,11 +25,16 @@ import {
 } from 'square';
 import { ModifiersService } from 'src/catalogs/services/modifiers.service';
 import { VariationsService } from 'src/catalogs/services/variations.service';
+import { CustomersService } from 'src/customers/customers.service';
+import { AppInstall } from 'src/customers/entities/app-install.entity';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { BusinessHoursPeriod } from 'src/locations/entities/business-hours-period.entity';
 import { LocationsService } from 'src/locations/locations.service';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
+import { MerchantsService } from 'src/merchants/merchants.service';
 import { Order } from 'src/orders/entities/order.entity';
+import { SquareOrderFulfillmentUpdatedPayload } from 'src/square/payloads/square-order-fulfillment-updated.payload';
 import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
 import { In, Repository } from 'typeorm';
@@ -43,26 +49,31 @@ export class OrdersService extends BaseService<Order> {
     protected readonly repository: Repository<Order>,
     protected readonly squareService: SquareService,
     protected readonly locationsService: LocationsService,
-    private readonly variationsService: VariationsService,
-    private readonly modifiersService: ModifiersService,
+    protected readonly variationsService: VariationsService,
+    protected readonly modifiersService: ModifiersService,
+    protected readonly merchantsService: MerchantsService,
+    protected readonly customersService: CustomersService,
+    protected readonly firebaseAdminService: FirebaseAdminService,
   ) {
     super(repository);
   }
 
   async createAndSaveCurrent(params: {
+    variations?: VariationAddDto[];
     idempotencyKey?: string;
     customer: Customer;
     locationId?: string;
     merchant: Merchant;
   }) {
-    if (!params.merchant.squareAccessToken) {
+    const { variations, merchant, customer } = params;
+    if (!merchant.squareAccessToken) {
       throw new Error('Merchant does not have a Square access token');
     }
     let locationId = params.locationId;
 
     if (!locationId) {
       const squareMainLocation = await this.squareService.retrieveLocation({
-        accessToken: params.merchant.squareAccessToken,
+        accessToken: merchant.squareAccessToken,
         locationSquareId: 'main',
       });
       const locationSquareId = squareMainLocation.result.location?.id;
@@ -81,16 +92,16 @@ export class OrdersService extends BaseService<Order> {
     }
 
     let order = await this.createAndSave({
-      customerId: params.customer.id,
+      customerId: customer.id,
       locationId,
-      merchantId: params.merchant.id,
+      merchantId: merchant.id,
       squareVersion: 1,
     });
 
     let location = await this.locationsService.findOne({
       where: {
         id: locationId,
-        merchantId: params.merchant.id,
+        merchantId: merchant.id,
       },
     });
 
@@ -100,14 +111,19 @@ export class OrdersService extends BaseService<Order> {
 
     try {
       const response = await this.squareService.createOrder({
-        accessToken: params.merchant.squareAccessToken,
+        accessToken: merchant.squareAccessToken,
         body: {
           idempotencyKey: params.idempotencyKey,
           order: {
             state: 'DRAFT',
             referenceId: order.id,
-            customerId: params.customer.squareId,
+            customerId: customer.squareId,
             locationId: location?.locationSquareId ?? 'main',
+            lineItems:
+              variations &&
+              (await this.squareOrderLineItemsFor({
+                variations,
+              })),
           },
         },
       });
@@ -133,8 +149,8 @@ export class OrdersService extends BaseService<Order> {
         order,
         squareOrder,
       });
-      params.customer.currentOrder = order;
-      await params.customer.save();
+      customer.currentOrder = order;
+      await customer.save();
     } catch (error) {
       await this.remove(order);
       throw error;
@@ -198,12 +214,12 @@ export class OrdersService extends BaseService<Order> {
           order,
           squareOrder: newSquareOrder,
         });
-        order.version = 1;
       }
       if (!location.id) {
         throw new InternalServerErrorException('No location ID');
       }
       order.locationId = location.id;
+      order.location = location;
       return await order.save();
     } catch (error) {
       throw new InternalServerErrorException(error);
@@ -211,62 +227,39 @@ export class OrdersService extends BaseService<Order> {
   }
 
   async updateAndSaveVariations(params: {
-    locationSquareId: string;
     variations: VariationAddDto[];
     order: Order;
     squareAccessToken: string;
+    idempotencyKey?: string;
   }) {
     let order = params.order;
-    const { locationSquareId, variations, squareAccessToken } = params;
+    const locationSquareId = order.location?.locationSquareId;
+    const {
+      variations: variationDtos,
+      squareAccessToken,
+      idempotencyKey,
+    } = params;
     if (!order.squareId) {
       throw new UnprocessableEntityException(`No Square Order ID`);
+    }
+    if (!locationSquareId) {
+      throw new UnprocessableEntityException(`No Square Location ID`);
     }
     const squareUpdateBody: UpdateOrderRequest = {
       order: {
         locationId: locationSquareId,
-        version: ++order.squareVersion,
-        lineItems: [],
+        version: order.squareVersion,
+        lineItems: await this.squareOrderLineItemsFor({
+          variations: variationDtos,
+        }),
       },
     };
-
-    for (const dto of variations) {
-      const variation = await this.variationsService.findOneOrFail({
-        where: { id: dto.id },
-      });
-      if (!variation.squareId) {
-        throw new UnprocessableEntityException(`Invalid variation`);
-      }
-      const squareOrderLineItem: OrderLineItem = {
-        catalogObjectId: variation.squareId,
-        quantity: `${dto.quantity}`,
-        modifiers: [],
-      };
-      if (dto.modifierIds && dto.modifierIds.length > 0) {
-        const modifiers = await this.modifiersService.findBy({
-          id: In(dto.modifierIds),
-        });
-
-        if (modifiers.length !== dto.modifierIds.length) {
-          throw new NotFoundException(`Invalid modifiers`);
-        }
-
-        for (const modifier of modifiers) {
-          if (!modifier.squareId) {
-            throw new UnprocessableEntityException(`Invalid modifier`);
-          }
-          squareOrderLineItem.modifiers?.push({
-            catalogObjectId: modifier.squareId,
-          });
-        }
-      }
-      squareUpdateBody.order?.lineItems?.push(squareOrderLineItem);
-    }
 
     try {
       const response = await this.squareService.updateOrder({
         accessToken: squareAccessToken,
         orderId: order.squareId,
-        body: squareUpdateBody,
+        body: { ...squareUpdateBody, idempotencyKey },
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
@@ -307,7 +300,7 @@ export class OrdersService extends BaseService<Order> {
       body: {
         order: {
           locationId: location?.locationSquareId,
-          version: ++order.squareVersion,
+          version: order.squareVersion,
         },
         fieldsToClear: params.uids.map((uid) => `line_items[${uid}]`),
       },
@@ -324,6 +317,43 @@ export class OrdersService extends BaseService<Order> {
         `No Square Order returned from Square`,
       );
     }
+  }
+
+  async squareOrderLineItemsFor(params: { variations: VariationAddDto[] }) {
+    const orderLineItems: OrderLineItem[] = [];
+    for (const dto of params.variations) {
+      const variation = await this.variationsService.findOneOrFail({
+        where: { id: dto.id },
+      });
+      if (!variation.squareId) {
+        throw new UnprocessableEntityException(`Invalid variation`);
+      }
+      const squareOrderLineItem: OrderLineItem = {
+        catalogObjectId: variation.squareId,
+        quantity: `${dto.quantity}`,
+        modifiers: [],
+      };
+      if (dto.modifierIds && dto.modifierIds.length > 0) {
+        const modifiers = await this.modifiersService.findBy({
+          id: In(dto.modifierIds),
+        });
+
+        if (modifiers.length !== dto.modifierIds.length) {
+          throw new NotFoundException(`Invalid modifiers`);
+        }
+
+        for (const modifier of modifiers) {
+          if (!modifier.squareId) {
+            throw new UnprocessableEntityException(`Invalid modifier`);
+          }
+          squareOrderLineItem.modifiers?.push({
+            catalogObjectId: modifier.squareId,
+          });
+        }
+      }
+      orderLineItems.push(squareOrderLineItem);
+    }
+    return orderLineItems;
   }
 
   validatePickupTime(pickupAt: string, businessHours: BusinessHoursPeriod[]) {
@@ -399,53 +429,66 @@ export class OrdersService extends BaseService<Order> {
     }
 
     const businessHours = location?.businessHours ?? [];
-
     this.validatePickupTime(pickupAt, businessHours);
 
-    let squareOrderResponse: ApiResponse<UpdateOrderResponse>;
+    const squareRetrieveOrderResponse = await this.squareService.retrieveOrder({
+      accessToken: squareAccessToken,
+      orderId: order.squareId,
+    });
+    const squareRetrievedOrder = squareRetrieveOrderResponse.result.order;
+    const squareRetrievedOrderHasFulfillment =
+      squareRetrievedOrder?.fulfillments &&
+      squareRetrievedOrder?.fulfillments?.length > 0;
+
+    let squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse>;
     try {
-      squareOrderResponse = await this.squareService.updateOrder({
+      squareUpdateOrderResponse = await this.squareService.updateOrder({
         accessToken: squareAccessToken,
         orderId: order.squareId,
         body: {
           order: {
             locationId: location.locationSquareId,
-            version: ++order.squareVersion,
+            version: order.squareVersion,
             state: 'OPEN',
-            fulfillments: [
-              {
-                type: 'PICKUP',
-                pickupDetails: {
-                  scheduleType: this.isWithinHour(new Date(pickupAt))
-                    ? 'ASAP'
-                    : 'SCHEDULED',
-                  pickupAt: pickupAt,
-                  recipient: {
-                    customerId: customer.squareId,
+            fulfillments: squareRetrievedOrderHasFulfillment
+              ? undefined
+              : [
+                  {
+                    type: 'PICKUP',
+                    pickupDetails: {
+                      scheduleType: this.isWithinHour(new Date(pickupAt))
+                        ? 'ASAP'
+                        : 'SCHEDULED',
+                      pickupAt: pickupAt,
+                      recipient: {
+                        customerId: customer.squareId,
+                      },
+                    },
                   },
-                },
-              },
-            ],
+                ],
           },
         },
       });
     } catch (error) {
       this.logger.error('Error updating Square order:', error);
-      throw new NotFoundException('Failed to update Square order');
+      throw new InternalServerErrorException(
+        error,
+        'Failed to update Square order',
+      );
     }
 
-    const squareOrder = squareOrderResponse.result.order;
-    if (!squareOrder) {
+    const squareOrderFromUpdate = squareUpdateOrderResponse.result.order;
+    if (!squareOrderFromUpdate) {
       throw new NotFoundException('Square order not found');
     }
 
     const updatedOrder = await this.updateAndSaveOrderForSquareOrder({
       order,
-      squareOrder,
+      squareOrder: squareOrderFromUpdate,
     });
 
     const orderTotalAmount =
-      squareOrder?.netAmounts?.totalMoney?.amount ?? BigInt(0);
+      squareOrderFromUpdate?.netAmounts?.totalMoney?.amount ?? BigInt(0);
 
     try {
       await this.squareService.createPayment({
@@ -463,7 +506,7 @@ export class OrdersService extends BaseService<Order> {
             amount: BigInt(Math.floor(input.orderTipMoney ?? 0)),
             currency: 'USD',
           },
-          orderId: squareOrder.id,
+          orderId: squareOrderFromUpdate.id,
           referenceId: order.id,
         },
       });
@@ -489,5 +532,77 @@ export class OrdersService extends BaseService<Order> {
     params.order.squareDetails = params.squareOrder as any;
 
     return params.order.save();
+  }
+
+  @OnEvent('square.order.fulfillment.updated')
+  async handleSquareOrderFulfillmentUpdate(
+    payload: SquareOrderFulfillmentUpdatedPayload,
+  ) {
+    const squareOrderId =
+      payload.data.object.order_fulfillment_updated.order_id;
+    if (!squareOrderId) {
+      this.logger.error(
+        `Missing order_id in SquareOrderFulfillmentUpdatedPayload`,
+      );
+    }
+    const order = await this.findOne({ where: { squareId: squareOrderId } });
+    if (!order) {
+      this.logger.error(`Order with id ${squareOrderId} not found`);
+      return;
+    }
+
+    if (!payload.merchant_id) {
+      this.logger.error(
+        'Missing merchant_id in SquareLocationCreatedEventPayload',
+      );
+      return;
+    }
+
+    const merchant = await this.findOne({
+      where: { squareId: payload.merchant_id },
+    });
+    if (!merchant) {
+      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
+      return;
+    }
+
+    const app = this.merchantsService.firebaseAdminApp({ merchant });
+    if (!app) {
+      this.logger.error(`Firebase app not found for merchant ${merchant.id}`);
+      return;
+    }
+
+    const customer = await this.loadOneRelation<Customer>(order, 'customer');
+    if (!customer) {
+      this.logger.error(`Customer not found for order ${order.id}`);
+      return;
+    }
+
+    const appInstalls =
+      await this.customersService.loadManyRelation<AppInstall>(
+        customer,
+        'appInstalls',
+      );
+
+    const messaging = this.firebaseAdminService.messaging(app);
+    const orderFulfillment = payload.data.object.order_fulfillment_updated;
+    const latestUpdate =
+      orderFulfillment.fulfillment_update[
+        orderFulfillment.fulfillment_update.length - 1
+      ];
+    const body = `Your order with ID ${order.id} has been updated from ${latestUpdate.old_state} to ${latestUpdate.new_state}.`;
+
+    for (const appInstall of appInstalls) {
+      if (!appInstall.firebaseCloudMessagingToken) {
+        continue;
+      }
+      await messaging.send({
+        token: appInstall.firebaseCloudMessagingToken,
+        notification: {
+          title: 'Order Update',
+          body,
+        },
+      });
+    }
   }
 }

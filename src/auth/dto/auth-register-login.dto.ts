@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEmail,
-  IsIn,
-  IsNotEmpty,
-  MinLength,
-  Validate,
-} from 'class-validator';
-import { RoleNameEnum } from 'src/roles/roles.enum';
+import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
 import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 
@@ -32,10 +25,10 @@ export class AuthRegisterLoginDto {
   @IsNotEmpty()
   lastName: string;
 
-  @ApiProperty({
-    enum: Object.values(RoleNameEnum),
-  })
-  @IsNotEmpty()
-  @IsIn([RoleNameEnum.user])
-  role: RoleNameEnum;
+  // @ApiProperty({
+  //   enum: Object.values(RoleNameEnum),
+  // })
+  // @IsNotEmpty()
+  // @IsIn([RoleNameEnum.user])
+  // role: RoleNameEnum;
 }
