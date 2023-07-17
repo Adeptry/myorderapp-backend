@@ -18,6 +18,7 @@ import {
 import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';
+import { VariationLocationOverride } from './variation-location-override.entity';
 
 @Entity('variation')
 export class Variation extends EntityHelper {
@@ -103,4 +104,14 @@ export class Variation extends EntityHelper {
   })
   @JoinColumn({ name: 'catalogId' })
   catalog?: Catalog;
+
+  @ApiProperty({
+    required: false,
+    type: () => [VariationLocationOverride],
+    isArray: true,
+  })
+  @OneToMany(() => VariationLocationOverride, (entity) => entity.variation, {
+    nullable: true,
+  })
+  locationOverrides?: VariationLocationOverride[];
 }

@@ -44,12 +44,6 @@ export abstract class BaseService<Entity extends ObjectLiteral> {
   create(entityLike: DeepPartial<Entity>): Entity {
     return this.repository.create(entityLike);
   }
-  createAndSave(
-    entityLike: DeepPartial<Entity>,
-    options?: SaveOptions,
-  ): Promise<Entity> {
-    return this.save(this.repository.create(entityLike), options);
-  }
   merge(
     mergeIntoEntity: Entity,
     ...entityLikes: DeepPartial<Entity>[]

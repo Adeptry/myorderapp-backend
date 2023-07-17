@@ -22,7 +22,11 @@ import { CatalogsController } from './catalogs.controller';
 import { CategoriesController } from './controllers/categories.controller';
 import { ItemsController } from './controllers/items.controller';
 import { CatalogImage } from './entities/catalog-image.entity';
+import { ModifierLocationOverride } from './entities/modifier-location-override.entity';
+import { VariationLocationOverride } from './entities/variation-location-override.entity';
 import { CatalogImagesService } from './services/catalog-images.service';
+import { ModifierLocationOverridesService } from './services/modifier-location-overrides.service';
+import { VariationLocationOverridesService } from './services/variation-location-overrides.service';
 
 @Module({
   imports: [
@@ -34,6 +38,8 @@ import { CatalogImagesService } from './services/catalog-images.service';
       Variation,
       Modifier,
       CatalogImage,
+      ModifierLocationOverride,
+      VariationLocationOverride,
     ]),
     LocationsModule,
     AuthModule,
@@ -50,6 +56,8 @@ import { CatalogImagesService } from './services/catalog-images.service';
     ModifierListsService,
     CategoriesService,
     CatalogImagesService,
+    VariationLocationOverridesService,
+    ModifierLocationOverridesService,
   ],
   providers: [
     CatalogsService,
@@ -59,6 +67,8 @@ import { CatalogImagesService } from './services/catalog-images.service';
     ModifierListsService,
     CategoriesService,
     CatalogImagesService,
+    VariationLocationOverridesService,
+    ModifierLocationOverridesService,
   ],
   controllers: [CatalogsController, CategoriesController, ItemsController],
 })

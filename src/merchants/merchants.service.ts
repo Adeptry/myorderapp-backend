@@ -109,23 +109,23 @@ export class MerchantsService extends BaseService<Merchant> {
   }
 
   async squareCatalogSync(params: { merchant: Merchant }) {
-    const entity = params.merchant;
+    const merchant = params.merchant;
 
-    if (entity?.id == null) {
+    if (merchant?.id == null) {
       throw new NotFoundException('Merchant id is null');
     }
 
-    const squareAccessToken = entity.squareAccessToken;
+    const squareAccessToken = merchant.squareAccessToken;
     if (squareAccessToken == null) {
       throw new UnauthorizedException('Square access token is null');
     }
 
-    let catalog = await this.loadOneRelation<Catalog>(entity, 'catalog');
+    let catalog = await this.loadOneRelation<Catalog>(merchant, 'catalog');
     if (catalog == null) {
       catalog = this.catalogsService.createEmpty();
-      entity.catalog = catalog;
+      merchant.catalog = catalog;
       await this.catalogsService.save(catalog);
-      await this.save(entity);
+      await this.save(merchant);
     }
 
     if (catalog.id == null) {
@@ -135,6 +135,7 @@ export class MerchantsService extends BaseService<Merchant> {
     await this.catalogsService.squareSync({
       squareAccessToken,
       catalogId: catalog.id,
+      merchantId: merchant.id,
     });
 
     return;

@@ -9,6 +9,7 @@ import {
   JoinTable,
   ManyToMany,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
@@ -20,6 +21,7 @@ import { Location } from 'src/locations/entities/location.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import { Catalog } from './catalog.entity';
 import { ModifierList } from './modifier-list.entity';
+import { ModifierLocationOverride } from './modifier-location-override.entity';
 
 @Entity('modifier')
 export class Modifier extends EntityHelper {
@@ -91,7 +93,15 @@ export class Modifier extends EntityHelper {
 
   // Locations
 
-  // Locations
+  @ApiProperty({
+    required: false,
+    type: () => [ModifierLocationOverride],
+    isArray: true,
+  })
+  @OneToMany(() => ModifierLocationOverride, (entity) => entity.modifier, {
+    nullable: true,
+  })
+  locationOverrides?: ModifierLocationOverride[];
 
   @Column({ default: true, nullable: true, type: Boolean })
   @Exclude({ toPlainOnly: true })

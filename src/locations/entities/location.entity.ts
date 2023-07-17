@@ -1,6 +1,8 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { ModifierLocationOverride } from 'src/catalogs/entities/modifier-location-override.entity';
+import { VariationLocationOverride } from 'src/catalogs/entities/variation-location-override.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -180,6 +182,24 @@ export class Location extends EntityHelper {
   @JoinColumn({ name: 'addressId' })
   @ApiProperty({ type: Address, required: false })
   address?: Address | null;
+
+  /*
+   * Overrides
+   */
+
+  @OneToMany(() => VariationLocationOverride, (entity) => entity.location, {
+    nullable: true,
+  })
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
+  variationLocationOverrides?: VariationLocationOverride[];
+
+  @OneToMany(() => ModifierLocationOverride, (entity) => entity.location, {
+    nullable: true,
+  })
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
+  modifierLocationOverrides?: ModifierLocationOverride[];
 
   /*
    * Square

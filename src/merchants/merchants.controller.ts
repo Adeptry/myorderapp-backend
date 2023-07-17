@@ -125,14 +125,16 @@ export class MerchantsController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
+  @ApiOkResponse({ description: 'Square Oauth confirmed' })
   async squareConfirmOauth(
     @Req() request: any,
     @Query('oauthAccessCode') oauthAccessCode: string,
-  ): Promise<Merchant | null> {
-    return this.service.squareConfirmOauth({
+  ): Promise<void> {
+    await this.service.squareConfirmOauth({
       oauthAccessCode,
       merchant: request.merchant,
     });
+    return;
   }
 
   @Get('me/square/catalog/sync')

@@ -91,12 +91,14 @@ export class OrdersService extends BaseService<Order> {
       locationId = moaMainLocation.id;
     }
 
-    let order = await this.createAndSave({
-      customerId: customer.id,
-      locationId,
-      merchantId: merchant.id,
-      squareVersion: 1,
-    });
+    let order = await this.save(
+      this.create({
+        customerId: customer.id,
+        locationId,
+        merchantId: merchant.id,
+        squareVersion: 1,
+      }),
+    );
 
     let location = await this.locationsService.findOne({
       where: {

@@ -3,20 +3,24 @@ import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { LocationsService } from 'src/locations/locations.service';
 import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
-import { DataSource, In, Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 import { MoaSelectionType } from './dto/catalogs.types';
 import { CatalogImage } from './entities/catalog-image.entity';
 import { Catalog } from './entities/catalog.entity';
 import { Category } from './entities/category.entity';
 import { Item } from './entities/item.entity';
 import { ModifierList } from './entities/modifier-list.entity';
+import { ModifierLocationOverride } from './entities/modifier-location-override.entity';
 import { Modifier } from './entities/modifier.entity';
+import { VariationLocationOverride } from './entities/variation-location-override.entity';
 import { Variation } from './entities/variation.entity';
 import { CatalogImagesService } from './services/catalog-images.service';
 import { CategoriesService } from './services/categories.service';
 import { ItemsService } from './services/items.service';
 import { ModifierListsService } from './services/modifier-lists.service';
+import { ModifierLocationOverridesService } from './services/modifier-location-overrides.service';
 import { ModifiersService } from './services/modifiers.service';
+import { VariationLocationOverridesService } from './services/variation-location-overrides.service';
 import { VariationsService } from './services/variations.service';
 
 @Injectable()
@@ -28,36 +32,38 @@ export class CatalogsService extends BaseService<Catalog> {
     protected readonly repository: Repository<Catalog>,
     @InjectDataSource()
     private dataSource: DataSource,
+    private readonly itemsService: ItemsService,
+    private readonly variationsService: VariationsService,
+    private readonly modifiersService: ModifiersService,
+    private readonly modifierListsService: ModifierListsService,
+    private readonly categoriesService: CategoriesService,
+    private readonly catalogImagesService: CatalogImagesService,
+    private readonly variationLocationOverridesService: VariationLocationOverridesService,
+    private readonly modifierLocationOverridesService: ModifierLocationOverridesService,
     @Inject(SquareService)
     private readonly squareService: SquareService,
-    @Inject(ItemsService)
-    private readonly itemsService: ItemsService,
-    @Inject(VariationsService)
-    private readonly variationsService: VariationsService,
-    @Inject(ModifiersService)
-    private readonly modifiersService: ModifiersService,
-    @Inject(ModifierListsService)
-    private readonly modifierListsService: ModifierListsService,
-    @Inject(CategoriesService)
-    private readonly categoriesService: CategoriesService,
-    @Inject(CatalogImagesService)
-    private readonly catalogImagesService: CatalogImagesService,
     @Inject(LocationsService)
     private readonly locationsService: LocationsService,
   ) {
     super(repository);
   }
 
-  async squareSync(params: { squareAccessToken: string; catalogId: string }) {
+  async squareSync(params: {
+    squareAccessToken: string;
+    catalogId: string;
+    merchantId: string;
+  }) {
+    const { merchantId, catalogId, squareAccessToken: accessToken } = params;
     const moaCatalog = await this.findOneOrFail({
-      where: { id: params.catalogId },
+      where: { id: catalogId },
     });
 
     await this.dataSource.transaction(async () => {
       const squareCatalogObjects =
         (await this.squareService.listCatalog({
-          accessToken: params.squareAccessToken,
+          accessToken,
         })) ?? [];
+      const moaLocations = await this.locationsService.findBy({ merchantId });
 
       if (moaCatalog.id == null) {
         throw new Error('Catalog id is null.');
@@ -194,7 +200,7 @@ export class CatalogsService extends BaseService<Catalog> {
           });
           moaCategory.moaOrdinal = squareCategoryIndex;
           this.logger.verbose(
-            `Created category ${moaCategory.name} ${moaCategory.id}.`,
+            `Created category ${squareCategory.categoryData?.name}.`,
           );
         }
 
@@ -222,7 +228,7 @@ export class CatalogsService extends BaseService<Catalog> {
             (await this.itemsService.findOne({
               where: { squareId: squareItemForCategory.id },
             }));
-          if (moaItem === null) {
+          if (moaItem == null) {
             moaItem = this.itemsService.create({
               squareId: squareItemForCategory.id,
               categoryId: moaCategory.id,
@@ -231,32 +237,6 @@ export class CatalogsService extends BaseService<Catalog> {
                 squareItemForCategory.presentAtAllLocations,
             });
             moaItem.moaOrdinal = squareItemForCategoryIndex;
-            this.logger.verbose(`Created item s${moaItem.name} ${moaItem.id}.`);
-          }
-
-          moaItem.presentAtAllLocations =
-            squareItemForCategory.presentAtAllLocations;
-          const itemPresentAtLocationsIds =
-            squareItemForCategory.presentAtLocationIds ?? [];
-          if (itemPresentAtLocationsIds.length > 0) {
-            moaItem.presentAtLocations = await this.locationsService.find({
-              where: {
-                locationSquareId: In(itemPresentAtLocationsIds),
-              },
-            });
-          } else {
-            moaItem.presentAtLocations = [];
-          }
-          const itemAbsentAtLocationsIds =
-            squareItemForCategory.absentAtLocationIds ?? [];
-          if (itemAbsentAtLocationsIds.length > 0) {
-            moaItem.absentAtLocations = await this.locationsService.find({
-              where: {
-                locationSquareId: In(itemAbsentAtLocationsIds),
-              },
-            });
-          } else {
-            moaItem.absentAtLocations = [];
           }
 
           const squareItemData = squareItemForCategory.itemData;
@@ -267,6 +247,36 @@ export class CatalogsService extends BaseService<Catalog> {
           moaItem.name = squareItemData.name;
           moaItem.description = squareItemData.description;
           moaItem.category = moaCategory;
+
+          await this.itemsService.save(moaItem);
+
+          moaItem.presentAtAllLocations =
+            squareItemForCategory.presentAtAllLocations;
+          const itemPresentAtSquareLocationsIds =
+            squareItemForCategory.presentAtLocationIds ?? [];
+          if (itemPresentAtSquareLocationsIds.length > 0) {
+            moaItem.presentAtLocations = moaLocations.filter((value) => {
+              return (
+                value.locationSquareId &&
+                itemPresentAtSquareLocationsIds.includes(value.locationSquareId)
+              );
+            });
+          } else {
+            moaItem.presentAtLocations = [];
+          }
+
+          const itemAbsentAtSquareLocationsIds =
+            squareItemForCategory.absentAtLocationIds ?? [];
+          if (itemAbsentAtSquareLocationsIds.length > 0) {
+            moaItem.absentAtLocations = moaLocations.filter((value) => {
+              return (
+                value.locationSquareId &&
+                itemAbsentAtSquareLocationsIds.includes(value.locationSquareId)
+              );
+            });
+          } else {
+            moaItem.absentAtLocations = [];
+          }
 
           if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
             for (const squareImageId of squareItemData.imageIds) {
@@ -326,53 +336,77 @@ export class CatalogsService extends BaseService<Catalog> {
               }));
 
             if (moaVariation == null) {
-              moaVariation = await this.variationsService.create({
+              moaVariation = this.variationsService.create({
                 squareId: squareVariation.id,
                 itemId: moaItem.id,
                 catalogId: moaCatalog.id,
               });
-              this.logger.verbose(
-                `Created variation ${moaVariation.name} ${moaVariation.id}.`,
-              );
             }
 
             const squareVariationData = squareVariation.itemVariationData;
-            let changed = false;
             if (squareVariationData == null) {
               continue;
             }
 
-            if (moaVariation.name !== squareVariationData.name) {
-              moaVariation.name = squareVariationData.name;
-              changed = true;
-            }
-            if (moaVariation.ordinal !== squareVariationData.ordinal) {
-              moaVariation.ordinal = squareVariationData.ordinal;
-              changed = true;
-            }
-
-            const squareVariationDataPriceInCents =
+            moaVariation.name = squareVariationData.name;
+            moaVariation.ordinal = squareVariationData.ordinal;
+            moaVariation.priceInCents =
               Number(squareVariationData.priceMoney?.amount ?? 0) ?? 0;
-            if (moaVariation.priceInCents !== squareVariationDataPriceInCents) {
-              moaVariation.priceInCents = squareVariationDataPriceInCents;
-              changed = true;
-            }
 
             minPriceInCents = Math.min(
               minPriceInCents,
               moaVariation.priceInCents,
             );
 
-            if (changed) {
-              try {
-                this.logger.verbose(
-                  `Variation saved ${moaVariation.name} ${moaVariation.id}.`,
+            try {
+              await this.variationsService.save(moaVariation);
+            } catch (error) {
+              this.logger.log(error);
+            }
+
+            const squareVariationLocationOverrides =
+              squareVariationData.locationOverrides;
+
+            if (squareVariationLocationOverrides) {
+              // First, delete all existing VariationLocationOverrides for this moaVariation
+              const existingVariationLocationOverrides =
+                await this.variationLocationOverridesService.find({
+                  where: {
+                    variationId: moaVariation.id,
+                  },
+                });
+              for (const existingOverride of existingVariationLocationOverrides) {
+                await this.variationLocationOverridesService.remove(
+                  existingOverride,
                 );
-                await this.variationsService.save(moaVariation);
-              } catch (error) {
-                this.logger.log(error);
+              }
+
+              // Then, recreate them based on the current Square data
+              for (const override of squareVariationLocationOverrides) {
+                const moaLocationForVariationOverride = moaLocations.find(
+                  (value) => {
+                    return value.locationSquareId === override.locationId;
+                  },
+                );
+
+                const moaVariationLocationOverride =
+                  new VariationLocationOverride();
+                moaVariationLocationOverride.variationId = moaVariation.id;
+                moaVariationLocationOverride.locationId =
+                  moaLocationForVariationOverride?.id;
+                moaVariationLocationOverride.amount = Number(
+                  override.priceMoney?.amount ?? 0,
+                );
+                moaVariationLocationOverride.currency =
+                  override.priceMoney?.currency;
+
+                await this.variationLocationOverridesService.save(
+                  moaVariationLocationOverride,
+                );
               }
             }
+
+            await this.variationsService.save(moaVariation);
           }
 
           if (moaItem.displayPriceInCents != minPriceInCents) {
@@ -503,41 +537,92 @@ export class CatalogsService extends BaseService<Catalog> {
                 );
               }
 
-              moaModifier.presentAtAllLocations =
-                squareModifier.presentAtAllLocations;
-              const modifierPresentAtLocationsIds =
-                squareModifier.presentAtLocationIds ?? [];
-              if (modifierPresentAtLocationsIds.length > 0) {
-                moaModifier.presentAtLocations =
-                  await this.locationsService.find({
-                    where: {
-                      locationSquareId: In(modifierPresentAtLocationsIds),
-                    },
-                  });
-              } else {
-                moaModifier.presentAtLocations = [];
-              }
-              const modifierAbsentAtLocationsIds =
-                squareModifier.absentAtLocationIds ?? [];
-              if (modifierAbsentAtLocationsIds.length > 0) {
-                moaModifier.absentAtLocations =
-                  await this.locationsService.find({
-                    where: {
-                      locationSquareId: In(modifierAbsentAtLocationsIds),
-                    },
-                  });
-              } else {
-                moaModifier.absentAtLocations = [];
-              }
-
               const squareModifierData = squareModifier.modifierData;
-
               moaModifier.modifierList = moaModifierList;
               moaModifier.name = squareModifierData?.name;
               moaModifier.ordinal = squareModifierData?.ordinal;
               moaModifier.priceInCents = Number(
                 squareModifierData?.priceMoney?.amount ?? 0,
               );
+              await this.modifiersService.save(moaModifier);
+
+              moaModifier.presentAtAllLocations =
+                squareModifier.presentAtAllLocations;
+              const modifierPresentAtSquareLocationsIds =
+                squareModifier.presentAtLocationIds ?? [];
+              if (modifierPresentAtSquareLocationsIds.length > 0) {
+                moaModifier.presentAtLocations = moaLocations.filter(
+                  (value) => {
+                    return (
+                      value.locationSquareId &&
+                      modifierPresentAtSquareLocationsIds.includes(
+                        value.locationSquareId,
+                      )
+                    );
+                  },
+                );
+              } else {
+                moaModifier.presentAtLocations = [];
+              }
+              const modifierAbsentAtSquareLocationsIds =
+                squareModifier.absentAtLocationIds ?? [];
+              if (modifierAbsentAtSquareLocationsIds.length > 0) {
+                moaModifier.absentAtLocations = moaLocations.filter((value) => {
+                  return (
+                    value.locationSquareId &&
+                    modifierAbsentAtSquareLocationsIds.includes(
+                      value.locationSquareId,
+                    )
+                  );
+                });
+              } else {
+                moaModifier.absentAtLocations = [];
+              }
+
+              const squareModifierLocationOverride =
+                squareModifierData?.locationOverrides;
+
+              if (squareModifierLocationOverride) {
+                // First, delete all existing ModifierLocationOverrides for this moaModifier
+                const existingModifierLocationOverrides =
+                  await this.modifierLocationOverridesService.find({
+                    where: {
+                      modifierId: moaModifier.id,
+                    },
+                  });
+                for (const existingOverride of existingModifierLocationOverrides) {
+                  await this.modifierLocationOverridesService.remove(
+                    existingOverride,
+                  );
+                }
+
+                // Then, recreate them based on the current Square data
+                for (const modifierOverride of squareModifierLocationOverride) {
+                  const moaLocationForModifierOverride = moaLocations.find(
+                    (value) => {
+                      return (
+                        value.locationSquareId === modifierOverride.locationId
+                      );
+                    },
+                  );
+
+                  const moaModifierLocationOverride =
+                    new ModifierLocationOverride();
+                  moaModifierLocationOverride.modifierId = moaModifier.id;
+                  moaModifierLocationOverride.locationId =
+                    moaLocationForModifierOverride?.id;
+                  moaModifierLocationOverride.amount = Number(
+                    modifierOverride.priceMoney?.amount ?? 0,
+                  );
+                  moaModifierLocationOverride.currency =
+                    modifierOverride.priceMoney?.currency;
+
+                  await this.modifierLocationOverridesService.save(
+                    moaModifierLocationOverride,
+                  );
+                }
+              }
+
               await this.modifiersService.save(moaModifier);
             }
           }
