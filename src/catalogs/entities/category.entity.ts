@@ -77,7 +77,7 @@ export class Category extends EntityHelper {
   @OneToMany(() => CatalogImage, (entity) => entity.category, {
     nullable: true,
   })
-  catalogImages?: CatalogImage[];
+  images?: CatalogImage[];
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

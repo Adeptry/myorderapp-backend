@@ -79,11 +79,13 @@ export class ModifierList extends EntityHelper {
   @OneToMany(() => CatalogImage, (entity) => entity.modifierList, {
     nullable: true,
   })
-  catalogImages?: CatalogImage[];
+  images?: CatalogImage[];
 
   /*
    * Relations
    */
+
+  // Items
 
   @ManyToMany(() => Item, (entity) => entity.modifierLists, {
     onDelete: 'CASCADE',
@@ -92,12 +94,16 @@ export class ModifierList extends EntityHelper {
   })
   items?: Item[];
 
+  // Modifiers
+
   @ApiProperty({ type: () => Modifier, isArray: true, required: false })
   @OneToMany(() => Modifier, (entity) => entity.modifierList, {
     nullable: true,
     eager: true,
   })
   modifiers?: Modifier[];
+
+  // Catalog
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })

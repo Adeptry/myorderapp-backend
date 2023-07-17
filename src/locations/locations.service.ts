@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
 import { BaseService } from 'src/utils/base-service';
@@ -33,15 +33,27 @@ export class LocationsService extends BaseService<MoaLocation> {
     merchantId: string;
     squareAccessToken: string;
   }): Promise<MoaLocation[]> {
+    const { merchantId, squareAccessToken: accessToken } = params;
     const locations = await this.find({
-      where: { merchantId: params.merchantId },
+      where: { merchantId },
       relations: ['address', 'businessHours'],
     });
 
     const squareLocationsResponse = await this.squareService.listLocations({
-      accessToken: params.squareAccessToken,
+      accessToken,
     });
     const squareLocations = squareLocationsResponse?.result.locations ?? [];
+
+    const squareMainLocationResponse =
+      await this.squareService.retrieveLocation({
+        accessToken,
+        locationSquareId: 'main',
+      });
+    const squareMainLocation = squareMainLocationResponse.result.location;
+    if (!squareMainLocation) {
+      this.logger.error('Failed to retrieve main location');
+      throw new NotFoundException('Failed to retrieve main location');
+    }
 
     for (const squareLocation of squareLocations) {
       if (!squareLocation?.id) continue;
@@ -54,14 +66,15 @@ export class LocationsService extends BaseService<MoaLocation> {
         moaLocation = this.create({
           locationSquareId: squareLocation.id,
           merchantSquareId: squareLocation.merchantId,
-          merchantId: params.merchantId,
+          isMain: squareLocation.id === squareMainLocation?.id,
+          merchantId,
         });
         locations.push(moaLocation);
       }
 
       const {
-        merchantId,
-        id,
+        merchantId: merchantSquareId,
+        id: locationSquareId,
         name,
         description,
         phoneNumber,
@@ -84,8 +97,8 @@ export class LocationsService extends BaseService<MoaLocation> {
       } = squareLocation;
 
       Object.assign(moaLocation, {
-        merchantSquareId: merchantId,
-        locationSquareId: id,
+        merchantSquareId,
+        locationSquareId,
         name,
         description,
         phoneNumber,
@@ -106,6 +119,8 @@ export class LocationsService extends BaseService<MoaLocation> {
         mcc,
         fullFormatLogoUrl,
       });
+
+      moaLocation.isMain = squareLocation.id === squareMainLocation.id;
 
       // Sync Address
       if (squareLocation.address) {

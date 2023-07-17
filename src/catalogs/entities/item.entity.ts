@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { Location } from 'src/locations/entities/location.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -89,7 +90,7 @@ export class Item extends EntityHelper {
   @OneToMany(() => CatalogImage, (entity) => entity.item, {
     nullable: true,
   })
-  catalogImages?: CatalogImage[];
+  images?: CatalogImage[];
 
   /*
    * Category
@@ -151,4 +152,42 @@ export class Item extends EntityHelper {
   })
   @JoinColumn()
   catalog?: Catalog;
+
+  /*
+   *  Locations
+   */
+
+  @Column({ default: true, nullable: true, type: Boolean })
+  @Exclude({ toPlainOnly: true })
+  presentAtAllLocations?: boolean | null;
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'items_present_at_locations',
+    joinColumn: {
+      name: 'itemId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  presentAtLocations?: Location[];
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'items_absent_at_locations',
+    joinColumn: {
+      name: 'itemId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  absentAtLocations?: Location[];
 }

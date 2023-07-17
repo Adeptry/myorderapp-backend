@@ -15,6 +15,7 @@ import { ModifiersService } from 'src/catalogs/services/modifiers.service';
 import { VariationsService } from 'src/catalogs/services/variations.service';
 import { CustomersModule } from 'src/customers/customers.module';
 import { GuardsModule } from 'src/guards/guards.module';
+import { LocationsModule } from 'src/locations/locations.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
 import { CatalogsController } from './catalogs.controller';
@@ -34,6 +35,7 @@ import { CatalogImagesService } from './services/catalog-images.service';
       Modifier,
       CatalogImage,
     ]),
+    LocationsModule,
     AuthModule,
     SquareModule,
     forwardRef(() => GuardsModule),

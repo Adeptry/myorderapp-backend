@@ -48,7 +48,7 @@ export class Location extends EntityHelper {
   version?: number;
 
   /*
-   * Moameta
+   * Moa
    */
 
   @ApiProperty({ required: false })
@@ -59,7 +59,13 @@ export class Location extends EntityHelper {
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
-  /* Square */
+  /*
+   * Square
+   */
+  @ApiProperty({ type: Boolean, required: true })
+  @Column({ type: Boolean, nullable: true, default: false })
+  isMain?: boolean;
+
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   name?: string | null;

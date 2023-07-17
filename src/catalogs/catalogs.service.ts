@@ -1,8 +1,9 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { LocationsService } from 'src/locations/locations.service';
 import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
-import { DataSource, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { MoaSelectionType } from './dto/catalogs.types';
 import { CatalogImage } from './entities/catalog-image.entity';
 import { Catalog } from './entities/catalog.entity';
@@ -41,43 +42,10 @@ export class CatalogsService extends BaseService<Catalog> {
     private readonly categoriesService: CategoriesService,
     @Inject(CatalogImagesService)
     private readonly catalogImagesService: CatalogImagesService,
+    @Inject(LocationsService)
+    private readonly locationsService: LocationsService,
   ) {
     super(repository);
-  }
-
-  joinOne(params: { catalogId: string; onlyShowEnabled?: boolean }) {
-    const moaEnabled = params.onlyShowEnabled ? true : undefined;
-    return this.findOne({
-      where: {
-        id: params.catalogId,
-        categories: { moaEnabled, items: { moaEnabled } },
-      },
-      relations: {
-        categories: {
-          catalogImages: true,
-          items: {
-            catalogImages: true,
-            modifierLists: {
-              catalogImages: true,
-              modifiers: true,
-            },
-            variations: {
-              catalogImages: true,
-            },
-          },
-        },
-      },
-      order: {
-        categories: {
-          moaOrdinal: 'ASC',
-          items: {
-            moaOrdinal: 'ASC',
-            modifierLists: { modifiers: { ordinal: 'ASC' } },
-            variations: { ordinal: 'ASC' },
-          },
-        },
-      },
-    });
   }
 
   async squareSync(params: { squareAccessToken: string; catalogId: string }) {
@@ -255,13 +223,40 @@ export class CatalogsService extends BaseService<Catalog> {
               where: { squareId: squareItemForCategory.id },
             }));
           if (moaItem === null) {
-            moaItem = await this.itemsService.create({
+            moaItem = this.itemsService.create({
               squareId: squareItemForCategory.id,
               categoryId: moaCategory.id,
               catalogId: moaCatalog.id,
+              presentAtAllLocations:
+                squareItemForCategory.presentAtAllLocations,
             });
             moaItem.moaOrdinal = squareItemForCategoryIndex;
-            this.logger.verbose(`Created item ${moaItem.name} ${moaItem.id}.`);
+            this.logger.verbose(`Created item s${moaItem.name} ${moaItem.id}.`);
+          }
+
+          moaItem.presentAtAllLocations =
+            squareItemForCategory.presentAtAllLocations;
+          const itemPresentAtLocationsIds =
+            squareItemForCategory.presentAtLocationIds ?? [];
+          if (itemPresentAtLocationsIds.length > 0) {
+            moaItem.presentAtLocations = await this.locationsService.find({
+              where: {
+                locationSquareId: In(itemPresentAtLocationsIds),
+              },
+            });
+          } else {
+            moaItem.presentAtLocations = [];
+          }
+          const itemAbsentAtLocationsIds =
+            squareItemForCategory.absentAtLocationIds ?? [];
+          if (itemAbsentAtLocationsIds.length > 0) {
+            moaItem.absentAtLocations = await this.locationsService.find({
+              where: {
+                locationSquareId: In(itemAbsentAtLocationsIds),
+              },
+            });
+          } else {
+            moaItem.absentAtLocations = [];
           }
 
           const squareItemData = squareItemForCategory.itemData;
@@ -306,7 +301,7 @@ export class CatalogsService extends BaseService<Catalog> {
             await this.catalogImagesService.removeAll(
               await this.itemsService.loadManyRelation<CatalogImage>(
                 moaItem,
-                'catalogImages',
+                'images',
               ),
             );
           }
@@ -506,6 +501,33 @@ export class CatalogsService extends BaseService<Catalog> {
                 this.logger.verbose(
                   `Created modifier ${moaModifier.name} ${moaModifier.id}.`,
                 );
+              }
+
+              moaModifier.presentAtAllLocations =
+                squareModifier.presentAtAllLocations;
+              const modifierPresentAtLocationsIds =
+                squareModifier.presentAtLocationIds ?? [];
+              if (modifierPresentAtLocationsIds.length > 0) {
+                moaModifier.presentAtLocations =
+                  await this.locationsService.find({
+                    where: {
+                      locationSquareId: In(modifierPresentAtLocationsIds),
+                    },
+                  });
+              } else {
+                moaModifier.presentAtLocations = [];
+              }
+              const modifierAbsentAtLocationsIds =
+                squareModifier.absentAtLocationIds ?? [];
+              if (modifierAbsentAtLocationsIds.length > 0) {
+                moaModifier.absentAtLocations =
+                  await this.locationsService.find({
+                    where: {
+                      locationSquareId: In(modifierAbsentAtLocationsIds),
+                    },
+                  });
+              } else {
+                moaModifier.absentAtLocations = [];
               }
 
               const squareModifierData = squareModifier.modifierData;

@@ -52,6 +52,7 @@ export class CatalogImage extends EntityHelper {
 
   /* Square */
 
+  @Exclude({ toPlainOnly: true })
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   squareId?: string | null;
@@ -74,7 +75,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: true })
   itemId?: string;
 
-  @ManyToOne(() => Item, (entity) => entity.catalogImages, {
+  @ManyToOne(() => Item, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -85,7 +86,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: true })
   variationId?: string;
 
-  @ManyToOne(() => Variation, (entity) => entity.catalogImages, {
+  @ManyToOne(() => Variation, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -96,7 +97,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: true })
   categoryId?: string;
 
-  @ManyToOne(() => Category, (entity) => entity.catalogImages, {
+  @ManyToOne(() => Category, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -107,7 +108,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: true })
   modifierListId?: string;
 
-  @ManyToOne(() => ModifierList, (entity) => entity.catalogImages, {
+  @ManyToOne(() => ModifierList, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })

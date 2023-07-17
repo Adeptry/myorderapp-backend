@@ -6,6 +6,8 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
+  ManyToMany,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -14,6 +16,7 @@ import {
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { Location } from 'src/locations/entities/location.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import { Catalog } from './catalog.entity';
 import { ModifierList } from './modifier-list.entity';
@@ -85,4 +88,42 @@ export class Modifier extends EntityHelper {
   })
   @JoinColumn()
   catalog?: Catalog;
+
+  // Locations
+
+  // Locations
+
+  @Column({ default: true, nullable: true, type: Boolean })
+  @Exclude({ toPlainOnly: true })
+  presentAtAllLocations?: boolean | null;
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'modifiers_present_at_locations',
+    joinColumn: {
+      name: 'modifierId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  presentAtLocations?: Location[];
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'modifiers_absent_at_locations',
+    joinColumn: {
+      name: 'modifierId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  absentAtLocations?: Location[];
 }

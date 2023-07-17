@@ -32,7 +32,6 @@ import {
   CategoryUpdateAllDto,
   CategoryUpdateDto,
 } from 'src/catalogs/dto/category-update.dto';
-import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
 import { Category } from 'src/catalogs/entities/category.entity';
 import { CategoriesService } from 'src/catalogs/services/categories.service';
 import { ItemsService } from 'src/catalogs/services/items.service';
@@ -65,9 +64,11 @@ export class CategoriesController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'locationId', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'withItems', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get your Categories',
     operationId: 'getMyCategories',
@@ -81,55 +82,47 @@ export class CategoriesController {
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('locationId') locationId?: string,
+    @Query('withItems') withItems?: boolean,
   ): Promise<CategoryPaginatedResponse> {
-    if (!request.merchant.catalogId) {
+    const { merchant, customer } = request;
+    const whereEnabled = customer != undefined ? true : undefined;
+
+    if (!merchant.catalogId) {
       throw new NotFoundException(`Catalog not found`);
     }
-    return paginatedResults({
-      results: await this.service.findAndCount({
-        where: {
-          catalogId: request.merchant.catalogId,
-          moaEnabled: request.customer != undefined ? true : undefined,
-        },
-        order: { moaOrdinal: 'ASC' },
-        take: limit,
-        skip: (page - 1) * limit,
-      }),
-      pagination: { page, limit },
+    const results = await this.service.findAndCount({
+      where: {
+        catalogId: merchant.catalogId,
+        moaEnabled: whereEnabled,
+      },
+      order: { moaOrdinal: 'ASC' },
+      take: limit,
+      skip: (page - 1) * limit,
     });
-  }
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
-  @Get(':id/items')
-  @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: ItemPaginatedResponse })
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
-  @ApiQuery({ name: 'page', required: false, type: Number })
-  @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiOperation({ summary: 'Get Items in Category', operationId: 'getItems' })
-  async category(
-    @Req() request: UserTypeGuardedRequest,
-    @Param('id') categoryId: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
-  ): Promise<ItemPaginatedResponse> {
+    if (withItems) {
+      await Promise.all(
+        results[0].map(async (category) => {
+          this.logger.log(`Category: ${category.id}`);
+          if (!category.id) {
+            return;
+          }
+
+          category.items = await this.itemsService
+            .joinManyQuery({
+              categoryId: category.id,
+              locationId,
+              leftJoinDetails: false,
+              whereEnabled,
+            })
+            .getMany();
+        }),
+      );
+    }
+
     return paginatedResults({
-      results: await this.itemsService.findAndCount({
-        where: {
-          categoryId,
-          catalogId: request.merchant.catalogId,
-          moaEnabled: request.customer?.id != undefined ? true : undefined,
-        },
-        order: { moaOrdinal: 'ASC' },
-        take: limit,
-        skip: (page - 1) * limit,
-      }),
+      results,
       pagination: { page, limit },
     });
   }
