@@ -264,7 +264,6 @@ export class OrdersController {
 
     let order = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
-      relations: ['location'],
     });
 
     const { variations } = body;
@@ -336,20 +335,21 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
-    if (!request.customer.currentOrderId) {
+    const { customer, merchant } = request;
+    if (!customer.currentOrderId) {
       throw new NotFoundException(`No current order`);
     }
     const entity = await this.service.findOneOrFail({
-      where: { id: request.customer.currentOrderId },
+      where: { id: customer.currentOrderId },
     });
 
-    if (!request.merchant.squareAccessToken) {
+    if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
 
     await this.service.remove(entity);
-    request.customer.currentOrderId = undefined;
-    await request.customer.save();
+    customer.currentOrder = null;
+    await customer.save();
 
     return;
   }

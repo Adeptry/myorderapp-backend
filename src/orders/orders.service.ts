@@ -514,7 +514,7 @@ export class OrdersService extends BaseService<Order> {
       });
 
       updatedOrder.customerId = customer.id;
-      customer.currentOrderId = undefined;
+      customer.currentOrder = null;
       await customer.save();
 
       return this.save(updatedOrder);

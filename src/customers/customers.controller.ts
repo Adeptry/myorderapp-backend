@@ -75,7 +75,8 @@ export class CustomersController {
     description: 'Customer already exists',
     type: NestError,
   })
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
+  @ApiCreatedResponse({ type: Customer })
   @ApiOperation({
     summary: 'Create Customer for current User',
     operationId: 'createCustomer',

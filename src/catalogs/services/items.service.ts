@@ -110,8 +110,8 @@ export class ItemsService extends BaseService<Item> {
 
     if (leftJoinModifierLists) {
       query
-        .leftJoinAndSelect('item.modifierLists', 'modifierList')
-        .leftJoinAndSelect('modifierList.modifiers', 'modifiers');
+        .leftJoinAndSelect('item.modifierLists', 'modifierLists')
+        .leftJoinAndSelect('modifierLists.modifiers', 'modifiers');
 
       if (whereOnlyEnabled) {
         query.andWhere('modifierLists.enabled = true');
