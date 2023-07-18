@@ -53,6 +53,9 @@ async function bootstrap() {
         .setTitle('MyOrderApp Merchants API')
         .setVersion('2.0.1')
         .addBearerAuth()
+        .addServer(
+          configService.getOrThrow('app.backendDomain', { infer: true }),
+        )
         .build(),
       {
         include: [
@@ -84,6 +87,9 @@ async function bootstrap() {
         .setTitle('MyOrderApp Customers API')
         .setVersion('2.0.1')
         .addBearerAuth()
+        .addServer(
+          configService.getOrThrow('app.backendDomain', { infer: true }),
+        )
         .build(),
       {
         include: [
