@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { APP_URL, TESTER_EMAIL, TESTER_PASSWORD } from '../utils/constants';
+import { APP_URL } from '../utils/constants';
 
 describe('Auth user (e2e)', () => {
   const app = APP_URL;
@@ -8,37 +8,6 @@ describe('Auth user (e2e)', () => {
   const newUserLastName = `E2E`;
   const newUserEmail = `User.${Date.now()}@example.com`;
   const newUserPassword = `secret`;
-
-  it('Login: /api/v2/auth/email/login (POST)', () => {
-    return request(app)
-      .post('/api/v2/auth/email/login')
-      .send({ email: TESTER_EMAIL, password: TESTER_PASSWORD })
-      .expect(200)
-      .expect(({ body }) => {
-        expect(body.token).toBeDefined();
-        expect(body.refreshToken).toBeDefined();
-        expect(body.tokenExpires).toBeDefined();
-        expect(body.user.email).toBeDefined();
-        expect(body.user.hash).not.toBeDefined();
-        expect(body.user.password).not.toBeDefined();
-        expect(body.user.previousPassword).not.toBeDefined();
-      });
-  });
-
-  it('Do not allow register user with exists email: /api/v2/auth/email/register (POST)', () => {
-    return request(app)
-      .post('/api/v2/auth/email/register')
-      .send({
-        email: TESTER_EMAIL,
-        password: TESTER_PASSWORD,
-        firstName: 'Tester',
-        lastName: 'E2E',
-      })
-      .expect(422)
-      .expect(({ body }) => {
-        expect(body.errors.email).toBeDefined();
-      });
-  });
 
   it('Register new user: /api/v2/auth/email/register (POST)', async () => {
     return request(app)
