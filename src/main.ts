@@ -9,6 +9,10 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { useContainer } from 'class-validator';
 import { AppConfigModule } from './app-config/app-config.module';
 import { AppModule } from './app.module';
+import { AuthAppleModule } from './auth-apple/auth-apple.module';
+import { AuthFacebookModule } from './auth-facebook/auth-facebook.module';
+import { AuthGoogleModule } from './auth-google/auth-google.module';
+import { AuthTwitterModule } from './auth-twitter/auth-twitter.module';
 import { AuthModule } from './auth/auth.module';
 import { CardsModule } from './cards/cards.module';
 import { CatalogsModule } from './catalogs/catalogs.module';
@@ -47,11 +51,15 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.0')
+        .setVersion('2.0.1')
         .addBearerAuth()
         .build(),
       {
         include: [
+          AuthAppleModule,
+          AuthFacebookModule,
+          AuthGoogleModule,
+          AuthTwitterModule,
           SquareModule,
           MerchantsModule,
           AuthModule,
@@ -74,11 +82,15 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.0')
+        .setVersion('2.0.1')
         .addBearerAuth()
         .build(),
       {
         include: [
+          AuthAppleModule,
+          AuthFacebookModule,
+          AuthGoogleModule,
+          AuthTwitterModule,
           AuthModule,
           AppConfigModule,
           CustomersModule,
