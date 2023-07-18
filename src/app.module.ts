@@ -27,7 +27,6 @@ import { ForgotModule } from 'src/forgot/forgot.module';
 import { LocationsModule } from 'src/locations/locations.module';
 import { MailModule } from 'src/mail/mail.module';
 import mailConfig from 'src/mailer/mail.config';
-import { MailerModule } from 'src/mailer/mailer.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SessionModule } from 'src/session/session.module';
 import squareConfig from 'src/square/square.config';
@@ -102,7 +101,6 @@ import { OrdersModule } from './orders/orders.module';
     ForgotModule,
     SessionModule,
     MailModule,
-    MailerModule,
     TwilioModule,
     StripeModule,
     MerchantsModule,
