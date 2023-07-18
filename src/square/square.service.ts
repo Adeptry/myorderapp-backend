@@ -1,5 +1,7 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import * as fs from 'fs';
+import { nanoid } from 'nanoid';
 import {
   CalculateOrderRequest,
   CatalogObject,
@@ -9,6 +11,7 @@ import {
   CreateOrderRequest,
   CreatePaymentRequest,
   Environment,
+  FileWrapper,
   UpdateOrderRequest,
 } from 'square';
 import { RequestOptions } from 'square/dist/types/core';
@@ -223,5 +226,48 @@ export class SquareService {
     return this.client({
       accessToken: params.accessToken,
     }).cardsApi.disableCard(params.cardId);
+  }
+
+  async uploadCatalogImage(params: {
+    accessToken: string;
+    idempotencyKey: string;
+    objectId?: string;
+    file: Express.Multer.File;
+    caption?: string;
+  }): Promise<any> {
+    const { idempotencyKey, objectId, file, caption } = params;
+    const fileStream = fs.createReadStream(file.path);
+    const fileWrapper = new FileWrapper(fileStream);
+
+    try {
+      const response = await this.client({
+        accessToken: params.accessToken,
+      }).catalogApi.createCatalogImage(
+        {
+          idempotencyKey: idempotencyKey,
+          objectId: objectId,
+          image: {
+            type: 'IMAGE',
+            id: `#${nanoid()}`,
+            imageData: {
+              caption: caption,
+            },
+          },
+        },
+        fileWrapper,
+      );
+
+      return response.result;
+    } catch (error) {
+      throw new HttpException(
+        {
+          status: HttpStatus.INTERNAL_SERVER_ERROR,
+          error: `An error occurred while processing your request. ${JSON.stringify(
+            error,
+          )}`,
+        },
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      );
+    }
   }
 }

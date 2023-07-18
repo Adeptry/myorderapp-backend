@@ -16,10 +16,10 @@ import { UsersModule } from 'src/users/users.module';
   imports: [
     TypeOrmModule.forFeature([Merchant]),
     StripeModule,
-    SquareModule,
     FirebaseAdminModule,
     AuthModule,
     UsersModule,
+    forwardRef(() => SquareModule),
     forwardRef(() => GuardsModule),
     forwardRef(() => CatalogsModule),
     forwardRef(() => LocationsModule),

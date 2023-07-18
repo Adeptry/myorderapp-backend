@@ -17,6 +17,7 @@ import { CustomersModule } from './customers/customers.module';
 import { LocationsModule } from './locations/locations.module';
 import { MerchantsModule } from './merchants/merchants.module';
 import { OrdersModule } from './orders/orders.module';
+import { SquareModule } from './square/square.module';
 import { BigIntInterceptor } from './utils/big-int.intercepter';
 import validationOptions from './utils/validation-options';
 
@@ -51,6 +52,7 @@ async function bootstrap() {
         .build(),
       {
         include: [
+          SquareModule,
           MerchantsModule,
           AuthModule,
           AppConfigModule,

@@ -6,8 +6,13 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
+import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { AuthService } from '../auth/auth.service';
 import { MerchantsService } from '../merchants/merchants.service';
+
+export interface MerchantsGuardedRequest extends Request {
+  merchant: Merchant;
+}
 
 @Injectable()
 export class MerchantsGuard implements CanActivate {
