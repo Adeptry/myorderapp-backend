@@ -322,7 +322,6 @@ export class CatalogsService extends BaseService<Catalog> {
             throw new Error('Item id is null.');
           }
 
-          let minPriceInCents = Number(9999999);
           for (const squareVariation of squareItemData.variations ?? []) {
             this.logger.verbose(
               `Processing variation ${squareVariation.itemVariationData?.name} ${squareVariation.id}.`,
@@ -352,11 +351,6 @@ export class CatalogsService extends BaseService<Catalog> {
             moaVariation.ordinal = squareVariationData.ordinal;
             moaVariation.priceInCents =
               Number(squareVariationData.priceMoney?.amount ?? 0) ?? 0;
-
-            minPriceInCents = Math.min(
-              minPriceInCents,
-              moaVariation.priceInCents,
-            );
 
             try {
               await this.variationsService.save(moaVariation);
@@ -407,14 +401,6 @@ export class CatalogsService extends BaseService<Catalog> {
             }
 
             await this.variationsService.save(moaVariation);
-          }
-
-          if (moaItem.displayPriceInCents != minPriceInCents) {
-            moaItem.displayPriceInCents = minPriceInCents;
-            await this.itemsService.save(moaItem);
-            this.logger.verbose(
-              `Updated item price ${moaItem.name} ${minPriceInCents}.`,
-            );
           }
 
           const moaModifierListsForItem =

@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BaseService } from 'src/utils/base-service';
-import { Repository } from 'typeorm';
+import { Repository, SelectQueryBuilder } from 'typeorm';
 import { ItemUpdateAllDto, ItemUpdateDto } from '../dto/item-update.dto';
 import { Item } from '../entities/item.entity';
 import { ModifierList } from '../entities/modifier-list.entity';
@@ -20,23 +20,84 @@ export class ItemsService extends BaseService<Item> {
     locationId?: string;
     page?: number;
     limit?: number;
-    leftJoinDetails: boolean;
-    whereEnabled?: boolean;
+    leftJoinVariations?: boolean;
+    leftJoinModifierLists?: boolean;
+    leftJoinImages?: boolean;
+    whereOnlyEnabled?: boolean;
   }) {
     const {
       categoryId,
       locationId,
       page,
       limit,
-      leftJoinDetails,
-      whereEnabled,
+      leftJoinVariations,
+      leftJoinModifierLists,
+      leftJoinImages,
+      whereOnlyEnabled,
     } = params;
-    const query = this.createQueryBuilder('item')
-      .leftJoinAndSelect('item.images', 'images')
-      .where('item.categoryId = :categoryId', { categoryId });
 
-    if (whereEnabled) {
+    return this.join(
+      this.createQueryBuilder('item').where('item.categoryId = :categoryId', {
+        categoryId,
+      }),
+      {
+        locationId,
+        page,
+        limit,
+        leftJoinVariations,
+        leftJoinModifierLists,
+        leftJoinImages,
+        whereOnlyEnabled,
+      },
+    );
+  }
+
+  joinOneQuery(params: {
+    id: string;
+    locationId?: string;
+    leftJoinVariations?: boolean;
+    leftJoinModifierLists?: boolean;
+    leftJoinImages?: boolean;
+    whereOnlyEnabled?: boolean;
+  }) {
+    const { locationId } = params;
+
+    return this.join(
+      this.createQueryBuilder('item').where('item.id = :id', {
+        id: params.id,
+      }),
+      { locationId },
+    );
+  }
+
+  private join(
+    query: SelectQueryBuilder<Item>,
+    params: {
+      locationId?: string;
+      page?: number;
+      limit?: number;
+      leftJoinVariations?: boolean;
+      leftJoinModifierLists?: boolean;
+      leftJoinImages?: boolean;
+      whereOnlyEnabled?: boolean;
+    },
+  ) {
+    const {
+      locationId,
+      leftJoinModifierLists,
+      leftJoinVariations,
+      leftJoinImages,
+      whereOnlyEnabled,
+      page,
+      limit,
+    } = params;
+
+    if (whereOnlyEnabled) {
       query.andWhere('item.moaEnabled = true');
+    }
+
+    if (leftJoinImages) {
+      query.leftJoinAndSelect('item.images', 'images');
     }
 
     if (locationId != null) {
@@ -47,49 +108,62 @@ export class ItemsService extends BaseService<Item> {
       );
     }
 
-    if (leftJoinDetails) {
+    if (leftJoinModifierLists) {
       query
-        .leftJoinAndSelect('item.variations', 'variations')
-        .leftJoinAndSelect('item.modifierLists', 'modifierLists')
-        .leftJoinAndSelect('modifierLists.modifiers', 'modifiers');
+        .leftJoinAndSelect('item.modifierLists', 'modifierList')
+        .leftJoinAndSelect('modifierList.modifiers', 'modifiers');
 
-      if (whereEnabled) {
+      if (whereOnlyEnabled) {
         query.andWhere('modifierLists.enabled = true');
       }
 
-      if (locationId != null) {
-        query.andWhere(
-          '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id) OR ' +
-            '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id)))',
-          { locationId },
-        );
+      if (locationId) {
+        query
+          .leftJoinAndSelect(
+            'modifiers.locationOverrides',
+            'modifierLocationOverrides',
+            'modifierLocationOverrides.locationId = :locationId',
+            { locationId },
+          )
+          .andWhere(
+            '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id) OR ' +
+              '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id)))',
+            { locationId },
+          )
+          .addSelect(
+            'COALESCE(modifierLocationOverrides.amount, modifiers.priceInCents)',
+            'modifiers_priceInCents',
+          );
       }
     }
 
-    return query
-      .orderBy('item.moaOrdinal', 'ASC')
-      .take(limit)
-      .skip(page && limit && (page - 1) * limit);
-  }
+    if (leftJoinVariations) {
+      query.leftJoinAndSelect('item.variations', 'variations');
 
-  joinOneQuery(params: { id: string; locationId?: string }) {
-    const { id, locationId } = params;
-    const query = this.createQueryBuilder('item')
-      .leftJoinAndSelect('item.variations', 'variations')
-      .leftJoinAndSelect('item.images', 'images')
-      .leftJoinAndSelect('item.modifierLists', 'modifierList')
-      .leftJoinAndSelect('modifierList.modifiers', 'modifiers')
-      .where('item.id = :id', { id });
-
-    if (locationId) {
-      query.andWhere(
-        '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id) OR ' +
-          '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id)))',
-        { locationId },
-      );
+      if (locationId) {
+        query
+          .leftJoinAndSelect(
+            'variations.locationOverrides',
+            'variationLocationOverrides',
+            'variationLocationOverrides.locationId = :locationId',
+            { locationId },
+          )
+          .addSelect(
+            'COALESCE(variationLocationOverrides.amount, variations.priceInCents)',
+            'variations_priceInCents',
+          );
+      }
     }
 
-    return query;
+    if (limit) {
+      query.take(limit);
+    }
+
+    if (page && limit) {
+      query.skip(limit && (page - 1) * limit);
+    }
+
+    return query.orderBy('item.moaOrdinal', 'ASC');
   }
 
   async assignAndSave(params: { id: string; input: ItemUpdateDto }) {

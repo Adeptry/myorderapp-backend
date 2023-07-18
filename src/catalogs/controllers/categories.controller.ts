@@ -1,15 +1,13 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   Logger,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Patch,
   Query,
   Req,
@@ -43,10 +41,10 @@ import {
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
+import { CatalogSortService } from '../services/catalog-sort.service';
 
 @ApiTags('Catalogs')
 @Controller({
-  path: 'categories',
   version: '2',
 })
 export class CategoriesController {
@@ -54,13 +52,13 @@ export class CategoriesController {
 
   constructor(
     private readonly service: CategoriesService,
-    @Inject(ItemsService)
     private readonly itemsService: ItemsService,
+    private readonly catalogSortService: CatalogSortService,
   ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
-  @Get('me')
+  @Get('catalog/me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
@@ -68,10 +66,12 @@ export class CategoriesController {
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'withItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'items', required: false, type: Boolean })
+  @ApiQuery({ name: 'variations', required: false, type: Boolean })
+  @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
-    summary: 'Get your Categories',
-    operationId: 'getMyCategories',
+    summary: 'Get your Categories with Items, Variations, and ModifierLists',
+    operationId: 'getCatalog',
   })
   @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
   @ApiUnauthorizedResponse({
@@ -80,13 +80,33 @@ export class CategoriesController {
   })
   async categories(
     @Req() request: UserTypeGuardedRequest,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
-    @Query('withItems') withItems?: boolean,
+    @Query('items') items?: boolean,
+    @Query('variations') variations?: boolean,
+    @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
+    let parsedPage: number | undefined;
+    if (page !== undefined) {
+      parsedPage = parseInt(page, 10);
+      if (isNaN(parsedPage)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
+    let parsedLimit: number | undefined;
+    if (limit !== undefined) {
+      parsedLimit = parseInt(limit, 10);
+      if (isNaN(parsedLimit)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
     const { merchant, customer } = request;
-    const whereEnabled = customer != undefined ? true : undefined;
+    const whereOnlyEnabled = customer != undefined ? true : undefined;
 
     if (!merchant.catalogId) {
       throw new NotFoundException(`Catalog not found`);
@@ -94,42 +114,48 @@ export class CategoriesController {
     const results = await this.service.findAndCount({
       where: {
         catalogId: merchant.catalogId,
-        moaEnabled: whereEnabled,
+        moaEnabled: whereOnlyEnabled,
       },
       order: { moaOrdinal: 'ASC' },
-      take: limit,
-      skip: (page - 1) * limit,
+      take: parsedLimit,
+      skip: parsedPage && parsedLimit && (parsedPage - 1) * parsedLimit,
     });
 
-    if (withItems) {
+    if (items) {
       await Promise.all(
         results[0].map(async (category) => {
-          this.logger.log(`Category: ${category.id}`);
           if (!category.id) {
             return;
           }
 
-          category.items = await this.itemsService
-            .joinManyQuery({
-              categoryId: category.id,
-              locationId,
-              leftJoinDetails: false,
-              whereEnabled,
-            })
-            .getMany();
+          category.items = this.catalogSortService.sortItems(
+            await this.itemsService
+              .joinManyQuery({
+                categoryId: category.id,
+                locationId,
+                leftJoinImages: true,
+                leftJoinVariations: variations,
+                leftJoinModifierLists: modifierLists,
+                whereOnlyEnabled,
+              })
+              .getMany(),
+          );
         }),
       );
     }
 
     return paginatedResults({
       results,
-      pagination: { page, limit },
+      pagination: {
+        page: parsedPage ?? 0,
+        limit: parsedLimit ?? 0,
+      },
     });
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @Patch(':id')
+  @Patch('categories/:id')
   @ApiOkResponse({ type: Category })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
@@ -150,7 +176,7 @@ export class CategoriesController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @Patch()
+  @Patch('categories')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [Category] }) // array of Category
   @ApiUnauthorizedResponse({

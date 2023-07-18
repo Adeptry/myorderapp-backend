@@ -93,14 +93,10 @@ export class Modifier extends EntityHelper {
 
   // Locations
 
-  @ApiProperty({
-    required: false,
-    type: () => [ModifierLocationOverride],
-    isArray: true,
-  })
   @OneToMany(() => ModifierLocationOverride, (entity) => entity.modifier, {
     nullable: true,
   })
+  @Exclude({ toPlainOnly: true })
   locationOverrides?: ModifierLocationOverride[];
 
   @Column({ default: true, nullable: true, type: Boolean })

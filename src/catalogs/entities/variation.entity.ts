@@ -105,13 +105,9 @@ export class Variation extends EntityHelper {
   @JoinColumn({ name: 'catalogId' })
   catalog?: Catalog;
 
-  @ApiProperty({
-    required: false,
-    type: () => [VariationLocationOverride],
-    isArray: true,
-  })
   @OneToMany(() => VariationLocationOverride, (entity) => entity.variation, {
     nullable: true,
   })
+  @Exclude({ toPlainOnly: true })
   locationOverrides?: VariationLocationOverride[];
 }

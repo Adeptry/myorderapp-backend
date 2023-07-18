@@ -1,14 +1,13 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
   Logger,
   NotFoundException,
   Param,
-  ParseIntPipe,
   Patch,
   Query,
   Req,
@@ -38,23 +37,26 @@ import { paginatedResults } from 'src/utils/paginated';
 import { ItemUpdateAllDto, ItemUpdateDto } from '../dto/item-update.dto';
 import { ItemPaginatedResponse } from '../dto/items-paginated.output';
 import { Item } from '../entities/item.entity';
+import { CatalogSortService } from '../services/catalog-sort.service';
 import { ItemsService } from '../services/items.service';
 
 @ApiTags('Catalogs')
 @Controller({
-  path: 'items',
   version: '2',
 })
 export class ItemsController {
   private readonly logger = new Logger(ItemsController.name);
 
-  constructor(private readonly service: ItemsService) {}
+  constructor(
+    private readonly service: ItemsService,
+    private readonly catalogSortService: CatalogSortService,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
-  @Get(':id/items')
+  @Get('categories/:id/items')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: ItemPaginatedResponse })
   @ApiUnauthorizedResponse({
@@ -71,40 +73,52 @@ export class ItemsController {
   async getItemsInCategory(
     @Req() request: UserTypeGuardedRequest,
     @Param('id') categoryId: string,
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
   ): Promise<ItemPaginatedResponse> {
+    let parsedPage: number | undefined;
+    if (page !== undefined) {
+      parsedPage = parseInt(page, 10);
+      if (isNaN(parsedPage)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
+    let parsedLimit: number | undefined;
+    if (limit !== undefined) {
+      parsedLimit = parseInt(limit, 10);
+      if (isNaN(parsedLimit)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
     const { customer } = request;
-    const whereEnabled = customer != undefined ? true : undefined;
+    const whereOnlyEnabled = customer != undefined ? true : undefined;
     const results = await this.service
       .joinManyQuery({
         categoryId,
         locationId,
-        page,
-        limit,
-        leftJoinDetails: true,
-        whereEnabled,
+        page: parsedPage,
+        limit: parsedLimit,
+        leftJoinImages: true,
+        leftJoinModifierLists: true,
+        leftJoinVariations: true,
+        whereOnlyEnabled,
       })
       .getManyAndCount();
 
-    results[0].forEach((item) => {
-      item.modifierLists?.forEach((modifierList) => {
-        modifierList.modifiers?.sort(
-          (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0),
-        );
-      });
-    });
-
     return paginatedResults({
-      results,
-      pagination: { page, limit },
+      results: [this.catalogSortService.sortItems(results[0]), results[1]],
+      pagination: { page: parsedPage ?? 0, limit: parsedLimit ?? 0 },
     });
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
-  @Get(':id')
+  @Get('items/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Item })
   @ApiUnauthorizedResponse({
@@ -135,7 +149,7 @@ export class ItemsController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @Patch(':id')
+  @Patch('items/:id')
   @ApiOkResponse({ type: Item }) // Assuming you have an Item model similar to Category
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
@@ -156,7 +170,7 @@ export class ItemsController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @Patch()
+  @Patch('/items')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [Item] }) // Array of Item
   @ApiUnauthorizedResponse({

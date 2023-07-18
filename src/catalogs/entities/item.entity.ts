@@ -79,10 +79,6 @@ export class Item extends EntityHelper {
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ required: false })
-  @Column({ nullable: true })
-  displayPriceInCents?: number;
-
   @ApiProperty({ type: String, required: false })
   @Column({ type: String, nullable: true })
   description?: string | null;
