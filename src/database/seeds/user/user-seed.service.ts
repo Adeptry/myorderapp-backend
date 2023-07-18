@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoleNameEnum } from 'src/roles/roles.enum';
+import { RoleEnum } from 'src/roles/roles.enum';
 import { StatusEnum } from 'src/statuses/statuses.enum';
 import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
@@ -16,7 +16,7 @@ export class UserSeedService {
     const countAdmin = await this.repository.count({
       where: {
         role: {
-          id: RoleNameEnum.admin,
+          id: RoleEnum.admin,
         },
       },
     });
@@ -29,7 +29,7 @@ export class UserSeedService {
           email: 'admin@example.com',
           password: 'secret',
           role: {
-            id: RoleNameEnum.admin,
+            id: RoleEnum.admin,
           },
           status: {
             id: StatusEnum.active,

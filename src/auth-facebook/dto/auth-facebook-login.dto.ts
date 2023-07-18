@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { RoleNameEnum } from 'src/roles/roles.enum';
+import { RoleEnum } from 'src/roles/roles.enum';
 
 export class AuthFacebookLoginDto {
   @ApiProperty({ example: 'abc' })
@@ -8,8 +8,8 @@ export class AuthFacebookLoginDto {
   accessToken: string;
 
   @ApiProperty({
-    enum: Object.values(RoleNameEnum),
+    enum: Object.values(RoleEnum),
   })
   @IsNotEmpty()
-  role: RoleNameEnum;
+  role: RoleEnum;
 }

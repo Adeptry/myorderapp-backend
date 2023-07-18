@@ -15,7 +15,7 @@ import { AllConfigType } from 'src/config.type';
 import { ForgotService } from 'src/forgot/forgot.service';
 import { MailService } from 'src/mail/mail.service';
 import { Role } from 'src/roles/entities/role.entity';
-import { RoleNameEnum } from 'src/roles/roles.enum';
+import { RoleEnum } from 'src/roles/roles.enum';
 import { Session } from 'src/session/entities/session.entity';
 import { SessionService } from 'src/session/session.service';
 import { SocialInterface } from 'src/social/interfaces/social.interface';
@@ -55,8 +55,8 @@ export class AuthService {
       !user ||
       (user?.role &&
         !(onlyAdmin
-          ? user.role.id === RoleNameEnum.admin
-          : [RoleNameEnum.user].includes(user.role.id as RoleNameEnum)))
+          ? user.role.id === RoleEnum.admin
+          : [RoleEnum.user].includes(user.role.id as RoleEnum)))
     ) {
       throw new HttpException(
         {
@@ -119,7 +119,7 @@ export class AuthService {
   async validateSocialLogin(
     authProvider: string,
     socialData: SocialInterface,
-    roleEnum: RoleNameEnum,
+    roleEnum: RoleEnum,
   ): Promise<LoginResponseType> {
     let user: NullableType<User>;
     const socialEmail = socialData.email?.toLowerCase();
@@ -207,7 +207,7 @@ export class AuthService {
       ...dto,
       email: dto.email,
       role: {
-        id: RoleNameEnum.user,
+        id: RoleEnum.user,
       } as Role,
       status: {
         id: StatusEnum.inactive,

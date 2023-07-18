@@ -25,7 +25,6 @@ import {
 import { User } from 'src/users/entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthService } from './auth.service';
-import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
 import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -55,7 +54,6 @@ export class AuthController {
   public login(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
-    this.logger.log(JSON.stringify(loginDto));
     return this.service.validateLogin(loginDto, false);
   }
 
@@ -88,18 +86,18 @@ export class AuthController {
     return this.service.register(createUserDto);
   }
 
-  @Post('email/confirm')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Confirm email',
-    operationId: 'confirmEmail',
-  })
-  @ApiNoContentResponse()
-  async confirmEmail(
-    @Body() confirmEmailDto: AuthConfirmEmailDto,
-  ): Promise<void> {
-    return this.service.confirmEmail(confirmEmailDto.hash);
-  }
+  // @Post('email/confirm')
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @ApiOperation({
+  //   summary: 'Confirm email',
+  //   operationId: 'confirmEmail',
+  // })
+  // @ApiNoContentResponse()
+  // async confirmEmail(
+  //   @Body() confirmEmailDto: AuthConfirmEmailDto,
+  // ): Promise<void> {
+  //   return this.service.confirmEmail(confirmEmailDto.hash);
+  // }
 
   @Post('forgot/password')
   @HttpCode(HttpStatus.NO_CONTENT)
@@ -192,9 +190,6 @@ export class AuthController {
     @Request() request,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
-    this.logger.verbose(
-      `Update user ${request.user.id} ${JSON.stringify(userDto)}`,
-    );
     return this.service.update(request.user, userDto);
   }
 
