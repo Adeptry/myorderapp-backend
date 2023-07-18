@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { FileEntity } from 'src/files/entities/file.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -11,6 +12,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
@@ -53,6 +55,19 @@ export class AppConfig extends EntityHelper {
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   fontFamily?: string;
+
+  /* App Icon */
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true })
+  iconFileId?: string;
+
+  @OneToOne(() => FileEntity, {
+    onDelete: 'SET NULL',
+    nullable: true,
+  })
+  @JoinColumn({ name: 'iconFileId' })
+  iconFile?: FileEntity | null;
 
   // @ApiProperty({ required: false })
   // @Column({ nullable: true })

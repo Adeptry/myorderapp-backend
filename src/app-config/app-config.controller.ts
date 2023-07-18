@@ -10,13 +10,17 @@ import {
   Post,
   Req,
   UnauthorizedException,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -26,7 +30,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AppConfigService } from 'src/app-config/app-config.service';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
+import { FilesService } from 'src/files/files.service';
+import {
+  MerchantsGuard,
+  MerchantsGuardedRequest,
+} from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
@@ -42,7 +50,10 @@ import { AppConfig } from './entities/app-config.entity';
   version: '2',
 })
 export class AppConfigController {
-  constructor(private readonly service: AppConfigService) {}
+  constructor(
+    private readonly service: AppConfigService,
+    private readonly filesService: FilesService,
+  ) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
@@ -85,21 +96,25 @@ export class AppConfigController {
   @ApiOperation({ summary: 'Create your Config', operationId: 'createConfig' })
   @ApiBody({ type: ConfigUpdateDto })
   async create(
-    @Req() request: any,
+    @Req() request: MerchantsGuardedRequest,
     @Body()
     createAppConfigDto: ConfigUpdateDto,
   ) {
-    if (
-      await this.service.exist({ where: { merchantId: request.merchant.id } })
-    ) {
+    const { merchant } = request;
+
+    if (!merchant?.id) {
+      throw new UnauthorizedException(`AppConfig not found`);
+    }
+
+    if (await this.service.exist({ where: { merchantId: merchant.id } })) {
       throw new BadRequestException(
-        `AppConfig with merchant id ${request.merchant.id} already exists`,
+        `AppConfig with merchant id ${merchant.id} already exists`,
       );
     }
 
     return this.service.save(
       this.service.create({
-        merchantId: request.merchant.id,
+        merchantId: merchant.id,
         ...createAppConfigDto,
       }),
     );
@@ -112,25 +127,78 @@ export class AppConfigController {
     type: NestError,
   })
   @Patch('me')
-  @HttpCode(HttpStatus.OK)
+  @HttpCode(HttpStatus.CREATED)
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: ConfigUpdateDto })
   async update(
-    @Req() request: any,
+    @Req() request: MerchantsGuardedRequest,
     @Body() updateAppConfigDto: ConfigUpdateDto,
   ) {
-    const merchantId = request.merchant.id;
-    const entity = await this.service.findOne({ where: { merchantId } });
-    if (!entity?.id) {
-      throw new UnauthorizedException(
-        `AppConfig with merchant id ${merchantId} not found`,
-      );
+    const { merchant } = request;
+
+    if (!merchant?.id) {
+      throw new UnauthorizedException(`AppConfig not found`);
     }
 
-    Object.assign(entity, updateAppConfigDto);
+    let appConfig = await this.service.findOne({
+      where: { merchantId: merchant.id },
+    });
 
-    return this.service.save(entity);
+    if (!appConfig) {
+      appConfig = this.service.create({
+        merchantId: merchant.id,
+      });
+    }
+
+    Object.assign(appConfig, updateAppConfigDto);
+
+    return this.service.save(appConfig);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @Post('me/icon/upload')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload icon', operationId: 'uploadIcon' })
+  async uploadFile(
+    @Req() request: MerchantsGuardedRequest,
+    @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
+  ) {
+    const { merchant } = request;
+
+    if (!merchant?.id) {
+      throw new UnauthorizedException(`Merchant not found`);
+    }
+
+    let appConfig = await this.service.findOne({
+      where: { merchantId: merchant.id },
+    });
+
+    if (!appConfig) {
+      appConfig = this.service.create({
+        merchantId: merchant.id,
+      });
+    }
+
+    appConfig.iconFile = await this.filesService.uploadFile(file);
+    return this.service.save(appConfig);
   }
 }
