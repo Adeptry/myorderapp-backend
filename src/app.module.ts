@@ -17,17 +17,23 @@ import { AuthTwitterModule } from 'src/auth-twitter/auth-twitter.module';
 import twitterConfig from 'src/auth-twitter/twitter.config';
 import authConfig from 'src/auth/auth.config';
 import { AuthModule } from 'src/auth/auth.module';
+import { CardsModule } from 'src/cards/cards.module';
 import { CatalogsModule } from 'src/catalogs/catalogs.module';
+import { AllConfigType } from 'src/config.type';
+import { CustomersModule } from 'src/customers/customers.module';
 import databaseConfig from 'src/database/database.config';
 import { TypeOrmConfigService } from 'src/database/typeorm-config.service';
 import fileConfig from 'src/files/file.config';
 import { FilesModule } from 'src/files/files.module';
 import { FirebaseAdminModule } from 'src/firebase-admin/firebase-admin.module';
 import { ForgotModule } from 'src/forgot/forgot.module';
+import { GuardsModule } from 'src/guards/guards.module';
+import { HealthModule } from 'src/health/health.module';
 import { LocationsModule } from 'src/locations/locations.module';
 import { MailModule } from 'src/mail/mail.module';
 import mailConfig from 'src/mailer/mail.config';
 import { MerchantsModule } from 'src/merchants/merchants.module';
+import { OrdersModule } from 'src/orders/orders.module';
 import { SessionModule } from 'src/session/session.module';
 import squareConfig from 'src/square/square.config';
 import stripeConfig from 'src/stripe/stripe.config';
@@ -36,11 +42,6 @@ import twilioConfig from 'src/twilio/twilio.config';
 import { TwilioModule } from 'src/twilio/twilio.module';
 import { UsersModule } from 'src/users/users.module';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { CardsModule } from './cards/cards.module';
-import { AllConfigType } from './config.type';
-import { CustomersModule } from './customers/customers.module';
-import { GuardsModule } from './guards/guards.module';
-import { OrdersModule } from './orders/orders.module';
 
 @Module({
   imports: [
@@ -113,6 +114,7 @@ import { OrdersModule } from './orders/orders.module';
     OrdersModule,
     GuardsModule,
     CardsModule,
+    HealthModule,
   ],
 })
 export class AppModule {}

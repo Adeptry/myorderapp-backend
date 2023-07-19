@@ -8,7 +8,7 @@ import {
   Logger,
   Patch,
   Post,
-  Request,
+  Req,
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
@@ -51,9 +51,7 @@ export class AuthController {
     operationId: 'login',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public login(
-    @Body() loginDto: AuthEmailLoginDto,
-  ): Promise<LoginResponseType> {
+  async login(@Body() loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
     return this.service.validateLogin(loginDto, false);
   }
 
@@ -138,7 +136,7 @@ export class AuthController {
     operationId: 'currentAuth',
   })
   @ApiOkResponse({ type: User })
-  public me(@Request() request): Promise<NullableType<User>> {
+  public me(@Req() request): Promise<NullableType<User>> {
     return this.service.me(request.user);
   }
 
@@ -154,7 +152,7 @@ export class AuthController {
     operationId: 'refreshToken',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public refresh(@Request() request): Promise<Omit<LoginResponseType, 'user'>> {
+  public refresh(@Req() request): Promise<Omit<LoginResponseType, 'user'>> {
     return this.service.refreshToken(request.user.sessionId);
   }
 
@@ -167,7 +165,7 @@ export class AuthController {
     operationId: 'logout',
   })
   @ApiNoContentResponse()
-  public async logout(@Request() request): Promise<void> {
+  public async logout(@Req() request): Promise<void> {
     await this.service.logout({
       sessionId: request.user.sessionId,
     });
@@ -187,7 +185,7 @@ export class AuthController {
   @ApiOkResponse({ type: User })
   @ApiBody({ type: AuthUpdateDto })
   public update(
-    @Request() request,
+    @Req() request,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
     return this.service.update(request.user, userDto);
@@ -202,7 +200,7 @@ export class AuthController {
     operationId: 'deleteCurrentAuth',
   })
   @ApiNoContentResponse()
-  public async delete(@Request() request): Promise<void> {
+  public async delete(@Req() request): Promise<void> {
     return this.service.softDelete(request.user);
   }
 }

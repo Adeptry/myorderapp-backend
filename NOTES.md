@@ -19,3 +19,8 @@ state: foundOne?.id,
 9KYx-K-hM5_r33paTE4ka
 
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6Iko4d1lIbVQtOFZzWmpvUkMtay1MUyIsInJvbGUiOnsiaWQiOiJ1c2VyIn0sInNlc3Npb25JZCI6MTgsImlhdCI6MTY4OTE4MzU3NCwiZXhwIjoxNjg5MjY5OTc0fQ.eW_vNSVzzPVhaELnkFAx27_Qq9wh0i8Lcc6jPW8qdTI
+
+https://github.com/saltyshiomix/nextron
+https://mui.com/material-ui/getting-started/templates/
+https://react-hook-form.com/get-started#IntegratingwithUIlibraries
+https://github.com/Adeptry/moa-merchants-ts-axios/tree/master
