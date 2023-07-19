@@ -23,7 +23,7 @@ export type AppConfig = {
   frontendDomain?: string;
   backendDomain: string;
   port: number;
-  apiPrefix: string;
+  apiPrefix?: string;
   fallbackLanguage: string;
   headerLanguage: string;
 };
@@ -74,7 +74,7 @@ export default registerAs<AppConfig>('app', () => {
       : process.env.PORT
       ? parseInt(process.env.PORT, 10)
       : 3000,
-    apiPrefix: process.env.API_PREFIX || 'api',
+    apiPrefix: process.env.API_PREFIX,
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
   };
