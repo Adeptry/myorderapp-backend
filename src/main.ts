@@ -33,12 +33,12 @@ async function bootstrap() {
   const configService = app.get(ConfigService<AllConfigType>);
 
   app.enableShutdownHooks();
-  app.setGlobalPrefix(
-    configService.getOrThrow('app.apiPrefix', { infer: true }),
-    {
-      exclude: ['/'],
-    },
-  );
+  // app.setGlobalPrefix(
+  //   configService.getOrThrow('app.apiPrefix', { infer: true }),
+  //   {
+  //     exclude: ['/'],
+  //   },
+  // );
   app.enableVersioning({
     type: VersioningType.URI,
   });

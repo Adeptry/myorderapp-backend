@@ -28,10 +28,9 @@ export class FilesService {
       );
     }
 
+    // /${this.configService.get('app.apiPrefix', { infer: true })}
     const path = {
-      local: `/${this.configService.get('app.apiPrefix', { infer: true })}/v1/${
-        file.path
-      }`,
+      local: `/v2/${file.path}`,
       s3: (file as Express.MulterS3.File).location,
     };
 
