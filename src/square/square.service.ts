@@ -1,4 +1,8 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
 import { nanoid } from 'nanoid';
@@ -259,14 +263,10 @@ export class SquareService {
 
       return response.result;
     } catch (error) {
-      throw new HttpException(
-        {
-          status: HttpStatus.INTERNAL_SERVER_ERROR,
-          error: `An error occurred while processing your request. ${JSON.stringify(
-            error,
-          )}`,
-        },
-        HttpStatus.INTERNAL_SERVER_ERROR,
+      throw new InternalServerErrorException(
+        `An error occurred while processing your request. ${JSON.stringify(
+          error,
+        )}`,
       );
     }
   }

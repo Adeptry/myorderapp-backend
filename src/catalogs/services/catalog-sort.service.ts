@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { Item } from '../entities/item.entity';
+import { Item } from 'src/catalogs/entities/item.entity';
 
 @Injectable()
 export class CatalogSortService {

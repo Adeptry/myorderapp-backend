@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AllConfigType } from 'src/config.type';
@@ -17,15 +17,7 @@ export class FilesService {
     file: Express.Multer.File | Express.MulterS3.File,
   ): Promise<FileEntity> {
     if (!file) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            file: 'selectFile',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`Must submit file`);
     }
 
     // /${this.configService.get('app.apiPrefix', { infer: true })}

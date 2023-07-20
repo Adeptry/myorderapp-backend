@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
+import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
 import { Repository } from 'typeorm';
-import { SquareService } from '../square/square.service';
 import {
   LocationUpdateAllDto,
   LocationUpdateDto,

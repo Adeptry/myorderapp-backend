@@ -31,6 +31,7 @@ import {
   CategoryUpdateDto,
 } from 'src/catalogs/dto/category-update.dto';
 import { Category } from 'src/catalogs/entities/category.entity';
+import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
 import { CategoriesService } from 'src/catalogs/services/categories.service';
 import { ItemsService } from 'src/catalogs/services/items.service';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
@@ -41,7 +42,6 @@ import {
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
-import { CatalogSortService } from '../services/catalog-sort.service';
 
 @ApiTags('Catalogs')
 @Controller({

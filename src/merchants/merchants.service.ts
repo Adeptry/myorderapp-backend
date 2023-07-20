@@ -1,10 +1,9 @@
 import {
   BadRequestException,
   forwardRef,
-  HttpException,
-  HttpStatus,
   Inject,
   Injectable,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   UnauthorizedException,
@@ -67,9 +66,8 @@ export class MerchantsService extends BaseService<Merchant> {
     ).result;
 
     if (!accessTokenResult) {
-      throw new HttpException(
+      throw new InternalServerErrorException(
         'Failed to obtain token from Square service',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 
@@ -77,9 +75,8 @@ export class MerchantsService extends BaseService<Merchant> {
       accessTokenResult;
 
     if (!expiresAt) {
-      throw new HttpException(
+      throw new InternalServerErrorException(
         'No expiry date provided in the access token',
-        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
 

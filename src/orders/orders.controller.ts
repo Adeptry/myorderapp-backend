@@ -113,7 +113,7 @@ export class OrdersController {
   @ApiOkResponse({ type: Order })
   @ApiOperation({
     summary: 'Get current Order',
-    operationId: 'getCurrent',
+    operationId: 'getCurrentOrder',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async getCurrent(@Req() request: CustomersGuardedRequest): Promise<Order> {
@@ -146,7 +146,7 @@ export class OrdersController {
   @Get()
   @ApiOperation({
     summary: 'Get my Orders',
-    operationId: 'getMyOrders',
+    operationId: 'getOrders',
   })
   @ApiOkResponse({ type: OrdersPaginatedReponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -188,7 +188,7 @@ export class OrdersController {
   @Patch('current')
   @ApiOperation({
     summary: 'Update Order',
-    operationId: 'patchUpdateCurrent',
+    operationId: 'updateCurrentOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -234,7 +234,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Add Variation to current Order',
-    operationId: 'postUpdateCurrent',
+    operationId: 'updateCurrentOrder',
   })
   @ApiBadRequestResponse({
     description: 'No current order or Invalid variation',
@@ -288,7 +288,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Remove Variation from current Order',
-    operationId: 'deleteCurrentsVariation',
+    operationId: 'deleteVariation',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrentsVariation(
@@ -331,7 +331,7 @@ export class OrdersController {
   @ApiNoContentResponse({ description: 'Order Deleted Successfully' })
   @ApiOperation({
     summary: 'Delete current Order',
-    operationId: 'deleteCurrent',
+    operationId: 'deleteCurrentOrder',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {

@@ -6,8 +6,8 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { FileEntity } from '../../files/entities/file.entity';
-import { IsExist } from '../../utils/validators/is-exists.validator';
+import { FileEntity } from 'src/files/entities/file.entity';
+import { IsExist } from 'src/utils/validators/is-exists.validator';
 
 export class AuthUpdateDto {
   @ApiProperty({ type: () => FileEntity })

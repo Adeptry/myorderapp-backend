@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { MoaSelectionType } from 'src/catalogs/dto/catalogs.types';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -16,7 +17,6 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaSelectionType } from '../dto/catalogs.types';
 import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Item } from './item.entity';

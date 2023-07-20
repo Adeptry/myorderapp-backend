@@ -57,6 +57,7 @@ export class Merchant extends EntityHelper {
   @Column({ nullable: true })
   userId?: string;
 
+  @ApiProperty({ required: false })
   @ManyToOne(() => User)
   user?: User;
 

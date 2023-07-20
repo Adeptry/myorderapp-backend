@@ -44,7 +44,7 @@ import { NestError } from 'src/utils/error';
 import { ConfigUpdateDto } from './dto/app-config-update.input';
 import { AppConfig } from './entities/app-config.entity';
 
-@ApiTags('Config')
+@ApiTags('Configs')
 @Controller({
   path: 'app-config',
   version: '2',

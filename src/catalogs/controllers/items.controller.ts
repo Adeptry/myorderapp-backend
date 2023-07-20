@@ -25,6 +25,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import {
+  ItemUpdateAllDto,
+  ItemUpdateDto,
+} from 'src/catalogs/dto/item-update.dto';
+import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
+import { Item } from 'src/catalogs/entities/item.entity';
+import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
+import { ItemsService } from 'src/catalogs/services/items.service';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
@@ -34,11 +42,6 @@ import { UsersGuard } from 'src/guards/users.guard';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
-import { ItemUpdateAllDto, ItemUpdateDto } from '../dto/item-update.dto';
-import { ItemPaginatedResponse } from '../dto/items-paginated.output';
-import { Item } from '../entities/item.entity';
-import { CatalogSortService } from '../services/catalog-sort.service';
-import { ItemsService } from '../services/items.service';
 
 @ApiTags('Catalogs')
 @Controller({
@@ -68,7 +71,7 @@ export class ItemsController {
   @ApiQuery({ name: 'locationId', required: false, type: String })
   @ApiOperation({
     summary: 'Get Items in Category',
-    operationId: 'getItemsInCategory',
+    operationId: 'getItems',
   })
   async getItemsInCategory(
     @Req() request: UserTypeGuardedRequest,

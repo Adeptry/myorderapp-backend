@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BaseService } from 'src/utils/base-service';
-import { Repository } from 'typeorm';
 import {
   CategoryUpdateAllDto,
   CategoryUpdateDto,
-} from '../dto/category-update.dto';
-import { Category } from '../entities/category.entity';
+} from 'src/catalogs/dto/category-update.dto';
+import { Category } from 'src/catalogs/entities/category.entity';
+import { BaseService } from 'src/utils/base-service';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class CategoriesService extends BaseService<Category> {

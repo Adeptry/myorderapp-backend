@@ -25,17 +25,20 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import {
+  MerchantsGuard,
+  MerchantsGuardedRequest,
+} from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { NullableType } from 'src/utils/types/nullable.type';
-import { MerchantsGuard } from '../guards/merchants.guard';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
 import { Merchant } from './entities/merchant.entity';
 import { MerchantsService } from './merchants.service';
 
-@ApiTags('Merchant')
+@ApiTags('Merchants')
 @Controller({
   path: 'merchants',
   version: '2',
@@ -84,32 +87,17 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
-    operationId: 'getMyMerchant',
+    operationId: 'getCurrentMerchant',
   })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
   @ApiOkResponse({ type: Merchant })
-  public async me(@Req() request: any): Promise<Merchant> {
-    console.log(
-      this.squareService.oauthUrl({
-        scope: [
-          'MERCHANT_PROFILE_READ',
-          'CUSTOMERS_WRITE',
-          'CUSTOMERS_READ',
-          'ORDERS_WRITE',
-          'ORDERS_READ',
-          'PAYMENTS_READ',
-          'PAYMENTS_WRITE',
-          'PAYMENTS_WRITE_ADDITIONAL_RECIPIENTS',
-          'ITEMS_WRITE',
-          'ITEMS_READ',
-        ],
-        state: request.merchant.id,
-      }),
-    );
-    return await request.merchant;
+  public me(@Req() request: MerchantsGuardedRequest): Merchant {
+    const { merchant, user } = request;
+    merchant.user = user;
+    return merchant;
   }
 
   @Post('me/square/login')

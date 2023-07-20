@@ -1,13 +1,13 @@
+import { User } from 'src/users/entities/user.entity';
+import { EntityHelper } from 'src/utils/entity-helper';
 import {
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   Index,
   ManyToOne,
   PrimaryGeneratedColumn,
-  DeleteDateColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 
 @Entity()
 export class Session extends EntityHelper {

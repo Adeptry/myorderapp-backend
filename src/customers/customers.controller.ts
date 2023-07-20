@@ -140,10 +140,12 @@ export class CustomersController {
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Get current Customer',
-    operationId: 'getMyCustomer',
+    operationId: 'getCurrentCustomer',
   })
-  public me(@Req() request: any): Promise<Customer> {
-    return request.customer;
+  public me(@Req() request: CustomersGuardedRequest): Customer {
+    const { customer, user } = request;
+    customer.user = user;
+    return customer;
   }
 
   @ApiBearerAuth()
@@ -153,7 +155,7 @@ export class CustomersController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: CustomersPaginatedResponse })
-  @ApiOperation({ summary: 'Get my Customers', operationId: 'getMyCustomers' })
+  @ApiOperation({ summary: 'Get my Customers', operationId: 'getCustomers' })
   async get(
     @Req() request: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -172,7 +174,7 @@ export class CustomersController {
   @Post('me/app-install')
   @ApiOperation({
     summary: 'Create or update Customer App Install',
-    operationId: 'updateMyAppInstall',
+    operationId: 'updateAppInstall',
   })
   @ApiBody({ type: AppInstallUpdateDto })
   @ApiCreatedResponse({

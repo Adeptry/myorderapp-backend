@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { CustomersModule } from 'src/customers/customers.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
-import { SquareModule } from '../square/square.module';
+import { SquareModule } from 'src/square/square.module';
 import { Address } from './entities/address.entity';
 import { BusinessHoursPeriod } from './entities/business-hours-period.entity';
 import { Location } from './entities/location.entity';

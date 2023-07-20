@@ -48,7 +48,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get access token',
-    operationId: 'login',
+    operationId: 'createSession',
   })
   @ApiOkResponse({ type: LoginResponseType })
   async login(@Body() loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
@@ -75,7 +75,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create Auth',
-    operationId: 'register',
+    operationId: 'createUser',
   })
   @ApiCreatedResponse({ type: LoginResponseType })
   async register(

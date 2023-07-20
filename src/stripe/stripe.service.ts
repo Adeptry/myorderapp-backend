@@ -1,4 +1,8 @@
-import { HttpException, HttpStatus, Injectable, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AllConfigType } from 'src/config.type';
 import Stripe from 'stripe';
@@ -30,7 +34,7 @@ export class StripeService {
       return await this.client.customers.create(params, options);
     } catch (error) {
       this.logger.error(`Failed to create customer: ${error}`);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
@@ -42,7 +46,7 @@ export class StripeService {
       return await this.client.checkout.sessions.create(params, options);
     } catch (error) {
       this.logger.error(`Failed to create checkout session: ${error}`);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException(error.message);
     }
   }
 
@@ -55,7 +59,7 @@ export class StripeService {
       return await this.client.checkout.sessions.retrieve(id, params, options);
     } catch (error) {
       this.logger.error(`Failed to retrieve checkout session: ${error}`);
-      throw new HttpException(error.message, HttpStatus.INTERNAL_SERVER_ERROR);
+      throw new InternalServerErrorException(error.message);
     }
   }
 }

@@ -1,8 +1,8 @@
 import {
-  HttpException,
-  HttpStatus,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { ConfigService } from '@nestjs/config';
@@ -21,9 +21,9 @@ import { SessionService } from 'src/session/session.service';
 import { SocialInterface } from 'src/social/interfaces/social.interface';
 import { Status } from 'src/statuses/entities/status.entity';
 import { StatusEnum } from 'src/statuses/statuses.enum';
+import { User } from 'src/users/entities/user.entity';
 import { UsersService } from 'src/users/users.service';
-import { User } from '../users/entities/user.entity';
-import { NullableType } from '../utils/types/nullable.type';
+import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthProvidersEnum } from './auth-providers.enum';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
@@ -58,27 +58,11 @@ export class AuthService {
           ? user.role.id === RoleEnum.admin
           : [RoleEnum.user].includes(user.role.id as RoleEnum)))
     ) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: 'notFound',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException('Wrong email or password');
     }
 
     if (user.provider !== AuthProvidersEnum.email) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: `needLoginViaProvider:${user.provider}`,
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`Login via ${user.provider}`);
     }
 
     const isValidPassword = await bcrypt.compare(
@@ -87,15 +71,7 @@ export class AuthService {
     );
 
     if (!isValidPassword) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            password: 'incorrectPassword',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`Incorrect password`);
     }
 
     const session = await this.sessionService.create({
@@ -164,15 +140,7 @@ export class AuthService {
     }
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            user: 'userNotFound',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`User not found`);
     }
 
     const session = await this.sessionService.create({
@@ -246,13 +214,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.NOT_FOUND,
-          error: `notFound`,
-        },
-        HttpStatus.NOT_FOUND,
-      );
+      throw new NotFoundException(`User not found`);
     }
 
     user.hash = null;
@@ -268,15 +230,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            email: 'emailNotExists',
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`No account with that email`);
     }
 
     const hash = crypto
@@ -304,15 +258,7 @@ export class AuthService {
     });
 
     if (!forgot) {
-      throw new HttpException(
-        {
-          status: HttpStatus.UNPROCESSABLE_ENTITY,
-          errors: {
-            hash: `notFound`,
-          },
-        },
-        HttpStatus.UNPROCESSABLE_ENTITY,
-      );
+      throw new UnprocessableEntityException(`Couldn't find reset token`);
     }
 
     const user = forgot.user;
@@ -344,15 +290,7 @@ export class AuthService {
         });
 
         if (!currentUser) {
-          throw new HttpException(
-            {
-              status: HttpStatus.UNPROCESSABLE_ENTITY,
-              errors: {
-                user: 'userNotFound',
-              },
-            },
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          );
+          throw new UnprocessableEntityException(`Couldn't find user`);
         }
 
         const isValidOldPassword = await bcrypt.compare(
@@ -361,15 +299,7 @@ export class AuthService {
         );
 
         if (!isValidOldPassword) {
-          throw new HttpException(
-            {
-              status: HttpStatus.UNPROCESSABLE_ENTITY,
-              errors: {
-                oldPassword: 'incorrectOldPassword',
-              },
-            },
-            HttpStatus.UNPROCESSABLE_ENTITY,
-          );
+          throw new UnprocessableEntityException(`Incorrect old password`);
         } else {
           await this.sessionService.softDelete({
             user: {
@@ -379,15 +309,7 @@ export class AuthService {
           });
         }
       } else {
-        throw new HttpException(
-          {
-            status: HttpStatus.UNPROCESSABLE_ENTITY,
-            errors: {
-              oldPassword: 'missingOldPassword',
-            },
-          },
-          HttpStatus.UNPROCESSABLE_ENTITY,
-        );
+        throw new UnprocessableEntityException(`Incorrect old password`);
       }
     }
 

@@ -49,7 +49,7 @@ export class CardsController {
   @ApiOkResponse({ type: SquareListCardsResponse })
   @ApiBearerAuth()
   @ApiOperation({
-    operationId: 'listMySquareCards',
+    operationId: 'listSquareCards',
     summary: 'List my Square Cards',
   })
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
@@ -90,7 +90,7 @@ export class CardsController {
     type: NestError,
   })
   @ApiOperation({
-    operationId: 'createMySquareCard',
+    operationId: 'createSquareCard',
     summary: 'Create my Square Card',
   })
   @ApiBody({
@@ -144,7 +144,7 @@ export class CardsController {
     type: NestError,
   })
   @ApiOperation({
-    operationId: 'disableMySquareCard',
+    operationId: 'disableSquareCard',
     summary: 'Disable my Square Card',
   })
   @ApiParam({ name: 'id', required: true, type: String })
