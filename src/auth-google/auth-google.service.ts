@@ -9,7 +9,7 @@ import { AuthGoogleLoginDto } from './dto/auth-google-login.dto';
 export class AuthGoogleService {
   private google: OAuth2Client;
 
-  constructor(private configService: ConfigService<AllConfigType>) {
+  constructor(private readonly configService: ConfigService<AllConfigType>) {
     this.google = new OAuth2Client(
       configService.get('google.clientId', { infer: true }),
       configService.get('google.clientSecret', { infer: true }),

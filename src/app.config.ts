@@ -22,6 +22,7 @@ export type AppConfig = {
   workingDirectory: string;
   frontendDomain?: string;
   backendDomain: string;
+  corsOriginRegExp: string;
   port: number;
   apiPrefix?: string;
   fallbackLanguage: string;
@@ -48,6 +49,9 @@ class EnvironmentVariablesValidator {
   BACKEND_DOMAIN: string;
 
   @IsString()
+  CORS_ORIGIN_REG_EXP: string;
+
+  @IsString()
   @IsOptional()
   API_PREFIX: string;
 
@@ -69,6 +73,7 @@ export default registerAs<AppConfig>('app', () => {
     workingDirectory: process.env.PWD || process.cwd(),
     frontendDomain: process.env.FRONTEND_DOMAIN,
     backendDomain: process.env.BACKEND_DOMAIN ?? 'http://localhost',
+    corsOriginRegExp: process.env.CORS_ORIGIN_REG_EXP ?? '(localhost)',
     port: process.env.PORT
       ? parseInt(process.env.PORT, 10)
       : process.env.PORT

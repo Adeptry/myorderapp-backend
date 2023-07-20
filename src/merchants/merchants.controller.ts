@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   InternalServerErrorException,
   Logger,
   Post,
@@ -25,10 +24,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import {
-  MerchantsGuard,
-  MerchantsGuardedRequest,
-} from 'src/guards/merchants.guard';
+import { AuthService } from 'src/auth/auth.service';
+import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
@@ -48,8 +45,8 @@ export class MerchantsController {
 
   constructor(
     protected readonly service: MerchantsService,
-    @Inject(SquareService)
     protected readonly squareService: SquareService,
+    protected readonly authService: AuthService,
   ) {}
 
   @ApiBearerAuth()
@@ -94,9 +91,9 @@ export class MerchantsController {
     type: NestError,
   })
   @ApiOkResponse({ type: Merchant })
-  public me(@Req() request: MerchantsGuardedRequest): Merchant {
-    const { merchant, user } = request;
-    merchant.user = user;
+  async me(@Req() request): Promise<Merchant> {
+    const { merchant } = request;
+    merchant.user = await this.authService.me(request.user);
     return merchant;
   }
 

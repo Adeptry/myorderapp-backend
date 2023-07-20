@@ -27,25 +27,15 @@ import { BigIntInterceptor } from 'src/utils/big-int.intercepter';
 import validationOptions from 'src/utils/validation-options';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
-    cors: {
-      origin: function (origin, callback) {
-        const allowedOrigins = [
-          'http://localhost:3000',
-          'https://myorderapp.dev', // TODO CONFIG
-        ];
-        if (allowedOrigins.includes(origin)) {
-          callback(null, true);
-        } else {
-          callback(new Error('Origin not allowed by CORS'));
-        }
-      },
-      credentials: true,
-    },
+  const app = await NestFactory.create(AppModule);
+  const configService = app.get(ConfigService<AllConfigType>);
+  app.enableCors({
+    origin: RegExp(
+      configService.getOrThrow('app.corsOriginRegExp', { infer: true }),
+    ),
   });
   app.use(helmet());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
-  const configService = app.get(ConfigService<AllConfigType>);
 
   app.enableShutdownHooks();
   // app.setGlobalPrefix(

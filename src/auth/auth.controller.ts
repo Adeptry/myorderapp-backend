@@ -12,6 +12,7 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
@@ -22,6 +23,7 @@ import {
   ApiOperation,
   ApiTags,
 } from '@nestjs/swagger';
+import { AllConfigType } from 'src/config.type';
 import { User } from 'src/users/entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthService } from './auth.service';
@@ -39,7 +41,10 @@ import { LoginResponseType } from './types/login-response.type';
 })
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
-  constructor(private readonly service: AuthService) {}
+  constructor(
+    private readonly service: AuthService,
+    private readonly configService: ConfigService<AllConfigType>,
+  ) {}
 
   @SerializeOptions({
     groups: ['me'],
@@ -52,7 +57,8 @@ export class AuthController {
   })
   @ApiOkResponse({ type: LoginResponseType })
   async login(@Body() loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
-    return this.service.validateLogin(loginDto, false);
+    const response = await this.service.validateLogin(loginDto, false);
+    return response;
   }
 
   // @SerializeOptions({
@@ -81,7 +87,9 @@ export class AuthController {
   async register(
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
-    return this.service.register(createUserDto);
+    const response = await this.service.register(createUserDto);
+
+    return response;
   }
 
   // @Post('email/confirm')
