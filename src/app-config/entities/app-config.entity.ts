@@ -50,6 +50,10 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
+  name?: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
   seedColor?: string;
 
   @ApiProperty({ required: false })

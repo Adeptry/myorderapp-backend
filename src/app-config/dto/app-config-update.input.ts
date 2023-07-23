@@ -5,6 +5,11 @@ export class ConfigUpdateDto {
   @ApiProperty()
   @IsString()
   @IsOptional()
+  name?: string;
+
+  @ApiProperty()
+  @IsString()
+  @IsOptional()
   seedColor?: string;
 
   @ApiProperty()
