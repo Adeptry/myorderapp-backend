@@ -21,11 +21,13 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
 import { CustomersController } from 'src/customers/customers.controller';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { CustomersGuard } from 'src/guards/customers.guard';
 import {
   SquareCard,
@@ -37,8 +39,10 @@ import { NestError } from 'src/utils/error';
 import { CreateCardDto } from './dto/card-create.dto';
 
 @ApiTags('Cards')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
-  path: 'cards',
+  path: 'square/cards',
   version: '2',
 })
 export class CardsController {
@@ -63,7 +67,7 @@ export class CardsController {
     type: NestError,
   })
   @ApiQuery({ name: 'cursor', required: false, type: String })
-  @Get('me/square')
+  @Get('me')
   async listMyCards(
     @Req() request: any,
     @Query('cursor') cursor?: string,
@@ -105,7 +109,7 @@ export class CardsController {
       },
     },
   })
-  @Post('me/square')
+  @Post('me')
   async createMyCard(
     @Body() createCardDto: CreateCardDto,
     @Req() request: any,
@@ -148,7 +152,7 @@ export class CardsController {
     summary: 'Disable my Square Card',
   })
   @ApiParam({ name: 'id', required: true, type: String })
-  @Delete('me/square/:id')
+  @Delete('me/:id')
   async disableMyCard(
     @Req() request: any,
     @Param('id') cardId: string,

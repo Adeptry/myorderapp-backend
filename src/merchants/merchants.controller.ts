@@ -21,10 +21,12 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
@@ -35,6 +37,8 @@ import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
 import { Merchant } from './entities/merchant.entity';
 import { MerchantsService } from './merchants.service';
 
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @ApiTags('Merchants')
 @Controller({
   path: 'merchants',

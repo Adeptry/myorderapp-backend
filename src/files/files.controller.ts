@@ -14,13 +14,17 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConsumes,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { NestError } from 'src/utils/error';
 import { FilesService } from './files.service';
 
 @ApiTags('Files')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'files',
   version: '2',

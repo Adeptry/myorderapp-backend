@@ -25,12 +25,14 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
 import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import {
   CustomersGuard,
   CustomersGuardedRequest,
@@ -50,6 +52,8 @@ import { AppInstallsService } from './services/app-installs.service';
   type: NestError,
 })
 @ApiTags('Customers')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'customers',
   version: '2',

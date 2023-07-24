@@ -1,6 +1,6 @@
 {
   "name": "moa-backend3",
-  "version": "0.0.1",
+  "version": "2.0.4",
   "description": "",
   "author": "",
   "private": true,
@@ -61,6 +61,7 @@
     "nodemailer": "6.9.3",
     "passport": "0.6.0",
     "passport-anonymous": "1.0.1",
+    "passport-headerapikey": "^1.2.2",
     "passport-jwt": "4.0.1",
     "pg": "8.11.1",
     "reflect-metadata": "0.1.13",

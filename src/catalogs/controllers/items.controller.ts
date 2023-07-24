@@ -22,6 +22,7 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -33,6 +34,7 @@ import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
 import { Item } from 'src/catalogs/entities/item.entity';
 import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
 import { ItemsService } from 'src/catalogs/services/items.service';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
@@ -44,6 +46,8 @@ import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 
 @ApiTags('Catalogs')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
   version: '2',
 })

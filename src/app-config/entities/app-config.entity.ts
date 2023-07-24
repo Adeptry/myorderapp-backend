@@ -62,19 +62,27 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  shortDescription: string;
+  shortDescription?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  fullDescription: string;
+  fullDescription?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  keywords: string;
+  keywords?: string;
 
   @ApiProperty({ required: false })
   @Column({ nullable: true })
-  url: string;
+  url?: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  message?: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  blockingMessage?: string;
 
   /* App Icon */
 

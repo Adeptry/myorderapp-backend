@@ -9,12 +9,8 @@ import { AppConfigModule } from 'src/app-config/app-config.module';
 import appConfig from 'src/app.config';
 import appleConfig from 'src/auth-apple/apple.config';
 import { AuthAppleModule } from 'src/auth-apple/auth-apple.module';
-import { AuthFacebookModule } from 'src/auth-facebook/auth-facebook.module';
-import facebookConfig from 'src/auth-facebook/facebook.config';
 import { AuthGoogleModule } from 'src/auth-google/auth-google.module';
 import googleConfig from 'src/auth-google/google.config';
-import { AuthTwitterModule } from 'src/auth-twitter/auth-twitter.module';
-import twitterConfig from 'src/auth-twitter/twitter.config';
 import authConfig from 'src/auth/auth.config';
 import { AuthModule } from 'src/auth/auth.module';
 import { CardsModule } from 'src/cards/cards.module';
@@ -54,9 +50,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
         appConfig,
         mailConfig,
         fileConfig,
-        facebookConfig,
         googleConfig,
-        twitterConfig,
         appleConfig,
         squareConfig,
         stripeConfig,
@@ -95,9 +89,7 @@ import { DataSource, DataSourceOptions } from 'typeorm';
     }),
     UsersModule,
     AuthModule,
-    AuthFacebookModule,
     AuthGoogleModule,
-    AuthTwitterModule,
     AuthAppleModule,
     ForgotModule,
     SessionModule,

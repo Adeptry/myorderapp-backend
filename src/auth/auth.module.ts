@@ -11,6 +11,7 @@ import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { AnonymousStrategy } from './strategies/anonymous.strategy';
+import { ApiKeyStrategy } from './strategies/apikey.strategy';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
 
@@ -30,6 +31,7 @@ import { JwtStrategy } from './strategies/jwt.strategy';
     IsNotExist,
     AuthService,
     JwtStrategy,
+    ApiKeyStrategy,
     JwtRefreshStrategy,
     AnonymousStrategy,
   ],

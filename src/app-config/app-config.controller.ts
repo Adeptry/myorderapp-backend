@@ -26,11 +26,13 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AppConfigService } from 'src/app-config/app-config.service';
 import { FilesService } from 'src/files/files.service';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import {
   MerchantsGuard,
   MerchantsGuardedRequest,
@@ -45,6 +47,8 @@ import { ConfigUpdateDto } from './dto/app-config-update.input';
 import { AppConfig } from './entities/app-config.entity';
 
 @ApiTags('Configs')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'app-config',
   version: '2',

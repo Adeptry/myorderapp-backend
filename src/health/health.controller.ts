@@ -1,5 +1,5 @@
 import { Controller, Get, InternalServerErrorException } from '@nestjs/common';
-import { ApiExcludeEndpoint, ApiTags } from '@nestjs/swagger';
+import { ApiExcludeEndpoint, ApiSecurity, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckService,
@@ -7,6 +7,7 @@ import {
 } from '@nestjs/terminus';
 
 @ApiTags('Health')
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'health',
   version: '2',

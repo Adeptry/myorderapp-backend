@@ -22,9 +22,11 @@ import {
   ApiOperation,
   ApiParam,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
@@ -41,6 +43,8 @@ import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @ApiTags('Locations')
 @Controller('v2/locations')
 export class LocationsController {

@@ -11,9 +11,7 @@ import helmet from 'helmet';
 import { AppConfigModule } from 'src/app-config/app-config.module';
 import { AppModule } from 'src/app.module';
 import { AuthAppleModule } from 'src/auth-apple/auth-apple.module';
-import { AuthFacebookModule } from 'src/auth-facebook/auth-facebook.module';
 import { AuthGoogleModule } from 'src/auth-google/auth-google.module';
-import { AuthTwitterModule } from 'src/auth-twitter/auth-twitter.module';
 import { AuthModule } from 'src/auth/auth.module';
 import { CardsModule } from 'src/cards/cards.module';
 import { CatalogsModule } from 'src/catalogs/catalogs.module';
@@ -51,6 +49,9 @@ async function bootstrap() {
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new BigIntInterceptor());
 
+  const headerKeyApiKey =
+    configService.get<string>('HEADER_KEY_API_KEY', { infer: true }) || '';
+
   SwaggerModule.setup(
     'merchants/docs',
     app,
@@ -58,8 +59,12 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.1')
+        .setVersion('2.0.4')
         .addBearerAuth()
+        .addApiKey(
+          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
+          headerKeyApiKey,
+        )
         .addServer(
           configService.getOrThrow('app.backendDomain', { infer: true }),
         )
@@ -67,9 +72,7 @@ async function bootstrap() {
       {
         include: [
           AuthAppleModule,
-          AuthFacebookModule,
           AuthGoogleModule,
-          AuthTwitterModule,
           SquareModule,
           MerchantsModule,
           AuthModule,
@@ -92,8 +95,12 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.1')
+        .setVersion('2.0.4')
         .addBearerAuth()
+        .addApiKey(
+          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
+          headerKeyApiKey,
+        )
         .addServer(
           configService.getOrThrow('app.backendDomain', { infer: true }),
         )
@@ -101,9 +108,7 @@ async function bootstrap() {
       {
         include: [
           AuthAppleModule,
-          AuthFacebookModule,
           AuthGoogleModule,
-          AuthTwitterModule,
           AuthModule,
           AppConfigModule,
           CustomersModule,

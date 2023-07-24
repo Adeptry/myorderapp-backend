@@ -35,13 +35,20 @@ import { LoginResponseType } from './types/login-response.type';
 @Injectable()
 export class AuthService {
   constructor(
-    private jwtService: JwtService,
-    private usersService: UsersService,
-    private forgotService: ForgotService,
-    private sessionService: SessionService,
-    private mailService: MailService,
-    private configService: ConfigService<AllConfigType>,
+    private readonly jwtService: JwtService,
+    private readonly usersService: UsersService,
+    private readonly forgotService: ForgotService,
+    private readonly sessionService: SessionService,
+    private readonly mailService: MailService,
+    private readonly configService: ConfigService<AllConfigType>,
   ) {}
+
+  validateApiKey(apiKey: string) {
+    const apiKeys: string[] =
+      this.configService.get<string>('API_KEYS', { infer: true })?.split(',') ||
+      [];
+    return apiKeys.find((key) => apiKey == key) || apiKeys.length === 0;
+  }
 
   async validateLogin(
     loginDto: AuthEmailLoginDto,

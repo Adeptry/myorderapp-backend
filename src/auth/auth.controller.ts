@@ -21,9 +21,11 @@ import {
   ApiNoContentResponse,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
 import { AllConfigType } from 'src/config.type';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { User } from 'src/users/entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { AuthService } from './auth.service';
@@ -35,6 +37,8 @@ import { AuthUpdateDto } from './dto/auth-update.dto';
 import { LoginResponseType } from './types/login-response.type';
 
 @ApiTags('Auth')
+@UseGuards(ApiKeyAuthGuard)
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'auth',
   version: '2',
@@ -88,7 +92,6 @@ export class AuthController {
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
     const response = await this.service.register(createUserDto);
-
     return response;
   }
 

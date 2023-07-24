@@ -10,15 +10,24 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { ApiBody, ApiConsumes, ApiQuery, ApiTags } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiConsumes,
+  ApiQuery,
+  ApiSecurity,
+  ApiTags,
+} from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import {
   MerchantsGuard,
   MerchantsGuardedRequest,
 } from 'src/guards/merchants.guard';
 import { SquareService } from './square.service';
 
+@UseGuards(ApiKeyAuthGuard)
 @ApiTags('Square')
+@ApiSecurity('Api-Key')
 @Controller({
   path: 'square',
   version: '2',

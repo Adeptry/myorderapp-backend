@@ -1,9 +1,10 @@
 import { Controller, Get } from '@nestjs/common';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 
 import { HomeService } from './home.service';
 
 @ApiTags('Home')
+@ApiSecurity('Api-Key')
 @Controller()
 export class HomeController {
   constructor(private service: HomeService) {}

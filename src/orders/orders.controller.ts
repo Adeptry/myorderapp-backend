@@ -30,10 +30,12 @@ import {
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import {
   CustomersGuard,
   CustomersGuardedRequest,
@@ -48,7 +50,9 @@ import { OrdersPaginatedReponse } from './dto/orders-paginated.dto';
 import { PaymentCreateDto } from './dto/payment-create.dto';
 import { Order } from './entities/order.entity';
 
+@UseGuards(ApiKeyAuthGuard)
 @ApiTags('Orders')
+@ApiSecurity('Api-Key')
 @Controller('v2/orders')
 @ApiUnauthorizedResponse({
   description: 'You need to be authenticated to access this endpoint.',
