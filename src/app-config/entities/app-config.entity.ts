@@ -60,6 +60,22 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   fontFamily?: string;
 
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  shortDescription: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  fullDescription: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  keywords: string;
+
+  @ApiProperty({ required: false })
+  @Column({ nullable: true })
+  url: string;
+
   /* App Icon */
 
   @Exclude({ toPlainOnly: true })
