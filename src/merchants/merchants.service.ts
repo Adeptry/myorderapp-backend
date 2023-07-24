@@ -8,11 +8,13 @@ import {
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { credential } from 'firebase-admin';
 import { CatalogsService } from 'src/catalogs/catalogs.service';
 import { Catalog } from 'src/catalogs/entities/catalog.entity';
+import { AllConfigType } from 'src/config.type';
 import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
 import { LocationsService } from 'src/locations/locations.service';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
@@ -33,6 +35,8 @@ export class MerchantsService extends BaseService<Merchant> {
   constructor(
     @InjectRepository(Merchant)
     protected readonly repository: Repository<Merchant>,
+    @Inject(ConfigService)
+    private readonly configService: ConfigService<AllConfigType>,
     @Inject(StripeService)
     private readonly stripeService: StripeService,
     @Inject(SquareService)
@@ -254,16 +258,24 @@ export class MerchantsService extends BaseService<Merchant> {
     }
 
     const session = await this.stripeService.createCheckoutSession({
-      payment_method_types: ['card'],
       mode: 'subscription',
       line_items: [
         {
-          price: 'price_1J2igaIO3O3Eil4Y7Q7BhLUE',
+          price: this.configService.getOrThrow('stripe.subscriptionPrice', {
+            infer: true,
+          }),
           quantity: 1,
         },
         {
-          price: 'price_1IdKuBIO3O3Eil4YJCztT5VY',
+          price: this.configService.getOrThrow('stripe.developerPrice', {
+            infer: true,
+          }),
           quantity: 1,
+          adjustable_quantity: {
+            enabled: true,
+            minimum: 0,
+            maximum: 1,
+          },
         },
       ],
       allow_promotion_codes: true,

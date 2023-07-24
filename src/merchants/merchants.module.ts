@@ -1,4 +1,5 @@
 import { forwardRef, Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from 'src/auth/auth.module';
 import { CatalogsModule } from 'src/catalogs/catalogs.module';
@@ -19,6 +20,7 @@ import { UsersModule } from 'src/users/users.module';
     FirebaseAdminModule,
     AuthModule,
     UsersModule,
+    ConfigModule,
     forwardRef(() => SquareModule),
     forwardRef(() => GuardsModule),
     forwardRef(() => CatalogsModule),
