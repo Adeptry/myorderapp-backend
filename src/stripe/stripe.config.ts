@@ -16,10 +16,6 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   STRIPE_SUBSCRIPTION_PRICE: string;
-
-  @IsString()
-  @IsOptional()
-  STRIPE_APPLE_DEVELOPER_PRICE: string;
 }
 
 export default registerAs('stripe', () => {
@@ -28,6 +24,5 @@ export default registerAs('stripe', () => {
   return {
     apiKey: process.env.STRIPE_API_KEY,
     subscriptionPrice: process.env.STRIPE_SUBSCRIPTION_PRICE,
-    developerPrice: process.env.STRIPE_APPLE_DEVELOPER_PRICE,
   };
 });

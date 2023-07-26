@@ -266,17 +266,6 @@ export class MerchantsService extends BaseService<Merchant> {
           }),
           quantity: 1,
         },
-        {
-          price: this.configService.getOrThrow('stripe.developerPrice', {
-            infer: true,
-          }),
-          quantity: 1,
-          adjustable_quantity: {
-            enabled: true,
-            minimum: 0,
-            maximum: 1,
-          },
-        },
       ],
       allow_promotion_codes: true,
       customer: merchant.stripeId,

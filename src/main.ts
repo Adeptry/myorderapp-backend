@@ -1,12 +1,13 @@
 import {
   ClassSerializerInterceptor,
+  UnprocessableEntityException,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
-import { useContainer } from 'class-validator';
+import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AppConfigModule } from 'src/app-config/app-config.module';
 import { AppModule } from 'src/app.module';
@@ -22,7 +23,6 @@ import { MerchantsModule } from 'src/merchants/merchants.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { SquareModule } from 'src/square/square.module';
 import { BigIntInterceptor } from 'src/utils/big-int.intercepter';
-import validationOptions from 'src/utils/validation-options';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -45,9 +45,30 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-  app.useGlobalPipes(new ValidationPipe(validationOptions));
+  // app.useGlobalPipes(new ValidationPipe(validationOptions));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new BigIntInterceptor());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      exceptionFactory: (errors: ValidationError[]) => {
+        const messages = errors.reduce(
+          (acc, e) => ({
+            ...acc,
+            [e.property]: Object.values(
+              e.constraints ? e.constraints : {},
+            ).join(', '),
+          }),
+          {},
+        );
+
+        return new UnprocessableEntityException({
+          statusCode: 422,
+          error: 'Unprocessable Entity',
+          message: messages,
+        });
+      },
+    }),
+  );
 
   const headerKeyApiKey =
     configService.get<string>('HEADER_KEY_API_KEY', { infer: true }) || '';
