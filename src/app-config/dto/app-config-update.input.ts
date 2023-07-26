@@ -7,7 +7,7 @@ import {
   Length,
 } from 'class-validator';
 
-export class ConfigUpdateDto {
+export class AppConfigUpdateDto {
   @ApiProperty({ required: false })
   @IsString()
   @IsOptional()

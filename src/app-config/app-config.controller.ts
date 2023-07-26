@@ -43,7 +43,7 @@ import {
 } from 'src/guards/user-type.guard';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
-import { ConfigUpdateDto } from './dto/app-config-update.input';
+import { AppConfigUpdateDto } from './dto/app-config-update.input';
 import { AppConfig } from './entities/app-config.entity';
 
 @ApiTags('Configs')
@@ -98,11 +98,11 @@ export class AppConfigController {
     type: NestError,
   })
   @ApiOperation({ summary: 'Create your Config', operationId: 'createConfig' })
-  @ApiBody({ type: ConfigUpdateDto })
+  @ApiBody({ type: AppConfigUpdateDto })
   async create(
     @Req() request: MerchantsGuardedRequest,
     @Body()
-    createAppConfigDto: ConfigUpdateDto,
+    createAppConfigDto: AppConfigUpdateDto,
   ) {
     const { merchant } = request;
 
@@ -135,10 +135,10 @@ export class AppConfigController {
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
-  @ApiBody({ type: ConfigUpdateDto })
+  @ApiBody({ type: AppConfigUpdateDto })
   async update(
     @Req() request: MerchantsGuardedRequest,
-    @Body() updateAppConfigDto: ConfigUpdateDto,
+    @Body() updateAppConfigDto: AppConfigUpdateDto,
   ) {
     const { merchant } = request;
 
