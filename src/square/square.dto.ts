@@ -12,22 +12,22 @@ import { nanoid } from 'nanoid';
 
 export class SquareError {
   @ApiProperty({
-    nullable: true,
+    required: false,
     description:
       'Indicates the specific error that occurred during a request to a Square API.',
   })
   category: string;
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   code: string;
   @ApiProperty({
-    nullable: true,
+    required: false,
     description:
       'A human-readable description of the error for debugging purposes.',
   })
   detail?: string;
 
   @ApiProperty({
-    nullable: true,
+    required: false,
     description:
       'The name of the field provided in the original request (if any) that the error pertains to.',
   })
@@ -35,73 +35,73 @@ export class SquareError {
 }
 
 export class SquareAddress {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   addressLine1?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   addressLine2?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   addressLine3?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   locality?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   sublocality?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   sublocality2?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   sublocality3?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   administrativeDistrictLevel1?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   administrativeDistrictLevel2?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   administrativeDistrictLevel3?: string; // | null;
 
-  @ApiProperty({ nullable: true, example: '94103' })
+  @ApiProperty({ required: false, example: '94103' })
   @IsString()
   postalCode?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   country?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   firstName?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   lastName?: string; // | null;
 }
 
 export class SquareCard {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   id?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   cardBrand?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   last4?: string;
 
@@ -113,11 +113,11 @@ export class SquareCard {
   @Transform(({ value }) => value && BigInt(value), { toClassOnly: true })
   expYear?: bigint;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   cardholderName?: string;
 
-  // @ApiProperty({ type: () => SquareAddress, nullable: true })
+  // @ApiProperty({ type: () => SquareAddress, required: false })
   @Exclude({ toPlainOnly: true })
   billingAddress?: SquareAddress;
 
@@ -125,23 +125,23 @@ export class SquareCard {
 
   merchantId?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   referenceId?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   enabled?: boolean;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   cardType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   prepaidType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   bin?: string;
 
@@ -149,7 +149,7 @@ export class SquareCard {
   @Transform(({ value }) => value && BigInt(value), { toClassOnly: true })
   version?: bigint;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsOptional()
   cardCoBrand?: string;
 }
@@ -163,7 +163,7 @@ export class SquareCreateCustomerCardInput {
   @IsNotEmpty()
   sourceId: string;
 
-  @ApiProperty({ nullable: true, default: null })
+  @ApiProperty({ required: false, default: null })
   @IsOptional()
   verificationToken?: string;
 
@@ -173,30 +173,30 @@ export class SquareCreateCustomerCardInput {
 }
 
 export class SquareDisableCardResponse {
-  @ApiProperty({ nullable: true, type: SquareError, isArray: true })
+  @ApiProperty({ required: false, type: SquareError, isArray: true })
   errors?: SquareError[];
 
-  @ApiProperty({ nullable: true, type: SquareCard })
+  @ApiProperty({ required: false, type: SquareCard })
   card?: SquareCard;
 }
 
 export class SquareListCardsResponse {
-  @ApiProperty({ type: SquareError, isArray: true, nullable: true })
+  @ApiProperty({ type: SquareError, isArray: true, required: false })
   errors?: SquareError[];
 
-  @ApiProperty({ nullable: true, type: SquareCard, isArray: true })
+  @ApiProperty({ required: false, type: SquareCard, isArray: true })
   cards?: SquareCard[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   cursor?: string;
 }
 
 export class SquareMeasurementUnitCustom {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   abbreviation: string;
 }
@@ -206,31 +206,31 @@ export class SquareMeasurementUnit {
   @ValidateNested()
   customUnit?: SquareMeasurementUnitCustom;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   areaUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   lengthUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   volumeUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   weightUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   genericUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   timeUnit?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   type?: string;
 }
@@ -240,47 +240,47 @@ export class SquareOrderQuantityUnit {
   @ValidateNested()
   measurementUnit?: SquareMeasurementUnit;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   precision?: number; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 }
 
 export class SquareMoney {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   amount?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   currency?: string;
 }
 
 export class SquareOrderLineItemModifier {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   quantity?: string; // | null;
 
@@ -292,17 +292,17 @@ export class SquareOrderLineItemModifier {
   @ValidateNested()
   totalPriceMoney?: SquareMoney;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 }
 
 export class SquareOrderLineItemAppliedTax {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   taxUid: string;
 
@@ -312,11 +312,11 @@ export class SquareOrderLineItemAppliedTax {
 }
 
 export class SquareOrderLineItemAppliedDiscount {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   discountUid: string;
 
@@ -326,11 +326,11 @@ export class SquareOrderLineItemAppliedDiscount {
 }
 
 export class SquareOrderLineItemAppliedServiceCharge {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   serviceChargeUid: string;
 
@@ -340,29 +340,29 @@ export class SquareOrderLineItemAppliedServiceCharge {
 }
 
 export class SquareOrderLineItemPricingBlocklistsBlockedTax {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   taxUid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   taxCatalogObjectId?: string; // | null;
 }
 
 export class SquareOrderLineItemPricingBlocklistsBlockedDiscount {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   discountUid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   discountCatalogObjectId?: string; // | null;
 }
@@ -378,15 +378,15 @@ export class SquareOrderLineItemPricingBlocklists {
 }
 
 export class SquareOrderLineItem {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   quantity: string;
 
@@ -394,27 +394,27 @@ export class SquareOrderLineItem {
   @ValidateNested()
   quantityUnit?: SquareOrderQuantityUnit;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   note?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   variationName?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   itemType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
@@ -468,31 +468,31 @@ export class SquareOrderLineItem {
 }
 
 export class SquareOrderLineItemTax {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   type?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   percentage?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
@@ -500,37 +500,37 @@ export class SquareOrderLineItemTax {
   @ValidateNested()
   appliedMoney?: SquareMoney;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   scope?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   autoApplied?: boolean;
 }
 
 export class SquareOrderLineItemDiscount {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   type?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   percentage?: string; // | null;
 
@@ -542,41 +542,41 @@ export class SquareOrderLineItemDiscount {
   @ValidateNested()
   appliedMoney?: SquareMoney;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   scope?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString({ each: true })
   rewardIds?: string[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   pricingRuleId?: string;
 }
 
 export class SquareOrderServiceCharge {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   name?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   catalogObjectId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   catalogVersion?: bigint; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   percentage?: string; // | null;
 
@@ -596,11 +596,11 @@ export class SquareOrderServiceCharge {
   @ValidateNested()
   totalTaxMoney?: SquareMoney;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   calculationPhase?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   taxable?: boolean; // | null;
 
@@ -608,65 +608,65 @@ export class SquareOrderServiceCharge {
   @ValidateNested({ each: true })
   appliedTaxes?: SquareOrderLineItemAppliedTax[]; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   type?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   treatmentType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   scope?: string;
 }
 
 export class SquareFulfillmentPickupDetailsCurbsidePickupDetails {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   curbsideDetails?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   buyerArrivedAt?: string; // | null;
 }
 
 export class SquareFulfillmentFulfillmentEntry {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   lineItemUid: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   quantity: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 }
 
 export class SquareFulfillmentRecipient {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   customerId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   displayName?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   emailAddress?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   phoneNumber?: string; // | null;
 
@@ -680,67 +680,67 @@ export class SquareFulfillmentPickupDetails {
   @ValidateNested()
   recipient?: SquareFulfillmentRecipient;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   expiresAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   autoCompleteDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   scheduleType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   pickupAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   pickupWindowDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   prepTimeDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   note?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   placedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   acceptedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   rejectedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   readyAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   expiredAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   pickedUpAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   canceledAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   cancelReason?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   isCurbsidePickup?: boolean; // | null;
 
@@ -754,91 +754,91 @@ export class SquareFulfillmentDeliveryDetails {
   @ValidateNested()
   recipient?: SquareFulfillmentRecipient;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   scheduleType?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   placedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   deliverAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   prepTimeDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   deliveryWindowDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   note?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   completedAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   inProgressAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   rejectedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   readyAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   deliveredAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   canceledAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   cancelReason?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   courierPickupAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   courierPickupWindowDuration?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   isNoContactDelivery?: boolean; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   dropoffNotes?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   courierProviderName?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   courierSupportPhoneNumber?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   squareDeliveryId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   externalDeliveryId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   managedDelivery?: boolean; // | null;
 }
@@ -848,77 +848,77 @@ export class SquareFulfillmentShipmentDetails {
   @ValidateNested()
   recipient?: SquareFulfillmentRecipient;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   carrier?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   shippingNote?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   shippingType?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   trackingNumber?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   trackingUrl?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   placedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   inProgressAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   packagedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   expectedShippedAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   shippedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   canceledAt?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   cancelReason?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   failedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   failureReason?: string; // | null;
 }
 
 export class SquareFulfillment {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   uid?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   type?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   state?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   lineItemApplication?: string;
 
@@ -926,7 +926,7 @@ export class SquareFulfillment {
   @ValidateNested({ each: true })
   entries?: SquareFulfillmentFulfillmentEntry[];
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
@@ -944,39 +944,39 @@ export class SquareFulfillment {
 }
 
 export class SquareOrderPricingOptions {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   autoApplyDiscounts?: boolean; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsBoolean()
   autoApplyTaxes?: boolean; // | null;
 }
 
 export class SquareOrderReward {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   id: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   rewardTierId: string;
 }
 
 export class SquareOrder {
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   id?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   locationId: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   referenceId?: string; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   customerId?: string; // | null;
 
@@ -1000,27 +1000,27 @@ export class SquareOrder {
   @ValidateNested({ each: true })
   fulfillments?: SquareFulfillment[]; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNotEmpty()
   metadata?: Record<string, string>; // | null;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   createdAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   updatedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   closedAt?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   state?: string;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsNumber()
   version?: number;
 
@@ -1044,7 +1044,7 @@ export class SquareOrder {
   @ValidateNested()
   totalServiceChargeMoney?: SquareMoney;
 
-  @ApiProperty({ nullable: true })
+  @ApiProperty({ required: false })
   @IsString()
   ticketName?: string; // | null;
 

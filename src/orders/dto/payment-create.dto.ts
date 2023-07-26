@@ -16,7 +16,7 @@ export class PaymentCreateDto {
   paymentSquareId: string;
 
   @IsString()
-  @ApiProperty({ example: nanoid() })
+  @ApiProperty({ example: nanoid(), required: true, nullable: false })
   idempotencyKey: string;
 
   @ApiProperty()
