@@ -145,7 +145,15 @@ export class ItemsController {
     @Param('id') id: string,
     @Query('locationId') locationId?: string,
   ): Promise<Item> {
-    const entity = await this.service.joinOneQuery({ id, locationId }).getOne();
+    const entity = await this.service
+      .joinOneQuery({
+        id,
+        locationId,
+        leftJoinImages: true,
+        leftJoinModifierLists: true,
+        leftJoinVariations: true,
+      })
+      .getOne();
 
     if (!entity) {
       throw new NotFoundException(`Item with id ${id} not found`);

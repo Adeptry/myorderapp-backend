@@ -63,13 +63,25 @@ export class ItemsService extends BaseService<Item> {
     leftJoinImages?: boolean;
     whereOnlyEnabled?: boolean;
   }) {
-    const { locationId } = params;
+    const {
+      locationId,
+      leftJoinVariations,
+      leftJoinModifierLists,
+      leftJoinImages,
+      whereOnlyEnabled,
+    } = params;
 
     return this.join(
       this.createQueryBuilder('item').where('item.id = :id', {
         id: params.id,
       }),
-      { locationId },
+      {
+        locationId,
+        leftJoinVariations,
+        leftJoinModifierLists,
+        leftJoinImages,
+        whereOnlyEnabled,
+      },
     );
   }
 
