@@ -12,4 +12,31 @@ export class VariationsService extends BaseService<Variation> {
   ) {
     super(repository);
   }
+
+  joinManyQuery(params: { itemId: string; locationId?: string }) {
+    const { itemId, locationId } = params;
+
+    const query = this.createQueryBuilder('variations').where(
+      'variations.itemId = :itemId',
+      {
+        itemId,
+      },
+    );
+
+    if (locationId) {
+      query
+        .leftJoinAndSelect(
+          'variations.locationOverrides',
+          'variationLocationOverrides',
+          'variationLocationOverrides.locationId = :locationId',
+          { locationId },
+        )
+        .addSelect(
+          'COALESCE(variationLocationOverrides.amount, variations.priceInCents)',
+          'variations_priceInCents',
+        );
+    }
+
+    return query;
+  }
 }

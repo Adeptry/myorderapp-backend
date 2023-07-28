@@ -21,6 +21,7 @@ import { SquareModule } from 'src/square/square.module';
 import { CatalogsController } from './catalogs.controller';
 import { CategoriesController } from './controllers/categories.controller';
 import { ItemsController } from './controllers/items.controller';
+import { VariationsController } from './controllers/variations.controller';
 import { CatalogImage } from './entities/catalog-image.entity';
 import { ModifierLocationOverride } from './entities/modifier-location-override.entity';
 import { VariationLocationOverride } from './entities/variation-location-override.entity';
@@ -72,6 +73,11 @@ import { VariationLocationOverridesService } from './services/variation-location
     ModifierLocationOverridesService,
     CatalogSortService,
   ],
-  controllers: [CatalogsController, CategoriesController, ItemsController],
+  controllers: [
+    CatalogsController,
+    CategoriesController,
+    ItemsController,
+    VariationsController,
+  ],
 })
 export class CatalogsModule {}
