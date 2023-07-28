@@ -73,9 +73,12 @@ export class ItemsController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'locationId', required: false, type: String })
+  @ApiQuery({ name: 'images', required: false, type: Boolean })
+  @ApiQuery({ name: 'variations', required: false, type: Boolean })
+  @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get Items in Category',
-    operationId: 'getItems',
+    operationId: 'getItemsInCategory',
   })
   async getItemsInCategory(
     @Req() request: UserTypeGuardedRequest,
@@ -83,6 +86,9 @@ export class ItemsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
+    @Query('images') images?: boolean,
+    @Query('variations') variations?: boolean,
+    @Query('modifierLists') modifierLists?: boolean,
   ): Promise<ItemPaginatedResponse> {
     let parsedPage: number | undefined;
     if (page !== undefined) {
@@ -110,9 +116,9 @@ export class ItemsController {
         locationId,
         page: parsedPage,
         limit: parsedLimit,
-        leftJoinImages: true,
-        leftJoinModifierLists: true,
-        leftJoinVariations: true,
+        leftJoinImages: images,
+        leftJoinModifierLists: modifierLists,
+        leftJoinVariations: variations,
         whereOnlyEnabled,
       })
       .getManyAndCount();

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { FileEntity } from 'src/files/entities/file.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
@@ -48,38 +48,47 @@ export class AppConfig extends EntityHelper {
 
   /* App config entity */
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   name?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   seedColor?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   fontFamily?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   shortDescription?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   fullDescription?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   keywords?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   url?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   message?: string;
 
+  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })
   @Column({ nullable: true })
   blockingMessage?: string;
