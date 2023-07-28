@@ -8,12 +8,12 @@ import {
 } from 'class-validator';
 
 export class CategoryUpdateDto {
-  @ApiProperty()
+  @ApiProperty({ nullable: true, required: false })
   @IsNumber()
   @IsOptional()
   moaOrdinal?: number;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true, required: false })
   @IsBoolean()
   @IsOptional()
   moaEnabled?: boolean;
@@ -25,12 +25,12 @@ export class CategoryUpdateAllDto {
   @IsNotEmpty()
   id!: string;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true, required: false })
   @IsNumber()
   @IsOptional()
   moaOrdinal?: number;
 
-  @ApiProperty()
+  @ApiProperty({ nullable: true, required: false })
   @IsBoolean()
   @IsOptional()
   moaEnabled?: boolean;

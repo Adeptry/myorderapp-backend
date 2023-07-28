@@ -4,12 +4,12 @@ import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 export class LocationUpdateDto {
   @IsNumber()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   moaOrdinal?: number;
 
   @IsBoolean()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   moaEnabled?: boolean;
 }
 
@@ -21,11 +21,11 @@ export class LocationUpdateAllDto {
 
   @IsNumber()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   moaOrdinal?: number;
 
   @IsBoolean()
   @IsOptional()
-  @ApiProperty()
+  @ApiProperty({ required: false })
   moaEnabled?: boolean;
 }
