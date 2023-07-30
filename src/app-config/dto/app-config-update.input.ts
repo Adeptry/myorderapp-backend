@@ -6,6 +6,8 @@ import {
   IsUrl,
   Length,
 } from 'class-validator';
+import { AppearanceEnum } from '../entities/appearance.enum';
+import { ColorModeEnum } from '../entities/color-mode.enum';
 
 export class AppConfigUpdateDto {
   @ApiProperty({ required: false })
@@ -48,4 +50,18 @@ export class AppConfigUpdateDto {
   @IsOptional()
   @IsUrl()
   url?: string;
+
+  @ApiProperty({
+    enum: Object.values(AppearanceEnum),
+  })
+  @IsString()
+  @IsOptional()
+  appearance?: AppearanceEnum;
+
+  @ApiProperty({
+    enum: Object.values(ColorModeEnum),
+  })
+  @IsString()
+  @IsOptional()
+  colorMode?: ColorModeEnum;
 }

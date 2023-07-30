@@ -131,7 +131,7 @@ export class AppConfigController {
     type: NestError,
   })
   @Patch('me')
-  @HttpCode(HttpStatus.CREATED)
+  @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
