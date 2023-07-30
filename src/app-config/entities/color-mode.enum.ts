@@ -1,5 +1,5 @@
 export enum ColorModeEnum {
-  SYSTEM = 'SYSTEM',
-  LIGHT = 'LIGHT',
-  DARK = 'DARK',
+  SYSTEM = 0,
+  LIGHT = 1,
+  DARK = 2,
 }
