@@ -65,11 +65,19 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   fontFamily?: string;
 
-  @ApiProperty({ required: false, enum: Object.values(AppearanceEnum) })
+  @ApiProperty({
+    required: false,
+    enum: Object.values(AppearanceEnum),
+    enumName: 'AppearanceEnum',
+  })
   @Column({ type: 'simple-enum', nullable: true, enum: AppearanceEnum })
   appearance?: AppearanceEnum;
 
-  @ApiProperty({ required: false, enum: Object.values(ColorModeEnum) })
+  @ApiProperty({
+    required: false,
+    enum: Object.values(ColorModeEnum),
+    enumName: 'ColorModeEnum',
+  })
   @Column({ type: 'simple-enum', nullable: true, enum: ColorModeEnum })
   colorMode?: ColorModeEnum;
 

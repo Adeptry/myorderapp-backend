@@ -1,4 +1,4 @@
 export enum AppearanceEnum {
-  MODERN = 0,
-  CLASSIC = 1,
+  modern = 'modern',
+  classic = 'classic',
 }
