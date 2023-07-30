@@ -63,33 +63,66 @@ export class MerchantsService extends BaseService<Merchant> {
   }) {
     const { merchant, oauthAccessCode } = params;
 
-    const accessTokenResult = (
-      await this.squareService.obtainToken({
-        oauthAccessCode,
-      })
-    ).result;
+    const nodeEnv = this.configService.get('app.nodeEnv', { infer: true });
+    const testCode = this.configService.get('square.testCode', { infer: true });
+    const isTest = nodeEnv !== 'production' && oauthAccessCode === testCode;
 
-    if (!accessTokenResult) {
+    this.logger.log(
+      `${
+        this.squareConfirmOauth.name
+      } isTest: ${isTest}, testCode: ${testCode}, nodeEnv: ${nodeEnv}, oauthAccessCode ${oauthAccessCode}, equals: ${
+        oauthAccessCode === testCode
+      }`,
+    );
+
+    try {
+      const accessTokenResult = isTest
+        ? {
+            accessToken: this.configService.get('square.testAccessToken', {
+              infer: true,
+            }),
+            expiresAt: this.configService.get('square.testExpireAt', {
+              infer: true,
+            }),
+            merchantId: this.configService.get('square.testId', {
+              infer: true,
+            }),
+            refreshToken: this.configService.get('square.testRefreshToken', {
+              infer: true,
+            }),
+          }
+        : (
+            await this.squareService.obtainToken({
+              oauthAccessCode,
+            })
+          ).result;
+
+      if (!accessTokenResult) {
+        throw new InternalServerErrorException(
+          'Failed to obtain token from Square service',
+        );
+      }
+
+      const { accessToken, expiresAt, merchantId, refreshToken } =
+        accessTokenResult;
+
+      if (!expiresAt) {
+        throw new InternalServerErrorException(
+          'No expiry date provided in the access token',
+        );
+      }
+
+      merchant.squareAccessToken = accessToken;
+      merchant.squareExpiresAt = new Date(Date.parse(expiresAt));
+      merchant.squareId = merchantId;
+      merchant.squareRefreshToken = refreshToken;
+
+      return this.save(merchant);
+    } catch {
       throw new InternalServerErrorException(
         'Failed to obtain token from Square service',
       );
     }
-
-    const { accessToken, expiresAt, merchantId, refreshToken } =
-      accessTokenResult;
-
-    if (!expiresAt) {
-      throw new InternalServerErrorException(
-        'No expiry date provided in the access token',
-      );
-    }
-
-    merchant.squareAccessToken = accessToken;
-    merchant.squareExpiresAt = new Date(Date.parse(expiresAt));
-    merchant.squareId = merchantId;
-    merchant.squareRefreshToken = refreshToken;
-
-    return this.save(merchant);
   }
 
   async squareRefreshOauth(id: string) {

@@ -51,9 +51,9 @@ export class ModifierList extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /* Squre */
+  /* Square */
   @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
   @ApiProperty({ type: Number, required: false })

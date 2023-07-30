@@ -72,7 +72,7 @@ export class Item extends EntityHelper {
    */
 
   @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
   @ApiProperty({ type: String, required: false })

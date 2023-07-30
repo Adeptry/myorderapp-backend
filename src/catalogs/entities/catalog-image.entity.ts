@@ -54,7 +54,7 @@ export class CatalogImage extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @ApiProperty({ type: String, required: false })
-  @Column({ type: String, nullable: true })
+  @Column({ type: String, nullable: true, unique: false }) // TODO unique: true
   squareId?: string | null;
 
   @ApiProperty({ type: String, required: false })

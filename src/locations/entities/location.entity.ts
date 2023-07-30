@@ -212,6 +212,6 @@ export class Location extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  @Column({ nullable: true, unique: true })
+  @Column({ nullable: true, unique: false }) // TODO unique: true
   locationSquareId?: string;
 }

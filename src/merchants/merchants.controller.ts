@@ -123,6 +123,7 @@ export class MerchantsController {
       oauthAccessCode,
       merchant: request.merchant,
     });
+
     return;
   }
 

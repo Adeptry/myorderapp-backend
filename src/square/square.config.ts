@@ -7,6 +7,11 @@ export type SquareConfig = {
   clientEnvironment: string;
   oauthClientId: string;
   oauthClientSecret: string;
+  testCode?: string;
+  testAccessToken?: string;
+  testRefreshToken?: string;
+  testExpireAt?: string;
+  testId?: string;
 };
 
 class EnvironmentVariablesValidator {
@@ -25,6 +30,21 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   SQUARE_BASE_URL: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_TEST_CODE: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_TEST_ACCESS_TOKEN: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_TEST_REFRESH_TOKEN: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_TEST_EXPIRE_AT: string;
+  @IsString()
+  @IsOptional()
+  SQUARE_TEST_ID: string;
 }
 
 export default registerAs('square', () => {
@@ -36,5 +56,10 @@ export default registerAs('square', () => {
     oauthClientId: process.env.SQUARE_OAUTH_CLIENT_ID,
     oauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET,
     baseUrl: process.env.SQUARE_BASE_URL,
+    testCode: process.env.SQUARE_TEST_CODE,
+    testAccessToken: process.env.SQUARE_TEST_ACCESS_TOKEN,
+    testRefreshToken: process.env.SQUARE_TEST_REFRESH_TOKEN,
+    testExpireAt: process.env.SQUARE_TEST_EXPIRE_AT,
+    testId: process.env.SQUARE_TEST_ID,
   };
 });

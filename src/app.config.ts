@@ -12,8 +12,8 @@ import validateConfig from 'src/utils/validate-config';
 
 enum Environment {
   Development = 'development',
+  Staging = 'staging',
   Production = 'production',
-  Test = 'test',
 }
 
 export type AppConfig = {
