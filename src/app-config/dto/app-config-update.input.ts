@@ -53,6 +53,7 @@ export class AppConfigUpdateDto {
 
   @ApiProperty({
     enum: Object.values(AppearanceEnum),
+    required: false,
   })
   @IsString()
   @IsOptional()
@@ -60,6 +61,7 @@ export class AppConfigUpdateDto {
 
   @ApiProperty({
     enum: Object.values(ColorModeEnum),
+    required: false,
   })
   @IsString()
   @IsOptional()
