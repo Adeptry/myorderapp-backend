@@ -17,8 +17,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { AppearanceEnum } from './appearance.enum';
-import { ColorModeEnum } from './color-mode.enum';
+import { ThemeModeEnum } from './theme-mode.enum';
 
 @Entity('app_config')
 export class AppConfig extends EntityHelper {
@@ -67,19 +66,17 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({
     required: false,
-    enum: Object.values(AppearanceEnum),
-    enumName: 'AppearanceEnum',
   })
-  @Column({ type: 'simple-enum', nullable: true, enum: AppearanceEnum })
-  appearance?: AppearanceEnum;
+  @Column({ nullable: true })
+  useMaterial3?: boolean;
 
   @ApiProperty({
     required: false,
-    enum: Object.values(ColorModeEnum),
-    enumName: 'ColorModeEnum',
+    enum: Object.values(ThemeModeEnum),
+    enumName: 'ThemeModeEnum',
   })
-  @Column({ type: 'simple-enum', nullable: true, enum: ColorModeEnum })
-  colorMode?: ColorModeEnum;
+  @Column({ type: 'simple-enum', nullable: true, enum: ThemeModeEnum })
+  themeMode?: ThemeModeEnum;
 
   @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false })

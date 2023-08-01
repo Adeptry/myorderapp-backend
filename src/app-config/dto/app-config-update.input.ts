@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import {
+  IsBoolean,
   IsHexColor,
   IsOptional,
   IsString,
   IsUrl,
   Length,
 } from 'class-validator';
-import { AppearanceEnum } from '../entities/appearance.enum';
-import { ColorModeEnum } from '../entities/color-mode.enum';
+import { ThemeModeEnum } from '../entities/theme-mode.enum';
 
 export class AppConfigUpdateDto {
   @ApiProperty({ required: false })
@@ -52,18 +52,17 @@ export class AppConfigUpdateDto {
   url?: string;
 
   @ApiProperty({
-    enum: Object.values(AppearanceEnum),
     required: false,
   })
-  @IsString()
+  @IsBoolean()
   @IsOptional()
-  appearance?: AppearanceEnum;
+  useMaterial3?: boolean;
 
   @ApiProperty({
-    enum: Object.values(ColorModeEnum),
+    enum: Object.values(ThemeModeEnum),
     required: false,
   })
   @IsString()
   @IsOptional()
-  colorMode?: ColorModeEnum;
+  colorMode?: ThemeModeEnum;
 }
