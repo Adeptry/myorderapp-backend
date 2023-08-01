@@ -64,5 +64,5 @@ export class AppConfigUpdateDto {
   })
   @IsString()
   @IsOptional()
-  colorMode?: ThemeModeEnum;
+  themeMode?: ThemeModeEnum;
 }
