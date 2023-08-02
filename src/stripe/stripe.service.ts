@@ -62,4 +62,16 @@ export class StripeService {
       throw new InternalServerErrorException(error.message);
     }
   }
+
+  async createBillingPortalSession(
+    params: Stripe.BillingPortal.SessionCreateParams,
+    options?: Stripe.RequestOptions,
+  ): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
+    try {
+      return await this.client.billingPortal.sessions.create(params, options);
+    } catch (error) {
+      this.logger.error(`Failed to createBillingPortalSession: ${error}`);
+      throw new InternalServerErrorException(error.message);
+    }
+  }
 }

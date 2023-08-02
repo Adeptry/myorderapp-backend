@@ -262,6 +262,33 @@ export class MerchantsService extends BaseService<Merchant> {
     });
   }
 
+  async stripeCreateBillingPortalSession(params: {
+    merchant: Merchant;
+    returnUrl: string;
+  }) {
+    const { merchant, returnUrl } = params;
+
+    if (merchant.id == null) {
+      throw new NotFoundException('Merchant id is null');
+    }
+
+    const stripeId = merchant.stripeId;
+    if (stripeId == null) {
+      throw new UnauthorizedException('Stripe id is null');
+    }
+
+    const session = await this.stripeService.createBillingPortalSession({
+      customer: stripeId,
+      return_url: returnUrl,
+    });
+
+    if (!session) {
+      throw new Error('Failed to retrieve session from Stripe service');
+    }
+
+    return session.url;
+  }
+
   async stripeCreateCheckoutSessionId(params: {
     merchant: Merchant;
     successUrl: string;

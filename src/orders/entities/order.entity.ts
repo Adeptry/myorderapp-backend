@@ -46,7 +46,9 @@ export class Order extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /* Customer */
+  /*
+   * Customer
+   */
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
@@ -81,7 +83,10 @@ export class Order extends EntityHelper {
   @JoinColumn()
   location?: Location;
 
-  /* Square */
+  /*
+   * Square
+   */
+
   @ApiProperty({ required: false })
   squareDetails?: SquareOrder;
 

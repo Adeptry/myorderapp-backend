@@ -34,6 +34,10 @@ import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { NullableType } from 'src/utils/types/nullable.type';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
+import {
+  StripeBillingPortalCreateInput,
+  StripeBillingPortalCreateOutput,
+} from './dto/stripe-portal.dto';
 import { Merchant } from './entities/merchant.entity';
 import { MerchantsService } from './merchants.service';
 
@@ -221,5 +225,37 @@ export class MerchantsController {
       checkoutSessionId: dto.checkoutSessionId,
       merchant: request.merchant,
     });
+  }
+
+  @Post('me/stripe/billing-session/create')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Start create billing session url',
+    operationId: 'stripeCreateBillingSessionUrl',
+  })
+  @ApiBody({ type: StripeBillingPortalCreateInput })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiOkResponse({ type: StripeBillingPortalCreateOutput })
+  async stripeCreateBillingSessionUrl(
+    @Req() request,
+    @Body() input: StripeBillingPortalCreateInput,
+  ): Promise<StripeBillingPortalCreateOutput | null> {
+    const url = await this.service.stripeCreateBillingPortalSession({
+      merchant: request.merchant,
+      ...input,
+    });
+
+    if (!url) {
+      throw new InternalServerErrorException(
+        'Failed to create checkout session',
+      );
+    }
+
+    return { url };
   }
 }

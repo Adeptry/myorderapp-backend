@@ -120,7 +120,7 @@ export class Merchant extends EntityHelper {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Catalog;
 
   /*
