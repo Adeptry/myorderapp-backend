@@ -50,6 +50,7 @@ export class AppInstall extends EntityHelper {
   @ApiProperty({
     type: String,
     required: true,
+    nullable: true,
     example: '123456789',
   })
   @Column({ nullable: true })
@@ -58,6 +59,7 @@ export class AppInstall extends EntityHelper {
   @ApiProperty({
     type: String,
     required: false,
+    nullable: true,
     example: nanoid(),
   })
   @Column({ nullable: true })

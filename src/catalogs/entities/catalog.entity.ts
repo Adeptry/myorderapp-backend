@@ -24,7 +24,7 @@ import { Variation } from './variation.entity';
 export class Catalog extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -53,7 +53,12 @@ export class Catalog extends EntityHelper {
   /*
    * Categories
    */
-  @ApiProperty({ required: false, type: () => [Category], isArray: true })
+  @ApiProperty({
+    required: false,
+    type: () => [Category],
+    isArray: true,
+    nullable: true,
+  })
   @OneToMany(() => Category, (entity) => entity.catalog, {
     nullable: true,
   })

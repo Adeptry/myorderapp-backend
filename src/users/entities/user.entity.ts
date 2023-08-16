@@ -36,7 +36,7 @@ export class User extends EntityHelper {
   // More info: https://github.com/typeorm/typeorm/issues/2567
   @Column({ type: String, unique: true, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
-  @ApiProperty({ required: false, type: String })
+  @ApiProperty({ required: false, type: String, nullable: true })
   email: string | null;
 
   @Column({ nullable: true })
@@ -73,17 +73,17 @@ export class User extends EntityHelper {
 
   @Index()
   @Column({ type: String, nullable: true })
-  @ApiProperty({ required: false, type: String })
+  @ApiProperty({ required: false, type: String, nullable: true })
   firstName: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
-  @ApiProperty({ required: false, type: String })
+  @ApiProperty({ required: false, type: String, nullable: true })
   lastName: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
-  @ApiProperty({ required: false, type: String })
+  @ApiProperty({ required: false, type: String, nullable: true })
   phoneNumber: string | null;
 
   @ManyToOne(() => FileEntity, {

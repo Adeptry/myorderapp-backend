@@ -22,7 +22,7 @@ import { Modifier } from './modifier.entity';
 export class ModifierLocationOverride extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -49,11 +49,11 @@ export class ModifierLocationOverride extends EntityHelper {
 
   /* Square */
 
-  @ApiProperty({ type: Number, required: false })
+  @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
   amount?: number | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   currency?: string | null;
 

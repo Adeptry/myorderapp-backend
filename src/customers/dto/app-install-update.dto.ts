@@ -6,6 +6,7 @@ export class AppInstallUpdateDto {
   @ApiProperty({
     type: String,
     required: true,
+    nullable: true,
     example: '123456789',
   })
   @IsString()
@@ -14,6 +15,7 @@ export class AppInstallUpdateDto {
   @ApiProperty({
     type: String,
     required: false,
+    nullable: true,
     example: nanoid(),
   })
   @IsString()

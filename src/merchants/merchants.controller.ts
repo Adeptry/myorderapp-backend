@@ -176,7 +176,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start Stripe checkout',
-    operationId: 'startStripeCheckout',
+    operationId: 'createStripeCheckout',
   })
   @ApiBody({ type: StripeCheckoutCreateDto })
   @ApiUnauthorizedResponse({
@@ -233,7 +233,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start create billing session url',
-    operationId: 'stripeCreateBillingSessionUrl',
+    operationId: 'createStripeBillingSessionUrl',
   })
   @ApiBody({ type: StripeBillingPortalCreateInput })
   @ApiUnauthorizedResponse({

@@ -10,7 +10,7 @@ export class VariationAddDto {
   @IsNumber()
   quantity: number;
 
-  @ApiProperty({ required: false, type: String, isArray: true })
+  @ApiProperty({ required: false, type: String, isArray: true, nullable: true })
   @IsArray()
   @IsOptional()
   modifierIds: string[];

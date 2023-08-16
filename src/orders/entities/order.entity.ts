@@ -21,7 +21,7 @@ import {
 
 @Entity('order')
 export class Order extends EntityHelper {
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -87,7 +87,7 @@ export class Order extends EntityHelper {
    * Square
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   squareDetails?: SquareOrder;
 
   @ApiHideProperty()

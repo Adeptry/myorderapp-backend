@@ -26,7 +26,7 @@ import { Modifier } from './modifier.entity';
 export class ModifierList extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -56,23 +56,23 @@ export class ModifierList extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: Number, required: false })
+  @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
   minSelectedModifiers?: number | null;
 
-  @ApiProperty({ type: Number, required: false })
+  @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
   maxSelectedModifiers?: number | null;
 
-  @ApiProperty({ type: Boolean, required: false })
+  @ApiProperty({ type: Boolean, required: false, nullable: true })
   @Column({ type: Boolean, nullable: true })
   enabled?: boolean | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ type: 'simple-enum', nullable: true, enum: MoaSelectionType })
   selectionType?: MoaSelectionType;
 
@@ -96,7 +96,12 @@ export class ModifierList extends EntityHelper {
 
   // Modifiers
 
-  @ApiProperty({ type: () => Modifier, isArray: true, required: false })
+  @ApiProperty({
+    type: () => Modifier,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   @OneToMany(() => Modifier, (entity) => entity.modifierList, {
     nullable: true,
     eager: true,

@@ -8,11 +8,11 @@ export class AuthAppleLoginDto {
   idToken: string;
 
   @Allow()
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   firstName?: string;
 
   @Allow()
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   lastName?: string;
 
   @ApiProperty({

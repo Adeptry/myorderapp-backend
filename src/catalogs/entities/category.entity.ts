@@ -23,7 +23,7 @@ import { Item } from './item.entity';
 export class Category extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -50,11 +50,11 @@ export class Category extends EntityHelper {
 
   /* Entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -66,7 +66,7 @@ export class Category extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
@@ -90,7 +90,12 @@ export class Category extends EntityHelper {
   @JoinColumn()
   catalog?: Catalog;
 
-  @ApiProperty({ type: () => Item, isArray: true, required: false })
+  @ApiProperty({
+    type: () => Item,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   @OneToMany(() => Item, (item) => item.category, {
     nullable: true,
   })

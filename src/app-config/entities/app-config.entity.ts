@@ -50,61 +50,64 @@ export class AppConfig extends EntityHelper {
   /* App config entity */
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   name?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   seedColor?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   fontFamily?: string;
 
   @ApiProperty({
     required: false,
+    nullable: true,
   })
   @Column({ nullable: true })
   useMaterial3?: boolean;
 
   @ApiProperty({
     required: false,
+    nullable: true,
     enum: Object.values(ThemeModeEnum),
     enumName: 'ThemeModeEnum',
+    default: ThemeModeEnum.system,
   })
   @Column({ type: 'simple-enum', nullable: true, enum: ThemeModeEnum })
   themeMode?: ThemeModeEnum;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   shortDescription?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   fullDescription?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   keywords?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   url?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   message?: string;
 
   @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   blockingMessage?: string;
 
@@ -121,7 +124,7 @@ export class AppConfig extends EntityHelper {
   @JoinColumn({ name: 'iconFileId' })
   iconFile?: FileEntity | null;
 
-  // @ApiProperty({ required: false })
+  // @ApiProperty({ required: false, nullable: true })
   // @Column({ nullable: true })
   // enabled?: boolean;
 

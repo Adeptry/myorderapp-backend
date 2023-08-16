@@ -192,7 +192,7 @@ export class OrdersController {
   @Patch('current')
   @ApiOperation({
     summary: 'Update Order',
-    operationId: 'updateCurrentOrder',
+    operationId: 'patchCurrentOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -238,7 +238,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Add Variation to current Order',
-    operationId: 'updateCurrentOrder',
+    operationId: 'postCurrentOrder',
   })
   @ApiBadRequestResponse({
     description: 'No current order or Invalid variation',
@@ -363,7 +363,7 @@ export class OrdersController {
   @Post('current/payment')
   @ApiOperation({
     summary: 'Pay for current Order',
-    operationId: 'payForCurrentOrder',
+    operationId: 'postPaymentForCurrentOrder',
   })
   @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
   @ApiQuery({ name: 'merchantId', required: true, type: String })

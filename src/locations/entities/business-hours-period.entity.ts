@@ -19,7 +19,7 @@ import { Location } from './location.entity';
 export class BusinessHoursPeriod extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   @Exclude({ toPlainOnly: true })
   id?: string;
@@ -54,6 +54,7 @@ export class BusinessHoursPeriod extends EntityHelper {
   @ApiProperty({
     type: String,
     required: false,
+    nullable: true,
     description: 'Indicates the specific day  of the week.',
   })
   @Column({ type: String, nullable: true })
@@ -62,6 +63,7 @@ export class BusinessHoursPeriod extends EntityHelper {
   @ApiProperty({
     type: String,
     required: false,
+    nullable: true,
     description:
       'The start time of a business hours period, specified in local time using partial-time. RFC 3339 format. For example, `8:30:00` for a period starting at 8:30 in the morning. Note that the seconds value is always :00, but it is appended for conformance to the RFC.',
   })
@@ -71,6 +73,7 @@ export class BusinessHoursPeriod extends EntityHelper {
   @ApiProperty({
     type: String,
     required: false,
+    nullable: true,
     description:
       'The end time of a business hours period, specified in local time using partial-time. RFC 3339 format. For example, `21:00:00` for a period ending at 9:00 in the evening. Note that the seconds value is always :00, but it is appended for conformance to the RFC.',
   })

@@ -30,7 +30,7 @@ export class Item extends EntityHelper {
    * Base entity
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -59,11 +59,11 @@ export class Item extends EntityHelper {
    * Moa
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -75,11 +75,11 @@ export class Item extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   description?: string | null;
 
@@ -107,7 +107,12 @@ export class Item extends EntityHelper {
    * Modifier lists
    */
 
-  @ApiProperty({ type: () => ModifierList, isArray: true, required: false })
+  @ApiProperty({
+    type: () => ModifierList,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   @ManyToMany(() => ModifierList, (entity) => entity.items, {
     nullable: true,
   })
@@ -128,7 +133,12 @@ export class Item extends EntityHelper {
    * Variations
    */
 
-  @ApiProperty({ type: () => Variation, isArray: true, required: false })
+  @ApiProperty({
+    type: () => Variation,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   @OneToMany(() => Variation, (entity) => entity.item, {
     nullable: true,
   })

@@ -27,7 +27,7 @@ import { ModifierLocationOverride } from './modifier-location-override.entity';
 export class Modifier extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -57,15 +57,15 @@ export class Modifier extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   priceInCents?: number;
 
-  @ApiProperty({ type: Number, required: false })
+  @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
   ordinal?: number | null;
 

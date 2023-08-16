@@ -25,7 +25,7 @@ import { AppInstall } from './app-install.entity';
 export class Customer extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 

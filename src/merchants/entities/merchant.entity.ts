@@ -26,7 +26,7 @@ import {
 export class Merchant extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -57,7 +57,7 @@ export class Merchant extends EntityHelper {
   @Column({ nullable: true })
   userId?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @ManyToOne(() => User)
   user?: User;
 
@@ -90,7 +90,7 @@ export class Merchant extends EntityHelper {
   @Column({ nullable: true })
   squareExpiresAt?: Date;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   squareId?: string;
 
@@ -98,11 +98,11 @@ export class Merchant extends EntityHelper {
    * Step 4: Checkout
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   stripeId?: string;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   stripeCheckoutSessionId?: string;
 
@@ -110,7 +110,7 @@ export class Merchant extends EntityHelper {
    * Catalog
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   catalogId?: string;
 

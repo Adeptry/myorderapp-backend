@@ -24,7 +24,7 @@ import { BusinessHoursPeriod } from './business-hours-period.entity';
 
 @Entity('location')
 export class Location extends EntityHelper {
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -53,11 +53,11 @@ export class Location extends EntityHelper {
    * Moa
    */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -68,79 +68,79 @@ export class Location extends EntityHelper {
   @Column({ type: Boolean, nullable: true, default: false })
   isMain?: boolean;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   description?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   phoneNumber?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   status?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   timezone?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   country?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   languageCode?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   currency?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   businessName?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   type?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   websiteUrl?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   businessEmail?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   twitterUsername?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   instagramUsername?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   facebookUrl?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   logoUrl?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   posBackgroundUrl?: string;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   mcc?: string | null;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   fullFormatLogoUrl?: string | null;
 
@@ -164,7 +164,12 @@ export class Location extends EntityHelper {
   @OneToMany(() => BusinessHoursPeriod, (entity) => entity.location, {
     nullable: true,
   })
-  @ApiProperty({ type: BusinessHoursPeriod, required: false, isArray: true })
+  @ApiProperty({
+    type: BusinessHoursPeriod,
+    required: false,
+    isArray: true,
+    nullable: true,
+  })
   businessHours?: BusinessHoursPeriod[];
 
   /*
@@ -180,7 +185,7 @@ export class Location extends EntityHelper {
     nullable: true,
   })
   @JoinColumn({ name: 'addressId' })
-  @ApiProperty({ type: Address, required: false })
+  @ApiProperty({ type: Address, required: false, nullable: true })
   address?: Address | null;
 
   /*

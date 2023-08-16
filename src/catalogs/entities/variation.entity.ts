@@ -24,7 +24,7 @@ import { VariationLocationOverride } from './variation-location-override.entity'
 export class Variation extends EntityHelper {
   /* Base entity */
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;
 
@@ -50,11 +50,11 @@ export class Variation extends EntityHelper {
   version?: number;
 
   /* Entity */
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   ordinal?: number;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
@@ -66,11 +66,11 @@ export class Variation extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: String, required: false })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ required: false })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   priceInCents?: number;
 
