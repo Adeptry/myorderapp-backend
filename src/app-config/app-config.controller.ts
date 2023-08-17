@@ -8,6 +8,7 @@ import {
   NotFoundException,
   Patch,
   Post,
+  Query,
   Req,
   UnauthorizedException,
   UploadedFile,
@@ -72,9 +73,34 @@ export class AppConfigController {
   @ApiOkResponse({ type: AppConfig })
   @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
   @ApiOperation({ summary: 'Get your Config', operationId: 'getConfig' })
-  async get(@Req() request: UserTypeGuardedRequest) {
+  async getMe(
+    @Req() request: UserTypeGuardedRequest,
+    @Query('merchantId') merchantId?: string,
+  ) {
     const appConfig = await this.service.findOne({
-      where: { merchantId: request.merchant.id },
+      where: { merchantId: merchantId ?? request.merchant.id },
+    });
+
+    if (!appConfig) {
+      throw new NotFoundException(`App config not found`);
+    }
+
+    return appConfig;
+  }
+
+  @ApiBearerAuth()
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AppConfig })
+  @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
+  @ApiOperation({
+    summary: 'Get Config for Merchant ID',
+    operationId: 'getConfigForMerchant',
+  })
+  async get(@Query('merchantId') merchantId: string) {
+    const appConfig = await this.service.findOne({
+      where: { merchantId: merchantId },
     });
 
     if (!appConfig) {
