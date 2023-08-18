@@ -6,7 +6,10 @@ import {
 } from 'src/catalogs/dto/category-update.dto';
 import { Category } from 'src/catalogs/entities/category.entity';
 import { BaseService } from 'src/utils/base-service';
+import { paginatedResults } from 'src/utils/paginated';
 import { Repository } from 'typeorm';
+import { CatalogSortService } from './catalog-sort.service';
+import { ItemsService } from './items.service';
 
 @Injectable()
 export class CategoriesService extends BaseService<Category> {
@@ -15,8 +18,74 @@ export class CategoriesService extends BaseService<Category> {
   constructor(
     @InjectRepository(Category)
     protected readonly repository: Repository<Category>,
+    private readonly itemsService: ItemsService,
+    private readonly catalogSortService: CatalogSortService,
   ) {
     super(repository);
+  }
+
+  async findPaginatedResults(params: {
+    catalogId: string;
+    whereOnlyEnabled: boolean | undefined;
+    limit: number | undefined;
+    page: number | undefined;
+    locationId: string | undefined;
+    leftJoinItems: boolean | undefined;
+    leftJoinImages: boolean | undefined;
+    leftJoinVariations: boolean | undefined;
+    leftJoinModifierLists: boolean | undefined;
+  }) {
+    const {
+      catalogId,
+      whereOnlyEnabled,
+      limit,
+      page,
+      leftJoinItems,
+      leftJoinImages,
+      locationId,
+      leftJoinVariations,
+      leftJoinModifierLists,
+    } = params;
+    const results = await this.findAndCount({
+      where: {
+        catalogId: catalogId,
+        moaEnabled: whereOnlyEnabled,
+      },
+      order: { moaOrdinal: 'ASC' },
+      take: limit,
+      skip: page && limit && (page - 1) * limit,
+    });
+
+    if (leftJoinItems) {
+      await Promise.all(
+        results[0].map(async (category) => {
+          if (!category.id) {
+            return;
+          }
+
+          category.items = this.catalogSortService.sortItems(
+            await this.itemsService
+              .joinManyQuery({
+                categoryId: category.id,
+                locationId,
+                leftJoinImages,
+                leftJoinVariations,
+                leftJoinModifierLists,
+                whereOnlyEnabled,
+              })
+              .getMany(),
+          );
+        }),
+      );
+    }
+
+    return paginatedResults({
+      results,
+      pagination: {
+        page: page ?? 0,
+        limit: limit ?? 0,
+      },
+    });
   }
 
   async assignAndSave(params: { id: string; input: CategoryUpdateDto }) {

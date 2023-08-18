@@ -32,18 +32,16 @@ import {
   CategoryUpdateDto,
 } from 'src/catalogs/dto/category-update.dto';
 import { Category } from 'src/catalogs/entities/category.entity';
-import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
 import { CategoriesService } from 'src/catalogs/services/categories.service';
-import { ItemsService } from 'src/catalogs/services/items.service';
 import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
+import { MerchantsService } from 'src/merchants/merchants.service';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
-import { paginatedResults } from 'src/utils/paginated';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)
@@ -56,9 +54,84 @@ export class CategoriesController {
 
   constructor(
     private readonly service: CategoriesService,
-    private readonly itemsService: ItemsService,
-    private readonly catalogSortService: CatalogSortService,
+    private readonly merchantsService: MerchantsService,
   ) {}
+
+  @ApiBearerAuth()
+  @Get('catalog')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: CategoryPaginatedResponse })
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
+  @ApiQuery({ name: 'locationId', required: false, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiQuery({ name: 'items', required: false, type: Boolean })
+  @ApiQuery({ name: 'variations', required: false, type: Boolean })
+  @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
+  @ApiOperation({
+    summary:
+      'Get Categories for Merchant ID with Items, Variations, and/or ModifierLists',
+    operationId: 'getCatalog',
+  })
+  @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  async categoriesForMerchantId(
+    @Query('merchantId') merchantId: string,
+    @Query('actingAs') actingAs: UserTypeEnum,
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+    @Query('locationId') locationId?: string,
+    @Query('items') items?: boolean,
+    @Query('variations') variations?: boolean,
+    @Query('modifierLists') modifierLists?: boolean,
+  ): Promise<CategoryPaginatedResponse> {
+    let parsedPage: number | undefined;
+    if (page !== undefined) {
+      parsedPage = parseInt(page, 10);
+      if (isNaN(parsedPage)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
+    let parsedLimit: number | undefined;
+    if (limit !== undefined) {
+      parsedLimit = parseInt(limit, 10);
+      if (isNaN(parsedLimit)) {
+        throw new BadRequestException(
+          'Validation failed (numeric string is expected)',
+        );
+      }
+    }
+    const whereOnlyEnabled = actingAs === UserTypeEnum.customer;
+    const merchant = await this.merchantsService.findOne({
+      where: { id: merchantId },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException('Merchant not found');
+    }
+
+    if (!merchant.catalogId) {
+      throw new NotFoundException(`Catalog not found`);
+    }
+
+    return this.service.findPaginatedResults({
+      catalogId: merchant.catalogId,
+      page: parsedPage,
+      limit: parsedLimit,
+      whereOnlyEnabled,
+      locationId,
+      leftJoinItems: items,
+      leftJoinVariations: variations,
+      leftJoinModifierLists: modifierLists,
+      leftJoinImages: true,
+    });
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
@@ -74,15 +147,15 @@ export class CategoriesController {
   @ApiQuery({ name: 'variations', required: false, type: Boolean })
   @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
-    summary: 'Get your Categories with Items, Variations, and ModifierLists',
-    operationId: 'getCatalog',
+    summary: 'Get your Categories with Items, Variations, and/or ModifierLists',
+    operationId: 'getMyCatalog',
   })
   @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async categories(
+  async myCategories(
     @Req() request: UserTypeGuardedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -115,45 +188,17 @@ export class CategoriesController {
     if (!merchant.catalogId) {
       throw new NotFoundException(`Catalog not found`);
     }
-    const results = await this.service.findAndCount({
-      where: {
-        catalogId: merchant.catalogId,
-        moaEnabled: whereOnlyEnabled,
-      },
-      order: { moaOrdinal: 'ASC' },
-      take: parsedLimit,
-      skip: parsedPage && parsedLimit && (parsedPage - 1) * parsedLimit,
-    });
 
-    if (items) {
-      await Promise.all(
-        results[0].map(async (category) => {
-          if (!category.id) {
-            return;
-          }
-
-          category.items = this.catalogSortService.sortItems(
-            await this.itemsService
-              .joinManyQuery({
-                categoryId: category.id,
-                locationId,
-                leftJoinImages: true,
-                leftJoinVariations: variations,
-                leftJoinModifierLists: modifierLists,
-                whereOnlyEnabled,
-              })
-              .getMany(),
-          );
-        }),
-      );
-    }
-
-    return paginatedResults({
-      results,
-      pagination: {
-        page: parsedPage ?? 0,
-        limit: parsedLimit ?? 0,
-      },
+    return this.service.findPaginatedResults({
+      catalogId: merchant.catalogId,
+      page: parsedPage,
+      limit: parsedLimit,
+      whereOnlyEnabled,
+      locationId,
+      leftJoinItems: items,
+      leftJoinVariations: variations,
+      leftJoinModifierLists: modifierLists,
+      leftJoinImages: true,
     });
   }
 
