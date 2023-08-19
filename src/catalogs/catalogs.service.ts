@@ -226,7 +226,10 @@ export class CatalogsService extends BaseService<Catalog> {
               return value.squareId === squareItemForCategory.id;
             }) ??
             (await this.itemsService.findOne({
-              where: { squareId: squareItemForCategory.id },
+              where: {
+                squareId: squareItemForCategory.id,
+                catalogId: moaCatalog.id, // This _probably_ isn't necessary, unsure if desireable
+              },
             }));
           if (moaItem == null) {
             moaItem = this.itemsService.create({
@@ -281,7 +284,7 @@ export class CatalogsService extends BaseService<Catalog> {
           if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
             for (const squareImageId of squareItemData.imageIds) {
               let catalogImage = await this.catalogImagesService.findOne({
-                where: { squareId: squareImageId },
+                where: { squareId: squareImageId, catalogId: moaCatalog.id },
               });
 
               const squareImageForItem = squareImages.find(
@@ -331,7 +334,10 @@ export class CatalogsService extends BaseService<Catalog> {
                 return value.squareId === squareVariation.id;
               }) ??
               (await this.variationsService.findOne({
-                where: { squareId: squareVariation.id },
+                where: {
+                  squareId: squareVariation.id,
+                  catalogId: moaCatalog.id,
+                },
               }));
 
             if (moaVariation == null) {
@@ -457,6 +463,7 @@ export class CatalogsService extends BaseService<Catalog> {
               (await this.modifierListsService.findOne({
                 where: {
                   squareId: squareModifierListInfoForItem.modifierListId,
+                  catalogId: moaCatalog.id,
                 },
               }));
 
@@ -508,7 +515,10 @@ export class CatalogsService extends BaseService<Catalog> {
                   return value.squareId === squareModifier.id;
                 }) ??
                 (await this.modifiersService.findOne({
-                  where: { squareId: squareModifier.id },
+                  where: {
+                    squareId: squareModifier.id,
+                    catalogId: moaCatalog.id,
+                  },
                 }));
 
               if (moaModifier == null) {
