@@ -57,12 +57,13 @@ export class CategoriesService extends BaseService<Category> {
     });
 
     if (leftJoinItems) {
+      console.log('leftJoinItems');
       await Promise.all(
         results[0].map(async (category) => {
           if (!category.id) {
             return;
           }
-
+          console.log('category.id', category.id);
           category.items = this.catalogSortService.sortItems(
             await this.itemsService
               .joinManyQuery({
@@ -75,6 +76,7 @@ export class CategoriesService extends BaseService<Category> {
               })
               .getMany(),
           );
+          console.log(category.items.length);
         }),
       );
     }

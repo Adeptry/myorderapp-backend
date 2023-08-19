@@ -86,6 +86,12 @@ export class Item extends EntityHelper {
   @OneToMany(() => CatalogImage, (entity) => entity.item, {
     nullable: true,
   })
+  @ApiProperty({
+    type: () => CatalogImage,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   images?: CatalogImage[];
 
   /*
