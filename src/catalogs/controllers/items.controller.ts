@@ -40,7 +40,6 @@ import {
   UserTypeGuard,
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
-import { UsersGuard } from 'src/guards/users.guard';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
@@ -130,14 +129,9 @@ export class ItemsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Get('items/:id')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Item })
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @ApiOperation({ summary: 'Get Item with ID', operationId: 'getItem' })
   @ApiNotFoundResponse({ description: 'Item not found', type: NestError })
   @ApiQuery({ name: 'locationId', required: false, type: String })
