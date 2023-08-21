@@ -33,8 +33,8 @@ export class VariationsService extends BaseService<Variation> {
           { locationId },
         )
         .addSelect(
-          'COALESCE(variationLocationOverrides.amount, variations.priceInCents)',
-          'variations_priceInCents',
+          'COALESCE(variationLocationOverrides.amount, variations.priceAmount)',
+          'variations_priceAmount',
         );
     }
 

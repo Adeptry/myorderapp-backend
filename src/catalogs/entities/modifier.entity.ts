@@ -63,7 +63,11 @@ export class Modifier extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
-  priceInCents?: number;
+  priceAmount?: number;
+
+  @ApiProperty({ type: String, required: false, nullable: true })
+  @Column({ type: String, nullable: true })
+  priceCurrency?: string | null;
 
   @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })

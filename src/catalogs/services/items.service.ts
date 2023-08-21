@@ -146,8 +146,8 @@ export class ItemsService extends BaseService<Item> {
             { locationId },
           )
           .addSelect(
-            'COALESCE(modifierLocationOverrides.amount, modifiers.priceInCents)',
-            'modifiers_priceInCents',
+            'COALESCE(modifierLocationOverrides.amount, modifiers.priceAmount)',
+            'modifiers_priceAmount',
           );
       }
     }
@@ -164,8 +164,8 @@ export class ItemsService extends BaseService<Item> {
             { locationId },
           )
           .addSelect(
-            'COALESCE(variationLocationOverrides.amount, variations.priceInCents)',
-            'variations_priceInCents',
+            'COALESCE(variationLocationOverrides.amount, variations.priceAmount)',
+            'variations_priceAmount',
           );
       }
     }

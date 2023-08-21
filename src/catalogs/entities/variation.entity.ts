@@ -72,7 +72,11 @@ export class Variation extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
-  priceInCents?: number;
+  priceAmount?: number;
+
+  @ApiProperty({ type: String, required: false, nullable: true })
+  @Column({ type: String, nullable: true })
+  priceCurrency?: string | null;
 
   /*
    * Relations

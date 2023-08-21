@@ -355,8 +355,10 @@ export class CatalogsService extends BaseService<Catalog> {
 
             moaVariation.name = squareVariationData.name;
             moaVariation.ordinal = squareVariationData.ordinal;
-            moaVariation.priceInCents =
+            moaVariation.priceAmount =
               Number(squareVariationData.priceMoney?.amount ?? 0) ?? 0;
+            moaVariation.priceCurrency =
+              squareVariationData.priceMoney?.currency;
 
             try {
               await this.variationsService.save(moaVariation);
@@ -537,9 +539,11 @@ export class CatalogsService extends BaseService<Catalog> {
               moaModifier.modifierList = moaModifierList;
               moaModifier.name = squareModifierData?.name;
               moaModifier.ordinal = squareModifierData?.ordinal;
-              moaModifier.priceInCents = Number(
+              moaModifier.priceAmount = Number(
                 squareModifierData?.priceMoney?.amount ?? 0,
               );
+              moaModifier.priceCurrency =
+                squareModifierData?.priceMoney?.currency;
               await this.modifiersService.save(moaModifier);
 
               moaModifier.presentAtAllLocations =
