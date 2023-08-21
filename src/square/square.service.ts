@@ -4,13 +4,13 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import * as fs from 'fs';
 import { nanoid } from 'nanoid';
 import {
   CalculateOrderRequest,
   CatalogObject,
   Client,
   CreateCardRequest,
+  CreateCatalogImageResponse,
   CreateCustomerRequest,
   CreateOrderRequest,
   CreatePaymentRequest,
@@ -19,6 +19,7 @@ import {
   UpdateOrderRequest,
 } from 'square';
 import { RequestOptions } from 'square/dist/types/core';
+import { Readable } from 'stream';
 
 @Injectable()
 export class SquareService {
@@ -238,10 +239,19 @@ export class SquareService {
     objectId?: string;
     file: Express.Multer.File;
     caption?: string;
-  }): Promise<any> {
+  }): Promise<CreateCatalogImageResponse> {
     const { idempotencyKey, objectId, file, caption } = params;
-    const fileStream = fs.createReadStream(file.path);
-    const fileWrapper = new FileWrapper(fileStream);
+    const bufferToStream = (buffer: Buffer) => {
+      const stream = new Readable();
+      stream.push(buffer);
+      stream.push(null);
+      return stream;
+    };
+
+    const fileStream = bufferToStream(file.buffer);
+    const fileWrapper = new FileWrapper(fileStream, {
+      contentType: file.mimetype,
+    });
 
     try {
       const response = await this.client({

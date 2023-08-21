@@ -9,14 +9,20 @@ import {
   NotFoundException,
   Param,
   Patch,
+  Post,
   Query,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
+  ApiCreatedResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
   ApiOperation,
@@ -26,20 +32,27 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { nanoid } from 'nanoid';
 import {
   ItemUpdateAllDto,
   ItemUpdateDto,
 } from 'src/catalogs/dto/item-update.dto';
 import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
+import { CatalogImage } from 'src/catalogs/entities/catalog-image.entity';
 import { Item } from 'src/catalogs/entities/item.entity';
+import { CatalogImagesService } from 'src/catalogs/services/catalog-images.service';
 import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
 import { ItemsService } from 'src/catalogs/services/items.service';
 import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
+import {
+  MerchantsGuard,
+  MerchantsGuardedRequest,
+} from 'src/guards/merchants.guard';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
+import { SquareService } from 'src/square/square.service';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
@@ -56,6 +69,8 @@ export class ItemsController {
   constructor(
     private readonly service: ItemsService,
     private readonly catalogSortService: CatalogSortService,
+    private readonly catalogImagesService: CatalogImagesService,
+    private readonly squareService: SquareService,
   ) {}
 
   @ApiBearerAuth()
@@ -198,6 +213,86 @@ export class ItemsController {
     operationId: 'updateItems',
   })
   async updateItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
-    return await this.service.updateAll(input);
+    const items = await this.service.updateAll(input);
+    await Promise.all(
+      items.map(async (item) => {
+        item.images = await this.service.loadManyRelation(item, 'images');
+      }),
+    );
+    return items;
+  }
+
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiBearerAuth()
+  @Post('items/:id/square/image')
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiCreatedResponse({ type: CatalogImage })
+  @ApiQuery({
+    name: 'idempotencyKey',
+    required: true,
+    type: String,
+    example: nanoid(),
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Upload a catalog image',
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @ApiOperation({
+    summary: 'Upload Square Catalog Image',
+    operationId: 'uploadImageToSquareCatalog',
+  })
+  async squareUploadCatalogFileForImage(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() request: MerchantsGuardedRequest,
+    @Query('idempotencyKey') idempotencyKey: string,
+    @Param('id') id: string,
+  ) {
+    const { merchant } = request;
+
+    if (!merchant.squareAccessToken) {
+      throw new BadRequestException(
+        'Merchant does not have Square access token',
+      );
+    }
+
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const item = await this.service.findOne({ where: { id } });
+
+    if (!item) {
+      throw new NotFoundException(`Item with id ${id} not found`);
+    }
+
+    const squareResponse = await this.squareService.uploadCatalogImage({
+      accessToken: merchant.squareAccessToken,
+      idempotencyKey,
+      objectId: item.squareId,
+      file,
+    });
+
+    console.log(squareResponse);
+
+    const squareCatalogImage = squareResponse.image;
+    const moaCatalogImage = this.catalogImagesService.create({
+      item,
+      squareId: squareCatalogImage?.id,
+      name: squareCatalogImage?.imageData?.name,
+      url: squareCatalogImage?.imageData?.url,
+      caption: squareCatalogImage?.imageData?.caption,
+      catalogId: item.catalogId,
+    });
+
+    return moaCatalogImage.save();
   }
 }
