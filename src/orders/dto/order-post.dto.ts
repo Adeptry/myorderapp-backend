@@ -21,6 +21,7 @@ export class OrderCreateDto {
     nullable: true,
   })
   @IsArray({})
+  @IsOptional()
   variations?: VariationAddDto[];
 
   @ApiProperty({ required: false, nullable: true })

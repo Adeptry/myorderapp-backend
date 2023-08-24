@@ -25,7 +25,6 @@ import {
 import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
 import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
-import { UsersGuard } from 'src/guards/users.guard';
 import { NestError } from 'src/utils/error';
 import { VariationUpdateDto } from '../dto/variation-update.dto';
 import { Variation } from '../entities/variation.entity';
@@ -46,7 +45,6 @@ export class VariationsController {
   ) {}
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Get('items/:id/variations')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Variation, isArray: true })
@@ -70,7 +68,7 @@ export class VariationsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @Patch('variations/:id')
-  @ApiOkResponse({ type: Variation }) // Assuming you have an Item model similar to Category
+  @ApiOkResponse({ type: Variation })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,

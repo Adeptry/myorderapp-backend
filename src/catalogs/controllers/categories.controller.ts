@@ -67,6 +67,7 @@ export class CategoriesController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'items', required: false, type: Boolean })
+  @ApiQuery({ name: 'images', required: false, type: Boolean })
   @ApiQuery({ name: 'variations', required: false, type: Boolean })
   @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
@@ -79,13 +80,14 @@ export class CategoriesController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async categoriesForMerchantId(
+  async categories(
     @Query('merchantId') merchantId: string,
     @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
     @Query('items') items?: boolean,
+    @Query('images') images?: boolean,
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
@@ -107,7 +109,6 @@ export class CategoriesController {
         );
       }
     }
-    const whereOnlyEnabled = actingAs === UserTypeEnum.customer;
     const merchant = await this.merchantsService.findOne({
       where: { id: merchantId },
     });
@@ -124,12 +125,12 @@ export class CategoriesController {
       catalogId: merchant.catalogId,
       page: parsedPage,
       limit: parsedLimit,
-      whereOnlyEnabled,
+      whereOnlyEnabled: actingAs === UserTypeEnum.customer ? true : undefined,
       locationId,
       leftJoinItems: items,
       leftJoinVariations: variations,
       leftJoinModifierLists: modifierLists,
-      leftJoinImages: true,
+      leftJoinImages: images,
     });
   }
 
@@ -144,6 +145,7 @@ export class CategoriesController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'items', required: false, type: Boolean })
+  @ApiQuery({ name: 'images', required: false, type: Boolean })
   @ApiQuery({ name: 'variations', required: false, type: Boolean })
   @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
@@ -161,6 +163,7 @@ export class CategoriesController {
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
     @Query('items') items?: boolean,
+    @Query('images') images?: boolean,
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
@@ -198,7 +201,7 @@ export class CategoriesController {
       leftJoinItems: items,
       leftJoinVariations: variations,
       leftJoinModifierLists: modifierLists,
-      leftJoinImages: true,
+      leftJoinImages: images,
     });
   }
 

@@ -94,12 +94,15 @@ export class LocationsService extends BaseService<MoaLocation> {
         posBackgroundUrl,
         mcc,
         fullFormatLogoUrl,
+        coordinates,
       } = squareLocation;
 
       Object.assign(moaLocation, {
         merchantSquareId,
         locationSquareId,
         name,
+        latitude: coordinates?.latitude,
+        longitude: coordinates?.longitude,
         description,
         phoneNumber,
         status,

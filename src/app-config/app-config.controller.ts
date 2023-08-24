@@ -72,8 +72,11 @@ export class AppConfigController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
   @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
-  @ApiOperation({ summary: 'Get your Config', operationId: 'getConfig' })
-  async getMe(
+  @ApiOperation({
+    summary: 'Get your Config',
+    operationId: 'getConfigForMerchant',
+  })
+  async getConfigForMerchant(
     @Req() request: UserTypeGuardedRequest,
     @Query('merchantId') merchantId?: string,
   ) {

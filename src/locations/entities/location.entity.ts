@@ -72,6 +72,14 @@ export class Location extends EntityHelper {
   @Column({ type: String, nullable: true })
   name?: string | null;
 
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true })
+  latitude?: number | null;
+
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true })
+  longitude?: number | null;
+
   @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   description?: string | null;

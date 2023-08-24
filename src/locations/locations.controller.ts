@@ -54,6 +54,35 @@ export class LocationsController {
 
   @ApiBearerAuth()
   @Get()
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: LocationPaginatedResponse })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'page', required: false, type: Number })
+  @ApiQuery({ name: 'limit', required: false, type: Number })
+  @ApiOperation({
+    summary: 'Get Locations for Merchant',
+    operationId: 'getLocations',
+  })
+  async getMerchantLocations(
+    @Query('merchantId') merchantId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+  ): Promise<LocationPaginatedResponse> {
+    return paginatedResults({
+      results: await this.service.findAndCount({
+        where: { merchantId, status: 'ACTIVE' },
+        relations: ['address', 'businessHours'],
+      }),
+      pagination: { page, limit },
+    });
+  }
+
+  @ApiBearerAuth()
+  @Get('me')
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: LocationPaginatedResponse })
@@ -67,9 +96,9 @@ export class LocationsController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOperation({
     summary: 'Get all your Locations',
-    operationId: 'getLocations',
+    operationId: 'getMyLocations',
   })
-  async getLocations(
+  async getMyLocations(
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
@@ -85,7 +114,6 @@ export class LocationsController {
 
   @ApiBearerAuth()
   @Get(':id')
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
@@ -103,7 +131,7 @@ export class LocationsController {
     @Param('id') id: string,
   ): Promise<MoaLocation> {
     const entity = await this.service.findOne({
-      where: { id, merchantId: request.merchant.id },
+      where: { id },
     });
 
     if (!entity) {

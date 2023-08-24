@@ -7,7 +7,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { InjectRepository } from '@nestjs/typeorm';
+import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import {
   addDays,
   addHours,
@@ -37,16 +37,20 @@ import { Order } from 'src/orders/entities/order.entity';
 import { SquareOrderFulfillmentUpdatedPayload } from 'src/square/payloads/square-order-fulfillment-updated.payload';
 import { SquareService } from 'src/square/square.service';
 import { BaseService } from 'src/utils/base-service';
-import { In, Repository } from 'typeorm';
+import { DataSource, In, Repository } from 'typeorm';
 import { PaymentCreateDto } from './dto/payment-create.dto';
 import { VariationAddDto } from './dto/variation-add.dto';
+import { LineItemService } from './services/line-item.service';
 
 @Injectable()
 export class OrdersService extends BaseService<Order> {
   private readonly logger = new Logger(OrdersService.name);
   constructor(
+    @InjectDataSource()
+    private dataSource: DataSource,
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
+    protected readonly lineItemService: LineItemService,
     protected readonly squareService: SquareService,
     protected readonly locationsService: LocationsService,
     protected readonly variationsService: VariationsService,
@@ -83,6 +87,7 @@ export class OrdersService extends BaseService<Order> {
       const moaMainLocation = await this.locationsService.findOne({
         where: {
           locationSquareId,
+          merchantId: merchant.id,
         },
       });
       if (!moaMainLocation) {
@@ -99,6 +104,7 @@ export class OrdersService extends BaseService<Order> {
         squareVersion: 1,
       }),
     );
+    order.lineItems = [];
 
     let location = await this.locationsService.findOne({
       where: {
@@ -111,6 +117,12 @@ export class OrdersService extends BaseService<Order> {
       throw new NotFoundException(`Invalid location ID`);
     }
 
+    const squareOrderLineItems = variations
+      ? await this.squareOrderLineItemsFor({
+          variations,
+        })
+      : [];
+
     try {
       const response = await this.squareService.createOrder({
         accessToken: merchant.squareAccessToken,
@@ -121,11 +133,7 @@ export class OrdersService extends BaseService<Order> {
             referenceId: order.id,
             customerId: customer.squareId,
             locationId: location?.locationSquareId ?? 'main',
-            lineItems:
-              variations &&
-              (await this.squareOrderLineItemsFor({
-                variations,
-              })),
+            lineItems: squareOrderLineItems,
           },
         },
       });
@@ -140,12 +148,23 @@ export class OrdersService extends BaseService<Order> {
       if (!location?.locationSquareId) {
         location = await this.locationsService.findOneOrFail({
           where: { locationSquareId: squareOrder.locationId },
+          relations: {
+            address: true,
+            businessHours: true,
+          },
         });
         if (!location.id) {
           throw new InternalServerErrorException('No location ID');
         }
         order.locationId = location.id;
+        order.location = location;
       }
+
+      order.lineItems.push(
+        ...(squareOrder.lineItems ?? []).map((squareLineItem) => {
+          return this.lineItemService.fromSquareLineItem({ squareLineItem });
+        }),
+      );
 
       order = await this.updateAndSaveOrderForSquareOrder({
         order,
@@ -247,13 +266,15 @@ export class OrdersService extends BaseService<Order> {
     if (!locationSquareId) {
       throw new UnprocessableEntityException(`No Square Location ID`);
     }
+    const newLineItems =
+      (await this.squareOrderLineItemsFor({
+        variations: variationDtos,
+      })) ?? [];
     const squareUpdateBody: UpdateOrderRequest = {
       order: {
         locationId: locationSquareId,
         version: order.squareVersion,
-        lineItems: await this.squareOrderLineItemsFor({
-          variations: variationDtos,
-        }),
+        lineItems: newLineItems,
       },
     };
 
@@ -265,6 +286,11 @@ export class OrdersService extends BaseService<Order> {
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
+        order.lineItems?.push(
+          ...(squareOrder.lineItems ?? []).map((squareLineItem) => {
+            return this.lineItemService.fromSquareLineItem({ squareLineItem });
+          }),
+        );
         order = await this.updateAndSaveOrderForSquareOrder({
           order,
           squareOrder,
@@ -281,7 +307,7 @@ export class OrdersService extends BaseService<Order> {
   }
 
   async removeVariations(params: {
-    uids: string[];
+    ids: string[];
     squareAccessToken: string;
     order: Order;
   }) {
@@ -296,6 +322,11 @@ export class OrdersService extends BaseService<Order> {
       throw new InternalServerErrorException('No location ID');
     }
 
+    const localLineItems = await this.lineItemService.find({
+      where: {
+        id: In(params.ids),
+      },
+    });
     const response = await this.squareService.updateOrder({
       accessToken: params.squareAccessToken,
       orderId: order.squareId,
@@ -304,11 +335,21 @@ export class OrdersService extends BaseService<Order> {
           locationId: location?.locationSquareId,
           version: order.squareVersion,
         },
-        fieldsToClear: params.uids.map((uid) => `line_items[${uid}]`),
+        fieldsToClear: localLineItems.map(
+          (value) => `line_items[${value.squareUid}]`,
+        ),
       },
     });
     const squareOrder = response.result.order;
     if (squareOrder) {
+      order.lineItems = order.lineItems?.filter((lineItem) => {
+        if (lineItem.id) {
+          return !params.ids.includes(lineItem.id);
+        } else {
+          return false;
+        }
+      });
+      await this.lineItemService.removeAll(localLineItems);
       order = await this.updateAndSaveOrderForSquareOrder({
         order,
         squareOrder,
@@ -490,7 +531,7 @@ export class OrdersService extends BaseService<Order> {
     });
 
     const orderTotalAmount =
-      squareOrderFromUpdate?.netAmounts?.totalMoney?.amount ?? BigInt(0);
+      squareOrderFromUpdate?.totalMoney?.amount ?? BigInt(0);
 
     try {
       await this.squareService.createPayment({
@@ -513,7 +554,9 @@ export class OrdersService extends BaseService<Order> {
         },
       });
 
+      updatedOrder.closedAt = new Date();
       updatedOrder.customerId = customer.id;
+      updatedOrder.moneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
       customer.currentOrder = null;
       await customer.save();
 
@@ -531,7 +574,21 @@ export class OrdersService extends BaseService<Order> {
     params.order.squareId = params.squareOrder?.id;
     params.order.squareVersion =
       params.squareOrder?.version ?? params.order.squareVersion + 1;
-    params.order.squareDetails = params.squareOrder as any;
+
+    params.order.currency = params.squareOrder?.totalMoney?.currency;
+    params.order.moneyAmount = Number(params.squareOrder?.totalMoney?.amount);
+    params.order.moneyTaxAmount = Number(
+      params.squareOrder?.totalTaxMoney?.amount,
+    );
+    params.order.moneyDiscountAmount = Number(
+      params.squareOrder?.totalDiscountMoney?.amount,
+    );
+    params.order.moneyTipAmount = Number(
+      params.squareOrder?.totalTipMoney?.amount,
+    );
+    params.order.moneyServiceChargeAmount = Number(
+      params.squareOrder?.totalServiceChargeMoney?.amount,
+    );
 
     return params.order.save();
   }

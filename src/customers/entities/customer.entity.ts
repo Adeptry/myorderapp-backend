@@ -56,6 +56,7 @@ export class Customer extends EntityHelper {
   @Column({ nullable: true })
   userId?: string;
 
+  @ApiProperty({ required: false, nullable: true })
   @ManyToOne(() => User)
   user?: User;
 

@@ -80,7 +80,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.9')
+        .setVersion('2.0.10')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -97,6 +97,8 @@ async function bootstrap() {
           SquareModule,
           MerchantsModule,
           AuthModule,
+          OrdersModule,
+          CustomersModule,
           AppConfigModule,
           LocationsModule,
           CatalogsModule,
@@ -116,7 +118,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.9')
+        .setVersion('2.0.10')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },

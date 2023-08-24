@@ -35,6 +35,12 @@ export class CustomersGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const merchantId = request.query.merchantId;
 
+    if (!merchantId) {
+      throw new UnauthorizedException(
+        'Merchant ID is required to access this endpoint',
+      );
+    }
+
     const user = await this.authService.me(request.user);
     if (!user) {
       throw new UnauthorizedException(

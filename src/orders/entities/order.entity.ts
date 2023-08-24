@@ -4,7 +4,6 @@ import { nanoid } from 'nanoid';
 import { Customer } from 'src/customers/entities/customer.entity';
 import { Location } from 'src/locations/entities/location.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { SquareOrder } from 'src/square/square.dto';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -14,10 +13,12 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { LineItem } from './line-item.entity';
 
 @Entity('order')
 export class Order extends EntityHelper {
@@ -54,6 +55,11 @@ export class Order extends EntityHelper {
   @Column({ nullable: true })
   customerId?: string;
 
+  @ApiProperty({
+    required: false,
+    type: () => Customer,
+    nullable: true,
+  })
   @ManyToOne(() => Customer, (entity) => entity.orders, {
     nullable: true,
     onDelete: 'CASCADE',
@@ -79,6 +85,11 @@ export class Order extends EntityHelper {
   @Column({})
   locationId: string;
 
+  @ApiProperty({
+    required: false,
+    type: () => Location,
+    nullable: true,
+  })
   @ManyToOne(() => Location, { onDelete: 'SET NULL' })
   @JoinColumn()
   location?: Location;
@@ -87,8 +98,17 @@ export class Order extends EntityHelper {
    * Square
    */
 
-  @ApiProperty({ required: false, nullable: true })
-  squareDetails?: SquareOrder;
+  @ApiProperty({
+    required: false,
+    type: () => [LineItem],
+    isArray: true,
+    nullable: true,
+  })
+  @OneToMany(() => LineItem, (entity) => entity.order, {
+    nullable: true,
+    cascade: true,
+  })
+  lineItems?: LineItem[];
 
   @ApiHideProperty()
   @Exclude()
@@ -99,4 +119,54 @@ export class Order extends EntityHelper {
   @Exclude()
   @Column({})
   squareVersion: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: Date, nullable: true })
+  closedAt?: Date;
+
+  @ApiProperty({
+    type: String,
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: String, nullable: true })
+  currency?: string | null;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  moneyAmount?: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  moneyTaxAmount?: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  moneyDiscountAmount?: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  moneyTipAmount?: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  moneyServiceChargeAmount?: number;
 }

@@ -168,6 +168,9 @@ export class CustomersController {
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id },
+        relations: {
+          user: true,
+        },
       }),
       pagination: { page, limit },
     });

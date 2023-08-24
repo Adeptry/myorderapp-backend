@@ -40,10 +40,15 @@ import {
   CustomersGuard,
   CustomersGuardedRequest,
 } from 'src/guards/customers.guard';
+import {
+  UserTypeGuard,
+  UserTypeGuardedRequest,
+} from 'src/guards/user-type.guard';
 import { OrdersService } from 'src/orders/orders.service';
-import { SquareService } from 'src/square/square.service';
+import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
+import { IsNull, Not } from 'typeorm';
 import { OrderPatchDto } from './dto/order-patch.dto';
 import { OrderCreateDto, OrderPostDto } from './dto/order-post.dto';
 import { OrdersPaginatedReponse } from './dto/orders-paginated.dto';
@@ -61,10 +66,7 @@ import { Order } from './entities/order.entity';
 export class OrdersController {
   private readonly logger = new Logger(OrdersController.name);
 
-  constructor(
-    private readonly service: OrdersService,
-    private readonly squareService: SquareService,
-  ) {}
+  constructor(private readonly service: OrdersService) {}
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
@@ -102,12 +104,25 @@ export class OrdersController {
       throw new UnprocessableEntityException(`No Square Customer ID`);
     }
 
-    return this.service.createAndSaveCurrent({
+    const savedOrder = await this.service.createAndSaveCurrent({
       variations,
       idempotencyKey,
       customer,
       locationId,
       merchant,
+    });
+
+    return await this.service.findOne({
+      where: { id: savedOrder.id },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          address: true,
+          businessHours: true,
+        },
+      },
     });
   }
 
@@ -126,6 +141,15 @@ export class OrdersController {
     }
     const entity = await this.service.findOne({
       where: { id: request.customer.currentOrderId },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          address: true,
+          businessHours: true,
+        },
+      },
     });
     if (!entity) {
       request.customer.currentOrderId = undefined;
@@ -137,17 +161,13 @@ export class OrdersController {
     if (!entity.squareId || !request.merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
-    const response = await this.squareService.retrieveOrder({
-      accessToken: request.merchant.squareAccessToken,
-      orderId: entity.squareId,
-    });
-    entity.squareDetails = response.result.order as any;
+
     return entity;
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @Get()
+  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @Get('me')
   @ApiOperation({
     summary: 'Get my Orders',
     operationId: 'getOrders',
@@ -155,31 +175,38 @@ export class OrdersController {
   @ApiOkResponse({ type: OrdersPaginatedReponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async get(
-    @Req() request: CustomersGuardedRequest,
+  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'closed', required: false, type: Boolean })
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  @ApiQuery({ name: 'customer', required: false, type: Boolean })
+  async getMany(
+    @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('closed') closed?: boolean,
+    @Query('lineItems') lineItems?: boolean,
+    @Query('location') location?: boolean,
+    @Query('customer') customer?: boolean,
   ) {
     const results = await this.service.findAndCount({
       where: {
-        customerId: request.customer.id,
+        customerId: request.customer?.id,
+        merchantId: request.merchant?.id,
+        closedAt: closed ? Not(IsNull()) : undefined,
       },
       order: { createDate: 'DESC' },
       take: limit,
       skip: (page - 1) * limit,
+      relations: {
+        lineItems: {
+          modifiers: lineItems,
+        },
+        location: location,
+        customer: customer,
+      },
     });
-
-    for (const order of results[0]) {
-      if (!order.squareId || !request.merchant.squareAccessToken) {
-        throw new UnprocessableEntityException(`No Square Order ID`);
-      }
-      const response = await this.squareService.retrieveOrder({
-        accessToken: request.merchant.squareAccessToken,
-        orderId: order.squareId,
-      });
-      order.squareDetails = response.result.order as any;
-    }
 
     return paginatedResults({
       results,
@@ -204,6 +231,7 @@ export class OrdersController {
     description: 'Square error',
     type: NestError,
   })
+  @ApiQuery({ name: 'merchantId', required: false, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
   async patchUpdateCurrent(
     @Req() request: CustomersGuardedRequest,
@@ -214,6 +242,15 @@ export class OrdersController {
 
     let order = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
     });
 
     if (body.locationId) {
@@ -268,6 +305,15 @@ export class OrdersController {
 
     let order = await this.service.findOneOrFail({
       where: { id: request.customer.currentOrderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
     });
 
     const { variations } = body;
@@ -285,7 +331,8 @@ export class OrdersController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @Delete('current/variation/:uid')
+  @Delete('current/variation/:id')
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -297,7 +344,7 @@ export class OrdersController {
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrentsVariation(
     @Req() request: CustomersGuardedRequest,
-    @Param('uid') uid: string,
+    @Param('id') id: string,
   ) {
     // Validation and error checking
     if (!request.customer.currentOrderId) {
@@ -311,17 +358,26 @@ export class OrdersController {
     // Load the current order
     const order = await this.service.findOne({
       where: { id: request.customer.currentOrderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
     });
 
     if (!order) {
       throw new NotFoundException(`No current order`);
     }
-
-    return this.service.removeVariations({
+    await this.service.removeVariations({
       squareAccessToken: request.merchant.squareAccessToken,
-      uids: [uid],
+      ids: [id],
       order,
     });
+    return;
   }
 
   @ApiBearerAuth()
@@ -345,6 +401,15 @@ export class OrdersController {
     }
     const entity = await this.service.findOneOrFail({
       where: { id: customer.currentOrderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
     });
 
     if (!merchant.squareAccessToken) {
@@ -352,15 +417,13 @@ export class OrdersController {
     }
 
     await this.service.remove(entity);
-    customer.currentOrder = null;
-    await customer.save();
 
     return;
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @Post('current/payment')
+  @Post('current/payment/square')
   @ApiOperation({
     summary: 'Pay for current Order',
     operationId: 'postPaymentForCurrentOrder',
@@ -388,6 +451,15 @@ export class OrdersController {
 
     const order = await this.service.findOne({
       where: { id: customer.currentOrderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
     });
 
     if (!order) {

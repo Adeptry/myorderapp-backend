@@ -48,10 +48,6 @@ import {
   MerchantsGuard,
   MerchantsGuardedRequest,
 } from 'src/guards/merchants.guard';
-import {
-  UserTypeGuard,
-  UserTypeGuardedRequest,
-} from 'src/guards/user-type.guard';
 import { SquareService } from 'src/square/square.service';
 import { UserTypeEnum } from 'src/users/dto/type-user.dts';
 import { NestError } from 'src/utils/error';
@@ -74,7 +70,6 @@ export class ItemsController {
   ) {}
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @ApiQuery({ name: 'merchantId', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @Get('categories/:id/items')
@@ -95,7 +90,7 @@ export class ItemsController {
     operationId: 'getItemsInCategory',
   })
   async getItemsInCategory(
-    @Req() request: UserTypeGuardedRequest,
+    @Query('actingAs') actingAs: UserTypeEnum,
     @Param('id') categoryId: string,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -122,8 +117,7 @@ export class ItemsController {
         );
       }
     }
-    const { customer } = request;
-    const whereOnlyEnabled = customer != undefined ? true : undefined;
+
     const results = await this.service
       .joinManyQuery({
         categoryId,
@@ -133,7 +127,7 @@ export class ItemsController {
         leftJoinImages: images,
         leftJoinModifierLists: modifierLists,
         leftJoinVariations: variations,
-        whereOnlyEnabled,
+        whereOnlyEnabled: actingAs === UserTypeEnum.customer,
       })
       .getManyAndCount();
 

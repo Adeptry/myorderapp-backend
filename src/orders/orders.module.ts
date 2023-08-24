@@ -6,14 +6,18 @@ import { CustomersModule } from 'src/customers/customers.module';
 import { FirebaseAdminModule } from 'src/firebase-admin/firebase-admin.module';
 import { LocationsModule } from 'src/locations/locations.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
+import { LineItemModifier } from 'src/orders/entities/line-item-modifier.entity';
+import { LineItem } from 'src/orders/entities/line-item.entity';
 import { Order } from 'src/orders/entities/order.entity';
+import { OrdersController } from 'src/orders/orders.controller';
+import { OrdersService } from 'src/orders/orders.service';
+import { LineItemModifierService } from 'src/orders/services/line-item-modifier.service';
+import { LineItemService } from 'src/orders/services/line-item.service';
 import { SquareModule } from 'src/square/square.module';
-import { OrdersController } from './orders.controller';
-import { OrdersService } from './orders.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order]),
+    TypeOrmModule.forFeature([Order, LineItem, LineItemModifier]),
     SquareModule,
     AuthModule,
     LocationsModule,
@@ -23,6 +27,6 @@ import { OrdersService } from './orders.service';
     forwardRef(() => CustomersModule),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService],
+  providers: [OrdersService, LineItemService, LineItemModifierService],
 })
 export class OrdersModule {}

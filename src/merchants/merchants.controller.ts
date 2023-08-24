@@ -11,6 +11,7 @@ import {
   Query,
   Req,
   Request,
+  SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -87,6 +88,9 @@ export class MerchantsController {
   }
 
   @Get('me')
+  @SerializeOptions({
+    groups: ['me'],
+  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiBearerAuth()

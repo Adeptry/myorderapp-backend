@@ -117,9 +117,16 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   iconFileId?: string;
 
+  @ApiProperty({
+    type: () => FileEntity,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
   @OneToOne(() => FileEntity, {
     onDelete: 'SET NULL',
     nullable: true,
+    eager: true,
   })
   @JoinColumn({ name: 'iconFileId' })
   iconFile?: FileEntity | null;
