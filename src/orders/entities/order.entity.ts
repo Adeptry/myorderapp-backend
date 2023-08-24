@@ -100,7 +100,7 @@ export class Order extends EntityHelper {
 
   @ApiProperty({
     required: false,
-    type: () => [LineItem],
+    type: () => LineItem,
     isArray: true,
     nullable: true,
   })

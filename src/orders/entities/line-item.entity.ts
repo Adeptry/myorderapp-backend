@@ -116,7 +116,7 @@ export class LineItem extends EntityHelper {
 
   @ApiProperty({
     required: false,
-    type: () => [LineItemModifier],
+    type: () => LineItemModifier,
     isArray: true,
     nullable: true,
   })
