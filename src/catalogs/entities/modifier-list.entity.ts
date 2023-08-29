@@ -72,7 +72,13 @@ export class ModifierList extends EntityHelper {
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    enum: Object.values(MoaSelectionType),
+    enumName: 'MoaSelectionType',
+    default: MoaSelectionType.SINGLE,
+  })
   @Column({ type: 'simple-enum', nullable: true, enum: MoaSelectionType })
   selectionType?: MoaSelectionType;
 

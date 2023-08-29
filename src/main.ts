@@ -80,15 +80,13 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.10')
+        .setVersion('2.0.11')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
-        .addServer(
-          configService.getOrThrow('app.backendDomain', { infer: true }),
-        )
+        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
       {
         include: [
@@ -118,15 +116,13 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.10')
+        .setVersion('2.0.11')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
-        .addServer(
-          configService.getOrThrow('app.backendDomain', { infer: true }),
-        )
+        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
       {
         include: [

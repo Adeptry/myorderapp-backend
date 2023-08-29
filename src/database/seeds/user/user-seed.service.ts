@@ -24,8 +24,8 @@ export class UserSeedService {
     if (!countAdmin) {
       await this.userRepository.save(
         this.userRepository.create({
-          firstName: 'Moa',
-          lastName: 'Admin',
+          firstName: 'Paul',
+          lastName: 'Jones',
           email: 'paul.jones@adeptry.com',
           password: 'dfB2X&a$6h2K',
           role: {

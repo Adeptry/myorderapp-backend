@@ -24,7 +24,7 @@ export class FileEntity extends EntityHelper {
   @AfterInsert()
   updatePath() {
     if (this.path.indexOf('/') === 0) {
-      this.path = (appConfig() as AppConfig).backendDomain + this.path;
+      this.path = (appConfig() as AppConfig).backendUrl + this.path;
     }
   }
 }

@@ -25,6 +25,7 @@ import { SquareService } from 'src/square/square.service';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
 import { BaseService } from 'src/utils/base-service';
+import { CurrencyEnum } from 'src/utils/types/currency-enum.type';
 import { Repository } from 'typeorm';
 import { MerchantUpdateInput } from './dto/update-merchant.input';
 
@@ -293,8 +294,12 @@ export class MerchantsService extends BaseService<Merchant> {
     merchant: Merchant;
     successUrl: string;
     cancelUrl?: string;
+    currency?: CurrencyEnum;
   }): Promise<string | null> {
     const merchant = params.merchant;
+    const currency = params.currency?.valueOf() ?? 'USD';
+    const configKey =
+      `stripe.priceId${currency.toUpperCase()}` as keyof AllConfigType;
 
     if (merchant.stripeCheckoutSessionId) {
       throw new BadRequestException(
@@ -321,7 +326,7 @@ export class MerchantsService extends BaseService<Merchant> {
       mode: 'subscription',
       line_items: [
         {
-          price: this.configService.getOrThrow('stripe.subscriptionPrice', {
+          price: this.configService.getOrThrow(configKey, {
             infer: true,
           }),
           quantity: 1,
