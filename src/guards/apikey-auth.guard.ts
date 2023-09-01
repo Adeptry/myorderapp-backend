@@ -1,5 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 
 @Injectable()
-export class ApiKeyAuthGuard extends AuthGuard('api-key') {}
+export class ApiKeyAuthGuard extends AuthGuard('api-key') {
+  private readonly logger = new Logger(ApiKeyAuthGuard.name);
+}

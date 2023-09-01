@@ -1,6 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsNotEmpty, IsOptional, IsString } from 'class-validator';
-import { CurrencyEnum } from 'src/utils/types/currency-enum.type';
+import { IsNotEmpty, IsOptional } from 'class-validator';
 
 export class StripeCheckoutCreateDto {
   @ApiProperty({ example: 'http://localhost:3000/stripe/checkout/success' })
@@ -11,14 +10,7 @@ export class StripeCheckoutCreateDto {
   @IsOptional()
   cancelUrl: string;
 
-  @ApiProperty({
-    example: 'USD',
-    enum: Object.values(CurrencyEnum),
-    description:
-      'The currency must be one of the following: USD, EUR, GBP, JPY, CAD, AUD',
-  })
-  @IsOptional()
-  @IsString()
-  @IsIn(Object.values(CurrencyEnum))
-  currency: CurrencyEnum;
+  @ApiProperty({ example: 'price_1NXr6OIO3O3Eil4YtVWoZfGP' })
+  @IsNotEmpty()
+  stripePriceId: string;
 }

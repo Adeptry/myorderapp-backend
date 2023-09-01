@@ -12,7 +12,6 @@ import {
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import {
   ApiBearerAuth,
@@ -24,7 +23,6 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { AllConfigType } from 'src/config.type';
 import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { User } from 'src/users/entities/user.entity';
 import { NullableType } from 'src/utils/types/nullable.type';
@@ -45,10 +43,7 @@ import { LoginResponseType } from './types/login-response.type';
 })
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
-  constructor(
-    private readonly service: AuthService,
-    private readonly configService: ConfigService<AllConfigType>,
-  ) {}
+  constructor(private readonly service: AuthService) {}
 
   @SerializeOptions({
     groups: ['me'],
@@ -64,22 +59,6 @@ export class AuthController {
     const response = await this.service.validateLogin(loginDto, false);
     return response;
   }
-
-  // @SerializeOptions({
-  //   groups: ['me'],
-  // })
-  // @Post('admin/email/login')
-  // @HttpCode(HttpStatus.OK)
-  // @ApiOperation({
-  //   summary: 'Get admin access token',
-  //   operationId: 'adminLogin',
-  // })
-  // @ApiOkResponse({ type: LoginResponseType })
-  // public adminLogin(
-  //   @Body() loginDTO: AuthEmailLoginDto,
-  // ): Promise<LoginResponseType> {
-  //   return this.service.validateLogin(loginDTO, true);
-  // }
 
   @Post('email/register')
   @HttpCode(HttpStatus.CREATED)

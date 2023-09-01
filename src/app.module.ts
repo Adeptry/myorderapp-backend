@@ -38,6 +38,8 @@ import twilioConfig from 'src/twilio/twilio.config';
 import { TwilioModule } from 'src/twilio/twilio.module';
 import { UsersModule } from 'src/users/users.module';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { AdminController } from './admin/admin.controller';
+import { AdminModule } from './admin/admin.module';
 
 @Module({
   imports: [
@@ -107,6 +109,8 @@ import { DataSource, DataSourceOptions } from 'typeorm';
     GuardsModule,
     CardsModule,
     HealthModule,
+    AdminModule,
   ],
+  controllers: [AdminController],
 })
 export class AppModule {}

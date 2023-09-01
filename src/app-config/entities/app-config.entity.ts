@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Transform } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { FileEntity } from 'src/files/entities/file.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
@@ -49,17 +49,21 @@ export class AppConfig extends EntityHelper {
 
   /* App config entity */
 
-  @Transform(({ value }) => value ?? undefined)
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  showsAds?: boolean;
+
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   name?: string;
 
-  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   seedColor?: string;
 
-  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   fontFamily?: string;
@@ -81,35 +85,24 @@ export class AppConfig extends EntityHelper {
   @Column({ type: 'simple-enum', nullable: true, enum: ThemeModeEnum })
   themeMode?: ThemeModeEnum;
 
-  @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  shortDescription?: string;
-
-  @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  fullDescription?: string;
-
-  @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  keywords?: string;
-
-  @Transform(({ value }) => value ?? undefined)
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  url?: string;
-
-  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   message?: string;
 
-  @Transform(({ value }) => value ?? undefined)
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   blockingMessage?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @Column({ nullable: true })
+  minimumVersion?: string;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true })
+  showAds?: boolean;
 
   /* App Icon */
 

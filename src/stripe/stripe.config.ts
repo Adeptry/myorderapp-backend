@@ -4,12 +4,21 @@ import validateConfig from 'src/utils/validate-config';
 
 export type StripeConfig = {
   apiKey: string;
-  priceUSD: string;
-  priceEUR: string;
-  priceGBP: string;
-  priceJPY: string;
-  priceCAD: string;
-  priceAUD: string;
+  webhookSecret: string;
+
+  priceIdProUSD: string;
+  priceIdProEUR: string;
+  priceIdProGBP: string;
+  priceIdProJPY: string;
+  priceIdProCAD: string;
+  priceIdProAUD: string;
+
+  priceIdFreeUSD: string;
+  priceIdFreeEUR: string;
+  priceIdFreeGBP: string;
+  priceIdFreeJPY: string;
+  priceIdFreeCAD: string;
+  priceIdFreeAUD: string;
 };
 
 class EnvironmentVariablesValidator {
@@ -19,27 +28,31 @@ class EnvironmentVariablesValidator {
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_USD: string;
+  STRIPE_WEBHOOK_SECRET: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_ID_EUR: string;
+  STRIPE_PRO_PRICE_USD: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_ID_GBP: string;
+  STRIPE_PRO_PRICE_ID_EUR: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_ID_JPY: string;
+  STRIPE_PRO_PRICE_ID_GBP: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_ID_CAD: string;
+  STRIPE_PRO_PRICE_ID_JPY: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRICE_ID_AUD: string;
+  STRIPE_PRO_PRICE_ID_CAD: string;
+
+  @IsString()
+  @IsOptional()
+  STRIPE_PRO_PRICE_ID_AUD: string;
 }
 
 export default registerAs('stripe', () => {
@@ -47,11 +60,19 @@ export default registerAs('stripe', () => {
 
   return {
     apiKey: process.env.STRIPE_API_KEY,
-    priceIdUSD: process.env.STRIPE_PRICE_ID_USD,
-    priceIdEUR: process.env.STRIPE_PRICE_ID_EUR,
-    priceIdGBP: process.env.STRIPE_PRICE_ID_GBP,
-    priceIdJPY: process.env.STRIPE_PRICE_ID_JPY,
-    priceIdCAD: process.env.STRIPE_PRICE_ID_CAD,
-    priceIdAUD: process.env.STRIPE_PRICE_ID_AUD,
+    webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+    priceIdProUSD: process.env.STRIPE_PRICE_ID_PRO_USD,
+    priceIdProEUR: process.env.STRIPE_PRICE_ID_PRO_EUR,
+    priceIdProGBP: process.env.STRIPE_PRICE_ID_PRO_GBP,
+    priceIdProJPY: process.env.STRIPE_PRICE_ID_PRO_JPY,
+    priceIdProCAD: process.env.STRIPE_PRICE_ID_PRO_CAD,
+    priceIdProAUD: process.env.STRIPE_PRICE_ID_PRO_AUD,
+
+    priceIdFreeUSD: process.env.STRIPE_PRICE_ID_FREE_USD,
+    priceIdFreeEUR: process.env.STRIPE_PRICE_ID_FREE_EUR,
+    priceIdFreeGBP: process.env.STRIPE_PRICE_ID_FREE_GBP,
+    priceIdFreeJPY: process.env.STRIPE_PRICE_ID_FREE_JPY,
+    priceIdFreeCAD: process.env.STRIPE_PRICE_ID_FREE_CAD,
+    priceIdFreeAUD: process.env.STRIPE_PRICE_ID_FREE_AUD,
   };
 });

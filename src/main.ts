@@ -9,6 +9,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
+import { AdminModule } from 'src/admin/admin.module';
 import { AppConfigModule } from 'src/app-config/app-config.module';
 import { AppModule } from 'src/app.module';
 import { AuthAppleModule } from 'src/auth-apple/auth-apple.module';
@@ -25,7 +26,9 @@ import { SquareModule } from 'src/square/square.module';
 import { BigIntInterceptor } from 'src/utils/big-int.intercepter';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    rawBody: true,
+  });
   const configService = app.get(ConfigService<AllConfigType>);
   app.enableCors({
     origin: RegExp(
@@ -80,7 +83,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.11')
+        .setVersion('2.0.12')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -116,7 +119,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.11')
+        .setVersion('2.0.12')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -141,6 +144,31 @@ async function bootstrap() {
     {
       jsonDocumentUrl: 'customers/docs.json',
       yamlDocumentUrl: 'customers/docs.yaml',
+    },
+  );
+
+  SwaggerModule.setup(
+    'admins/docs',
+    app,
+    SwaggerModule.createDocument(
+      app,
+      new DocumentBuilder()
+        .setTitle('MyOrderApp Admin API')
+        .setVersion('2.0.12')
+        .addBearerAuth()
+        .addApiKey(
+          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
+          headerKeyApiKey,
+        )
+        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
+        .build(),
+      {
+        include: [AdminModule],
+      },
+    ),
+    {
+      jsonDocumentUrl: 'admin/docs.json',
+      yamlDocumentUrl: 'admin/docs.yaml',
     },
   );
 

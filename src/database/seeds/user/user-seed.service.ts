@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { RoleEnum } from 'src/roles/roles.enum';
@@ -24,10 +25,10 @@ export class UserSeedService {
     if (!countAdmin) {
       await this.userRepository.save(
         this.userRepository.create({
-          firstName: 'Paul',
-          lastName: 'Jones',
-          email: 'paul.jones@adeptry.com',
-          password: 'dfB2X&a$6h2K',
+          firstName: process.env.ADMIN_FIRST_NAME!,
+          lastName: process.env.ADMIN_LAST_NAME!,
+          email: process.env.ADMIN_EMAIL!,
+          password: process.env.ADMIN_PASSWORD!,
           role: {
             id: RoleEnum.admin,
           },

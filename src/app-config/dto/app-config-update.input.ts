@@ -4,7 +4,6 @@ import {
   IsHexColor,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
 } from 'class-validator';
 import { ThemeModeEnum } from '../entities/theme-mode.enum';
@@ -32,24 +31,6 @@ export class AppConfigUpdateDto {
   @IsOptional()
   @Length(3, 30)
   shortDescription?: string;
-
-  @ApiProperty({ required: false, nullable: true })
-  @IsString()
-  @IsOptional()
-  @Length(3, 4000)
-  fullDescription?: string;
-
-  @ApiProperty({ required: false, nullable: true })
-  @IsString()
-  @IsOptional()
-  @Length(0, 100)
-  keywords?: string;
-
-  @ApiProperty({ required: false, nullable: true })
-  @IsString()
-  @IsOptional()
-  @IsUrl()
-  url?: string;
 
   @ApiProperty({
     required: false,

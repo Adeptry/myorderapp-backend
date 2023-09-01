@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   forwardRef,
   Inject,
   Injectable,
@@ -21,17 +20,22 @@ import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { SquareCatalogVersionUpdatedEventPayload } from 'src/square/payloads/square-catalog-version-updated-payload.entity';
 import { SquareLocationCreatedEventPayload } from 'src/square/payloads/square-location-created-event-payload.entity';
 import { SquareLocationUpdatedEventPayload } from 'src/square/payloads/square-location-updated-event-payload.entity';
+import { SquareConfigUtils } from 'src/square/square.config.utils';
 import { SquareService } from 'src/square/square.service';
+import { StripeConfigUtils } from 'src/stripe/stripe.config.utils';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
 import { BaseService } from 'src/utils/base-service';
-import { CurrencyEnum } from 'src/utils/types/currency-enum.type';
+import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { MerchantUpdateInput } from './dto/update-merchant.input';
+import { MerchantTierEnum } from './entities/merchant-tier.enum';
 
 @Injectable()
 export class MerchantsService extends BaseService<Merchant> {
   private readonly logger = new Logger(MerchantsService.name);
+  private readonly stripeConfigUtils: StripeConfigUtils;
+  private readonly squareConfigUtils: SquareConfigUtils;
 
   constructor(
     @InjectRepository(Merchant)
@@ -50,6 +54,8 @@ export class MerchantsService extends BaseService<Merchant> {
     private readonly locationsService: LocationsService,
   ) {
     super(repository);
+    this.stripeConfigUtils = new StripeConfigUtils(configService);
+    this.squareConfigUtils = new SquareConfigUtils(configService);
   }
 
   async assignAndSave(id: string, updateInput: MerchantUpdateInput) {
@@ -68,30 +74,9 @@ export class MerchantsService extends BaseService<Merchant> {
     const testCode = this.configService.get('square.testCode', { infer: true });
     const isTest = nodeEnv !== 'production' && oauthAccessCode === testCode;
 
-    this.logger.log(
-      `${
-        this.squareConfirmOauth.name
-      } isTest: ${isTest}, testCode: ${testCode}, nodeEnv: ${nodeEnv}, oauthAccessCode ${oauthAccessCode}, equals: ${
-        oauthAccessCode === testCode
-      }`,
-    );
-
     try {
       const accessTokenResult = isTest
-        ? {
-            accessToken: this.configService.get('square.testAccessToken', {
-              infer: true,
-            }),
-            expiresAt: this.configService.get('square.testExpireAt', {
-              infer: true,
-            }),
-            merchantId: this.configService.get('square.testId', {
-              infer: true,
-            }),
-            refreshToken: this.configService.get('square.testRefreshToken', {
-              infer: true,
-            }),
-          }
+        ? this.squareConfigUtils.testTokenReponse()
         : (
             await this.squareService.obtainToken({
               oauthAccessCode,
@@ -176,6 +161,119 @@ export class MerchantsService extends BaseService<Merchant> {
     return;
   }
 
+  async squareLocationsSync(params: { merchant: Merchant }) {
+    const entity = params.merchant;
+
+    if (entity.id == null) {
+      throw new NotFoundException('Merchant id is null');
+    }
+
+    const squareAccessToken = entity.squareAccessToken;
+    if (squareAccessToken == null) {
+      throw new UnauthorizedException('Square access token is null');
+    }
+
+    await this.locationsService.sync({
+      merchantId: entity.id,
+      squareAccessToken,
+    });
+  }
+
+  async stripeCreateBillingPortalSession(params: {
+    merchant: Merchant;
+    returnUrl: string;
+  }) {
+    const { merchant, returnUrl } = params;
+
+    if (merchant.id == null) {
+      throw new NotFoundException('Merchant id is null');
+    }
+
+    const stripeId = merchant.stripeId;
+    if (stripeId == null) {
+      throw new UnauthorizedException('Stripe id is null');
+    }
+
+    const session = await this.stripeService.createBillingPortalSession({
+      customer: stripeId,
+      return_url: returnUrl,
+    });
+
+    if (!session) {
+      throw new Error('Failed to retrieve session from Stripe service');
+    }
+
+    return session.url;
+  }
+
+  async stripeCreateCheckoutSessionId(params: {
+    merchant: Merchant;
+    successUrl: string;
+    cancelUrl?: string;
+    stripePriceId: string;
+  }): Promise<string | null> {
+    const { merchant, stripePriceId } = params;
+
+    const user = await this.loadOneRelation<User>(merchant, 'user');
+    if (!user) {
+      throw new NotFoundException(`User with id ${merchant.userId} not found`);
+    }
+
+    if (!merchant.stripeId) {
+      throw new UnauthorizedException('Stripe id is null');
+    }
+
+    const session = await this.stripeService.createCheckoutSession({
+      mode: 'subscription',
+      line_items: [
+        {
+          price: stripePriceId,
+          quantity: 1,
+        },
+      ],
+      allow_promotion_codes: true,
+      customer: merchant.stripeId,
+      client_reference_id: merchant.id,
+      success_url: `${params.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: params.cancelUrl,
+    });
+
+    if (!session) {
+      throw new Error('Failed to retrieve session from Stripe service');
+    }
+
+    return session.id;
+  }
+
+  firebaseAdminApp(params: { merchant: Merchant }) {
+    const entity = params.merchant;
+
+    try {
+      const app = this.firebaseAdminService.getApp(entity.id);
+      return app;
+    } catch {
+      // do nothing, the app doesn't exist
+    }
+    try {
+      const appOptions = JSON.parse(JSON.stringify(entity.firebaseAppOptions));
+      const app = this.firebaseAdminService.initializeApp(
+        {
+          credential: credential.cert(appOptions),
+          databaseURL: entity.firebaseDatabaseUrl,
+        },
+        entity.id,
+      );
+      return app;
+    } catch (error) {
+      this.logger.log(error);
+      return null;
+    }
+  }
+
+  /*
+   * Square webhooks
+   */
+
   @OnEvent('square.location.created')
   async handleSquareLocationCreated(
     payload: SquareLocationCreatedEventPayload,
@@ -245,153 +343,134 @@ export class MerchantsService extends BaseService<Merchant> {
     await this.squareCatalogSync({ merchant });
   }
 
-  async squareLocationsSync(params: { merchant: Merchant }) {
-    const entity = params.merchant;
+  /*
+   * Stripe webhooks
+   */
 
-    if (entity.id == null) {
-      throw new NotFoundException('Merchant id is null');
-    }
+  // Sent when a customer’s subscription ends.
+  @OnEvent('stripe.customer.subscription.deleted')
+  async handleStripeCustomerSubscriptionDeleted(event: Stripe.Event) {
+    const stripeSubscription = event.data.object as Stripe.Subscription;
 
-    const squareAccessToken = entity.squareAccessToken;
-    if (squareAccessToken == null) {
-      throw new UnauthorizedException('Square access token is null');
-    }
-
-    await this.locationsService.sync({
-      merchantId: entity.id,
-      squareAccessToken,
-    });
-  }
-
-  async stripeCreateBillingPortalSession(params: {
-    merchant: Merchant;
-    returnUrl: string;
-  }) {
-    const { merchant, returnUrl } = params;
-
-    if (merchant.id == null) {
-      throw new NotFoundException('Merchant id is null');
-    }
-
-    const stripeId = merchant.stripeId;
-    if (stripeId == null) {
-      throw new UnauthorizedException('Stripe id is null');
-    }
-
-    const session = await this.stripeService.createBillingPortalSession({
-      customer: stripeId,
-      return_url: returnUrl,
-    });
-
-    if (!session) {
-      throw new Error('Failed to retrieve session from Stripe service');
-    }
-
-    return session.url;
-  }
-
-  async stripeCreateCheckoutSessionId(params: {
-    merchant: Merchant;
-    successUrl: string;
-    cancelUrl?: string;
-    currency?: CurrencyEnum;
-  }): Promise<string | null> {
-    const merchant = params.merchant;
-    const currency = params.currency?.valueOf() ?? 'USD';
-    const configKey =
-      `stripe.priceId${currency.toUpperCase()}` as keyof AllConfigType;
-
-    if (merchant.stripeCheckoutSessionId) {
-      throw new BadRequestException(
-        `Merchant with userId ${merchant.id} already has completed checkeout`,
-      );
-    }
-
-    const user = await this.loadOneRelation<User>(merchant, 'user');
-    if (!user) {
-      throw new NotFoundException(`User with id ${merchant.userId} not found`);
-    }
-
-    if (!merchant.stripeId) {
-      const stripeCustomer = await this.stripeService.createCustomer({
-        email: user.email ?? '',
-        phone: user.phoneNumber ?? '',
-        name: user.firstName ?? '',
+    if (typeof stripeSubscription.customer === 'string') {
+      const stripeCustomerId = stripeSubscription.customer;
+      const merchant = await this.findOne({
+        where: {
+          stripeId: stripeCustomerId,
+        },
       });
-      merchant.stripeId = stripeCustomer?.id;
+
+      if (!merchant) {
+        this.logger.error(`Merchant with id ${stripeCustomerId} not found`);
+        return;
+      }
+
+      // You can set the merchant tier to a default or 'inactive' state
+      merchant.tier = MerchantTierEnum.deleted;
+      this.logger.debug(`Setting merchant ${merchant.id} to deleted tier`);
       await this.save(merchant);
+    } else {
+      this.logger.error("Missing 'customer' in stripeSubscription");
     }
-
-    const session = await this.stripeService.createCheckoutSession({
-      mode: 'subscription',
-      line_items: [
-        {
-          price: this.configService.getOrThrow(configKey, {
-            infer: true,
-          }),
-          quantity: 1,
-        },
-      ],
-      allow_promotion_codes: true,
-      customer: merchant.stripeId,
-      client_reference_id: merchant.id,
-      success_url: `${params.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: params.cancelUrl,
-    });
-
-    if (!session) {
-      throw new Error('Failed to retrieve session from Stripe service');
-    }
-
-    return session.id;
   }
 
-  async stripeConfirmCheckoutSessionId(params: {
-    merchant: Merchant;
-    checkoutSessionId: string;
-  }): Promise<Merchant | null> {
-    const entity = params.merchant;
+  /*
+   * Sent when a subscription starts or changes. For example, renewing a
+   * subscription, adding a coupon, applying a discount, adding an invoice item,
+   * and changing plans all trigger this event.
+   */
+  @OnEvent('stripe.customer.subscription.updated')
+  async handleStripeCustomerSubscriptionUpdated(event: Stripe.Event) {
+    const stripeSubscription = event.data.object as Stripe.Subscription;
 
-    const session = await this.stripeService.retrieveCheckoutSession(
-      params.checkoutSessionId,
-    );
+    if (typeof stripeSubscription.customer === 'string') {
+      const stripeCustomerId = stripeSubscription.customer;
+      const merchant = await this.findOne({
+        where: {
+          stripeId: stripeCustomerId,
+        },
+      });
 
-    if (session.status != 'complete') {
-      throw new UnauthorizedException(
-        'Stripe checkout session is not complete',
-      );
+      if (!merchant) {
+        this.logger.error(`Merchant with id ${stripeCustomerId} not found`);
+        return;
+      }
+
+      const updateSubscriptionPriceId =
+        stripeSubscription.items?.data[0]?.price?.id;
+
+      if (updateSubscriptionPriceId) {
+        if (
+          this.stripeConfigUtils.isProStripePriceId(updateSubscriptionPriceId)
+        ) {
+          if (merchant.tier !== MerchantTierEnum.pro) {
+            merchant.tier = MerchantTierEnum.pro;
+            this.logger.debug(`merchant ${merchant.tier} to pro tier`);
+            await this.save(merchant);
+          }
+        } else if (
+          this.stripeConfigUtils.isFreeStripePriceId(updateSubscriptionPriceId)
+        ) {
+          if (merchant.tier !== MerchantTierEnum.free) {
+            this.logger.debug(`Setting merchant ${merchant.id} to free tier`);
+            merchant.tier = MerchantTierEnum.free;
+            await this.save(merchant);
+          }
+        } else {
+          this.logger.error(
+            `Unknown price id ${updateSubscriptionPriceId} for subscription`,
+          );
+        }
+      } else {
+        this.logger.error(`Missing 'priceId' in stripeSubscription`);
+      }
+    } else {
+      this.logger.error("Missing 'customer' in stripeSubscription");
     }
-
-    if (entity == null) {
-      return null;
-    }
-
-    entity.stripeCheckoutSessionId = session.id;
-    return this.save(entity);
   }
 
-  firebaseAdminApp(params: { merchant: Merchant }) {
-    const entity = params.merchant;
+  /*
+   * Sent when the subscription is created. The subscription status might be
+   * incomplete if customer authentication is required to complete the payment
+   * or if you set payment_behavior to default_incomplete. View subscription
+   * payment behavior to learn more.
+   */
+  @OnEvent('stripe.customer.subscription.created')
+  async handleStripeCustomerSubscriptionCreated(event: Stripe.Event) {
+    const stripeSubscription = event.data.object as Stripe.Subscription;
 
-    try {
-      const app = this.firebaseAdminService.getApp(entity.id);
-      return app;
-    } catch {
-      // do nothing, the app doesn't exist
-    }
-    try {
-      const appOptions = JSON.parse(JSON.stringify(entity.firebaseAppOptions));
-      const app = this.firebaseAdminService.initializeApp(
-        {
-          credential: credential.cert(appOptions),
-          databaseURL: entity.firebaseDatabaseUrl,
+    if (typeof stripeSubscription.customer === 'string') {
+      const stripeCustomerId = stripeSubscription.customer;
+      const merchant = await this.findOne({
+        where: {
+          stripeId: stripeCustomerId,
         },
-        entity.id,
-      );
-      return app;
-    } catch (error) {
-      this.logger.log(error);
-      return null;
+      });
+
+      if (!merchant) {
+        this.logger.error(`Merchant with id ${stripeCustomerId} not found`);
+        return;
+      }
+
+      const priceId = stripeSubscription.items?.data[0]?.price?.id;
+
+      if (priceId) {
+        if (this.stripeConfigUtils.isProStripePriceId(priceId)) {
+          this.logger.debug(`Setting merchant ${merchant.id} to pro tier`);
+          merchant.tier = MerchantTierEnum.pro;
+          await this.save(merchant);
+        } else if (this.stripeConfigUtils.isFreeStripePriceId(priceId)) {
+          this.logger.debug(`Setting merchant ${merchant.id} to free tier`);
+          merchant.tier = MerchantTierEnum.free;
+          await this.save(merchant);
+        } else {
+          this.logger.error(`Unknown price id ${priceId} for subscription`);
+        }
+      } else {
+        this.logger.error(`Missing 'priceId' in stripeSubscription`);
+      }
+    } else {
+      this.logger.error("Missing 'customer' in stripeSubscription");
     }
   }
 }

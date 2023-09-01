@@ -74,4 +74,22 @@ export class StripeService {
       throw new InternalServerErrorException(error.message);
     }
   }
+
+  webhooksConstructEvent(
+    payload: string | Buffer,
+    header: string | Buffer | string[],
+    secret: string,
+    tolerance?: number | undefined,
+    cryptoProvider?: Stripe.CryptoProvider | undefined,
+    receivedAt?: number | undefined,
+  ) {
+    return this.client.webhooks.constructEvent(
+      payload,
+      header,
+      secret,
+      tolerance,
+      cryptoProvider,
+      receivedAt,
+    );
+  }
 }

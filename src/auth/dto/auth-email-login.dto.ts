@@ -8,7 +8,7 @@ export class AuthEmailLoginDto {
   @Transform(lowerCaseTransformer)
   email: string;
 
-  @ApiProperty()
+  @ApiProperty({ example: '123456' })
   @IsNotEmpty()
   password: string;
 }

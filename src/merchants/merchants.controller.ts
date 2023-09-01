@@ -5,12 +5,12 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   InternalServerErrorException,
   Logger,
   Post,
   Query,
   Req,
-  Request,
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
@@ -32,8 +32,8 @@ import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
 import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
 import { SquareService } from 'src/square/square.service';
+import { StripeService } from 'src/stripe/stripe.service';
 import { NestError } from 'src/utils/error';
-import { NullableType } from 'src/utils/types/nullable.type';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
 import {
   StripeBillingPortalCreateInput,
@@ -56,6 +56,8 @@ export class MerchantsController {
     protected readonly service: MerchantsService,
     protected readonly squareService: SquareService,
     protected readonly authService: AuthService,
+    @Inject(StripeService)
+    private readonly stripeService: StripeService,
   ) {}
 
   @ApiBearerAuth()
@@ -79,11 +81,18 @@ export class MerchantsController {
     ) {
       throw new BadRequestException('Merchant already exists');
     }
-    await this.service.save(
-      this.service.create({
-        userId: request.user.id,
-      }),
-    );
+
+    const merchant = this.service.create({
+      userId: request.user.id,
+    });
+    const stripeCustomer = await this.stripeService.createCustomer({
+      email: request.user.email ?? '',
+      phone: request.user.phoneNumber ?? '',
+      name: request.user.firstName ?? '',
+    });
+    merchant.stripeId = stripeCustomer?.id;
+
+    await this.service.save(merchant);
     return;
   }
 
@@ -204,31 +213,6 @@ export class MerchantsController {
     }
 
     return { checkoutSessionId };
-  }
-
-  @Post('me/stripe/checkout/confirm')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Confirm Square checkout',
-    operationId: 'confirmStripeCheckout',
-  })
-  @ApiBody({ type: StripeCheckoutDto })
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
-  @ApiOkResponse({ type: Merchant })
-  async stripeConfirmCheckoutSessionId(
-    @Request() request,
-    @Body()
-    dto: StripeCheckoutDto,
-  ): Promise<NullableType<Merchant>> {
-    return this.service.stripeConfirmCheckoutSessionId({
-      checkoutSessionId: dto.checkoutSessionId,
-      merchant: request.merchant,
-    });
   }
 
   @Post('me/stripe/billing-session/create')
