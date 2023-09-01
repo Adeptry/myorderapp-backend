@@ -76,7 +76,7 @@ export class AppConfigController {
     summary: 'Get your Config',
     operationId: 'getMyConfig',
   })
-  async getMyCongif(
+  async getMyConfig(
     @Req() request: UserTypeGuardedRequest,
     @Query('merchantId') merchantId?: string,
   ) {
@@ -128,6 +128,7 @@ export class AppConfigController {
   })
   @ApiOperation({ summary: 'Create your Config', operationId: 'createConfig' })
   @ApiBody({ type: AppConfigUpdateDto })
+  @UseInterceptors(FileInterceptor('file'))
   async create(
     @Req() request: MerchantsGuardedRequest,
     @Body()
@@ -209,7 +210,7 @@ export class AppConfigController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file'))
+  @UseInterceptors(FileInterceptor('file')) // 1
   @ApiOperation({ summary: 'Upload icon', operationId: 'uploadIcon' })
   async uploadFile(
     @Req() request: MerchantsGuardedRequest,

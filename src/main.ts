@@ -83,7 +83,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.12')
+        .setVersion('2.0.13')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -119,7 +119,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.12')
+        .setVersion('2.0.13')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -154,7 +154,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.0.12')
+        .setVersion('2.0.13')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },

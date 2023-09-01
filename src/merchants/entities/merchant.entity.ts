@@ -107,6 +107,7 @@ export class Merchant extends EntityHelper {
    * App config
    */
 
+  @ApiProperty({ required: false, nullable: true, type: () => AppConfig })
   @OneToOne(() => AppConfig, (entity) => entity.merchant, {
     onDelete: 'SET NULL',
     nullable: true,
@@ -207,14 +208,12 @@ export class Merchant extends EntityHelper {
 
   @ApiProperty({
     type: () => FileEntity,
-    isArray: true,
     required: false,
     nullable: true,
   })
   @OneToOne(() => FileEntity, {
     onDelete: 'SET NULL',
     nullable: true,
-    eager: true,
   })
   @JoinColumn({ name: 'androidZipFileId' })
   androidZipFile?: FileEntity | null;
@@ -227,14 +226,12 @@ export class Merchant extends EntityHelper {
 
   @ApiProperty({
     type: () => FileEntity,
-    isArray: true,
     required: false,
     nullable: true,
   })
   @OneToOne(() => FileEntity, {
     onDelete: 'SET NULL',
     nullable: true,
-    eager: true,
   })
   @JoinColumn({ name: 'iosZipFileId' })
   iosZipFile?: FileEntity | null;

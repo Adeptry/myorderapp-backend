@@ -2,16 +2,19 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
   Inject,
   InternalServerErrorException,
   Logger,
+  ParseBoolPipe,
   Post,
   Query,
   Req,
   SerializeOptions,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -101,20 +104,56 @@ export class MerchantsController {
     groups: ['me'],
   })
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
     operationId: 'getCurrentMerchant',
   })
+  @ApiQuery({ name: 'user', required: false, type: Boolean })
+  @ApiQuery({ name: 'appConfig', required: false, type: Boolean })
+  @ApiQuery({ name: 'locations', required: false, type: Boolean })
+  @ApiQuery({ name: 'androidZipFile', required: false, type: Boolean })
+  @ApiQuery({ name: 'iosZipFile', required: false, type: Boolean })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
   @ApiOkResponse({ type: Merchant })
-  async me(@Req() request): Promise<Merchant> {
-    const { merchant } = request;
-    merchant.user = await this.authService.me(request.user);
+  async me(
+    @Req() request,
+    @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
+    userRelation?: boolean,
+    @Query('appConfig', new DefaultValuePipe(false), ParseBoolPipe)
+    appConfig?: boolean,
+    @Query('locations', new DefaultValuePipe(false), ParseBoolPipe)
+    locations?: boolean,
+    @Query('androidZipFile', new DefaultValuePipe(false), ParseBoolPipe)
+    androidZipFile?: boolean,
+    @Query('iosZipFile', new DefaultValuePipe(false), ParseBoolPipe)
+    iosZipFile?: boolean,
+  ): Promise<Merchant> {
+    const { user } = request;
+    const merchant = await this.service.findOne({
+      where: { userId: user.id },
+      relations: {
+        appConfig,
+        locations,
+        androidZipFile,
+        iosZipFile,
+      },
+    });
+
+    if (!merchant) {
+      throw new UnauthorizedException(
+        `Merchant with userId ${user.id} does not exist`,
+      );
+    }
+
+    if (userRelation) {
+      merchant.user = user;
+    }
+
     return merchant;
   }
 

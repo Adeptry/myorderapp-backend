@@ -112,7 +112,6 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({
     type: () => FileEntity,
-    isArray: true,
     required: false,
     nullable: true,
   })
@@ -134,7 +133,9 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
+  @ManyToOne(() => Merchant, (entity) => entity.appConfig, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   merchant?: Merchant;
 }
