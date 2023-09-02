@@ -1,33 +1,23 @@
-import { PartialType } from '@nestjs/swagger';
-import { CreateUserDto } from './create-user.dto';
-
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import {
-  IsEmail,
-  IsOptional,
-  IsPhoneNumber,
-  MinLength,
-  Validate,
-} from 'class-validator';
-import { FileEntity } from 'src/files/entities/file.entity';
+import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
+import { Role } from 'src/roles/entities/role.entity';
 import { Status } from 'src/statuses/entities/status.entity';
 import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
 import { IsExist } from 'src/utils/validators/is-exists.validator';
 import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
 
-export class UpdateUserDto extends PartialType(CreateUserDto) {
+export class UserCreateDto {
   @ApiProperty({ example: 'test1@example.com' })
   @Transform(lowerCaseTransformer)
-  @IsOptional()
+  @IsNotEmpty()
   @Validate(IsNotExist, ['User'], {
     message: 'emailAlreadyExists',
   })
   @IsEmail()
-  email?: string | null;
+  email: string | null;
 
   @ApiProperty()
-  @IsOptional()
   @MinLength(6)
   password?: string;
 
@@ -36,34 +26,27 @@ export class UpdateUserDto extends PartialType(CreateUserDto) {
   socialId?: string | null;
 
   @ApiProperty({ example: 'John' })
-  @IsOptional()
-  firstName?: string | null;
+  @IsNotEmpty()
+  firstName: string | null;
 
   @ApiProperty({ example: 'Doe' })
-  @IsOptional()
-  lastName?: string | null;
+  @IsNotEmpty()
+  lastName: string | null;
 
-  @ApiProperty()
-  @IsOptional()
-  @IsPhoneNumber()
-  phoneNumber?: string | null;
-
-  @ApiProperty({ type: () => FileEntity })
-  @IsOptional()
-  @Validate(IsExist, ['FileEntity', 'id'], {
-    message: 'imageNotExists',
-  })
-  photo?: FileEntity | null;
-
-  // @ApiProperty({ type: Role })
+  // @ApiProperty({ type: () => FileEntity })
   // @IsOptional()
-  // @Validate(IsExist, ['Role', 'id'], {
-  //   message: 'roleNotExists',
+  // @Validate(IsExist, ['FileEntity', 'id'], {
+  //   message: 'imageNotExists',
   // })
-  // role?: Role | null;
+  // photo?: FileEntity | null;
+
+  @ApiProperty({ type: Role })
+  @Validate(IsExist, ['Role', 'id'], {
+    message: 'roleNotExists',
+  })
+  role?: Role | null;
 
   @ApiProperty({ type: Status })
-  @IsOptional()
   @Validate(IsExist, ['Status', 'id'], {
     message: 'statusNotExists',
   })

@@ -25,14 +25,14 @@ import { SquareService } from 'src/square/square.service';
 import { StripeConfigUtils } from 'src/stripe/stripe.config.utils';
 import { StripeService } from 'src/stripe/stripe.service';
 import { User } from 'src/users/entities/user.entity';
-import { BaseService } from 'src/utils/base-service';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import Stripe from 'stripe';
 import { Repository } from 'typeorm';
 import { MerchantUpdateInput } from './dto/update-merchant.input';
 import { MerchantTierEnum } from './entities/merchant-tier.enum';
 
 @Injectable()
-export class MerchantsService extends BaseService<Merchant> {
+export class MerchantsService extends EntityRepositoryService<Merchant> {
   private readonly logger = new Logger(MerchantsService.name);
   private readonly stripeConfigUtils: StripeConfigUtils;
   private readonly squareConfigUtils: SquareConfigUtils;

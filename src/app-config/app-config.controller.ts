@@ -42,7 +42,7 @@ import {
   UserTypeGuard,
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { NestError } from 'src/utils/error';
 import { AppConfigUpdateDto } from './dto/app-config-update.input';
 import { AppConfig } from './entities/app-config.entity';
@@ -154,14 +154,10 @@ export class AppConfigController {
     );
   }
 
-  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
   @Patch('me')
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })

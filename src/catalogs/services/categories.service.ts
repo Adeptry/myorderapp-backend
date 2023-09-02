@@ -5,14 +5,14 @@ import {
   CategoryUpdateDto,
 } from 'src/catalogs/dto/category-update.dto';
 import { Category } from 'src/catalogs/entities/category.entity';
-import { BaseService } from 'src/utils/base-service';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { paginatedResults } from 'src/utils/paginated';
 import { Repository } from 'typeorm';
 import { CatalogSortService } from './catalog-sort.service';
 import { ItemsService } from './items.service';
 
 @Injectable()
-export class CategoriesService extends BaseService<Category> {
+export class CategoriesService extends EntityRepositoryService<Category> {
   private readonly logger = new Logger(CategoriesService.name);
 
   constructor(

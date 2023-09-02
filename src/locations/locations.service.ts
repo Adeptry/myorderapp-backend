@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
 import { SquareService } from 'src/square/square.service';
-import { BaseService } from 'src/utils/base-service';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
 import {
   LocationUpdateAllDto,
@@ -13,7 +13,7 @@ import { AddressService } from './services/address.service';
 import { BusinessHoursPeriodsService } from './services/business-hours-period.service';
 
 @Injectable()
-export class LocationsService extends BaseService<MoaLocation> {
+export class LocationsService extends EntityRepositoryService<MoaLocation> {
   private readonly logger = new Logger(LocationsService.name);
 
   constructor(

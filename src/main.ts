@@ -23,6 +23,7 @@ import { LocationsModule } from 'src/locations/locations.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { OrdersModule } from 'src/orders/orders.module';
 import { SquareModule } from 'src/square/square.module';
+import { UsersModule } from 'src/users/users.module';
 import { BigIntInterceptor } from 'src/utils/big-int.intercepter';
 
 async function bootstrap() {
@@ -83,7 +84,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.0.13')
+        .setVersion('2.0.14')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -98,6 +99,7 @@ async function bootstrap() {
           SquareModule,
           MerchantsModule,
           AuthModule,
+          UsersModule,
           OrdersModule,
           CustomersModule,
           AppConfigModule,
@@ -119,7 +121,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.0.13')
+        .setVersion('2.0.14')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
@@ -134,6 +136,7 @@ async function bootstrap() {
           AuthModule,
           AppConfigModule,
           CustomersModule,
+          UsersModule,
           CardsModule,
           OrdersModule,
           LocationsModule,
@@ -154,7 +157,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.0.13')
+        .setVersion('2.0.14')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },

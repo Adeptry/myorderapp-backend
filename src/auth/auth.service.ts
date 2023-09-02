@@ -58,7 +58,9 @@ export class AuthService {
     onlyAdmin: boolean,
   ): Promise<LoginResponseType> {
     const user = await this.usersService.findOne({
-      email: loginDto.email,
+      where: {
+        email: loginDto.email,
+      },
     });
 
     if (
@@ -111,19 +113,21 @@ export class AuthService {
     const socialEmail = socialData.email?.toLowerCase();
 
     const userByEmail = await this.usersService.findOne({
-      email: socialEmail,
+      where: { email: socialEmail },
     });
 
     user = await this.usersService.findOne({
-      socialId: socialData.id,
-      provider: authProvider,
+      where: {
+        socialId: socialData.id,
+        provider: authProvider,
+      },
     });
 
     if (user) {
       if (socialEmail && !userByEmail) {
         user.email = socialEmail;
       }
-      await this.usersService.update(user.id, user);
+      await this.usersService.patch(user.id, user);
     } else if (userByEmail) {
       user = userByEmail;
     } else {
@@ -134,18 +138,22 @@ export class AuthService {
         id: StatusEnum.active,
       });
 
-      user = await this.usersService.create({
-        email: socialEmail ?? null,
-        firstName: socialData.firstName ?? null,
-        lastName: socialData.lastName ?? null,
-        socialId: socialData.id,
-        provider: authProvider,
-        role,
-        status,
-      });
+      user = await this.usersService.save(
+        this.usersService.create({
+          email: socialEmail ?? null,
+          firstName: socialData.firstName ?? null,
+          lastName: socialData.lastName ?? null,
+          socialId: socialData.id,
+          provider: authProvider,
+          role,
+          status,
+        }),
+      );
 
       user = await this.usersService.findOne({
-        id: user.id,
+        where: {
+          id: user.id,
+        },
       });
     }
 
@@ -181,17 +189,19 @@ export class AuthService {
       .update(randomStringGenerator())
       .digest('hex');
 
-    const user = await this.usersService.create({
-      ...dto,
-      email: dto.email,
-      role: {
-        id: RoleEnum.user,
-      } as Role,
-      status: {
-        id: StatusEnum.inactive,
-      } as Status,
-      hash,
-    });
+    const user = await this.usersService.save(
+      this.usersService.create({
+        ...dto,
+        email: dto.email,
+        role: {
+          id: RoleEnum.user,
+        } as Role,
+        status: {
+          id: StatusEnum.inactive,
+        } as Status,
+        hash,
+      }),
+    );
 
     const session = await this.sessionService.create({
       user,
@@ -220,7 +230,9 @@ export class AuthService {
 
   async confirmEmail(hash: string): Promise<void> {
     const user = await this.usersService.findOne({
-      hash,
+      where: {
+        hash,
+      },
     });
 
     if (!user) {
@@ -236,7 +248,9 @@ export class AuthService {
 
   async forgotPassword(email: string): Promise<void> {
     const user = await this.usersService.findOne({
-      email,
+      where: {
+        email,
+      },
     });
 
     if (!user) {
@@ -285,7 +299,9 @@ export class AuthService {
 
   async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {
     return this.usersService.findOne({
-      id: userJwtPayload.id,
+      where: {
+        id: userJwtPayload.id,
+      },
     });
   }
 
@@ -296,7 +312,9 @@ export class AuthService {
     if (userDto.password) {
       if (userDto.oldPassword) {
         const currentUser = await this.usersService.findOne({
-          id: userJwtPayload.id,
+          where: {
+            id: userJwtPayload.id,
+          },
         });
 
         if (!currentUser) {
@@ -323,10 +341,12 @@ export class AuthService {
       }
     }
 
-    await this.usersService.update(userJwtPayload.id, userDto);
+    await this.usersService.patch(userJwtPayload.id, userDto);
 
     return this.usersService.findOne({
-      id: userJwtPayload.id,
+      where: {
+        id: userJwtPayload.id,
+      },
     });
   }
 

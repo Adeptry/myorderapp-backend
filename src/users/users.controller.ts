@@ -1,100 +1,83 @@
 import {
   Body,
   Controller,
-  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
-  Param,
-  ParseIntPipe,
   Patch,
-  Post,
-  Query,
+  Req,
   SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
-import { Roles } from 'src/roles/roles.decorator';
-import { RoleEnum } from 'src/roles/roles.enum';
-import { RolesGuard } from 'src/roles/roles.guard';
-import { paginated } from 'src/utils/paginated';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { NullableType } from 'src/utils/types/nullable.type';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiOperation,
+  ApiTags,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { UsersGuard, UsersGuardedRequest } from 'src/guards/users.guard';
+import { NestError } from 'src/utils/error';
+import { UserUpdateDto } from './dto/user-update.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
-@Roles(RoleEnum.admin)
-@UseGuards(AuthGuard('jwt'), RolesGuard)
+@UseGuards(AuthGuard('jwt'))
+@SerializeOptions({
+  groups: ['me'],
+})
 @ApiTags('Users')
 @Controller({
   path: 'users',
   version: '2',
 })
 export class UsersController {
-  constructor(private readonly usersService: UsersService) {}
+  constructor(private readonly service: UsersService) {}
 
-  @SerializeOptions({
-    groups: ['admin'],
-  })
-  @Post()
-  @HttpCode(HttpStatus.CREATED)
-  create(@Body() createProfileDto: CreateUserDto): Promise<User> {
-    return this.usersService.create(createProfileDto);
-  }
-
-  @SerializeOptions({
-    groups: ['admin'],
-  })
-  @Get()
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @Get('me')
   @HttpCode(HttpStatus.OK)
-  async findAll(
-    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
-  ): Promise<InfinityPaginationResultType<User>> {
-    if (limit > 50) {
-      limit = 50;
-    }
-
-    const result = await this.usersService.findManyWithPagination({
-      page,
-      limit,
-    });
-    return paginated({
-      data: result[0],
-      count: result[1],
-      pagination: { page, limit },
-    });
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: User })
+  @ApiOperation({ summary: 'Get your User', operationId: 'getCurrentUser' })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  getMe(@Req() request: UsersGuardedRequest) {
+    return request.user;
   }
 
-  @SerializeOptions({
-    groups: ['admin'],
-  })
-  @Get(':id')
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @Patch('me')
   @HttpCode(HttpStatus.OK)
-  findOne(@Param('id') id: string): Promise<NullableType<User>> {
-    return this.usersService.findOne({ id });
-  }
-
-  @SerializeOptions({
-    groups: ['admin'],
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: User })
+  @ApiOperation({
+    summary: 'Update your User',
+    operationId: 'patchCurrentUser',
   })
-  @Patch(':id')
-  @HttpCode(HttpStatus.OK)
-  update(
-    @Param('id') id: string,
-    @Body() updateProfileDto: UpdateUserDto,
-  ): Promise<User> {
-    return this.usersService.update(id, updateProfileDto);
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiBody({ type: UserUpdateDto })
+  async updateMe(
+    @Req() request: UsersGuardedRequest,
+    @Body() updateUserDto: UserUpdateDto,
+  ) {
+    return await this.service.patch(request.user.id, updateUserDto);
   }
 
-  @Delete(':id')
-  @HttpCode(HttpStatus.NO_CONTENT)
-  remove(@Param('id') id: string): Promise<void> {
-    return this.usersService.softDelete(id);
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @Delete('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: User })
+  @ApiOperation({
+    summary: 'Delete your User',
+    operationId: 'deleteCurrentUser',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  async deleteMe(@Req() request: UsersGuardedRequest) {
+    return this.service.softDelete(request.user.id);
   }
 }

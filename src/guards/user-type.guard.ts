@@ -12,7 +12,7 @@ import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { MerchantsService } from 'src/merchants/merchants.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { User } from 'src/users/entities/user.entity';
 
 export interface UserTypeGuardedRequest extends Request {

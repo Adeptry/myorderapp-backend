@@ -1,4 +1,3 @@
-import { Injectable } from '@nestjs/common';
 import {
   DeepPartial,
   DeleteResult,
@@ -19,8 +18,8 @@ import { PickKeysByType } from 'typeorm/common/PickKeysByType';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
 import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
 
-@Injectable()
-export abstract class BaseService<Entity extends ObjectLiteral> {
+// Be sure to mark your service as injectable
+export abstract class EntityRepositoryService<Entity extends ObjectLiteral> {
   constructor(protected readonly repository: Repository<Entity>) {}
 
   createQueryBuilder(

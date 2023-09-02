@@ -40,7 +40,7 @@ import {
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
 import { MerchantsService } from 'src/merchants/merchants.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { NestError } from 'src/utils/error';
 
 @ApiTags('Catalogs')

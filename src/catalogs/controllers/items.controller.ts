@@ -49,7 +49,7 @@ import {
   MerchantsGuardedRequest,
 } from 'src/guards/merchants.guard';
 import { SquareService } from 'src/square/square.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 
@@ -90,8 +90,8 @@ export class ItemsController {
     operationId: 'getItemsInCategory',
   })
   async getItemsInCategory(
-    @Query('actingAs') actingAs: UserTypeEnum,
     @Param('id') categoryId: string,
+    @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,

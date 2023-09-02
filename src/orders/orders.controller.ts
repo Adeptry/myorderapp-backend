@@ -45,7 +45,7 @@ import {
   UserTypeGuardedRequest,
 } from 'src/guards/user-type.guard';
 import { OrdersService } from 'src/orders/orders.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 import { IsNull, Not } from 'typeorm';
@@ -163,6 +163,42 @@ export class OrdersController {
     }
 
     return entity;
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get Order',
+    operationId: 'getOrder',
+  })
+  @ApiOkResponse({ type: Order })
+  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  @ApiQuery({ name: 'customer', required: false, type: Boolean })
+  async getOne(
+    @Req() request: UserTypeGuardedRequest,
+    @Param('id') id: string,
+    @Query('lineItems') lineItems?: boolean,
+    @Query('location') location?: boolean,
+    @Query('customer') customer?: boolean,
+  ) {
+    return await this.service.findOne({
+      where: {
+        id: id,
+        customerId: request.customer?.id,
+        merchantId: request.merchant?.id,
+      },
+      relations: {
+        lineItems: {
+          modifiers: lineItems,
+        },
+        location: location,
+        customer: customer,
+      },
+    });
   }
 
   @ApiBearerAuth()

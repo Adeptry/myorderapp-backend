@@ -81,11 +81,6 @@ export class User extends EntityHelper {
   @ApiProperty({ required: false, type: String, nullable: true })
   lastName: string | null;
 
-  @Index()
-  @Column({ type: String, nullable: true })
-  @ApiProperty({ required: false, type: String, nullable: true })
-  phoneNumber: string | null;
-
   @ManyToOne(() => FileEntity, {
     eager: true,
   })

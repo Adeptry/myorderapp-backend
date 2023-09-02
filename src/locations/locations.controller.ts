@@ -39,7 +39,7 @@ import {
 import { LocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
 import { Location as MoaLocation } from 'src/locations/entities/location.entity';
 import { LocationsService } from 'src/locations/locations.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dts';
+import { UserTypeEnum } from 'src/users/dto/type-user.dto';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 

@@ -7,7 +7,7 @@ import {
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
-import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 import {
   addDays,
   addHours,
@@ -36,18 +36,16 @@ import { MerchantsService } from 'src/merchants/merchants.service';
 import { Order } from 'src/orders/entities/order.entity';
 import { SquareOrderFulfillmentUpdatedPayload } from 'src/square/payloads/square-order-fulfillment-updated.payload';
 import { SquareService } from 'src/square/square.service';
-import { BaseService } from 'src/utils/base-service';
-import { DataSource, In, Repository } from 'typeorm';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
+import { In, Repository } from 'typeorm';
 import { PaymentCreateDto } from './dto/payment-create.dto';
 import { VariationAddDto } from './dto/variation-add.dto';
 import { LineItemService } from './services/line-item.service';
 
 @Injectable()
-export class OrdersService extends BaseService<Order> {
+export class OrdersService extends EntityRepositoryService<Order> {
   private readonly logger = new Logger(OrdersService.name);
   constructor(
-    @InjectDataSource()
-    private dataSource: DataSource,
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
     protected readonly lineItemService: LineItemService,

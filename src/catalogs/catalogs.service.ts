@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { LocationsService } from 'src/locations/locations.service';
 import { SquareService } from 'src/square/square.service';
-import { BaseService } from 'src/utils/base-service';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { DataSource, Repository } from 'typeorm';
 import { MoaSelectionType } from './dto/catalogs.types';
 import { CatalogImage } from './entities/catalog-image.entity';
@@ -24,7 +24,7 @@ import { VariationLocationOverridesService } from './services/variation-location
 import { VariationsService } from './services/variations.service';
 
 @Injectable()
-export class CatalogsService extends BaseService<Catalog> {
+export class CatalogsService extends EntityRepositoryService<Catalog> {
   private readonly logger = new Logger(CatalogsService.name);
 
   constructor(

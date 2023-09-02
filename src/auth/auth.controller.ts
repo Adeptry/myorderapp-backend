@@ -1,7 +1,6 @@
 import {
   Body,
   Controller,
-  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -52,10 +51,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get access token',
-    operationId: 'createSession',
+    operationId: 'login',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  async login(@Body() loginDto: AuthEmailLoginDto): Promise<LoginResponseType> {
+  async emailLogin(
+    @Body() loginDto: AuthEmailLoginDto,
+  ): Promise<LoginResponseType> {
     const response = await this.service.validateLogin(loginDto, false);
     return response;
   }
@@ -63,11 +64,11 @@ export class AuthController {
   @Post('email/register')
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Create Auth',
-    operationId: 'createUser',
+    summary: 'Create User and Authorize',
+    operationId: 'register',
   })
   @ApiCreatedResponse({ type: LoginResponseType })
-  async register(
+  async emailRegister(
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
     const response = await this.service.register(createUserDto);
@@ -169,7 +170,7 @@ export class AuthController {
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
-    summary: 'Update Auth',
+    summary: 'Update password',
     operationId: 'updateCurrentAuth',
   })
   @ApiOkResponse({ type: User })
@@ -181,16 +182,16 @@ export class AuthController {
     return this.service.update(request.user, userDto);
   }
 
-  @ApiBearerAuth()
-  @Delete('me')
-  @UseGuards(AuthGuard('jwt'))
-  @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOperation({
-    summary: 'Delete User',
-    operationId: 'deleteCurrentAuth',
-  })
-  @ApiNoContentResponse()
-  public async delete(@Req() request): Promise<void> {
-    return this.service.softDelete(request.user);
-  }
+  // @ApiBearerAuth()
+  // @Delete('me')
+  // @UseGuards(AuthGuard('jwt'))
+  // @HttpCode(HttpStatus.NO_CONTENT)
+  // @ApiOperation({
+  //   summary: 'Delete User',
+  //   operationId: 'deleteCurrentAuth',
+  // })
+  // @ApiNoContentResponse()
+  // public async delete(@Req() request): Promise<void> {
+  //   return this.service.softDelete(request.user);
+  // }
 }

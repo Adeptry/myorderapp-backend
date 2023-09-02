@@ -5,6 +5,11 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from 'src/auth/auth.service';
+import { User } from 'src/users/entities/user.entity';
+
+export interface UsersGuardedRequest extends Request {
+  user: User;
+}
 
 @Injectable()
 export class UsersGuard implements CanActivate {

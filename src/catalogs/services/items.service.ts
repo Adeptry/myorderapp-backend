@@ -6,11 +6,11 @@ import {
 } from 'src/catalogs/dto/item-update.dto';
 import { Item } from 'src/catalogs/entities/item.entity';
 import { ModifierList } from 'src/catalogs/entities/modifier-list.entity';
-import { BaseService } from 'src/utils/base-service';
+import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
-export class ItemsService extends BaseService<Item> {
+export class ItemsService extends EntityRepositoryService<Item> {
   constructor(
     @InjectRepository(Item)
     protected readonly repository: Repository<Item>,
