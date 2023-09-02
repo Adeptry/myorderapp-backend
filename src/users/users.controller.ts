@@ -16,19 +16,22 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { UsersGuard, UsersGuardedRequest } from 'src/guards/users.guard';
+import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+import { UsersGuardedRequest } from 'src/guards/users.guard';
 import { NestError } from 'src/utils/error';
 import { UserUpdateDto } from './dto/user-update.dto';
 import { User } from './entities/user.entity';
 import { UsersService } from './users.service';
 
 @ApiBearerAuth()
-@UseGuards(AuthGuard('jwt'))
+@ApiSecurity('Api-Key')
+@UseGuards(ApiKeyAuthGuard, AuthGuard('jwt'))
 @SerializeOptions({
-  groups: ['me'],
+  groups: ['me', 'admin'],
 })
 @ApiTags('Users')
 @Controller({
@@ -38,7 +41,6 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly service: UsersService) {}
 
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -46,10 +48,9 @@ export class UsersController {
   @ApiOperation({ summary: 'Get your User', operationId: 'getCurrentUser' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   getMe(@Req() request: UsersGuardedRequest) {
-    return request.user;
+    return this.service.findOne({ where: { id: request.user.id } });
   }
 
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
@@ -67,7 +68,6 @@ export class UsersController {
     return await this.service.patch(request.user.id, updateUserDto);
   }
 
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Delete('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()

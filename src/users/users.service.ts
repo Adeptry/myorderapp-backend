@@ -34,13 +34,10 @@ export class UsersService extends EntityRepositoryService<User> {
     });
   }
 
-  patch(id: string, payload: DeepPartial<User>): Promise<User> {
-    return this.repository.save(
-      this.repository.create({
-        id,
-        ...payload,
-      }),
-    );
+  async patch(id: string, payload: DeepPartial<User>): Promise<User | null> {
+    const result = await this.repository.findOne({ where: { id } });
+    await this.repository.save({ ...result, ...payload });
+    return await this.repository.findOne({ where: { id } });
   }
 
   put(id: string, entity: DeepPartial<User>): Promise<DeepPartial<User>> {
