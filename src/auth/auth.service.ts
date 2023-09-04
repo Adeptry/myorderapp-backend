@@ -207,6 +207,8 @@ export class AuthService {
       user,
     });
 
+    this.logger.log(`User ${user.id} registered with ${session.id}`);
+
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
       role: user.role,
@@ -353,6 +355,11 @@ export class AuthService {
   async refreshToken(
     data: Pick<JwtRefreshPayloadType, 'sessionId'>,
   ): Promise<Omit<LoginResponseType, 'user'>> {
+    this.logger.log(`refreshToken ${JSON.stringify(data)}`);
+    if (data.sessionId == undefined) {
+      throw new UnauthorizedException();
+    }
+
     const session = await this.sessionService.findOne({
       where: {
         id: data.sessionId,

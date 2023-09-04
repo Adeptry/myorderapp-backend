@@ -9,6 +9,7 @@ import {
   Post,
   Req,
   SerializeOptions,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -144,7 +145,11 @@ export class AuthController {
   })
   @ApiOkResponse({ type: LoginResponseType })
   public refresh(@Req() request): Promise<Omit<LoginResponseType, 'user'>> {
-    return this.service.refreshToken(request.user.sessionId);
+    this.logger.log(`refresh: ${JSON.stringify(request.user)}`);
+    if (request.user.sessionId == undefined) {
+      throw new UnauthorizedException();
+    }
+    return this.service.refreshToken({ sessionId: request.user.sessionId });
   }
 
   @ApiBearerAuth()
