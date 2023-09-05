@@ -207,8 +207,6 @@ export class AuthService {
       user,
     });
 
-    this.logger.log(`User ${user.id} registered with ${session.id}`);
-
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
       role: user.role,

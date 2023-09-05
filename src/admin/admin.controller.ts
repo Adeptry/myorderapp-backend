@@ -21,6 +21,7 @@ import {
   ApiOperation,
   ApiQuery,
   ApiSecurity,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthService } from 'src/auth/auth.service';
 import { AuthEmailLoginDto } from 'src/auth/dto/auth-email-login.dto';
@@ -29,6 +30,7 @@ import { FilesService } from 'src/files/files.service';
 import { AdminsGuard } from 'src/guards/admins.guard';
 import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
 import { MerchantsService } from 'src/merchants/merchants.service';
+import { NestError } from 'src/utils/error';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
@@ -128,5 +130,27 @@ export class AdminController {
     merchant.iosZipFile = await this.filesService.uploadFile(file);
     await merchant.save();
     return;
+  }
+
+  @Post('/square/catalog/sync')
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), AdminsGuard)
+  @ApiOperation({
+    summary: 'Sync a merchants Square Catalog',
+    operationId: 'syncMerchantSquareCatalog',
+  })
+  @ApiOkResponse()
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: NestError,
+  })
+  async squareCatalogSync(
+    @Query('merchantId') merchantId: string,
+  ): Promise<void> {
+    return this.merchantsService.squareCatalogSync({
+      merchantId,
+    });
   }
 }

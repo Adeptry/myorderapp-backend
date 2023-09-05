@@ -198,7 +198,7 @@ export class MerchantsController {
   })
   async squareCatalogSync(@Req() request: any): Promise<void> {
     return this.service.squareCatalogSync({
-      merchant: request.merchant,
+      merchantId: request.merchant.id,
     });
   }
 

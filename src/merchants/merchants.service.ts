@@ -128,8 +128,8 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
     return await this.save(merchant);
   }
 
-  async squareCatalogSync(params: { merchant: Merchant }) {
-    const merchant = params.merchant;
+  async squareCatalogSync(params: { merchantId: string }) {
+    const merchant = await this.findOne({ where: { id: params.merchantId } });
 
     if (merchant?.id == null) {
       throw new NotFoundException('Merchant id is null');
@@ -335,12 +335,12 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
       where: { squareId: payload.merchant_id },
     });
 
-    if (!merchant) {
+    if (!merchant?.id) {
       this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
       return;
     }
 
-    await this.squareCatalogSync({ merchant });
+    await this.squareCatalogSync({ merchantId: merchant.id });
   }
 
   /*
