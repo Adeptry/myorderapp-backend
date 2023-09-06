@@ -155,6 +155,7 @@ export class ItemsController {
         leftJoinImages: true,
         leftJoinModifierLists: true,
         leftJoinVariations: true,
+        whereOnlyEnabled: true,
       })
       .getOne();
 

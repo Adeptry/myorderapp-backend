@@ -129,7 +129,7 @@ export class ItemsService extends EntityRepositoryService<Item> {
         .leftJoinAndSelect('modifierLists.modifiers', 'modifiers');
 
       if (whereOnlyEnabled) {
-        query.andWhere('modifierLists.enabled = true');
+        query.andWhere('itemModifierLists.enabled = true');
       }
 
       if (locationId) {
