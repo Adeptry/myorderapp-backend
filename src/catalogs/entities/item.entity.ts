@@ -123,7 +123,7 @@ export class Item extends EntityHelper {
     () => ItemModifierList,
     (itemModifierList) => itemModifierList.item,
   )
-  itemModifierLists: ItemModifierList[];
+  itemModifierLists?: ItemModifierList[];
 
   /*
    * Variations
