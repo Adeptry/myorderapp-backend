@@ -162,8 +162,8 @@ export class ItemsController {
       throw new NotFoundException(`Item with id ${id} not found`);
     }
 
-    entity.modifierLists?.forEach((modifierList) => {
-      modifierList.modifiers?.sort(
+    entity.itemModifierLists.forEach((itemModifierList) => {
+      itemModifierList.modifierList?.modifiers?.sort(
         (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0),
       );
     });

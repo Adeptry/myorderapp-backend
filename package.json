@@ -1,6 +1,6 @@
 {
   "name": "moa-backend3",
-  "version": "2.0.13",
+  "version": "2.0.15",
   "description": "",
   "author": "",
   "private": true,
@@ -70,7 +70,7 @@
     "rxjs": "7.8.1",
     "source-map-support": "0.5.21",
     "sqlite3": "^5.1.6",
-    "square": "^28.0.1",
+    "square": "^30.0.0",
     "stripe": "^12.12.0",
     "swagger-ui-express": "4.6.3",
     "tsconfig-paths": "^4.2.0",

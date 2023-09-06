@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { MoaSelectionType } from 'src/catalogs/dto/catalogs.types';
+import { Location } from 'src/locations/entities/location.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
@@ -10,6 +10,7 @@ import {
   DeleteDateColumn,
   Entity,
   JoinColumn,
+  JoinTable,
   ManyToMany,
   ManyToOne,
   OneToMany,
@@ -17,9 +18,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { MoaSelectionType } from '../dto/catalogs.types';
 import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
-import { Item } from './item.entity';
+import { ItemModifierList } from './item-modifier-list.entity';
 import { Modifier } from './modifier.entity';
 
 @Entity('modifier_list')
@@ -56,21 +58,13 @@ export class ModifierList extends EntityHelper {
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
 
-  @ApiProperty({ type: Number, required: false, nullable: true })
-  @Column({ type: Number, nullable: true })
-  minSelectedModifiers?: number | null;
-
-  @ApiProperty({ type: Number, required: false, nullable: true })
-  @Column({ type: Number, nullable: true })
-  maxSelectedModifiers?: number | null;
-
-  @ApiProperty({ type: Boolean, required: false, nullable: true })
-  @Column({ type: Boolean, nullable: true })
-  enabled?: boolean | null;
-
   @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   name?: string | null;
+
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true })
+  ordinal?: number | null;
 
   @ApiProperty({
     required: false,
@@ -91,14 +85,49 @@ export class ModifierList extends EntityHelper {
    * Relations
    */
 
+  // Presence
+
+  @Column({ default: true, nullable: true, type: Boolean })
+  @Exclude({ toPlainOnly: true })
+  presentAtAllLocations?: boolean | null;
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'modifier_lists_present_at_locations',
+    joinColumn: {
+      name: 'modifierListId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  presentAtLocations?: Location[];
+
+  @ManyToMany(() => Location)
+  @JoinTable({
+    name: 'modifier_lists_absent_at_locations',
+    joinColumn: {
+      name: 'modifierListId',
+      referencedColumnName: 'id',
+    },
+    inverseJoinColumn: {
+      name: 'locationId',
+      referencedColumnName: 'id',
+    },
+  })
+  @Exclude({ toPlainOnly: true })
+  absentAtLocations?: Location[];
+
   // Items
 
-  @ManyToMany(() => Item, (entity) => entity.modifierLists, {
-    onDelete: 'CASCADE',
-    nullable: true,
-    cascade: true,
-  })
-  items?: Item[];
+  @OneToMany(
+    () => ItemModifierList,
+    (itemModifierList) => itemModifierList.modifierList,
+  )
+  itemModifierLists: ItemModifierList[];
 
   // Modifiers
 

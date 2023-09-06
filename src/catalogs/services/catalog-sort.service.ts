@@ -6,8 +6,8 @@ export class CatalogSortService {
   sortItems(items: Item[]): Item[] {
     return items.map((item) => {
       item.variations?.sort((a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0));
-      item.modifierLists?.forEach((modifierList) => {
-        modifierList.modifiers?.sort(
+      item.itemModifierLists.forEach((itemModifierList) => {
+        itemModifierList.modifierList?.modifiers?.sort(
           (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0),
         );
       });

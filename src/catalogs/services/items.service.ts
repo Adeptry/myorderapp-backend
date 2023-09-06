@@ -5,7 +5,6 @@ import {
   ItemUpdateDto,
 } from 'src/catalogs/dto/item-update.dto';
 import { Item } from 'src/catalogs/entities/item.entity';
-import { ModifierList } from 'src/catalogs/entities/modifier-list.entity';
 import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository, SelectQueryBuilder } from 'typeorm';
 
@@ -125,7 +124,8 @@ export class ItemsService extends EntityRepositoryService<Item> {
 
     if (leftJoinModifierLists) {
       query
-        .leftJoinAndSelect('item.modifierLists', 'modifierLists')
+        .leftJoinAndSelect('item.itemModifierLists', 'itemModifierLists')
+        .leftJoinAndSelect('itemModifierLists.modifierList', 'modifierLists')
         .leftJoinAndSelect('modifierLists.modifiers', 'modifiers');
 
       if (whereOnlyEnabled) {
@@ -148,6 +148,10 @@ export class ItemsService extends EntityRepositoryService<Item> {
           .addSelect(
             'COALESCE(modifierLocationOverrides.amount, modifiers.priceAmount)',
             'modifiers_priceAmount',
+          )
+          .addSelect(
+            'COALESCE(modifierLocationOverrides.currency, modifiers.priceCurrency)',
+            'modifiers_priceCurrency',
           );
       }
     }
@@ -209,13 +213,5 @@ export class ItemsService extends EntityRepositoryService<Item> {
     }
 
     return await this.saveAll(entities);
-  }
-
-  async loadModifierLists(entity: Item): Promise<ModifierList[]> {
-    return this.repository
-      .createQueryBuilder()
-      .relation(Item, 'modifierLists')
-      .of(entity)
-      .loadMany();
   }
 }

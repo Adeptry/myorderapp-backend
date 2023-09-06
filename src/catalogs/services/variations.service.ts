@@ -1,17 +1,143 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CatalogObject } from 'square';
 import { Variation } from 'src/catalogs/entities/variation.entity';
+import { Location } from 'src/locations/entities/location.entity';
 import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
 import { VariationUpdateDto } from '../dto/variation-update.dto';
+import { VariationLocationOverride } from '../entities/variation-location-override.entity';
+import { VariationLocationOverridesService } from './variation-location-overrides.service';
 
 @Injectable()
 export class VariationsService extends EntityRepositoryService<Variation> {
+  private readonly logger = new Logger(VariationsService.name);
+
   constructor(
     @InjectRepository(Variation)
     protected readonly repository: Repository<Variation>,
+    protected readonly variationLocationOverridesService: VariationLocationOverridesService,
   ) {
     super(repository);
+  }
+
+  /*
+  TODO measurement unid ID
+    {
+      "type": "ITEM_VARIATION",
+      "id": "BFUSZWSXHLPFHGURT3RGAP36",
+      "present_at_all_locations": false,
+      "present_at_location_ids": [
+        "L3XVVEYYRJN4F",
+        "LE27K4BS6ZFEP",
+        "LNND56HBQ4EB6"
+      ],
+      "item_variation_data": {
+        "item_id": "QM4MACMQW6JGIPTCGZR6IRQR",
+        "name": "Small (12 oz.)",
+        "ordinal": 1,
+        "pricing_type": "FIXED_PRICING",
+        "price_money": {
+          "amount": 360,
+          "currency": "USD"
+        },
+        "location_overrides": [
+          {
+            "location_id": "L3XVVEYYRJN4F",
+            "price_money": {
+              "amount": 500,
+              "currency": "USD"
+            },
+            "pricing_type": "FIXED_PRICING"
+          }
+        ],
+        "sellable": true,
+        "stockable": true
+      }
+    },
+
+  */
+  async processAndSave(params: {
+    squareCatalogObject: CatalogObject;
+    moaCatalogId: string;
+    moaLocations: Location[];
+    moaItemId: string;
+  }) {
+    const { squareCatalogObject, moaCatalogId, moaLocations, moaItemId } =
+      params;
+    const squareItemVariationData = squareCatalogObject.itemVariationData;
+
+    if (!squareItemVariationData) {
+      throw new Error(`No itemVariationData for ${squareCatalogObject.id}.`);
+    }
+
+    this.logger.verbose(
+      `Processing variation ${squareItemVariationData?.name} ${squareCatalogObject.id}.`,
+    );
+    let moaVariation = await this.findOne({
+      where: {
+        squareId: squareCatalogObject.id,
+        catalogId: moaCatalogId,
+      },
+    });
+
+    if (moaVariation == null) {
+      moaVariation = this.create({
+        squareId: squareCatalogObject.id,
+        itemId: moaItemId,
+        catalogId: moaCatalogId,
+      });
+    }
+
+    moaVariation.name = squareItemVariationData.name;
+    moaVariation.ordinal = squareItemVariationData.ordinal;
+    moaVariation.priceAmount =
+      Number(squareItemVariationData.priceMoney?.amount ?? 0) ?? 0;
+    moaVariation.priceCurrency = squareItemVariationData.priceMoney?.currency;
+
+    try {
+      await this.save(moaVariation);
+    } catch (error) {
+      this.logger.log(error);
+    }
+
+    const squareVariationLocationOverrides =
+      squareItemVariationData.locationOverrides;
+
+    if (squareVariationLocationOverrides) {
+      // First, delete all existing VariationLocationOverrides for this moaVariation
+      const existingVariationLocationOverrides =
+        await this.variationLocationOverridesService.find({
+          where: {
+            variationId: moaVariation.id,
+          },
+        });
+      for (const existingOverride of existingVariationLocationOverrides) {
+        await this.variationLocationOverridesService.remove(existingOverride);
+      }
+
+      // Then, recreate them based on the current Square data
+      for (const override of squareVariationLocationOverrides) {
+        const moaLocationForVariationOverride = moaLocations.find((value) => {
+          return value.locationSquareId === override.locationId;
+        });
+
+        const moaVariationLocationOverride = new VariationLocationOverride();
+        moaVariationLocationOverride.variationId = moaVariation.id;
+        moaVariationLocationOverride.locationId =
+          moaLocationForVariationOverride?.id;
+        moaVariationLocationOverride.amount = Number(
+          override.priceMoney?.amount ?? 0,
+        );
+        moaVariationLocationOverride.currency = override.priceMoney?.currency;
+
+        await this.variationLocationOverridesService.save(
+          moaVariationLocationOverride,
+        );
+      }
+    }
+
+    return await this.save(moaVariation);
   }
 
   joinManyQuery(params: { itemId: string; locationId?: string }) {

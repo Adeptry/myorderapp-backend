@@ -1,5 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CatalogObject } from 'square';
 import {
   CategoryUpdateAllDto,
   CategoryUpdateDto,
@@ -85,6 +86,52 @@ export class CategoriesService extends EntityRepositoryService<Category> {
         limit: limit ?? 0,
       },
     });
+  }
+
+  /*
+   {
+      "type": "CATEGORY",
+      "id": "KUSUMGI746SRBXYBJ2EWHQDN",
+      "updated_at": "2022-10-19T19:33:57.869Z",
+      "created_at": "2021-07-21T16:58:30.267Z",
+      "version": 1666208037869,
+      "is_deleted": false,
+      "present_at_all_locations": true,
+      "category_data": {
+        "name": "Hot Stuff",
+        "is_top_level": true
+      }
+    },
+  */
+  async processAndSave(params: {
+    squareCategoryCatalogObject: CatalogObject;
+    moaCatalogId: string;
+    moaOrdinal: number;
+  }) {
+    const { squareCategoryCatalogObject, moaCatalogId, moaOrdinal } = params;
+    this.logger.verbose(
+      `Processing category ${squareCategoryCatalogObject.categoryData?.name}.`,
+    );
+    let moaCategory = await this.findOne({
+      where: {
+        squareId: squareCategoryCatalogObject.id,
+        catalogId: moaCatalogId,
+      },
+    });
+
+    if (moaCategory == null) {
+      moaCategory = this.create({
+        squareId: squareCategoryCatalogObject.id,
+        catalogId: moaCatalogId,
+      });
+      moaCategory.moaOrdinal = moaOrdinal;
+      this.logger.verbose(
+        `Created category ${squareCategoryCatalogObject.categoryData?.name}.`,
+      );
+    }
+
+    moaCategory.name = squareCategoryCatalogObject.categoryData?.name;
+    return await this.save(moaCategory);
   }
 
   async assignAndSave(params: { id: string; input: CategoryUpdateDto }) {

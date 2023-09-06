@@ -20,6 +20,7 @@ import {
 } from 'square';
 import { RequestOptions } from 'square/dist/types/core';
 import { Readable } from 'stream';
+import { SquareCatalogObjectTypeEnum } from './square-catalog-object-type.enum';
 
 @Injectable()
 export class SquareService {
@@ -88,19 +89,36 @@ export class SquareService {
     });
   }
 
-  async listCatalog(params: { accessToken: string }): Promise<CatalogObject[]> {
-    const client = this.client({ accessToken: params.accessToken });
+  async accumulateCatalog(params: {
+    accessToken: string;
+    types: SquareCatalogObjectTypeEnum[];
+  }): Promise<CatalogObject[]> {
+    const { accessToken, types } = params;
+    const client = this.client({ accessToken });
     const catalogObjects: CatalogObject[] = [];
-    const types = 'ITEM,ITEM_VARIATION,MODIFIER,MODIFIER_LIST,CATEGORY,IMAGE';
+    const theTypes = types.join(',');
     let listCatalogResponse = await client.catalogApi.listCatalog(
       undefined,
-      types,
+      theTypes,
+    );
+    this.logger.verbose(
+      `listCatalog undefined ${theTypes} result length ${
+        listCatalogResponse?.result.objects?.length ?? 0
+      }`,
     );
     catalogObjects.push(...(listCatalogResponse?.result.objects ?? []));
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await client.catalogApi.listCatalog(cursor, types);
+      listCatalogResponse = await client.catalogApi.listCatalog(
+        cursor,
+        theTypes,
+      );
+      this.logger.verbose(
+        `listCatalog ${cursor} ${theTypes} result length ${
+          listCatalogResponse?.result.objects?.length ?? 0
+        }`,
+      );
       cursor = listCatalogResponse?.result.cursor;
       catalogObjects.push(...(listCatalogResponse?.result.objects ?? []));
     }

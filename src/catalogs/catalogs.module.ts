@@ -23,10 +23,12 @@ import { CategoriesController } from './controllers/categories.controller';
 import { ItemsController } from './controllers/items.controller';
 import { VariationsController } from './controllers/variations.controller';
 import { CatalogImage } from './entities/catalog-image.entity';
+import { ItemModifierList } from './entities/item-modifier-list.entity';
 import { ModifierLocationOverride } from './entities/modifier-location-override.entity';
 import { VariationLocationOverride } from './entities/variation-location-override.entity';
 import { CatalogImagesService } from './services/catalog-images.service';
 import { CatalogSortService } from './services/catalog-sort.service';
+import { ItemModifierListService } from './services/item-modifier-list.service';
 import { ModifierLocationOverridesService } from './services/modifier-location-overrides.service';
 import { VariationLocationOverridesService } from './services/variation-location-overrides.service';
 
@@ -42,6 +44,7 @@ import { VariationLocationOverridesService } from './services/variation-location
       CatalogImage,
       ModifierLocationOverride,
       VariationLocationOverride,
+      ItemModifierList,
     ]),
     LocationsModule,
     AuthModule,
@@ -60,6 +63,7 @@ import { VariationLocationOverridesService } from './services/variation-location
     CatalogImagesService,
     VariationLocationOverridesService,
     ModifierLocationOverridesService,
+    ItemModifierListService,
   ],
   providers: [
     CatalogsService,
@@ -72,6 +76,7 @@ import { VariationLocationOverridesService } from './services/variation-location
     VariationLocationOverridesService,
     ModifierLocationOverridesService,
     CatalogSortService,
+    ItemModifierListService,
   ],
   controllers: [
     CatalogsController,

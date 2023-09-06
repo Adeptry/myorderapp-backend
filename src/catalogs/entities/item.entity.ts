@@ -21,7 +21,7 @@ import {
 import { CatalogImage } from './catalog-image.entity';
 import { Catalog } from './catalog.entity';
 import { Category } from './category.entity';
-import { ModifierList } from './modifier-list.entity';
+import { ItemModifierList } from './item-modifier-list.entity';
 import { Variation } from './variation.entity';
 
 @Entity('item')
@@ -114,26 +114,16 @@ export class Item extends EntityHelper {
    */
 
   @ApiProperty({
-    type: () => ModifierList,
+    type: () => ItemModifierList,
     isArray: true,
     required: false,
     nullable: true,
   })
-  @ManyToMany(() => ModifierList, (entity) => entity.items, {
-    nullable: true,
-  })
-  @JoinTable({
-    name: 'items_modifier_lists', // name of the table that will be created in the database
-    joinColumn: {
-      name: 'item',
-      referencedColumnName: 'id',
-    },
-    inverseJoinColumn: {
-      name: 'modifierList',
-      referencedColumnName: 'id',
-    },
-  })
-  modifierLists?: ModifierList[];
+  @OneToMany(
+    () => ItemModifierList,
+    (itemModifierList) => itemModifierList.item,
+  )
+  itemModifierLists: ItemModifierList[];
 
   /*
    * Variations

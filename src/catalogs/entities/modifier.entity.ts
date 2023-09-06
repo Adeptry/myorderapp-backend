@@ -82,7 +82,7 @@ export class Modifier extends EntityHelper {
     nullable: false,
   })
   @JoinColumn()
-  modifierList?: ModifierList;
+  modifierList?: ModifierList | null;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })

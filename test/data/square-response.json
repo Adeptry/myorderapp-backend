@@ -1,0 +1,2471 @@
+{
+    "objects": [{
+            "type": "ITEM_VARIATION",
+            "id": "73DCARC2UOA6HRJQWIZMWPXX",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "6NABAKAXZC7NYL2U4EEG7DE4",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3OLJE76ST26OL5LBN3IYEPB3",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "I6G3MQHU7R5NLHJAS7RE7LS3",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "ZTPC6BUJYNWJZLBBLVDEXWWY",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "T2LQJX67LQ5Z5EKO6ZMC5JKW",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 575,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "2EEV3PGH4NMB55UCTYAIUEBN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "XYZDF4UH2PUVQWQWHL2MDSJS",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1200,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "AQVGBFNNQBXHLFEH6E7TZTSO",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "AN72YYV3DXHYIBAKXENL7EQV",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 650,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "LSGMDICQXF2ZZJEIYMXMJ746",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "EZZR5VRY6AEOQY4JN6RD7SPS",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 850,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "2BIED6LJT7U7ZT4ZXR34L4MX",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "3V5KSYIDREV66NUGIQGEIZP5",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "5DCQJKK2KZBROTCOMUVQIJU3",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "BIXRRDN7LBWWEZ6PWYGPLSLA",
+                "name": "Small (12 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 235,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "S4NFVVUS55ZGHZHAGHYKPFCQ",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "BIXRRDN7LBWWEZ6PWYGPLSLA",
+                "name": "Medium (16 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 290,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "UQUFIKHOERPTBR44PDBSOIPD",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "BIXRRDN7LBWWEZ6PWYGPLSLA",
+                "name": "Large (20 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 315,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "X7S4BUYGJT7MV5ENLJ6R4XFG",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "3JPENPNB5VWG6LBWNJAXUJIY",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 450,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "HV5TBMY7B6FLSBRQXKDLH7PR",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "3JPENPNB5VWG6LBWNJAXUJIY",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 500,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "5NTKZAJULPVDGYSA4KVIUVSQ",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "TF5LWGMPKIRX62K6TYVTCUBX",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 340,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "JIK7OZ5CX2BAPQ2SOMUYKUVC",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "VVA2QKKZ2QT2BLYKROJWE4DU",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 400,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "RSTVDBHFRVMWFXTJNA3NFQJE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4EJ52XD6LFM6DJ62Q3H3CIZN",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 500,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "7ZZ3XPYEGYFOSWHNMUGIYYJI",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "WX4EEPIJHWWB3D3FH6Y5R6IR",
+                "name": "Single Shot",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 250,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "7F5EZ5XE67QWGNSPBZIPHDTL",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "WX4EEPIJHWWB3D3FH6Y5R6IR",
+                "name": "Double Shot",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 375,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "4VXLAMJDJT5LDZ7IAKTA45OM",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ORC4KK35NUBUNM7GALSHPFHA",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1100,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "NJJ4662G6M6JDIWZGLELXLTB",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "MYDUO4H7UGG77XKTBBVPBZ5U",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 400,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "SM2QHRKO3NBY3O6K2A7TL5WN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "R7W7GTVIEYQZEWXVQMOOOYMT",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "FVHENQDIKMBGJQB64AL3QWXS",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4VUVK5OGKKVQXKHNVBDGCQVS",
+                "name": "Mild",
+                "ordinal": 0,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1000,
+                    "currency": "USD"
+                },
+                "item_option_values": [{
+                    "item_option_id": "2CCZZ2JZRXLPW2KBQZR62MHN",
+                    "item_option_value_id": "ZFD7TKKO3Z7FPS7DON572A5L"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "WJHHY7MBAX7G7XO6GYLVPPYE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4VUVK5OGKKVQXKHNVBDGCQVS",
+                "name": "Medium",
+                "ordinal": 1,
+                "pricing_type": "VARIABLE_PRICING",
+                "item_option_values": [{
+                    "item_option_id": "2CCZZ2JZRXLPW2KBQZR62MHN",
+                    "item_option_value_id": "MXAAJBB47NFNADZ46DJUYOTX"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "7UJVDP5EBS2V466BVUN24MQG",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4VUVK5OGKKVQXKHNVBDGCQVS",
+                "name": "Hot",
+                "ordinal": 2,
+                "pricing_type": "VARIABLE_PRICING",
+                "item_option_values": [{
+                    "item_option_id": "2CCZZ2JZRXLPW2KBQZR62MHN",
+                    "item_option_value_id": "FMIX5BMCQSNIW7ZMQBDBCK3L"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "KFNJBE2WRRWIN77NB5CPYFCP",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "JRFUFOUOXLMAI6LG3SJGLHX7",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 575,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3UM3AT5B43SYNX55S6WQ3ZXV",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARHHJAF4LDVXYVJKWN6SQY2L",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 265,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "X6LJ7RICXKLBK7V4BGOU2QY7",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARHHJAF4LDVXYVJKWN6SQY2L",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "AU4NLXOIMBOYTCWCFRIXWL4H",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARHHJAF4LDVXYVJKWN6SQY2L",
+                "name": "Large (24 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "7OZXGMPFZ5ILQEYSINQ77LMF",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARHHJAF4LDVXYVJKWN6SQY2L",
+                "name": "X-Large (32 oz.)",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 500,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "QIJRXEJO5ROK4AKAV7GLXT5J",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "DS2YT75WDIR5WK3TOIKFPYIP",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "OF4RF4XNXW4MCAI3TJNTMQHE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "DS2YT75WDIR5WK3TOIKFPYIP",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 325,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "5ZLPBDYD6XJIOZUGIFKVQ3MP",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "DS2YT75WDIR5WK3TOIKFPYIP",
+                "name": "Large (24 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "TQIMPOH2BBXOZVNULARHWS2Q",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "DS2YT75WDIR5WK3TOIKFPYIP",
+                "name": "X-Large (32 oz.)",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 425,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "6VLM5GIGZE3MAEF72ULNJJHS",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARNFAPJBKAFQLBCWZ5JS6P5K",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 400,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "7UTCBCRS2G3W3W75JQKALXEX",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ARNFAPJBKAFQLBCWZ5JS6P5K",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 475,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "YKO3Y3DOC5SEECDZAJ4J6FEZ",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "IOCTXNEDFSLBZ6BXSCOTOK3F",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 575,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "JLY6VG3D4RNODBZA3F77CA6M",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "K4XITVX2HAZ5U27R2WFGU4KZ",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 375,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "4WCMPXPLSUNTEE7KVONBS7ST",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "K4XITVX2HAZ5U27R2WFGU4KZ",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 450,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "Q5WTRCWW3D4VHU57KG4LWFVR",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "5GOR373B4CJMHUJRUITF2DLQ",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "42UG3DESMNRTF7NLUTV3CNKU",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "5GOR373B4CJMHUJRUITF2DLQ",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 325,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "HALLOP5KTSB4RMXD5KKFH3MM",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "5GOR373B4CJMHUJRUITF2DLQ",
+                "name": "Large (24 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3DV63ZAAJFLUZBLE5RELRYOE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "5GOR373B4CJMHUJRUITF2DLQ",
+                "name": "X-Large (32 oz.)",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 425,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "BFUSZWSXHLPFHGURT3RGAP36",
+            "updated_at": "2023-07-17T20:40:54.456Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1689626454456,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "QM4MACMQW6JGIPTCGZR6IRQR",
+                "name": "Small (12 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 360,
+                    "currency": "USD"
+                },
+                "location_overrides": [{
+                    "location_id": "L3XVVEYYRJN4F",
+                    "price_money": {
+                        "amount": 500,
+                        "currency": "USD"
+                    },
+                    "pricing_type": "FIXED_PRICING"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "4NBWRO7MDPEX6L3BTX5FH6YN",
+            "updated_at": "2023-07-17T21:32:12.984Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1689629532984,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "QM4MACMQW6JGIPTCGZR6IRQR",
+                "name": "Medium (16 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 400,
+                    "currency": "USD"
+                },
+                "location_overrides": [{
+                    "location_id": "L3XVVEYYRJN4F",
+                    "price_money": {
+                        "amount": 600,
+                        "currency": "USD"
+                    },
+                    "pricing_type": "FIXED_PRICING"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "INX3I7GNKKEJRYTWBM2QC2YG",
+            "updated_at": "2023-08-20T20:23:28.949Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1692563008949,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "HH2VAF3STI6YHC4EUQINZUZQ",
+                "name": "Small (16 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "DSUKAX6CK3OKR3P47QY552TD",
+            "updated_at": "2023-08-20T20:23:28.949Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1692563008949,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "HH2VAF3STI6YHC4EUQINZUZQ",
+                "name": "Medium (20 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 325,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "VG4TRRJFRWAXKHF3TZYXRQK6",
+            "updated_at": "2023-08-20T20:23:28.949Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1692563008949,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "HH2VAF3STI6YHC4EUQINZUZQ",
+                "name": "Large (24 oz)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "LTDOCYYDMGNS2SCNDYF2ECWP",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "HH2VAF3STI6YHC4EUQINZUZQ",
+                "name": "X-Large (32 oz.)",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 425,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "NSBMBUSNU2VG2PQESTURQ25V",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "NIFUXLHXVSZ3WUFO5YB67NME",
+                "name": "Small (12 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 200,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "6NKOTMUJTHGJ6PED2IJUKQPV",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "NIFUXLHXVSZ3WUFO5YB67NME",
+                "name": "Medium (16 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 275,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "ZK5XCLQMEFFOCQOJZXQME7RF",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "NIFUXLHXVSZ3WUFO5YB67NME",
+                "name": "Large (20 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "RKD35ET5CXF6BK7AN4DBHGLK",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "KVKCVGZY4UCQQZQHLH2D6TLH",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1100,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "UXTS22PYEWSPADI6RPF62NVI",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "KVKCVGZY4UCQQZQHLH2D6TLH",
+                "name": "Chorizo",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "JFYPFWJSZBB2WXYEK3765IMF",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "KVKCVGZY4UCQQZQHLH2D6TLH",
+                "name": "Lobster",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 2600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "557C5KYQGNV2NE3X4F4RTA5A",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "3BPMSAOOZ4LLZTFXQHM3QMOX",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 575,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "SDMDT6AKH6VOI6AY7XWCENM7",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "Z6PHIN4ZKZMHUWPGSGNYT7K5",
+                "name": "Small (12 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 375,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "FBBUF2SKUPPCNSKAE3AIEHZN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "Z6PHIN4ZKZMHUWPGSGNYT7K5",
+                "name": "Medium (16 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 450,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "SEUJBBH6AMJL3WDNSR4QCA2A",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "S67ABHRNYKBK3YQHDFKNO5NP",
+                "name": "Chocolate Chip",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "DZXWI2L6J3CJVXTOVDZNTMSH",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "S67ABHRNYKBK3YQHDFKNO5NP",
+                "name": "Blueberry",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "4L2EN7BBNBODA6PBFIRRCA2W",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "S67ABHRNYKBK3YQHDFKNO5NP",
+                "name": "Corn",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 350,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "22PFU5NON6P2HT5M3YBMV6CV",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "Y4NQNBC5BW6VHVJ6P4ZL44KQ",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 550,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "TCB3XNZTQMFGMIEKGICD3CUW",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "Y4NQNBC5BW6VHVJ6P4ZL44KQ",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 700,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "23YUX7Y4KZ24UYU3E7DBZODB",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "5B3DLJYVS4QBHCRV5RIROVBL",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 450,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "JTU4V2B7FSJP6UOTKPOQUTWC",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "M4VAS5AFRPA5YEGPHENUCGOK",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "KXEG4YTSG3OFJQAXJJ7PKN54",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "UEM3CDGLBTYYIMJDRJT5OODI",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 595,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "HSLEKSGSCDESRFVTSE6NIQZK",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4WCMEJALBOECVRSEA3U4A2Z4",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1200,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3PDUB54BQ5RCQXRIO6ZT75FT",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "IYLPXMFNJN46ZZMKVRWT2RGD",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1000,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "RJZPJQRLDEAWAJA7QJKVFGB7",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "J7NPEQK7C2UIW4KJE6KK3AUZ",
+                "name": "Cheese",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1000,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3VNPFBDXMZHHXX2NFSRTW3GM",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "J7NPEQK7C2UIW4KJE6KK3AUZ",
+                "name": "Chicken",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1200,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "SPYEPTTXXUW2CNWG4AM53ON4",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "J7NPEQK7C2UIW4KJE6KK3AUZ",
+                "name": "Brie, Pear and Spinach",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1300,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "MWORO7MVHQYHX7IBVBX5MIQC",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "ON22ESO23D24XXVYHBIV3MHX",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1400,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "KMQOTWM3NZAFLR3KNZO64HTI",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "3NTRM473S232NBVX622DT4ZF",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1000,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "6UQYVUMOMVAHZR7CRSD3XQKN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "4Z7VLFTEULEWWQIN3K2PNPTA",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1200,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "TXAF33POLS25OVTBZRMTPILN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "AULHFAFVTE2JAG5QNQEXD2JF",
+                "name": "Small (16 oz.)",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 315,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "ARNPF6F3IJSHMAZR3OD4IW2I",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "AULHFAFVTE2JAG5QNQEXD2JF",
+                "name": "Medium (20 oz.)",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 340,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "FHEUONAGRNXFB4HIYE6ERC3U",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "AULHFAFVTE2JAG5QNQEXD2JF",
+                "name": "Large (24 oz.)",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 365,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "B42HYZVGN3SU3C4SJ2I7CCZE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "AULHFAFVTE2JAG5QNQEXD2JF",
+                "name": "X-Large (32 oz.)",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 440,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "SL3FQ7J47CGHYLN255GYTY77",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "WZLMCZNEGECU5UOQWJAMM5CW",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 850,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "3BHYS2ZYMKIJ65GCIX26L6DA",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "7YUGNUM2ONQA2CDEWVJQDAHY",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 675,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "K5Z7IHIAQY74QFY3XHCY7XEE",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "SYU7WJWAF63PT2CPIGQ6M5XN",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 850,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "PMEUHMYLFDVMMHSEDLE4IISN",
+            "updated_at": "2021-12-14T22:32:24.793Z",
+            "created_at": "2021-12-14T22:32:24.793Z",
+            "version": 1639521144793,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6",
+                "L3XVVEYYRJN4F"
+            ],
+            "item_variation_data": {
+                "item_id": "HHZ7I4OD2C5TZEGK3BIKLMNM",
+                "name": "Regular",
+                "ordinal": 1,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 650,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "H6H64L6RTEPHILOAMMSICHR4",
+            "updated_at": "2023-07-16T14:25:49.539Z",
+            "created_at": "2023-07-16T14:25:49.539Z",
+            "version": 1689517549539,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "name": "Screen Shot 2023-07-16 at 10.25.37 AM.png",
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/402747f30cf56f5a2f2596e79a0e4443ff66b6bd/original.png"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "R27M7YHOJO4ZIALYZNX3J26L",
+            "updated_at": "2023-07-16T18:11:38.086Z",
+            "created_at": "2023-07-16T18:11:38.086Z",
+            "version": 1689531098086,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "name": "Screenshot from 2023-07-16 14-11-15.png",
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/6664d37b35c640ba2236e4b1344177b786a7e306/original.png"
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "FOAEZI2YDXNBAM5Z5WUBJ5LS",
+            "updated_at": "2023-07-17T23:07:05.796Z",
+            "created_at": "2023-07-17T21:32:12.984Z",
+            "version": 1689635225796,
+            "is_deleted": false,
+            "present_at_all_locations": false,
+            "present_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LE27K4BS6ZFEP",
+                "LNND56HBQ4EB6"
+            ],
+            "item_variation_data": {
+                "item_id": "QM4MACMQW6JGIPTCGZR6IRQR",
+                "name": "Large",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 500,
+                    "currency": "USD"
+                },
+                "location_overrides": [{
+                    "location_id": "L3XVVEYYRJN4F",
+                    "price_money": {
+                        "amount": 700,
+                        "currency": "USD"
+                    },
+                    "pricing_type": "FIXED_PRICING"
+                }],
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "ZL55UIDFW44AW7GZN6CECAQR",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Medium",
+                "ordinal": 2,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 450,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "PDDFK5PGULVR65X3EBZWIWF5",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Large",
+                "ordinal": 3,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 500,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "GJHFZPHPQNDMJA65462YM6L3",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Extra Large",
+                "ordinal": 4,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 550,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "TJ6LXAGHTKQY2WOKINMAZMOR",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Big Gulp",
+                "ordinal": 5,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 600,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "NLQ2I64Q4GH3KM3632TVP6AT",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Too Big",
+                "ordinal": 6,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 700,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "U6LRN4VCCPFYR2UO76P44QOO",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Overlarge",
+                "ordinal": 7,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 800,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "2RXAMYJFI6RKGUSVIWMUMRDZ",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Please Stop",
+                "ordinal": 8,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 900,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "ITEM_VARIATION",
+            "id": "F462CAAE7LU3Q2WJ6UCXM3UY",
+            "updated_at": "2023-08-20T22:37:30.495Z",
+            "created_at": "2023-08-20T22:37:30.495Z",
+            "version": 1692571050495,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "absent_at_location_ids": [
+                "L3XVVEYYRJN4F",
+                "LWT2FGR5CPM5T"
+            ],
+            "item_variation_data": {
+                "item_id": "EDP7GKU5CCDBJ5APYD2TZ67J",
+                "name": "Heartbreaker",
+                "ordinal": 9,
+                "pricing_type": "FIXED_PRICING",
+                "price_money": {
+                    "amount": 1000,
+                    "currency": "USD"
+                },
+                "sellable": true,
+                "stockable": true
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "EO6POLUFCGKUS7DBLM4OJTEA",
+            "updated_at": "2023-08-21T04:30:17.152Z",
+            "created_at": "2023-08-21T04:30:17.152Z",
+            "version": 1692592217152,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/a87fe072ff02770e9bfda144aa417850e2e9ee22/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "7LXKBOVF6ESESS6SUR3W23H4",
+            "updated_at": "2023-08-21T05:15:03.795Z",
+            "created_at": "2023-08-21T05:15:03.795Z",
+            "version": 1692594903795,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/d8a7e8fc228ccc0cebb98e22823d860d8349fb37/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "GIBC54NVT2AOWU2XN5E2AXHC",
+            "updated_at": "2023-08-21T05:18:16.821Z",
+            "created_at": "2023-08-21T05:18:16.821Z",
+            "version": 1692595096821,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/35277887848e27a710eaa5a8889601077ca6c67c/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "KLCT5TKMARYVTSFD2VBOM7YT",
+            "updated_at": "2023-08-21T05:28:00.634Z",
+            "created_at": "2023-08-21T05:28:00.634Z",
+            "version": 1692595680634,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/364fe053c98fe4b6e0f5a5828801372ae615e92c/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "DOFHE2OTXQ5FU3W4PXBJ6X2E",
+            "updated_at": "2023-08-21T05:36:37.906Z",
+            "created_at": "2023-08-21T05:36:37.906Z",
+            "version": 1692596197906,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/1e2bc1aa7f12d0b14ec4a72ea1ca776ffa84d71d/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "RZJFFEHMDUH6BOQ3SVLB2PC4",
+            "updated_at": "2023-08-23T04:58:28.951Z",
+            "created_at": "2023-08-23T04:58:28.951Z",
+            "version": 1692766708951,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/fca0e1e0fb4b813db74ce99cd67a34bd9260af85/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "XJGRVPKGHH6NMXGDFU5P4QPV",
+            "updated_at": "2023-08-28T05:19:34.022Z",
+            "created_at": "2023-08-28T05:19:34.022Z",
+            "version": 1693199974022,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/efff22e1203822e877fdfac210e6ac26d978361e/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "MYMGLIR5ARWQ6WBXX3PI6I3P",
+            "updated_at": "2023-08-28T05:42:16.964Z",
+            "created_at": "2023-08-28T05:42:16.964Z",
+            "version": 1693201336964,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/64c69cca805bdce0f530466dc2c6671e964154c3/original.jpeg"
+            }
+        },
+        {
+            "type": "IMAGE",
+            "id": "NOH3KOQ3P5ROZU4FSHK2HU32",
+            "updated_at": "2023-08-28T17:29:48.721Z",
+            "created_at": "2023-08-28T17:29:48.721Z",
+            "version": 1693243788721,
+            "is_deleted": false,
+            "present_at_all_locations": true,
+            "image_data": {
+                "url": "https://square-catalog-sandbox.s3.amazonaws.com/files/b173c545cd239b8d6abce21aa37628f9b37f1803/original.jpeg"
+            }
+        }
+    ]
+}
