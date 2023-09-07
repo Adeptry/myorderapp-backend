@@ -60,9 +60,18 @@ export class User extends EntityHelper {
     }
   }
 
-  @Column({ default: AuthProvidersEnum.email })
-  @Expose({ groups: ['me', 'admin'] })
-  @ApiProperty()
+  // @Expose({ groups: ['me', 'admin'] })
+  @Column({
+    type: 'simple-enum',
+    nullable: true,
+    enum: AuthProvidersEnum,
+    default: AuthProvidersEnum.email,
+  })
+  @ApiProperty({
+    required: false,
+    enum: Object.values(AuthProvidersEnum),
+    nullable: true,
+  })
   provider: string;
 
   @Index()
