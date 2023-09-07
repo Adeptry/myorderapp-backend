@@ -68,7 +68,7 @@ export class User extends EntityHelper {
   @Index()
   @Column({ type: String, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
-  @ApiProperty({ type: String, nullable: true })
+  @ApiProperty({ required: false, type: String, nullable: true })
   socialId: string | null;
 
   @Index()
