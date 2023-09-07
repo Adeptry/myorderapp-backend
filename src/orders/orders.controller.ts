@@ -298,7 +298,18 @@ export class OrdersController {
       });
     }
 
-    return order;
+    return await this.service.findOne({
+      where: { id: order.id },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          address: true,
+          businessHours: true,
+        },
+      },
+    });
   }
 
   @ApiBearerAuth()
@@ -332,14 +343,17 @@ export class OrdersController {
     @Body() body: OrderPostDto,
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
-    if (!request.customer.currentOrderId) {
-      throw new BadRequestException(`No current order`);
-    }
-    if (!request.merchant.squareAccessToken) {
+    const { variations } = body;
+    const { customer, merchant } = request;
+
+    if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
+    if (!customer.squareId) {
+      throw new UnprocessableEntityException(`No Square Customer ID`);
+    }
 
-    let order = await this.service.findOneOrFail({
+    let order = await this.service.findOne({
       where: { id: request.customer.currentOrderId },
       relations: {
         location: {
@@ -352,17 +366,40 @@ export class OrdersController {
       },
     });
 
-    const { variations } = body;
     if (variations && variations.length > 0) {
-      order = await this.service.updateAndSaveVariations({
-        variations,
-        order,
-        squareAccessToken: request.merchant.squareAccessToken,
-        idempotencyKey,
-      });
+      if (order != null) {
+        order = await this.service.updateAndSaveVariations({
+          variations,
+          order,
+          squareAccessToken: merchant.squareAccessToken,
+          idempotencyKey,
+        });
+      } else {
+        order = await this.service.createAndSaveCurrent({
+          variations,
+          idempotencyKey,
+          customer,
+          merchant,
+        });
+      }
     }
 
-    return order;
+    if (!order?.id) {
+      throw new Error(`No order ID`);
+    }
+
+    return await this.service.findOne({
+      where: { id: order.id },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          address: true,
+          businessHours: true,
+        },
+      },
+    });
   }
 
   @ApiBearerAuth()
