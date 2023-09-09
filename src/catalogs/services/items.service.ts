@@ -6,7 +6,7 @@ import {
 } from 'src/catalogs/dto/item-update.dto';
 import { Item } from 'src/catalogs/entities/item.entity';
 import { EntityRepositoryService } from 'src/utils/entity-repository-service';
-import { Repository, SelectQueryBuilder } from 'typeorm';
+import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 
 @Injectable()
 export class ItemsService extends EntityRepositoryService<Item> {
@@ -129,7 +129,13 @@ export class ItemsService extends EntityRepositoryService<Item> {
         .leftJoinAndSelect('modifierLists.modifiers', 'modifiers');
 
       if (whereOnlyEnabled) {
-        query.andWhere('itemModifierLists.enabled = true');
+        query.andWhere(
+          new Brackets((qb) => {
+            qb.where('itemModifierLists.enabled = true').orWhere(
+              'itemModifierLists.enabled IS NULL',
+            );
+          }),
+        );
       }
 
       if (locationId) {
