@@ -25,6 +25,7 @@ export type DatabaseConfig = {
   ca?: string;
   key?: string;
   cert?: string;
+  logging?: boolean;
 };
 
 class EnvironmentVariablesValidator {
@@ -70,10 +71,6 @@ class EnvironmentVariablesValidator {
 
   @IsBoolean()
   @IsOptional()
-  DATABASE_SSL_ENABLED: boolean;
-
-  @IsBoolean()
-  @IsOptional()
   DATABASE_REJECT_UNAUTHORIZED: boolean;
 
   @IsString()
@@ -87,6 +84,10 @@ class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
   DATABASE_CERT: string;
+
+  @IsBoolean()
+  @IsOptional()
+  DATABASE_LOGGING: boolean;
 }
 
 export default registerAs<DatabaseConfig>('database', () => {
@@ -111,5 +112,6 @@ export default registerAs<DatabaseConfig>('database', () => {
     ca: process.env.DATABASE_CA,
     key: process.env.DATABASE_KEY,
     cert: process.env.DATABASE_CERT,
+    logging: process.env.DATABASE_LOGGING === 'true',
   };
 });
