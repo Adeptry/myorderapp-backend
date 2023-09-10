@@ -140,33 +140,33 @@ export class Order extends EntityHelper {
     nullable: true,
   })
   @Column({ nullable: true })
-  moneyAmount?: number;
+  totalMoneyAmount?: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ nullable: true })
-  moneyTaxAmount?: number;
+  totalMoneyTaxAmount?: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ nullable: true })
-  moneyDiscountAmount?: number;
+  totalMoneyDiscountAmount?: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ nullable: true })
-  moneyTipAmount?: number;
+  totalMoneyTipAmount?: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ nullable: true })
-  moneyServiceChargeAmount?: number;
+  totalMoneyServiceChargeAmount?: number;
 }

@@ -78,7 +78,7 @@ export class OrdersController {
   @ApiNotFoundResponse({ description: 'Invalid location ID', type: NestError })
   @ApiOperation({
     summary: 'Create Order',
-    operationId: 'createOrder',
+    operationId: 'createCurrentOrder',
   })
   @ApiUnprocessableEntityResponse({
     description: 'No Square tokens',
@@ -87,7 +87,7 @@ export class OrdersController {
   @ApiCreatedResponse({ type: Order })
   @ApiBody({ required: true, type: OrderCreateDto })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async create(
+  async createCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderCreateDto,
   ) {
@@ -254,8 +254,8 @@ export class OrdersController {
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Patch('current')
   @ApiOperation({
-    summary: 'Update Order',
-    operationId: 'patchCurrentOrder',
+    summary: 'Patch update Order, e.g. modify Location',
+    operationId: 'patchUpdateToCurrentOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -321,11 +321,11 @@ export class OrdersController {
     type: NestError,
   })
   @ApiOperation({
-    summary: 'Add Variation to current Order',
-    operationId: 'postCurrentOrder',
+    summary: 'Post update Order, e.g. add Variations & Modifiers in Line Items',
+    operationId: 'postUpdateToCurrentOrder',
   })
   @ApiBadRequestResponse({
-    description: 'No current order or Invalid variation',
+    description: 'No current Order or Invalid variation',
     type: NestError,
   })
   @ApiUnprocessableEntityResponse({
@@ -338,7 +338,7 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
-  async postUpdateCurrent(
+  async postUpdateToCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderPostDto,
     @Query('idempotencyKey') idempotencyKey?: string,
@@ -411,11 +411,11 @@ export class OrdersController {
     type: NestError,
   })
   @ApiOperation({
-    summary: 'Remove Variation from current Order',
-    operationId: 'deleteVariation',
+    summary: 'Remove Line Items from Order',
+    operationId: 'deleteLineItemInCurrentOrder',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async deleteCurrentsVariation(
+  async deleteLineItemInCurrent(
     @Req() request: CustomersGuardedRequest,
     @Param('id') id: string,
   ) {
@@ -428,7 +428,6 @@ export class OrdersController {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
 
-    // Load the current order
     const order = await this.service.findOne({
       where: { id: request.customer.currentOrderId },
       relations: {
@@ -463,7 +462,7 @@ export class OrdersController {
   })
   @ApiNoContentResponse({ description: 'Order Deleted Successfully' })
   @ApiOperation({
-    summary: 'Delete current Order',
+    summary: 'Delete Order',
     operationId: 'deleteCurrentOrder',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
@@ -498,7 +497,7 @@ export class OrdersController {
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Post('current/payment/square')
   @ApiOperation({
-    summary: 'Pay for current Order',
+    summary: 'Pay for Order',
     operationId: 'postPaymentForCurrentOrder',
   })
   @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
@@ -512,7 +511,7 @@ export class OrdersController {
     description: 'Invalid pickup time',
     type: NestError,
   })
-  async payForCurrentOrder(
+  async postPaymentForCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: PaymentCreateDto,
   ) {

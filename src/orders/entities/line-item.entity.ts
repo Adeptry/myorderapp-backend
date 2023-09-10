@@ -81,27 +81,27 @@ export class LineItem extends EntityHelper {
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  variationTotalPriceMoney?: number;
+  variationTotalMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  grossSalesMoney?: number;
+  grossSalesMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  totalTaxMoney?: number;
+  totalTaxMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  totalDiscountMoney?: number;
+  totalDiscountMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  totalMoney?: number;
+  totalMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  totalServiceChargeMoney?: number;
+  totalServiceChargeMoneyAmount?: number;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

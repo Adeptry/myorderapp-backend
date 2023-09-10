@@ -67,11 +67,11 @@ export class LineItemModifier extends EntityHelper {
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  basePriceAmount?: number;
+  baseMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  totalPriceAmount?: number;
+  totalMoneyAmount?: number;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

@@ -554,7 +554,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
 
       updatedOrder.closedAt = new Date();
       updatedOrder.customerId = customer.id;
-      updatedOrder.moneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
+      updatedOrder.totalMoneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
       customer.currentOrder = null;
       await customer.save();
 
@@ -574,17 +574,19 @@ export class OrdersService extends EntityRepositoryService<Order> {
       params.squareOrder?.version ?? params.order.squareVersion + 1;
 
     params.order.currency = params.squareOrder?.totalMoney?.currency;
-    params.order.moneyAmount = Number(params.squareOrder?.totalMoney?.amount);
-    params.order.moneyTaxAmount = Number(
+    params.order.totalMoneyAmount = Number(
+      params.squareOrder?.totalMoney?.amount,
+    );
+    params.order.totalMoneyTaxAmount = Number(
       params.squareOrder?.totalTaxMoney?.amount,
     );
-    params.order.moneyDiscountAmount = Number(
+    params.order.totalMoneyDiscountAmount = Number(
       params.squareOrder?.totalDiscountMoney?.amount,
     );
-    params.order.moneyTipAmount = Number(
+    params.order.totalMoneyTipAmount = Number(
       params.squareOrder?.totalTipMoney?.amount,
     );
-    params.order.moneyServiceChargeAmount = Number(
+    params.order.totalMoneyServiceChargeAmount = Number(
       params.squareOrder?.totalServiceChargeMoney?.amount,
     );
 

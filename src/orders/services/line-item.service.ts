@@ -31,20 +31,22 @@ export class LineItemService extends EntityRepositoryService<LineItem> {
     lineItem.basePriceMoney = Number(
       params.squareLineItem.basePriceMoney?.amount ?? 0,
     );
-    lineItem.variationTotalPriceMoney = Number(
+    lineItem.variationTotalMoneyAmount = Number(
       params.squareLineItem.variationTotalPriceMoney?.amount ?? 0,
     );
-    lineItem.grossSalesMoney = Number(
+    lineItem.grossSalesMoneyAmount = Number(
       params.squareLineItem.grossSalesMoney?.amount ?? 0,
     );
-    lineItem.totalTaxMoney = Number(
+    lineItem.totalTaxMoneyAmount = Number(
       params.squareLineItem.totalTaxMoney?.amount ?? 0,
     );
-    lineItem.totalDiscountMoney = Number(
+    lineItem.totalDiscountMoneyAmount = Number(
       params.squareLineItem.totalDiscountMoney?.amount ?? 0,
     );
-    lineItem.totalMoney = Number(params.squareLineItem.totalMoney?.amount ?? 0);
-    lineItem.totalServiceChargeMoney = Number(
+    lineItem.totalMoneyAmount = Number(
+      params.squareLineItem.totalMoney?.amount ?? 0,
+    );
+    lineItem.totalServiceChargeMoneyAmount = Number(
       params.squareLineItem.totalServiceChargeMoney?.amount ?? 0,
     );
 
