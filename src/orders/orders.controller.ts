@@ -367,10 +367,10 @@ export class OrdersController {
     });
 
     if (variations && variations.length > 0) {
-      if (order != null) {
+      if (order?.id != null) {
         order = await this.service.updateAndSaveVariations({
           variations,
-          order,
+          orderId: order.id,
           squareAccessToken: merchant.squareAccessToken,
           idempotencyKey,
         });

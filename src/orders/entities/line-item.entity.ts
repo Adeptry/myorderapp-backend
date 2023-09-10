@@ -48,7 +48,7 @@ export class LineItem extends EntityHelper {
   /* Square info */
 
   @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true })
+  @Column({ nullable: true, unique: true })
   squareUid?: string; // | null;
 
   @ApiProperty({ required: false, nullable: true })

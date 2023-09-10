@@ -247,23 +247,39 @@ export class OrdersService extends EntityRepositoryService<Order> {
 
   async updateAndSaveVariations(params: {
     variations: VariationAddDto[];
-    order: Order;
+    orderId: string;
     squareAccessToken: string;
     idempotencyKey?: string;
   }) {
-    let order = params.order;
-    const locationSquareId = order.location?.locationSquareId;
     const {
+      orderId,
       variations: variationDtos,
       squareAccessToken,
       idempotencyKey,
     } = params;
+
+    let order = await this.findOneOrFail({
+      where: { id: orderId },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          address: true,
+          businessHours: true,
+        },
+      },
+    });
+
+    const locationSquareId = order.location?.locationSquareId;
+
     if (!order.squareId) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
     if (!locationSquareId) {
       throw new UnprocessableEntityException(`No Square Location ID`);
     }
+
     const newLineItems =
       (await this.squareOrderLineItemsFor({
         variations: variationDtos,
@@ -284,11 +300,22 @@ export class OrdersService extends EntityRepositoryService<Order> {
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
-        order.lineItems?.push(
-          ...(squareOrder.lineItems ?? []).map((squareLineItem) => {
-            return this.lineItemService.fromSquareLineItem({ squareLineItem });
-          }),
+        const existingSquareLineItemUids = new Set(
+          order.lineItems?.map((item) => item.squareUid) ?? [],
         );
+
+        const newSquareOrderLineItems = (squareOrder.lineItems ?? []).filter(
+          (squareLineItem) =>
+            !existingSquareLineItemUids.has(squareLineItem.uid ?? undefined),
+        );
+
+        if (newSquareOrderLineItems.length > 0) {
+          const newLineItems = newSquareOrderLineItems.map((squareLineItem) =>
+            this.lineItemService.fromSquareLineItem({ squareLineItem }),
+          );
+          order.lineItems?.push(...newLineItems);
+        }
+
         order = await this.updateAndSaveOrderForSquareOrder({
           order,
           squareOrder,
