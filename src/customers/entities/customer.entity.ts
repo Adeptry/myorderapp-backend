@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import { Location } from 'src/locations/entities/location.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { Order } from 'src/orders/entities/order.entity';
 import { User } from 'src/users/entities/user.entity';
@@ -104,4 +105,15 @@ export class Customer extends EntityHelper {
   @Exclude()
   @Column('text', { nullable: true })
   squareId?: string | null;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true })
+  locationId?: string;
+
+  @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'locationId' })
+  preferredLocation?: Location | null;
 }

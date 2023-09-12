@@ -5,8 +5,10 @@ import { CustomersController } from 'src/customers/customers.controller';
 import { CustomersService } from 'src/customers/customers.service';
 import { Customer } from 'src/customers/entities/customer.entity';
 import { GuardsModule } from 'src/guards/guards.module';
+import { LocationsModule } from 'src/locations/locations.module';
 import { MerchantsModule } from 'src/merchants/merchants.module';
 import { SquareModule } from 'src/square/square.module';
+import { UsersModule } from 'src/users/users.module';
 import { AppInstall } from './entities/app-install.entity';
 import { AppInstallsService } from './services/app-installs.service';
 
@@ -16,6 +18,8 @@ import { AppInstallsService } from './services/app-installs.service';
     SquareModule,
     GuardsModule,
     AuthModule,
+    LocationsModule,
+    UsersModule,
     forwardRef(() => MerchantsModule),
   ],
   exports: [CustomersService],

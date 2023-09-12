@@ -49,7 +49,7 @@ export class AppInstall extends EntityHelper {
 
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
     nullable: true,
     example: '123456789',
   })

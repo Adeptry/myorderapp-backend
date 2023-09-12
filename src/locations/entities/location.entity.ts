@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { ModifierLocationOverride } from 'src/catalogs/entities/modifier-location-override.entity';
 import { VariationLocationOverride } from 'src/catalogs/entities/variation-location-override.entity';
+import { Customer } from 'src/customers/entities/customer.entity';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { EntityHelper } from 'src/utils/entity-helper';
 import {
@@ -164,6 +165,17 @@ export class Location extends EntityHelper {
     onDelete: 'SET NULL',
   })
   merchant?: Merchant;
+
+  /*
+   * Merchant
+   */
+
+  @OneToMany(() => Customer, (entity) => entity.preferredLocation, {
+    nullable: true,
+  })
+  @Exclude({ toPlainOnly: true })
+  @ApiHideProperty()
+  preferredByCustomers?: Customer[];
 
   /*
    * Business Hours

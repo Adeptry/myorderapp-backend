@@ -1,19 +1,19 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   Logger,
-  NotFoundException,
+  ParseBoolPipe,
   ParseIntPipe,
+  Patch,
   Post,
   Query,
   Req,
   Res,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -39,12 +39,11 @@ import {
 } from 'src/guards/customers.guard';
 import { MerchantsGuard } from 'src/guards/merchants.guard';
 import { UsersGuard } from 'src/guards/users.guard';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { SquareService } from 'src/square/square.service';
 import { NestError } from 'src/utils/error';
 import { paginatedResults } from 'src/utils/paginated';
 import { AppInstallUpdateDto } from './dto/app-install-update.dto';
 import { CustomersPaginatedResponse } from './dto/customers-paginated.output';
+import { CustomerUpdateDto } from './dto/update-customer.dto';
 import { AppInstallsService } from './services/app-installs.service';
 
 @ApiUnauthorizedResponse({
@@ -63,8 +62,6 @@ export class CustomersController {
 
   constructor(
     private readonly service: CustomersService,
-    private readonly squareService: SquareService,
-    private readonly merchantsService: MerchantsService,
     private readonly appInstallsService: AppInstallsService,
   ) {}
 
@@ -87,53 +84,10 @@ export class CustomersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async create(@Req() request: any, @Query('merchantId') merchantId: string) {
-    if (
-      await this.service.findOne({
-        where: { userId: request.user.id, merchantId },
-      })
-    ) {
-      throw new BadRequestException('Customer already exists');
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
+    return this.service.createAndSave({
+      userId: request.user.id,
+      merchantId: merchantId,
     });
-    if (!merchant) {
-      throw new NotFoundException(`Merchant ${merchantId} not found`);
-    }
-
-    if (!merchant?.squareAccessToken) {
-      throw new BadRequestException(
-        `Merchant does not have Square access token`,
-      );
-    }
-
-    const customer = await this.service.save(
-      this.service.create({
-        merchantId: merchant.id,
-        userId: request.user.id,
-      }),
-    );
-
-    const response = await this.squareService.createCustomer({
-      accessToken: merchant.squareAccessToken,
-      request: {
-        emailAddress: request.user.email ?? undefined,
-        givenName: request.user.firstName ?? undefined,
-        familyName: request.user.lastName ?? undefined,
-        idempotencyKey: customer.id,
-      },
-    });
-
-    if (!response.result.customer?.id) {
-      throw new InternalServerErrorException(
-        `Failed to create Square customer`,
-      );
-    }
-
-    customer.squareId = response.result.customer?.id;
-
-    return await this.service.save(customer);
   }
 
   @ApiBearerAuth()
@@ -146,10 +100,67 @@ export class CustomersController {
     summary: 'Get current Customer',
     operationId: 'getCurrentCustomer',
   })
-  public me(@Req() request: CustomersGuardedRequest): Customer {
-    const { customer, user } = request;
-    customer.user = user;
-    return customer;
+  @ApiQuery({ name: 'user', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchant', required: false, type: Boolean })
+  @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
+  async me(
+    @Req() request: CustomersGuardedRequest,
+    @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
+    userRelation?: boolean,
+    @Query('merchant', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantRelation?: boolean,
+    @Query('currentOrder', new DefaultValuePipe(false), ParseBoolPipe)
+    currentOrderRelation?: boolean,
+    @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredLocationRelation?: boolean,
+  ): Promise<Customer> {
+    const { customer, merchant } = request;
+
+    return await this.service.findOneOrFail({
+      where: { id: customer.id, merchantId: merchant.id },
+      relations: {
+        user: userRelation,
+        merchant: merchantRelation,
+        currentOrder: currentOrderRelation,
+        preferredLocation: preferredLocationRelation
+          ? {
+              businessHours: preferredLocationRelation,
+            }
+          : undefined,
+      },
+    });
+  }
+
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @Patch('me')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOkResponse({ type: Customer })
+  @ApiOperation({
+    summary: 'Update your Customer',
+    operationId: 'updateMyCustomer',
+  })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiBody({ type: CustomerUpdateDto })
+  async update(
+    @Req() request: CustomersGuardedRequest,
+    @Body() customerUpdateDto: CustomerUpdateDto,
+  ) {
+    const { customer, merchant } = request;
+
+    if (!customer.id || !merchant.id) {
+      throw new UnprocessableEntityException(
+        "Customer or Merchant doesn't exist",
+      );
+    }
+
+    return this.service.updateAndSave({
+      id: customer.id,
+      merchantId: merchant.id,
+      customerUpdateDto,
+    });
   }
 
   @ApiBearerAuth()

@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid';
 export class AppInstallUpdateDto {
   @ApiProperty({
     type: String,
-    required: true,
+    required: false,
     nullable: true,
     example: '123456789',
   })

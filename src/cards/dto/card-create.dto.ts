@@ -11,11 +11,11 @@ export class CreateCardDto {
   @IsNotEmpty()
   sourceId: string;
 
-  @ApiProperty({ nullable: true, default: null })
+  @ApiProperty({ nullable: true, required: false, default: null })
   @IsOptional()
   verificationToken?: string;
 
-  @ApiProperty({ nullable: true, example: '94103' })
+  @ApiProperty({ nullable: true, example: '94103', required: false })
   @IsNotEmpty()
   postalCode: string;
 }
