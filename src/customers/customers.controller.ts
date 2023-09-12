@@ -126,6 +126,7 @@ export class CustomersController {
         preferredLocation: preferredLocationRelation
           ? {
               businessHours: preferredLocationRelation,
+              address: preferredLocationRelation,
             }
           : undefined,
       },

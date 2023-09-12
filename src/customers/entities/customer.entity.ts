@@ -115,7 +115,7 @@ export class Customer extends EntityHelper {
   @Column({ nullable: true })
   locationId?: string;
 
-  @ApiProperty({ type: Location, nullable: true, required: false })
+  @ApiProperty({ type: () => Location, nullable: true, required: false })
   @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
