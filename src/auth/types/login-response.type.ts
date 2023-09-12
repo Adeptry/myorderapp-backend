@@ -11,6 +11,6 @@ export class LoginResponseType {
   @ApiProperty()
   tokenExpires: number;
 
-  @ApiProperty({ type: User })
+  @ApiProperty({ type: User, required: false, nullable: true })
   user: User;
 }

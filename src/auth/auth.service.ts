@@ -353,7 +353,6 @@ export class AuthService {
   async refreshToken(
     data: Pick<JwtRefreshPayloadType, 'sessionId'>,
   ): Promise<Omit<LoginResponseType, 'user'>> {
-    this.logger.log(`refreshToken ${JSON.stringify(data)}`);
     if (data.sessionId == undefined) {
       throw new UnauthorizedException();
     }

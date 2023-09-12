@@ -400,6 +400,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         catalogObjectId: variation.squareId,
         quantity: `${dto.quantity}`,
         modifiers: [],
+        note: dto.note,
       };
       if (dto.modifierIds && dto.modifierIds.length > 0) {
         const modifiers = await this.modifiersService.findBy({

@@ -14,4 +14,9 @@ export class VariationAddDto {
   @IsArray()
   @IsOptional()
   modifierIds: string[];
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @IsArray()
+  @IsOptional()
+  note: string;
 }
