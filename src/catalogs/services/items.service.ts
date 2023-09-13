@@ -116,8 +116,8 @@ export class ItemsService extends EntityRepositoryService<Item> {
 
     if (locationId != null) {
       query.andWhere(
-        '(EXISTS (SELECT 1 FROM items_present_at_locations WHERE locationId = :locationId AND itemId = item.id) OR ' +
-          '(item.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM items_absent_at_locations WHERE locationId = :locationId AND itemId = item.id)))',
+        '(EXISTS (SELECT 1 FROM items_present_at_locations WHERE "locationId" = :locationId AND "itemId" = item.id) OR ' +
+          '(item.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM items_absent_at_locations WHERE "locationId" = :locationId AND "itemId" = item.id)))',
         { locationId },
       );
     }
@@ -147,8 +147,8 @@ export class ItemsService extends EntityRepositoryService<Item> {
             { locationId },
           )
           .andWhere(
-            '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id) OR ' +
-              '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE locationId = :locationId AND modifierId = modifiers.id)))',
+            '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE "locationId" = :locationId AND "modifierId" = modifiers.id) OR ' +
+              '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE "locationId" = :locationId AND "modifierId" = modifiers.id)))',
             { locationId },
           )
           .addSelect(
@@ -170,7 +170,7 @@ export class ItemsService extends EntityRepositoryService<Item> {
           .leftJoinAndSelect(
             'variations.locationOverrides',
             'variationLocationOverrides',
-            'variationLocationOverrides.locationId = :locationId',
+            'variationLocationOverrides."locationId" = :locationId',
             { locationId },
           )
           .addSelect(
