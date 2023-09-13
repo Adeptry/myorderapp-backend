@@ -101,7 +101,7 @@ export class Customer extends EntityHelper {
 
   /* Square */
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column('text', { nullable: true })
   squareId?: string | null;
 
