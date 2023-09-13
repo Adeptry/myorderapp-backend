@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Injectable,
   InternalServerErrorException,
   Logger,
@@ -8,18 +7,10 @@ import {
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  addDays,
-  addHours,
-  format,
-  isAfter,
-  isBefore,
-  isWithinInterval,
-} from 'date-fns';
+
 import {
   ApiResponse,
   OrderLineItem,
-  Order as SquareOrder,
   UpdateOrderRequest,
   UpdateOrderResponse,
 } from 'square';
@@ -29,7 +20,6 @@ import { CustomersService } from 'src/customers/customers.service';
 import { AppInstall } from 'src/customers/entities/app-install.entity';
 import { Customer } from 'src/customers/entities/customer.entity';
 import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
-import { BusinessHoursPeriod } from 'src/locations/entities/business-hours-period.entity';
 import { LocationsService } from 'src/locations/locations.service';
 import { Merchant } from 'src/merchants/entities/merchant.entity';
 import { MerchantsService } from 'src/merchants/merchants.service';
@@ -40,15 +30,17 @@ import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { In, Repository } from 'typeorm';
 import { PaymentCreateDto } from './dto/payment-create.dto';
 import { VariationAddDto } from './dto/variation-add.dto';
+import { OrdersUtils } from './orders.utils';
 import { LineItemService } from './services/line-item.service';
 
 @Injectable()
 export class OrdersService extends EntityRepositoryService<Order> {
   private readonly logger = new Logger(OrdersService.name);
+  private readonly ordersUtils: OrdersUtils;
   constructor(
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
-    protected readonly lineItemService: LineItemService,
+    protected readonly lineItemsService: LineItemService,
     protected readonly squareService: SquareService,
     protected readonly locationsService: LocationsService,
     protected readonly variationsService: VariationsService,
@@ -58,6 +50,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     protected readonly firebaseAdminService: FirebaseAdminService,
   ) {
     super(repository);
+    this.ordersUtils = new OrdersUtils(lineItemsService);
   }
 
   async createAndSaveCurrent(params: {
@@ -66,35 +59,40 @@ export class OrdersService extends EntityRepositoryService<Order> {
     customer: Customer;
     locationId?: string;
     merchant: Merchant;
-  }) {
+  }): Promise<Order> {
     const { variations, merchant, customer } = params;
     if (!merchant.squareAccessToken) {
       throw new Error('Merchant does not have a Square access token');
     }
+
     let locationId = params.locationId;
 
     if (!locationId) {
-      const squareMainLocation = await this.squareService.retrieveLocation({
-        accessToken: merchant.squareAccessToken,
-        locationSquareId: 'main',
-      });
-      const locationSquareId = squareMainLocation.result.location?.id;
-      if (!locationSquareId) {
-        throw new InternalServerErrorException('No Square Location ID');
+      if (customer.preferredLocationId) {
+        locationId = customer.preferredLocationId;
+      } else {
+        const squareMainLocation = await this.squareService.retrieveLocation({
+          accessToken: merchant.squareAccessToken,
+          locationSquareId: 'main',
+        });
+        const locationSquareId = squareMainLocation.result.location?.id;
+        if (!locationSquareId) {
+          throw new InternalServerErrorException('No Square Location ID');
+        }
+        const moaMainLocation = await this.locationsService.findOne({
+          where: {
+            locationSquareId,
+            merchantId: merchant.id,
+          },
+        });
+        if (!moaMainLocation) {
+          throw new InternalServerErrorException('No MOA Location');
+        }
+        locationId = moaMainLocation.id;
       }
-      const moaMainLocation = await this.locationsService.findOne({
-        where: {
-          locationSquareId,
-          merchantId: merchant.id,
-        },
-      });
-      if (!moaMainLocation) {
-        throw new InternalServerErrorException('No MOA Location');
-      }
-      locationId = moaMainLocation.id;
     }
 
-    let order = await this.save(
+    const order = await this.save(
       this.create({
         customerId: customer.id,
         locationId,
@@ -158,16 +156,11 @@ export class OrdersService extends EntityRepositoryService<Order> {
         order.location = location;
       }
 
-      order.lineItems.push(
-        ...(squareOrder.lineItems ?? []).map((squareLineItem) => {
-          return this.lineItemService.fromSquareLineItem({ squareLineItem });
-        }),
-      );
-
-      order = await this.updateAndSaveOrderForSquareOrder({
+      await this.ordersUtils.updateAndSaveOrderForSquareOrder({
         order,
         squareOrder,
       });
+
       customer.currentOrder = order;
       await customer.save();
     } catch (error) {
@@ -181,26 +174,45 @@ export class OrdersService extends EntityRepositoryService<Order> {
   async updateAndSaveLocation(params: {
     locationMoaId: string;
     merchant: Merchant;
-    order: Order;
+    orderId: string;
     idempotencyKey?: string;
   }) {
-    if (!params.merchant.squareAccessToken) {
+    const { locationMoaId, merchant, orderId } = params;
+
+    const order = await this.findOneOrFail({
+      where: { id: orderId },
+      relations: {
+        location: {
+          address: true,
+          businessHours: true,
+        },
+        lineItems: {
+          modifiers: true,
+        },
+      },
+    });
+
+    if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
-    if (!params.order.squareId) {
+    if (!order.squareId) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
     const location = await this.locationsService.findOneOrFail({
-      where: { id: params.locationMoaId, merchantId: params.merchant.id },
+      where: { id: locationMoaId, merchantId: params.merchant.id },
     });
     if (!location.locationSquareId) {
       throw new UnprocessableEntityException(`No Square Location ID`);
     }
-    let order = params.order;
+
+    if (!location.id) {
+      throw new InternalServerErrorException('No location ID');
+    }
+
     try {
       const existingOrderResponse = await this.squareService.retrieveOrder({
-        accessToken: params.merchant.squareAccessToken,
-        orderId: params.order.squareId,
+        accessToken: merchant.squareAccessToken,
+        orderId: order.squareId,
       });
       const existingSquareOrder = existingOrderResponse.result.order;
       const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
@@ -208,6 +220,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
           return {
             catalogObjectId: lineItem.catalogObjectId,
             quantity: lineItem.quantity,
+            note: lineItem.note,
             modifiers: lineItem.modifiers?.map((modifier) => {
               return { catalogObjectId: modifier.catalogObjectId };
             }),
@@ -216,7 +229,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       );
 
       const newSquareOrderResponse = await this.squareService.createOrder({
-        accessToken: params.merchant.squareAccessToken,
+        accessToken: merchant.squareAccessToken,
         body: {
           order: {
             locationId: location.locationSquareId,
@@ -229,17 +242,15 @@ export class OrdersService extends EntityRepositoryService<Order> {
       const newSquareOrder = newSquareOrderResponse.result.order;
 
       if (newSquareOrder) {
-        order = await this.updateAndSaveOrderForSquareOrder({
-          order,
+        order.locationId = location.id;
+        order.location = location;
+        return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+          order: order,
           squareOrder: newSquareOrder,
         });
+      } else {
+        throw new InternalServerErrorException('No Square Order returned');
       }
-      if (!location.id) {
-        throw new InternalServerErrorException('No location ID');
-      }
-      order.locationId = location.id;
-      order.location = location;
-      return await order.save();
     } catch (error) {
       throw new InternalServerErrorException(error);
     }
@@ -258,7 +269,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       idempotencyKey,
     } = params;
 
-    let order = await this.findOneOrFail({
+    const order = await this.findOneOrFail({
       where: { id: orderId },
       relations: {
         lineItems: {
@@ -300,27 +311,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
-        const existingSquareLineItemUids = new Set(
-          order.lineItems?.map((item) => item.squareUid) ?? [],
-        );
-
-        const newSquareOrderLineItems = (squareOrder.lineItems ?? []).filter(
-          (squareLineItem) =>
-            !existingSquareLineItemUids.has(squareLineItem.uid ?? undefined),
-        );
-
-        if (newSquareOrderLineItems.length > 0) {
-          const newLineItems = newSquareOrderLineItems.map((squareLineItem) =>
-            this.lineItemService.fromSquareLineItem({ squareLineItem }),
-          );
-          order.lineItems?.push(...newLineItems);
-        }
-
-        order = await this.updateAndSaveOrderForSquareOrder({
+        return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
           order,
           squareOrder,
         });
-        return order;
       } else {
         throw new InternalServerErrorException(
           `No Square Order returned from Square`,
@@ -331,12 +325,22 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
   }
 
-  async removeVariations(params: {
-    ids: string[];
+  async removeLineItems(params: {
+    lineItemIds: string[];
     squareAccessToken: string;
-    order: Order;
+    orderId: string;
   }) {
-    let order = params.order;
+    const { orderId, lineItemIds, squareAccessToken } = params;
+
+    const order = await this.findOneOrFail({
+      where: { id: orderId },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+      },
+    });
+
     if (!order.squareId) {
       throw new InternalServerErrorException('No Square Order ID');
     }
@@ -347,13 +351,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new InternalServerErrorException('No location ID');
     }
 
-    const localLineItems = await this.lineItemService.find({
+    const localLineItems = await this.lineItemsService.find({
       where: {
-        id: In(params.ids),
+        id: In(lineItemIds),
       },
     });
     const response = await this.squareService.updateOrder({
-      accessToken: params.squareAccessToken,
+      accessToken: squareAccessToken,
       orderId: order.squareId,
       body: {
         order: {
@@ -367,19 +371,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
     const squareOrder = response.result.order;
     if (squareOrder) {
-      order.lineItems = order.lineItems?.filter((lineItem) => {
-        if (lineItem.id) {
-          return !params.ids.includes(lineItem.id);
-        } else {
-          return false;
-        }
-      });
-      await this.lineItemService.removeAll(localLineItems);
-      order = await this.updateAndSaveOrderForSquareOrder({
+      return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
         order,
         squareOrder,
       });
-      return order;
     } else {
       throw new InternalServerErrorException(
         `No Square Order returned from Square`,
@@ -425,61 +420,29 @@ export class OrdersService extends EntityRepositoryService<Order> {
     return orderLineItems;
   }
 
-  validatePickupTime(pickupAt: string, businessHours: BusinessHoursPeriod[]) {
-    const pickupDateTime = new Date(pickupAt);
-    const now = new Date();
-
-    if (isBefore(pickupDateTime, now)) {
-      throw new BadRequestException('Pickup time is in the past');
-    }
-
-    if (isAfter(pickupDateTime, addDays(now, 7))) {
-      throw new BadRequestException('Pickup time is too far in the future');
-    }
-
-    const pickupTime = format(pickupDateTime, 'HH:mm:ss');
-    const pickupDayOfWeek = format(pickupDateTime, 'eee').toUpperCase();
-
-    const matchingPeriod = businessHours.find(
-      (period) => period.dayOfWeek === pickupDayOfWeek,
-    );
-
-    if (
-      !matchingPeriod ||
-      !matchingPeriod.startLocalTime ||
-      !matchingPeriod.endLocalTime ||
-      !(
-        pickupTime >= matchingPeriod.startLocalTime &&
-        pickupTime <= matchingPeriod.endLocalTime
-      )
-    ) {
-      throw new BadRequestException('Pickup time is not within business hours');
-    }
-  }
-
-  isWithinHour(date: Date) {
-    return isWithinInterval(date, {
-      start: new Date(),
-      end: addHours(new Date(), 1),
-    });
-  }
-
   async createPayment(params: {
-    order: Order;
+    orderId: string;
     customer: Customer;
     input: PaymentCreateDto;
     merchant: Merchant;
   }) {
-    const { order, customer, input, merchant } = params;
+    const { orderId, customer, input, merchant } = params;
     const { squareAccessToken } = merchant;
     const { pickupAt } = input;
 
-    const location = await this.locationsService.findOne({
-      where: { id: order.locationId },
-      relations: ['businessHours'],
+    const order = await this.findOneOrFail({
+      where: { id: orderId },
+      relations: {
+        lineItems: {
+          modifiers: true,
+        },
+        location: {
+          businessHours: true,
+        },
+      },
     });
 
-    if (!location?.locationSquareId) {
+    if (!order.location?.locationSquareId) {
       throw new NotFoundException('Invalid location');
     }
 
@@ -497,8 +460,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
       );
     }
 
-    const businessHours = location?.businessHours ?? [];
-    this.validatePickupTime(pickupAt, businessHours);
+    this.ordersUtils.validatePickupTime(
+      pickupAt,
+      order.location?.businessHours ?? [],
+    );
 
     const squareRetrieveOrderResponse = await this.squareService.retrieveOrder({
       accessToken: squareAccessToken,
@@ -516,7 +481,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         orderId: order.squareId,
         body: {
           order: {
-            locationId: location.locationSquareId,
+            locationId: order.location.locationSquareId,
             version: order.squareVersion,
             state: 'OPEN',
             fulfillments: squareRetrievedOrderHasFulfillment
@@ -525,7 +490,9 @@ export class OrdersService extends EntityRepositoryService<Order> {
                   {
                     type: 'PICKUP',
                     pickupDetails: {
-                      scheduleType: this.isWithinHour(new Date(pickupAt))
+                      scheduleType: this.ordersUtils.isWithinHour(
+                        new Date(pickupAt),
+                      )
                         ? 'ASAP'
                         : 'SCHEDULED',
                       pickupAt: pickupAt,
@@ -551,13 +518,16 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new NotFoundException('Square order not found');
     }
 
-    const updatedOrder = await this.updateAndSaveOrderForSquareOrder({
-      order,
-      squareOrder: squareOrderFromUpdate,
-    });
+    const updatedOrder =
+      await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+        order,
+        squareOrder: squareOrderFromUpdate,
+      });
 
-    const orderTotalAmount =
-      squareOrderFromUpdate?.totalMoney?.amount ?? BigInt(0);
+    const orderTotalMoney = squareOrderFromUpdate?.totalMoney;
+    if (!orderTotalMoney) {
+      throw new UnprocessableEntityException('Invalid order total amount');
+    }
 
     try {
       await this.squareService.createPayment({
@@ -566,14 +536,11 @@ export class OrdersService extends EntityRepositoryService<Order> {
           sourceId: input.paymentSquareId,
           idempotencyKey: input.idempotencyKey,
           customerId: customer.squareId,
-          locationId: location.locationSquareId,
-          amountMoney: {
-            amount: orderTotalAmount,
-            currency: 'USD',
-          },
+          locationId: order.location.locationSquareId,
+          amountMoney: orderTotalMoney,
           tipMoney: {
             amount: BigInt(Math.floor(input.orderTipMoney ?? 0)),
-            currency: 'USD',
+            currency: orderTotalMoney.currency,
           },
           orderId: squareOrderFromUpdate.id,
           referenceId: order.id,
@@ -591,34 +558,6 @@ export class OrdersService extends EntityRepositoryService<Order> {
       this.logger.error('Error creating Square payment:', error);
       throw new InternalServerErrorException('Failed to create Square payment');
     }
-  }
-
-  async updateAndSaveOrderForSquareOrder(params: {
-    order: Order;
-    squareOrder: SquareOrder;
-  }) {
-    params.order.squareId = params.squareOrder?.id;
-    params.order.squareVersion =
-      params.squareOrder?.version ?? params.order.squareVersion + 1;
-
-    params.order.currency = params.squareOrder?.totalMoney?.currency;
-    params.order.totalMoneyAmount = Number(
-      params.squareOrder?.totalMoney?.amount,
-    );
-    params.order.totalMoneyTaxAmount = Number(
-      params.squareOrder?.totalTaxMoney?.amount,
-    );
-    params.order.totalMoneyDiscountAmount = Number(
-      params.squareOrder?.totalDiscountMoney?.amount,
-    );
-    params.order.totalMoneyTipAmount = Number(
-      params.squareOrder?.totalTipMoney?.amount,
-    );
-    params.order.totalMoneyServiceChargeAmount = Number(
-      params.squareOrder?.totalServiceChargeMoney?.amount,
-    );
-
-    return params.order.save();
   }
 
   @OnEvent('square.order.fulfillment.updated')

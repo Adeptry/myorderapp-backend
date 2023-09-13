@@ -19,39 +19,40 @@ export class LineItemService extends EntityRepositoryService<LineItem> {
   }
 
   fromSquareLineItem(params: { squareLineItem: OrderLineItem }) {
+    const { squareLineItem } = params;
+    this.logger.debug(
+      `building line item from square line item ${squareLineItem.uid}`,
+    );
     const lineItem = new LineItem();
-    lineItem.squareUid = params.squareLineItem.uid ?? undefined;
-    lineItem.name = params.squareLineItem.name ?? undefined;
-    lineItem.quantity = params.squareLineItem.quantity ?? undefined;
-    lineItem.note = params.squareLineItem.note ?? undefined;
-    // lineItem.variationId = params.squareLineItem.catalogObjectId ?? undefined;
-    lineItem.variationName = params.squareLineItem.variationName ?? undefined;
-    lineItem.currency =
-      params.squareLineItem.basePriceMoney?.currency ?? undefined;
+    lineItem.squareUid = squareLineItem.uid ?? undefined;
+    lineItem.name = squareLineItem.name ?? undefined;
+    lineItem.quantity = squareLineItem.quantity ?? undefined;
+    lineItem.note = squareLineItem.note ?? undefined;
+    // lineItem.variationId = squareLineItem.catalogObjectId ?? undefined;
+    lineItem.variationName = squareLineItem.variationName ?? undefined;
+    lineItem.currency = squareLineItem.basePriceMoney?.currency ?? undefined;
     lineItem.basePriceMoney = Number(
-      params.squareLineItem.basePriceMoney?.amount ?? 0,
+      squareLineItem.basePriceMoney?.amount ?? 0,
     );
     lineItem.variationTotalMoneyAmount = Number(
-      params.squareLineItem.variationTotalPriceMoney?.amount ?? 0,
+      squareLineItem.variationTotalPriceMoney?.amount ?? 0,
     );
     lineItem.grossSalesMoneyAmount = Number(
-      params.squareLineItem.grossSalesMoney?.amount ?? 0,
+      squareLineItem.grossSalesMoney?.amount ?? 0,
     );
     lineItem.totalTaxMoneyAmount = Number(
-      params.squareLineItem.totalTaxMoney?.amount ?? 0,
+      squareLineItem.totalTaxMoney?.amount ?? 0,
     );
     lineItem.totalDiscountMoneyAmount = Number(
-      params.squareLineItem.totalDiscountMoney?.amount ?? 0,
+      squareLineItem.totalDiscountMoney?.amount ?? 0,
     );
-    lineItem.totalMoneyAmount = Number(
-      params.squareLineItem.totalMoney?.amount ?? 0,
-    );
+    lineItem.totalMoneyAmount = Number(squareLineItem.totalMoney?.amount ?? 0);
     lineItem.totalServiceChargeMoneyAmount = Number(
-      params.squareLineItem.totalServiceChargeMoney?.amount ?? 0,
+      squareLineItem.totalServiceChargeMoney?.amount ?? 0,
     );
 
-    if (params.squareLineItem.modifiers) {
-      lineItem.modifiers = params.squareLineItem.modifiers.map((modifier) =>
+    if (squareLineItem.modifiers) {
+      lineItem.modifiers = squareLineItem.modifiers.map((modifier) =>
         this.lineItemModifierService.fromSquareLineItemModifier(modifier),
       );
     }

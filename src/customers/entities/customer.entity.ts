@@ -113,13 +113,13 @@ export class Customer extends EntityHelper {
   @ApiProperty({ required: false, nullable: true })
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  locationId?: string;
+  preferredLocationId?: string;
 
   @ApiProperty({ type: () => Location, nullable: true, required: false })
   @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn({ name: 'locationId' })
+  @JoinColumn({ name: 'preferredLocationId' })
   preferredLocation?: Location | null;
 }

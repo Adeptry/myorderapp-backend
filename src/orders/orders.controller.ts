@@ -10,6 +10,7 @@ import {
   Logger,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -87,20 +88,26 @@ export class OrdersController {
   @ApiCreatedResponse({ type: Order })
   @ApiBody({ required: true, type: OrderCreateDto })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
   async createCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderCreateDto,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
   ) {
     const { customer, merchant } = { ...request };
     const { idempotencyKey, locationId, variations } = body;
 
-    if (request.customer.currentOrderId) {
+    if (customer.currentOrderId) {
       throw new BadRequestException(`Current order already exists`);
     }
-    if (!request.merchant.squareAccessToken) {
+    if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
-    if (!request.customer.squareId) {
+    if (!customer.squareId) {
       throw new UnprocessableEntityException(`No Square Customer ID`);
     }
 
@@ -113,15 +120,18 @@ export class OrdersController {
     });
 
     return await this.service.findOne({
-      where: { id: savedOrder.id },
+      where: {
+        id: savedOrder.id,
+        customerId: request.customer?.id,
+        merchantId: request.merchant?.id,
+      },
       relations: {
-        lineItems: {
-          modifiers: true,
-        },
-        location: {
-          address: true,
-          businessHours: true,
-        },
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
       },
     });
   }
@@ -135,30 +145,43 @@ export class OrdersController {
     operationId: 'getCurrentOrder',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async getCurrent(@Req() request: CustomersGuardedRequest): Promise<Order> {
-    if (!request.customer.currentOrderId) {
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  async getCurrent(
+    @Req() request: CustomersGuardedRequest,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
+  ): Promise<Order> {
+    const { customer, merchant } = { ...request };
+
+    if (!customer.currentOrderId) {
       throw new NotFoundException(`No current order`);
     }
     const entity = await this.service.findOne({
-      where: { id: request.customer.currentOrderId },
+      where: {
+        id: customer.currentOrderId,
+        customerId: customer?.id,
+        merchantId: merchant?.id,
+      },
       relations: {
-        lineItems: {
-          modifiers: true,
-        },
-        location: {
-          address: true,
-          businessHours: true,
-        },
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
       },
     });
     if (!entity) {
-      request.customer.currentOrderId = undefined;
-      await request.customer.save();
+      customer.currentOrderId = undefined;
+      await customer.save();
 
       throw new NotFoundException(`No current order`);
     }
 
-    if (!entity.squareId || !request.merchant.squareAccessToken) {
+    if (!entity.squareId || !merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Order ID`);
     }
 
@@ -177,26 +200,28 @@ export class OrdersController {
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
-  @ApiQuery({ name: 'customer', required: false, type: Boolean })
   async getOne(
     @Req() request: UserTypeGuardedRequest,
     @Param('id') id: string,
-    @Query('lineItems') lineItems?: boolean,
-    @Query('location') location?: boolean,
-    @Query('customer') customer?: boolean,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
   ) {
+    const { merchant, customer } = { ...request };
     return await this.service.findOne({
       where: {
         id: id,
-        customerId: request.customer?.id,
-        merchantId: request.merchant?.id,
+        customerId: customer?.id,
+        merchantId: merchant?.id,
       },
       relations: {
-        lineItems: {
-          modifiers: lineItems,
-        },
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
         location: location,
-        customer: customer,
       },
     });
   }
@@ -216,36 +241,35 @@ export class OrdersController {
   @ApiQuery({ name: 'closed', required: false, type: Boolean })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
-  @ApiQuery({ name: 'customer', required: false, type: Boolean })
   async getMany(
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('closed') closed?: boolean,
-    @Query('lineItems') lineItems?: boolean,
-    @Query('location') location?: boolean,
-    @Query('customer') customer?: boolean,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
   ) {
-    const results = await this.service.findAndCount({
-      where: {
-        customerId: request.customer?.id,
-        merchantId: request.merchant?.id,
-        closedAt: closed ? Not(IsNull()) : undefined,
-      },
-      order: { createDate: 'DESC' },
-      take: limit,
-      skip: (page - 1) * limit,
-      relations: {
-        lineItems: {
-          modifiers: lineItems,
-        },
-        location: location,
-        customer: customer,
-      },
-    });
-
     return paginatedResults({
-      results,
+      results: await this.service.findAndCount({
+        where: {
+          customerId: request.customer?.id,
+          merchantId: request.merchant?.id,
+          closedAt: closed ? Not(IsNull()) : undefined,
+        },
+        order: { createDate: 'DESC' },
+        take: limit,
+        skip: (page - 1) * limit,
+        relations: {
+          lineItems: lineItems
+            ? {
+                modifiers: lineItems,
+              }
+            : undefined,
+          location: location,
+        },
+      }),
       pagination: { page, limit },
     });
   }
@@ -255,7 +279,7 @@ export class OrdersController {
   @Patch('current')
   @ApiOperation({
     summary: 'Patch update Order, e.g. modify Location',
-    operationId: 'patchUpdateToCurrentOrder',
+    operationId: 'patchUpdateCurrentOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -269,45 +293,47 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: false, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
-  async patchUpdateCurrent(
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  async patchCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderPatchDto,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
+
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
-    const { merchant } = { ...request };
+    const { merchant, customer } = { ...request };
+    const { currentOrderId } = { ...customer };
 
-    let order = await this.service.findOneOrFail({
-      where: { id: request.customer.currentOrderId },
-      relations: {
-        location: {
-          address: true,
-          businessHours: true,
-        },
-        lineItems: {
-          modifiers: true,
-        },
-      },
-    });
+    if (!currentOrderId) {
+      throw new UnprocessableEntityException(`No current order`);
+    }
+
+    if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
+      throw new NotFoundException(`Order not found`);
+    }
 
     if (body.locationId) {
-      order = await this.service.updateAndSaveLocation({
+      await this.service.updateAndSaveLocation({
         locationMoaId: body.locationId,
         merchant,
-        order,
+        orderId: currentOrderId,
         idempotencyKey,
       });
     }
 
     return await this.service.findOne({
-      where: { id: order.id },
+      where: { id: currentOrderId },
       relations: {
-        lineItems: {
-          modifiers: true,
-        },
-        location: {
-          address: true,
-          businessHours: true,
-        },
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
       },
     });
   }
@@ -322,7 +348,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Post update Order, e.g. add Variations & Modifiers in Line Items',
-    operationId: 'postUpdateToCurrentOrder',
+    operationId: 'postUpdateCurrentOrder',
   })
   @ApiBadRequestResponse({
     description: 'No current Order or Invalid variation',
@@ -338,13 +364,21 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
-  async postUpdateToCurrent(
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  async postCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderPostDto,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
+
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
     const { variations } = body;
     const { customer, merchant } = request;
+    const { currentOrderId } = { ...customer };
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
@@ -353,103 +387,107 @@ export class OrdersController {
       throw new UnprocessableEntityException(`No Square Customer ID`);
     }
 
-    let order = await this.service.findOne({
-      where: { id: request.customer.currentOrderId },
-      relations: {
-        location: {
-          address: true,
-          businessHours: true,
-        },
-        lineItems: {
-          modifiers: true,
-        },
-      },
-    });
-
+    let returnOrderId: string | undefined = undefined;
     if (variations && variations.length > 0) {
-      if (order?.id != null) {
-        order = await this.service.updateAndSaveVariations({
-          variations,
-          orderId: order.id,
-          squareAccessToken: merchant.squareAccessToken,
-          idempotencyKey,
-        });
+      if (currentOrderId != null) {
+        if (await this.service.exist({ where: { id: currentOrderId } })) {
+          await this.service.updateAndSaveVariations({
+            variations,
+            orderId: currentOrderId,
+            squareAccessToken: merchant.squareAccessToken,
+            idempotencyKey,
+          });
+          returnOrderId = currentOrderId;
+        } else {
+          customer.currentOrderId = undefined;
+          await customer.save();
+          throw new NotFoundException(`No current order`);
+        }
       } else {
-        order = await this.service.createAndSaveCurrent({
-          variations,
-          idempotencyKey,
-          customer,
-          merchant,
-        });
+        returnOrderId = (
+          await this.service.createAndSaveCurrent({
+            variations,
+            idempotencyKey,
+            customer,
+            merchant,
+          })
+        ).id;
       }
     }
 
-    if (!order?.id) {
+    if (!returnOrderId) {
       throw new Error(`No order ID`);
     }
 
     return await this.service.findOne({
-      where: { id: order.id },
+      where: { id: returnOrderId },
       relations: {
-        lineItems: {
-          modifiers: true,
-        },
-        location: {
-          address: true,
-          businessHours: true,
-        },
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
       },
     });
   }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @Delete('current/variation/:id')
-  @HttpCode(HttpStatus.NO_CONTENT)
+  @Delete('current/line-item/:id')
+  @ApiOkResponse({ type: Order })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
   @ApiOperation({
     summary: 'Remove Line Items from Order',
-    operationId: 'deleteLineItemInCurrentOrder',
+    operationId: 'deleteCurrentLineItem',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async deleteLineItemInCurrent(
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  async deleteCurrentLineItem(
     @Req() request: CustomersGuardedRequest,
     @Param('id') id: string,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
   ) {
-    // Validation and error checking
-    if (!request.customer.currentOrderId) {
+    const { customer, merchant } = { ...request };
+    const { squareAccessToken } = { ...merchant };
+    const { currentOrderId } = { ...customer };
+
+    if (!currentOrderId) {
       throw new BadRequestException(`No current order`);
     }
 
-    if (!request.merchant.squareAccessToken) {
+    if (!squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
     }
 
-    const order = await this.service.findOne({
-      where: { id: request.customer.currentOrderId },
-      relations: {
-        location: {
-          address: true,
-          businessHours: true,
-        },
-        lineItems: {
-          modifiers: true,
-        },
-      },
-    });
-
-    if (!order) {
+    if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
       throw new NotFoundException(`No current order`);
     }
-    await this.service.removeVariations({
-      squareAccessToken: request.merchant.squareAccessToken,
-      ids: [id],
-      order,
+
+    await this.service.removeLineItems({
+      squareAccessToken,
+      lineItemIds: [id],
+      orderId: currentOrderId,
     });
-    return;
+
+    return await this.service.findOne({
+      where: { id: currentOrderId },
+      relations: {
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
+      },
+    });
   }
 
   @ApiBearerAuth()
@@ -467,25 +505,20 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
-    const { customer, merchant } = request;
+    const { customer } = request;
+
     if (!customer.currentOrderId) {
       throw new NotFoundException(`No current order`);
     }
-    const entity = await this.service.findOneOrFail({
+
+    const entity = await this.service.findOne({
       where: { id: customer.currentOrderId },
-      relations: {
-        location: {
-          address: true,
-          businessHours: true,
-        },
-        lineItems: {
-          modifiers: true,
-        },
-      },
     });
 
-    if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Order ID`);
+    if (!entity) {
+      customer.currentOrderId = undefined;
+      await customer.save();
+      throw new NotFoundException(`No current order`);
     }
 
     await this.service.remove(entity);
@@ -511,30 +544,26 @@ export class OrdersController {
     description: 'Invalid pickup time',
     type: NestError,
   })
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
   async postPaymentForCurrent(
     @Req() request: CustomersGuardedRequest,
     @Body() body: PaymentCreateDto,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
   ) {
     const { customer, merchant } = { ...request };
+    const { currentOrderId } = { ...customer };
 
-    if (!customer.currentOrderId) {
+    if (!currentOrderId) {
+      customer.currentOrderId = undefined;
+      await customer.save();
       throw new NotFoundException(`No current order`);
     }
 
-    const order = await this.service.findOne({
-      where: { id: customer.currentOrderId },
-      relations: {
-        location: {
-          address: true,
-          businessHours: true,
-        },
-        lineItems: {
-          modifiers: true,
-        },
-      },
-    });
-
-    if (!order) {
+    if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
       throw new NotFoundException(`No current order`);
     }
 
@@ -543,11 +572,22 @@ export class OrdersController {
     }
 
     try {
-      return await this.service.createPayment({
-        order,
+      await this.service.createPayment({
+        orderId: currentOrderId,
         customer,
         input: body,
         merchant,
+      });
+      return await this.service.findOne({
+        where: { id: currentOrderId },
+        relations: {
+          lineItems: lineItems
+            ? {
+                modifiers: lineItems,
+              }
+            : undefined,
+          location: location,
+        },
       });
     } catch (error) {
       this.logger.error(error);
