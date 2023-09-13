@@ -170,11 +170,11 @@ export class ItemsService extends EntityRepositoryService<Item> {
           .leftJoinAndSelect(
             'variations.locationOverrides',
             'variationLocationOverrides',
-            'variationLocationOverrides."locationId" = :locationId',
+            '"variationLocationOverrides"."locationId" = :locationId',
             { locationId },
           )
           .addSelect(
-            'COALESCE(variationLocationOverrides.amount, variations.priceAmount)',
+            'COALESCE("variationLocationOverrides".amount, variations.priceAmount)',
             'variations_priceAmount',
           );
       }
