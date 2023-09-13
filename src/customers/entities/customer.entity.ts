@@ -101,8 +101,7 @@ export class Customer extends EntityHelper {
 
   /* Square */
 
-  @ApiHideProperty()
-  @Exclude()
+  @ApiProperty({ required: false, nullable: true })
   @Column('text', { nullable: true })
   squareId?: string | null;
 
@@ -111,7 +110,6 @@ export class Customer extends EntityHelper {
    */
 
   @ApiProperty({ required: false, nullable: true })
-  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   preferredLocationId?: string;
 
