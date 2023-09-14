@@ -3,6 +3,8 @@ import {
   Controller,
   Delete,
   Get,
+  HttpCode,
+  HttpStatus,
   InternalServerErrorException,
   Logger,
   Param,
@@ -102,9 +104,7 @@ export class CardsController {
     examples: {
       success: {
         value: {
-          idempotencyKey: nanoid(),
           sourceId: 'cnon:card-nonce-ok',
-          postalCode: '94103',
         },
       },
     },
@@ -118,13 +118,15 @@ export class CardsController {
       const response = await this.squareService.createCard({
         accessToken: request.merchant.squareAccessToken,
         body: {
-          idempotencyKey: createCardDto.idempotencyKey,
+          idempotencyKey: nanoid(),
           sourceId: createCardDto.sourceId,
           card: {
             customerId: request.customer.squareId,
-            billingAddress: {
-              postalCode: createCardDto.postalCode,
-            },
+            billingAddress: createCardDto.postalCode
+              ? {
+                  postalCode: createCardDto.postalCode,
+                }
+              : undefined,
           },
         },
       });
@@ -137,6 +139,7 @@ export class CardsController {
 
   @ApiOkResponse({ type: SquareDisableCardResponse })
   @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiUnauthorizedResponse({
@@ -153,16 +156,13 @@ export class CardsController {
   })
   @ApiParam({ name: 'id', required: true, type: String })
   @Delete('me/:id')
-  async disableMyCard(
-    @Req() request: any,
-    @Param('id') cardId: string,
-  ): Promise<SquareDisableCardResponse> {
+  async disableMyCard(@Req() request: any, @Param('id') cardId: string) {
     try {
-      const response = await this.squareService.disableCard({
+      await this.squareService.disableCard({
         accessToken: request.merchant.squareAccessToken,
         cardId,
       });
-      return response.result as SquareDisableCardResponse;
+      return;
     } catch (error) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
