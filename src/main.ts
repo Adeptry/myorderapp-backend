@@ -27,6 +27,7 @@ import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SquareModule } from './square/square.module.js';
 import { UsersModule } from './users/users.module.js';
+import { AllExceptionsFilter } from './utils/all-exceptions-filter.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
 
 async function bootstrap() {
@@ -43,6 +44,7 @@ async function bootstrap() {
 
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
+  app.useGlobalFilters(new AllExceptionsFilter());
 
   const configService = app.get(ConfigService<AllConfigType>);
   app.enableCors({
@@ -190,7 +192,5 @@ async function bootstrap() {
   );
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
-
-  app.use(Sentry.Handlers.errorHandler());
 }
 void bootstrap();
