@@ -34,9 +34,12 @@ export class FilesService {
       throw new UnprocessableEntityException('Must submit file');
     }
 
-    const bucketName = this.configService.get('file.awsDefaultS3Bucket', {
-      infer: true,
-    })!;
+    const bucketName = this.configService.getOrThrow(
+      'file.awsDefaultS3Bucket',
+      {
+        infer: true,
+      },
+    );
     const key = `${Date.now()}-${file.originalname}`;
 
     const params: S3.PutObjectRequest = {
