@@ -7,6 +7,8 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import * as Sentry from '@sentry/node';
+
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AdminModule } from './admin/admin.module.js';
@@ -19,6 +21,7 @@ import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { AllConfigType } from './config.type.js';
 import { CustomersModule } from './customers/customers.module.js';
+import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
@@ -27,9 +30,20 @@ import { UsersModule } from './users/users.module.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
 
 async function bootstrap() {
+  Sentry.init({
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    dsn: process.env.SENTRY_DSN!,
+    tracesSampleRate: 1.0,
+    integrations: [new Sentry.Integrations.Http({ tracing: true })],
+  });
+
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+
+  app.use(Sentry.Handlers.requestHandler());
+  app.use(Sentry.Handlers.tracingHandler());
+
   const configService = app.get(ConfigService<AllConfigType>);
   app.enableCors({
     origin: RegExp(
@@ -166,7 +180,7 @@ async function bootstrap() {
         .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
       {
-        include: [AdminModule],
+        include: [AdminModule, HealthModule],
       },
     ),
     {
@@ -176,5 +190,7 @@ async function bootstrap() {
   );
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
+
+  app.use(Sentry.Handlers.errorHandler());
 }
 void bootstrap();
