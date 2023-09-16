@@ -4,8 +4,8 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { User } from 'src/users/entities/user.entity';
+import { AuthService } from '../auth/auth.service.js';
+import { User } from '../users/entities/user.entity.js';
 
 export interface UsersGuardedRequest extends Request {
   user: User;

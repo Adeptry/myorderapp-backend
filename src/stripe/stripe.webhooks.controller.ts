@@ -12,9 +12,9 @@ import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Request, Response } from 'express';
-import { AllConfigType } from 'src/config.type';
 import Stripe from 'stripe';
-import { StripeService } from './stripe.service';
+import { AllConfigType } from '../config.type.js';
+import { StripeService } from './stripe.service.js';
 
 @Controller('v2/stripe/webhook')
 export class StripeWebhookController {

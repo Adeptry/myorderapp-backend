@@ -2,9 +2,9 @@ import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
-import { AllConfigType } from 'src/config.type';
-import { OrNeverType } from 'src/utils/types/or-never.type';
-import { JwtPayloadType } from './types/jwt-payload.type';
+import { AllConfigType } from '../../config.type.js';
+import { OrNeverType } from '../../utils/types/or-never.type.js';
+import { JwtPayloadType } from './types/jwt-payload.type.js';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {

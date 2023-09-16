@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -13,8 +12,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Item } from './item.entity';
-import { ModifierList } from './modifier-list.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Item } from './item.entity.js';
+import type { ModifierList } from './modifier-list.entity.js';
 
 @Entity('item_modifier_list')
 export class ItemModifierList extends EntityHelper {
@@ -60,11 +60,11 @@ export class ItemModifierList extends EntityHelper {
   itemId?: string;
 
   @ApiProperty({
-    type: () => Item,
+    type: 'Item',
     required: false,
     nullable: true,
   })
-  @ManyToOne(() => Item, (item) => item.itemModifierLists, {
+  @ManyToOne('Item', 'itemModifierLists', {
     onDelete: 'CASCADE',
   })
   item: Item;
@@ -74,16 +74,12 @@ export class ItemModifierList extends EntityHelper {
   modifierListId?: string;
 
   @ApiProperty({
-    type: () => ModifierList,
+    type: 'ModifierList',
     required: false,
     nullable: true,
   })
-  @ManyToOne(
-    () => ModifierList,
-    (modifierList) => modifierList.itemModifierLists,
-    {
-      onDelete: 'CASCADE',
-    },
-  )
+  @ManyToOne('ModifierList', 'itemModifierLists', {
+    onDelete: 'CASCADE',
+  })
   modifierList: ModifierList;
 }

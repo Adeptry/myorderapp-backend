@@ -22,13 +22,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
-import { NestError } from 'src/utils/error';
-import { VariationUpdateDto } from '../dto/variation-update.dto';
-import { Variation } from '../entities/variation.entity';
-import { VariationsService } from '../services/variations.service';
+import { CatalogSortService } from '../../catalogs/services/catalog-sort.service.js';
+import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
+import { MerchantsGuard } from '../../guards/merchants.guard.js';
+import { NestError } from '../../utils/error.js';
+import { VariationUpdateDto } from '../dto/variation-update.dto.js';
+import { Variation } from '../entities/variation.entity.js';
+import { VariationsService } from '../services/variations.service.js';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)

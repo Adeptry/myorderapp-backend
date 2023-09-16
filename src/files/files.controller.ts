@@ -18,9 +18,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { NestError } from 'src/utils/error';
-import { FilesService } from './files.service';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { NestError } from '../utils/error.js';
+import { FilesService } from './files.service.js';
 
 @ApiTags('Files')
 @UseGuards(ApiKeyAuthGuard)

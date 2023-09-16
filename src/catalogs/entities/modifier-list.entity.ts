@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -18,11 +16,13 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MoaSelectionType } from '../dto/catalogs.types';
-import { CatalogImage } from './catalog-image.entity';
-import { Catalog } from './catalog.entity';
-import { ItemModifierList } from './item-modifier-list.entity';
-import { Modifier } from './modifier.entity';
+import { Location } from '../../locations/entities/location.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { MoaSelectionType } from '../dto/catalogs.types.js';
+import { CatalogImage } from './catalog-image.entity.js';
+import type { Catalog } from './catalog.entity.js';
+import { ItemModifierList } from './item-modifier-list.entity.js';
+import { Modifier } from './modifier.entity.js';
 
 @Entity('modifier_list')
 export class ModifierList extends EntityHelper {
@@ -149,7 +149,7 @@ export class ModifierList extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne(() => Catalog, (entity) => entity.modifierLists, {
+  @ManyToOne('Catalog', 'modifierLists', {
     nullable: false,
     onDelete: 'CASCADE',
   })

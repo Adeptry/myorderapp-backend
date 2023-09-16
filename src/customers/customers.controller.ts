@@ -30,21 +30,21 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Response } from 'express';
-import { CustomersService } from 'src/customers/customers.service';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+import { CustomersService } from '../customers/customers.service.js';
+import { Customer } from '../customers/entities/customer.entity.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import {
   CustomersGuard,
   CustomersGuardedRequest,
-} from 'src/guards/customers.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
-import { UsersGuard } from 'src/guards/users.guard';
-import { NestError } from 'src/utils/error';
-import { paginatedResults } from 'src/utils/paginated';
-import { AppInstallUpdateDto } from './dto/app-install-update.dto';
-import { CustomersPaginatedResponse } from './dto/customers-paginated.output';
-import { CustomerUpdateDto } from './dto/update-customer.dto';
-import { AppInstallsService } from './services/app-installs.service';
+} from '../guards/customers.guard.js';
+import { MerchantsGuard } from '../guards/merchants.guard.js';
+import { UsersGuard } from '../guards/users.guard.js';
+import { NestError } from '../utils/error.js';
+import { paginatedResults } from '../utils/paginated.js';
+import { AppInstallUpdateDto } from './dto/app-install-update.dto.js';
+import { CustomersPaginatedResponse } from './dto/customers-paginated.output.js';
+import { CustomerUpdateDto } from './dto/update-customer.dto.js';
+import { AppInstallsService } from './services/app-installs.service.js';
 
 @ApiUnauthorizedResponse({
   description: 'You need to be authenticated to access this endpoint.',

@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogItemModifierListInfo } from 'square';
-import { ItemModifierList } from 'src/catalogs/entities/item-modifier-list.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
-import { ModifierListsService } from './modifier-lists.service';
+import { ItemModifierList } from '../../catalogs/entities/item-modifier-list.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
+import { ModifierListsService } from './modifier-lists.service.js';
 
 @Injectable()
 export class ItemModifierListService extends EntityRepositoryService<ItemModifierList> {

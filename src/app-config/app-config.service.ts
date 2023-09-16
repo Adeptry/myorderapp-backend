@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
-import { AppConfig } from './entities/app-config.entity';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { AppConfig } from './entities/app-config.entity.js';
 
 @Injectable()
 export class AppConfigService extends EntityRepositoryService<AppConfig> {

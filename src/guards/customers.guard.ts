@@ -7,12 +7,12 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthService } from 'src/auth/auth.service';
-import { CustomersService } from 'src/customers/customers.service';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { User } from 'src/users/entities/user.entity';
+import { AuthService } from '../auth/auth.service.js';
+import { CustomersService } from '../customers/customers.service.js';
+import { Customer } from '../customers/entities/customer.entity.js';
+import { Merchant } from '../merchants/entities/merchant.entity.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { User } from '../users/entities/user.entity.js';
 
 export interface CustomersGuardedRequest extends Request {
   user: User;

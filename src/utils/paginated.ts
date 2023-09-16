@@ -1,5 +1,5 @@
-import { InfinityPaginationResultType } from './types/infinity-pagination-result.type';
-import { PaginationOptions } from './types/pagination-options';
+import { InfinityPaginationResultType } from './types/infinity-pagination-result.type.js';
+import { PaginationOptions } from './types/pagination-options.js';
 
 export const paginated = <T>(params: {
   data: T[];

@@ -6,10 +6,10 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
-import { AuthService } from 'src/auth/auth.service';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { User } from 'src/users/entities/user.entity';
+import { AuthService } from '../auth/auth.service.js';
+import { Merchant } from '../merchants/entities/merchant.entity.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { User } from '../users/entities/user.entity.js';
 
 export interface MerchantsGuardedRequest extends Request {
   merchant: Merchant;

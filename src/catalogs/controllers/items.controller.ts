@@ -36,22 +36,22 @@ import { nanoid } from 'nanoid';
 import {
   ItemUpdateAllDto,
   ItemUpdateDto,
-} from 'src/catalogs/dto/item-update.dto';
-import { ItemPaginatedResponse } from 'src/catalogs/dto/items-paginated.output';
-import { CatalogImage } from 'src/catalogs/entities/catalog-image.entity';
-import { Item } from 'src/catalogs/entities/item.entity';
-import { CatalogImagesService } from 'src/catalogs/services/catalog-images.service';
-import { CatalogSortService } from 'src/catalogs/services/catalog-sort.service';
-import { ItemsService } from 'src/catalogs/services/items.service';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+} from '../../catalogs/dto/item-update.dto.js';
+import { ItemPaginatedResponse } from '../../catalogs/dto/items-paginated.output.js';
+import { CatalogImage } from '../../catalogs/entities/catalog-image.entity.js';
+import { Item } from '../../catalogs/entities/item.entity.js';
+import { CatalogImagesService } from '../../catalogs/services/catalog-images.service.js';
+import { CatalogSortService } from '../../catalogs/services/catalog-sort.service.js';
+import { ItemsService } from '../../catalogs/services/items.service.js';
+import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import {
   MerchantsGuard,
   MerchantsGuardedRequest,
-} from 'src/guards/merchants.guard';
-import { SquareService } from 'src/square/square.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dto';
-import { NestError } from 'src/utils/error';
-import { paginatedResults } from 'src/utils/paginated';
+} from '../../guards/merchants.guard.js';
+import { SquareService } from '../../square/square.service.js';
+import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
+import { NestError } from '../../utils/error.js';
+import { paginatedResults } from '../../utils/paginated.js';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)

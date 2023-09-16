@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
-import { VariationAddDto } from './variation-add.dto';
+import { VariationAddDto } from './variation-add.dto.js';
 
 export class OrderPostDto {
   @ApiProperty({

@@ -1,12 +1,12 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { CustomersModule } from 'src/customers/customers.module';
-import { FilesModule } from 'src/files/files.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { AppConfigController } from './app-config.controller';
-import { AppConfigService } from './app-config.service';
-import { AppConfig } from './entities/app-config.entity';
+import { AuthModule } from '../auth/auth.module.js';
+import { CustomersModule } from '../customers/customers.module.js';
+import { FilesModule } from '../files/files.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
+import { AppConfigController } from './app-config.controller.js';
+import { AppConfigService } from './app-config.service.js';
+import { AppConfig } from './entities/app-config.entity.js';
 
 @Module({
   imports: [

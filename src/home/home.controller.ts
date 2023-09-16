@@ -1,7 +1,7 @@
 import { Controller, Get } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
 
-import { HomeService } from './home.service';
+import { HomeService } from './home.service.js';
 
 @ApiTags('Home')
 @ApiSecurity('Api-Key')

@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -15,8 +14,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { LineItemModifier } from './line-item-modifier.entity';
-import { Order } from './order.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { LineItemModifier } from './line-item-modifier.entity.js';
+import type { Order } from './order.entity.js';
 
 @Entity('line_item')
 export class LineItem extends EntityHelper {
@@ -107,7 +107,7 @@ export class LineItem extends EntityHelper {
   @Column({ nullable: true })
   orderId?: string;
 
-  @ManyToOne(() => Order, (entity) => entity.lineItems, {
+  @ManyToOne('Order', 'lineItems', {
     nullable: false,
     onDelete: 'CASCADE',
   })

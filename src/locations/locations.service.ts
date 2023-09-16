@@ -1,16 +1,16 @@
 import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
-import { SquareService } from 'src/square/square.service';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
+import { SquareService } from '../square/square.service.js';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
 import {
   LocationUpdateAllDto,
   LocationUpdateDto,
-} from './dto/location-update.input';
-import { Location as MoaLocation } from './entities/location.entity';
-import { AddressService } from './services/address.service';
-import { BusinessHoursPeriodsService } from './services/business-hours-period.service';
+} from './dto/location-update.input.js';
+import { Location as MoaLocation } from './entities/location.entity.js';
+import { AddressService } from './services/address.service.js';
+import { BusinessHoursPeriodsService } from './services/business-hours-period.service.js';
 
 @Injectable()
 export class LocationsService extends EntityRepositoryService<MoaLocation> {

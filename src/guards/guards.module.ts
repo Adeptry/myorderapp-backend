@@ -1,12 +1,12 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { AuthModule } from 'src/auth/auth.module';
-import { CustomersModule } from 'src/customers/customers.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { UsersModule } from 'src/users/users.module';
-import { CustomersGuard } from './customers.guard';
-import { MerchantsGuard } from './merchants.guard';
-import { UserTypeGuard } from './user-type.guard';
-import { UsersGuard } from './users.guard';
+import { AuthModule } from '../auth/auth.module.js';
+import { CustomersModule } from '../customers/customers.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { CustomersGuard } from './customers.guard.js';
+import { MerchantsGuard } from './merchants.guard.js';
+import { UserTypeGuard } from './user-type.guard.js';
+import { UsersGuard } from './users.guard.js';
 
 @Module({
   imports: [

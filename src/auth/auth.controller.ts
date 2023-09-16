@@ -23,16 +23,16 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { User } from 'src/users/entities/user.entity';
-import { NullableType } from 'src/utils/types/nullable.type';
-import { AuthService } from './auth.service';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto';
-import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto';
-import { AuthResetPasswordDto } from './dto/auth-reset-password.dto';
-import { AuthUpdateDto } from './dto/auth-update.dto';
-import { LoginResponseType } from './types/login-response.type';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { User } from '../users/entities/user.entity.js';
+import { NullableType } from '../utils/types/nullable.type.js';
+import { AuthService } from './auth.service.js';
+import { AuthEmailLoginDto } from './dto/auth-email-login.dto.js';
+import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto.js';
+import { AuthRegisterLoginDto } from './dto/auth-register-login.dto.js';
+import { AuthResetPasswordDto } from './dto/auth-reset-password.dto.js';
+import { AuthUpdateDto } from './dto/auth-update.dto.js';
+import { LoginResponseType } from './types/login-response.type.js';
 
 @ApiTags('Auth')
 @UseGuards(ApiKeyAuthGuard)

@@ -1,9 +1,9 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { AuthModule } from 'src/auth/auth.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { SquareWebhookController } from './square-webhook.controller';
-import { SquareController } from './square.controller';
-import { SquareService } from './square.service';
+import { AuthModule } from '../auth/auth.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
+import { SquareWebhookController } from './square-webhook.controller.js';
+import { SquareController } from './square.controller.js';
+import { SquareService } from './square.service.js';
 
 @Module({
   imports: [AuthModule, forwardRef(() => MerchantsModule)],

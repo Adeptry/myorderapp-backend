@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
-import { ModifierList } from 'src/catalogs/entities/modifier-list.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
-import { MoaSelectionType } from '../dto/catalogs.types';
-import { ModifierLocationOverridesService } from './modifier-location-overrides.service';
+import { ModifierList } from '../../catalogs/entities/modifier-list.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
+import { MoaSelectionType } from '../dto/catalogs.types.js';
+import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
 @Injectable()
 export class ModifierListsService extends EntityRepositoryService<ModifierList> {

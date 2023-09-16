@@ -1,10 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { Location } from 'src/locations/entities/location.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -18,7 +14,11 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { LineItem } from './line-item.entity';
+import type { Customer } from '../../customers/entities/customer.entity.js';
+import type { Location } from '../../locations/entities/location.entity.js';
+import { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { LineItem } from './line-item.entity.js';
 
 @Entity('order')
 export class Order extends EntityHelper {
@@ -57,10 +57,10 @@ export class Order extends EntityHelper {
 
   @ApiProperty({
     required: false,
-    type: () => Customer,
+    type: 'Customer',
     nullable: true,
   })
-  @ManyToOne(() => Customer, (entity) => entity.orders, {
+  @ManyToOne('Customer', 'orders', {
     nullable: true,
     onDelete: 'CASCADE',
   })
@@ -87,10 +87,10 @@ export class Order extends EntityHelper {
 
   @ApiProperty({
     required: false,
-    type: () => Location,
+    type: 'Location',
     nullable: true,
   })
-  @ManyToOne(() => Location, { onDelete: 'SET NULL' })
+  @ManyToOne('Location', { onDelete: 'SET NULL' })
   @JoinColumn()
   location?: Location;
 

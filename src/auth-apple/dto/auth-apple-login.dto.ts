@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow, IsNotEmpty } from 'class-validator';
-import { RoleEnum } from 'src/roles/roles.enum';
+import { RoleEnum } from '../../roles/roles.enum.js';
 
 export class AuthAppleLoginDto {
   @ApiProperty({ example: 'abc' })

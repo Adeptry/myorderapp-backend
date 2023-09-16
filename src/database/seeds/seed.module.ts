@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import appConfig from 'src/app.config';
-import databaseConfig from 'src/database/database.config';
-import { TypeOrmConfigService } from 'src/database/typeorm-config.service';
 import { DataSource, DataSourceOptions } from 'typeorm';
-import { RoleSeedModule } from './role/role-seed.module';
-import { StatusSeedModule } from './status/status-seed.module';
-import { UserSeedModule } from './user/user-seed.module';
+import appConfig from '../../app.config.js';
+import databaseConfig from '../../database/database.config.js';
+import { TypeOrmConfigService } from '../../database/typeorm-config.service.js';
+import { RoleSeedModule } from './role/role-seed.module.js';
+import { StatusSeedModule } from './status/status-seed.module.js';
+import { UserSeedModule } from './user/user-seed.module.js';
 
 @Module({
   imports: [

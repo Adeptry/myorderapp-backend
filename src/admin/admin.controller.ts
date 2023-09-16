@@ -23,14 +23,14 @@ import {
   ApiSecurity,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { AuthEmailLoginDto } from 'src/auth/dto/auth-email-login.dto';
-import { LoginResponseType } from 'src/auth/types/login-response.type';
-import { FilesService } from 'src/files/files.service';
-import { AdminsGuard } from 'src/guards/admins.guard';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { NestError } from 'src/utils/error';
+import { AuthService } from '../auth/auth.service.js';
+import { AuthEmailLoginDto } from '../auth/dto/auth-email-login.dto.js';
+import { LoginResponseType } from '../auth/types/login-response.type.js';
+import { FilesService } from '../files/files.service.js';
+import { AdminsGuard } from '../guards/admins.guard.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { NestError } from '../utils/error.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')

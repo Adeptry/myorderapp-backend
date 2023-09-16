@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { APP_URL } from '../utils/constants';
+import { APP_URL } from '../utils/constants.js';
 
 describe('Auth user (e2e)', () => {
   const app = APP_URL;

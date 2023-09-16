@@ -12,11 +12,11 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { LoginResponseType } from 'src/auth/types/login-response.type';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { AuthAppleService } from './auth-apple.service';
-import { AuthAppleLoginDto } from './dto/auth-apple-login.dto';
+import { AuthService } from '../auth/auth.service.js';
+import { LoginResponseType } from '../auth/types/login-response.type.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { AuthAppleService } from './auth-apple.service.js';
+import { AuthAppleLoginDto } from './dto/auth-apple-login.dto.js';
 
 @ApiTags('Auth')
 @UseGuards(ApiKeyAuthGuard)

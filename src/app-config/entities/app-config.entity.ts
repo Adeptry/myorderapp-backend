@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { FileEntity } from 'src/files/entities/file.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -17,7 +14,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { ThemeModeEnum } from './theme-mode.enum';
+import { FileEntity } from '../../files/entities/file.entity.js';
+import type { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { ThemeModeEnum } from './theme-mode.enum.js';
 
 @Entity('app_config')
 export class AppConfig extends EntityHelper {
@@ -133,7 +133,7 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => Merchant, (entity) => entity.appConfig, {
+  @ManyToOne('Merchant', 'appConfig', {
     onDelete: 'SET NULL',
   })
   @JoinColumn()

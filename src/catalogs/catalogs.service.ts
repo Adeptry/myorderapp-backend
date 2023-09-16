@@ -1,25 +1,25 @@
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
-import { LocationsService } from 'src/locations/locations.service';
-import { SquareCatalogObjectTypeEnum } from 'src/square/square-catalog-object-type.enum';
-import { SquareService } from 'src/square/square.service';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { DataSource, Repository } from 'typeorm';
-import { CatalogImage } from './entities/catalog-image.entity';
-import { Catalog } from './entities/catalog.entity';
-import { Category } from './entities/category.entity';
-import { ItemModifierList } from './entities/item-modifier-list.entity';
-import { Item } from './entities/item.entity';
-import { ModifierList } from './entities/modifier-list.entity';
-import { Modifier } from './entities/modifier.entity';
-import { Variation } from './entities/variation.entity';
-import { CatalogImagesService } from './services/catalog-images.service';
-import { CategoriesService } from './services/categories.service';
-import { ItemModifierListService } from './services/item-modifier-list.service';
-import { ItemsService } from './services/items.service';
-import { ModifierListsService } from './services/modifier-lists.service';
-import { ModifiersService } from './services/modifiers.service';
-import { VariationsService } from './services/variations.service';
+import { LocationsService } from '../locations/locations.service.js';
+import { SquareCatalogObjectTypeEnum } from '../square/square-catalog-object-type.enum.js';
+import { SquareService } from '../square/square.service.js';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { CatalogImage } from './entities/catalog-image.entity.js';
+import { Catalog } from './entities/catalog.entity.js';
+import { Category } from './entities/category.entity.js';
+import { ItemModifierList } from './entities/item-modifier-list.entity.js';
+import { Item } from './entities/item.entity.js';
+import { ModifierList } from './entities/modifier-list.entity.js';
+import { Modifier } from './entities/modifier.entity.js';
+import { Variation } from './entities/variation.entity.js';
+import { CatalogImagesService } from './services/catalog-images.service.js';
+import { CategoriesService } from './services/categories.service.js';
+import { ItemModifierListService } from './services/item-modifier-list.service.js';
+import { ItemsService } from './services/items.service.js';
+import { ModifierListsService } from './services/modifier-lists.service.js';
+import { ModifiersService } from './services/modifiers.service.js';
+import { VariationsService } from './services/variations.service.js';
 
 @Injectable()
 export class CatalogsService extends EntityRepositoryService<Catalog> {

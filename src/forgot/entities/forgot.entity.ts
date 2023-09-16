@@ -1,6 +1,4 @@
 import { Allow } from 'class-validator';
-import { User } from 'src/users/entities/user.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   Column,
   CreateDateColumn,
@@ -10,6 +8,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
 export class Forgot extends EntityHelper {

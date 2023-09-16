@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
+import { Repository } from 'typeorm';
 import {
   CategoryUpdateAllDto,
   CategoryUpdateDto,
-} from 'src/catalogs/dto/category-update.dto';
-import { Category } from 'src/catalogs/entities/category.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
-import { paginatedResults } from 'src/utils/paginated';
-import { Repository } from 'typeorm';
-import { CatalogSortService } from './catalog-sort.service';
-import { ItemsService } from './items.service';
+} from '../../catalogs/dto/category-update.dto.js';
+import { Category } from '../../catalogs/entities/category.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
+import { paginatedResults } from '../../utils/paginated.js';
+import { CatalogSortService } from './catalog-sort.service.js';
+import { ItemsService } from './items.service.js';
 
 @Injectable()
 export class CategoriesService extends EntityRepositoryService<Category> {

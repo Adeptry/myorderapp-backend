@@ -1,6 +1,6 @@
 import { ConfigService } from '@nestjs/config';
 import { ObtainTokenResponse } from 'square';
-import { AllConfigType } from 'src/config.type';
+import { AllConfigType } from '../config.type.js';
 
 export class SquareConfigUtils {
   constructor(private configService: ConfigService<AllConfigType>) {}

@@ -6,7 +6,7 @@ import {
   IsString,
   Length,
 } from 'class-validator';
-import { ThemeModeEnum } from '../entities/theme-mode.enum';
+import { ThemeModeEnum } from '../entities/theme-mode.enum.js';
 
 export class AppConfigUpdateDto {
   @ApiProperty({ required: false, nullable: true })

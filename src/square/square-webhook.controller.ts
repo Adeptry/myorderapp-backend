@@ -12,7 +12,7 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import { Request } from 'express';
 import { WebhooksHelper } from 'square';
-import { AllConfigType } from 'src/config.type';
+import { AllConfigType } from '../config.type.js';
 
 @Controller('v2/square/webhook')
 export class SquareWebhookController {

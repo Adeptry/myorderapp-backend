@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { EntityHelper } from 'src/utils/entity-helper';
 import { Entity, PrimaryColumn } from 'typeorm';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
 export class Role extends EntityHelper {

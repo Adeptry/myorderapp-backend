@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail } from 'class-validator';
 import { Transform } from 'class-transformer';
-import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
+import { IsEmail } from 'class-validator';
+import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
 
 export class AuthForgotPasswordDto {
   @ApiProperty()

@@ -1,13 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { AppConfig } from 'src/app-config/entities/app-config.entity';
-import { Catalog } from 'src/catalogs/entities/catalog.entity';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { FileEntity } from 'src/files/entities/file.entity';
-import { Location } from 'src/locations/entities/location.entity';
-import { User } from 'src/users/entities/user.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -22,8 +15,15 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MerchantAppStatusEnum as MerchantAppStoreStatusEnum } from './merchant-app-store-status.enum';
-import { MerchantTierEnum } from './merchant-tier.enum';
+import { AppConfig } from '../../app-config/entities/app-config.entity.js';
+import { Catalog } from '../../catalogs/entities/catalog.entity.js';
+import { Customer } from '../../customers/entities/customer.entity.js';
+import { FileEntity } from '../../files/entities/file.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
+import { User } from '../../users/entities/user.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { MerchantAppStatusEnum as MerchantAppStoreStatusEnum } from './merchant-app-store-status.enum.js';
+import { MerchantTierEnum } from './merchant-tier.enum.js';
 
 @Entity('merchant')
 export class Merchant extends EntityHelper {

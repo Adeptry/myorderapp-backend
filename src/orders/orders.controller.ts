@@ -36,25 +36,25 @@ import {
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+import { IsNull, Not } from 'typeorm';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import {
   CustomersGuard,
   CustomersGuardedRequest,
-} from 'src/guards/customers.guard';
+} from '../guards/customers.guard.js';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
-} from 'src/guards/user-type.guard';
-import { OrdersService } from 'src/orders/orders.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dto';
-import { NestError } from 'src/utils/error';
-import { paginatedResults } from 'src/utils/paginated';
-import { IsNull, Not } from 'typeorm';
-import { OrderPatchDto } from './dto/order-patch.dto';
-import { OrderCreateDto, OrderPostDto } from './dto/order-post.dto';
-import { OrdersPaginatedReponse } from './dto/orders-paginated.dto';
-import { PaymentCreateDto } from './dto/payment-create.dto';
-import { Order } from './entities/order.entity';
+} from '../guards/user-type.guard.js';
+import { OrdersService } from '../orders/orders.service.js';
+import { UserTypeEnum } from '../users/dto/type-user.dto.js';
+import { NestError } from '../utils/error.js';
+import { paginatedResults } from '../utils/paginated.js';
+import { OrderPatchDto } from './dto/order-patch.dto.js';
+import { OrderCreateDto, OrderPostDto } from './dto/order-post.dto.js';
+import { OrdersPaginatedReponse } from './dto/orders-paginated.dto.js';
+import { PaymentCreateDto } from './dto/payment-create.dto.js';
+import { Order } from './entities/order.entity.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiTags('Orders')
@@ -306,7 +306,7 @@ export class OrdersController {
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
     const { merchant, customer } = { ...request };
-    const { currentOrderId } = { ...customer };
+    const currentOrderId = customer.currentOrderId;
 
     if (!currentOrderId) {
       throw new UnprocessableEntityException(`No current order`);
@@ -378,7 +378,7 @@ export class OrdersController {
   ) {
     const { variations } = body;
     const { customer, merchant } = request;
-    const { currentOrderId } = { ...customer };
+    const currentOrderId = customer.currentOrderId;
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(`No Square Access Token`);
@@ -456,8 +456,8 @@ export class OrdersController {
     location?: boolean,
   ) {
     const { customer, merchant } = { ...request };
-    const { squareAccessToken } = { ...merchant };
-    const { currentOrderId } = { ...customer };
+    const squareAccessToken = merchant.squareAccessToken;
+    const currentOrderId = customer.currentOrderId;
 
     if (!currentOrderId) {
       throw new BadRequestException(`No current order`);
@@ -555,7 +555,7 @@ export class OrdersController {
     location?: boolean,
   ) {
     const { customer, merchant } = { ...request };
-    const { currentOrderId } = { ...customer };
+    const currentOrderId = customer.currentOrderId;
 
     if (!currentOrderId) {
       customer.currentOrderId = undefined;

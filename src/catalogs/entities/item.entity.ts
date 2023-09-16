@@ -1,8 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -18,11 +16,13 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { CatalogImage } from './catalog-image.entity';
-import { Catalog } from './catalog.entity';
-import { Category } from './category.entity';
-import { ItemModifierList } from './item-modifier-list.entity';
-import { Variation } from './variation.entity';
+import { Location } from '../../locations/entities/location.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { CatalogImage } from './catalog-image.entity.js';
+import type { Catalog } from './catalog.entity.js';
+import type { Category } from './category.entity.js';
+import { ItemModifierList } from './item-modifier-list.entity.js';
+import { Variation } from './variation.entity.js';
 
 @Entity('item')
 export class Item extends EntityHelper {
@@ -102,7 +102,7 @@ export class Item extends EntityHelper {
   @Column({ nullable: true })
   categoryId?: string;
 
-  @ManyToOne(() => Category, (category) => category.items, {
+  @ManyToOne('Category', 'items', {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -148,7 +148,7 @@ export class Item extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne(() => Catalog, (entity) => entity.items, {
+  @ManyToOne('Catalog', 'items', {
     nullable: false,
     onDelete: 'CASCADE',
   })

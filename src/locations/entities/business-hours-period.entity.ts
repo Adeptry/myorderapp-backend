@@ -1,19 +1,19 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
+  Entity,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Entity } from 'typeorm/decorator/entity/Entity';
-import { Location } from './location.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Location } from './location.entity.js';
 
 @Entity('business_hours_period')
 export class BusinessHoursPeriod extends EntityHelper {
@@ -86,7 +86,7 @@ export class BusinessHoursPeriod extends EntityHelper {
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne(() => Location, (entity) => entity.businessHours, {
+  @ManyToOne('Location', 'businessHours', {
     onDelete: 'SET NULL',
   })
   location?: Location;

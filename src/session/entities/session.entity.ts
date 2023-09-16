@@ -1,5 +1,3 @@
-import { User } from 'src/users/entities/user.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   CreateDateColumn,
   DeleteDateColumn,
@@ -8,6 +6,8 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
 export class Session extends EntityHelper {

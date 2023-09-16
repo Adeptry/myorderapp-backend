@@ -1,19 +1,19 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { CatalogsModule } from 'src/catalogs/catalogs.module';
-import { CustomersModule } from 'src/customers/customers.module';
-import { FirebaseAdminModule } from 'src/firebase-admin/firebase-admin.module';
-import { LocationsModule } from 'src/locations/locations.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { LineItemModifier } from 'src/orders/entities/line-item-modifier.entity';
-import { LineItem } from 'src/orders/entities/line-item.entity';
-import { Order } from 'src/orders/entities/order.entity';
-import { OrdersController } from 'src/orders/orders.controller';
-import { OrdersService } from 'src/orders/orders.service';
-import { LineItemModifierService } from 'src/orders/services/line-item-modifier.service';
-import { LineItemService } from 'src/orders/services/line-item.service';
-import { SquareModule } from 'src/square/square.module';
+import { AuthModule } from '../auth/auth.module.js';
+import { CatalogsModule } from '../catalogs/catalogs.module.js';
+import { CustomersModule } from '../customers/customers.module.js';
+import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module.js';
+import { LocationsModule } from '../locations/locations.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
+import { LineItemModifier } from '../orders/entities/line-item-modifier.entity.js';
+import { LineItem } from '../orders/entities/line-item.entity.js';
+import { Order } from '../orders/entities/order.entity.js';
+import { OrdersController } from '../orders/orders.controller.js';
+import { OrdersService } from '../orders/orders.service.js';
+import { LineItemModifierService } from '../orders/services/line-item-modifier.service.js';
+import { LineItemService } from '../orders/services/line-item.service.js';
+import { SquareModule } from '../square/square.module.js';
 
 @Module({
   imports: [

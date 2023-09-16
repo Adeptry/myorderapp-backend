@@ -4,8 +4,8 @@ import {
   Logger,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/config.type';
 import Stripe from 'stripe';
+import { AllConfigType } from '../config.type.js';
 
 @Injectable()
 export class StripeService {

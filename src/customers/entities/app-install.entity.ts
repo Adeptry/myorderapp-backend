@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -14,7 +13,8 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Customer } from './customer.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Customer } from './customer.entity.js';
 
 @Entity('app_install')
 export class AppInstall extends EntityHelper {
@@ -71,7 +71,7 @@ export class AppInstall extends EntityHelper {
   @Column({ nullable: true })
   customerId?: string;
 
-  @ManyToOne(() => Customer, (entity) => entity.appInstalls, {
+  @ManyToOne('Customer', 'appInstalls', {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })

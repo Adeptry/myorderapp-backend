@@ -1,11 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { Order } from 'src/orders/entities/order.entity';
-import { User } from 'src/users/entities/user.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -20,7 +15,12 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { AppInstall } from './app-install.entity';
+import { Location } from '../../locations/entities/location.entity.js';
+import { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { Order } from '../../orders/entities/order.entity.js';
+import { User } from '../../users/entities/user.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { AppInstall } from './app-install.entity.js';
 
 @Entity('customer')
 export class Customer extends EntityHelper {

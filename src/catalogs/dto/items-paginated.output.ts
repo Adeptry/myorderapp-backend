@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Item } from 'src/catalogs/entities/item.entity';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { Item } from '../../catalogs/entities/item.entity.js';
+import { InfinityPaginationResultType } from '../../utils/types/infinity-pagination-result.type.js';
 
 export class ItemPaginatedResponse extends InfinityPaginationResultType<Item> {
   @ApiProperty({

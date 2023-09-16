@@ -9,22 +9,22 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
-import { AdminModule } from 'src/admin/admin.module';
-import { AppConfigModule } from 'src/app-config/app-config.module';
-import { AppModule } from 'src/app.module';
-import { AuthAppleModule } from 'src/auth-apple/auth-apple.module';
-import { AuthGoogleModule } from 'src/auth-google/auth-google.module';
-import { AuthModule } from 'src/auth/auth.module';
-import { CardsModule } from 'src/cards/cards.module';
-import { CatalogsModule } from 'src/catalogs/catalogs.module';
-import { AllConfigType } from 'src/config.type';
-import { CustomersModule } from 'src/customers/customers.module';
-import { LocationsModule } from 'src/locations/locations.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { OrdersModule } from 'src/orders/orders.module';
-import { SquareModule } from 'src/square/square.module';
-import { UsersModule } from 'src/users/users.module';
-import { BigIntInterceptor } from 'src/utils/big-int.intercepter';
+import { AdminModule } from './admin/admin.module.js';
+import { AppConfigModule } from './app-config/app-config.module.js';
+import { AppModule } from './app.module.js';
+import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
+import { AuthGoogleModule } from './auth-google/auth-google.module.js';
+import { AuthModule } from './auth/auth.module.js';
+import { CardsModule } from './cards/cards.module.js';
+import { CatalogsModule } from './catalogs/catalogs.module.js';
+import { AllConfigType } from './config.type.js';
+import { CustomersModule } from './customers/customers.module.js';
+import { LocationsModule } from './locations/locations.module.js';
+import { MerchantsModule } from './merchants/merchants.module.js';
+import { OrdersModule } from './orders/orders.module.js';
+import { SquareModule } from './square/square.module.js';
+import { UsersModule } from './users/users.module.js';
+import { BigIntInterceptor } from './utils/big-int.intercepter.js';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {

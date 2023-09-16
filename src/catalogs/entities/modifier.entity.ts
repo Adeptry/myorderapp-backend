@@ -17,11 +17,11 @@ import {
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
-import { Catalog } from './catalog.entity';
-import { ModifierList } from './modifier-list.entity';
-import { ModifierLocationOverride } from './modifier-location-override.entity';
+import { Location } from '../../locations/entities/location.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Catalog } from './catalog.entity.js';
+import { ModifierList } from './modifier-list.entity.js';
+import { ModifierLocationOverride } from './modifier-location-override.entity.js';
 
 @Entity('modifier')
 export class Modifier extends EntityHelper {
@@ -88,7 +88,7 @@ export class Modifier extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne(() => Catalog, (entity) => entity.modifiers, {
+  @ManyToOne('Catalog', 'modifiers', {
     nullable: false,
     onDelete: 'CASCADE',
   })

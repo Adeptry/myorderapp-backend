@@ -14,12 +14,12 @@ import {
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
-import { Catalog } from './catalog.entity';
-import { Category } from './category.entity';
-import { Item } from './item.entity';
-import { ModifierList } from './modifier-list.entity';
-import { Variation } from './variation.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Catalog } from './catalog.entity.js';
+import { Category } from './category.entity.js';
+import { Item } from './item.entity.js';
+import type { ModifierList } from './modifier-list.entity.js';
+import { Variation } from './variation.entity.js';
 
 @Entity('catalog_image')
 export class CatalogImage extends EntityHelper {
@@ -108,7 +108,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: true })
   modifierListId?: string;
 
-  @ManyToOne(() => ModifierList, (entity) => entity.images, {
+  @ManyToOne('ModifierList', 'images', {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -119,7 +119,7 @@ export class CatalogImage extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne(() => Catalog, (entity) => entity.variations, {
+  @ManyToOne('Catalog', 'variations', {
     nullable: false,
     onDelete: 'CASCADE',
   })

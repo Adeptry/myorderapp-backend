@@ -31,21 +31,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AppConfigService } from 'src/app-config/app-config.service';
-import { FilesService } from 'src/files/files.service';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+import { AppConfigService } from '../app-config/app-config.service.js';
+import { FilesService } from '../files/files.service.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import {
   MerchantsGuard,
   MerchantsGuardedRequest,
-} from 'src/guards/merchants.guard';
+} from '../guards/merchants.guard.js';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
-} from 'src/guards/user-type.guard';
-import { UserTypeEnum } from 'src/users/dto/type-user.dto';
-import { NestError } from 'src/utils/error';
-import { AppConfigUpdateDto } from './dto/app-config-update.input';
-import { AppConfig } from './entities/app-config.entity';
+} from '../guards/user-type.guard.js';
+import { UserTypeEnum } from '../users/dto/type-user.dto.js';
+import { NestError } from '../utils/error.js';
+import { AppConfigUpdateDto } from './dto/app-config-update.input.js';
+import { AppConfig } from './entities/app-config.entity.js';
 
 @ApiTags('Configs')
 @UseGuards(ApiKeyAuthGuard)

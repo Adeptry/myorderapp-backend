@@ -14,9 +14,9 @@ import {
   SelectQueryBuilder,
   UpdateResult,
 } from 'typeorm';
-import { PickKeysByType } from 'typeorm/common/PickKeysByType';
-import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity';
-import { UpsertOptions } from 'typeorm/repository/UpsertOptions';
+import { PickKeysByType } from 'typeorm/common/PickKeysByType.js';
+import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity.js';
+import { UpsertOptions } from 'typeorm/repository/UpsertOptions.js';
 
 // Be sure to mark your service as injectable
 export abstract class EntityRepositoryService<Entity extends ObjectLiteral> {

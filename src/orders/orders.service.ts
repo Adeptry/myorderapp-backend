@@ -14,24 +14,24 @@ import {
   UpdateOrderRequest,
   UpdateOrderResponse,
 } from 'square';
-import { ModifiersService } from 'src/catalogs/services/modifiers.service';
-import { VariationsService } from 'src/catalogs/services/variations.service';
-import { CustomersService } from 'src/customers/customers.service';
-import { AppInstall } from 'src/customers/entities/app-install.entity';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
-import { LocationsService } from 'src/locations/locations.service';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { Order } from 'src/orders/entities/order.entity';
-import { SquareOrderFulfillmentUpdatedPayload } from 'src/square/payloads/square-order-fulfillment-updated.payload';
-import { SquareService } from 'src/square/square.service';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { In, Repository } from 'typeorm';
-import { PaymentCreateDto } from './dto/payment-create.dto';
-import { VariationAddDto } from './dto/variation-add.dto';
-import { OrdersUtils } from './orders.utils';
-import { LineItemService } from './services/line-item.service';
+import { ModifiersService } from '../catalogs/services/modifiers.service.js';
+import { VariationsService } from '../catalogs/services/variations.service.js';
+import { CustomersService } from '../customers/customers.service.js';
+import { AppInstall } from '../customers/entities/app-install.entity.js';
+import { Customer } from '../customers/entities/customer.entity.js';
+import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
+import { LocationsService } from '../locations/locations.service.js';
+import { Merchant } from '../merchants/entities/merchant.entity.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { Order } from '../orders/entities/order.entity.js';
+import { SquareOrderFulfillmentUpdatedPayload } from '../square/payloads/square-order-fulfillment-updated.payload.js';
+import { SquareService } from '../square/square.service.js';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { PaymentCreateDto } from './dto/payment-create.dto.js';
+import { VariationAddDto } from './dto/variation-add.dto.js';
+import { OrdersUtils } from './orders.utils.js';
+import { LineItemService } from './services/line-item.service.js';
 
 @Injectable()
 export class OrdersService extends EntityRepositoryService<Order> {

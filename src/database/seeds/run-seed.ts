@@ -1,8 +1,8 @@
 import { NestFactory } from '@nestjs/core';
-import { RoleSeedService } from 'src/database/seeds/role/role-seed.service';
-import { SeedModule } from 'src/database/seeds/seed.module';
-import { StatusSeedService } from 'src/database/seeds/status/status-seed.service';
-import { UserSeedService } from 'src/database/seeds/user/user-seed.service';
+import { RoleSeedService } from '../../database/seeds/role/role-seed.service.js';
+import { SeedModule } from '../../database/seeds/seed.module.js';
+import { StatusSeedService } from '../../database/seeds/status/status-seed.service.js';
+import { UserSeedService } from '../../database/seeds/user/user-seed.service.js';
 
 const runSeed = async () => {
   const app = await NestFactory.create(SeedModule);

@@ -14,9 +14,9 @@ import {
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
-import { Modifier } from './modifier.entity';
+import type { Location } from '../../locations/entities/location.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { Modifier } from './modifier.entity.js';
 
 @Entity('modifier_location_override')
 export class ModifierLocationOverride extends EntityHelper {
@@ -76,7 +76,7 @@ export class ModifierLocationOverride extends EntityHelper {
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne(() => Location, (entity) => entity.modifierLocationOverrides, {
+  @ManyToOne('Location', 'modifierLocationOverrides', {
     onDelete: 'CASCADE',
     nullable: false,
   })

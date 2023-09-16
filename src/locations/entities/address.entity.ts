@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -12,6 +11,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity('address')
 export class Address extends EntityHelper {

@@ -14,9 +14,9 @@ import {
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
-import { Variation } from './variation.entity';
+import type { Location } from '../../locations/entities/location.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import type { Variation } from './variation.entity.js';
 
 @Entity('variation_location_override')
 export class VariationLocationOverride extends EntityHelper {
@@ -65,7 +65,7 @@ export class VariationLocationOverride extends EntityHelper {
   @Column({ nullable: true })
   variationId?: string;
 
-  @ManyToOne(() => Variation, (entity) => entity.locationOverrides, {
+  @ManyToOne('Variation', 'locationOverrides', {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -76,7 +76,7 @@ export class VariationLocationOverride extends EntityHelper {
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
+  @ManyToOne('Location', 'variationLocationOverrides', {
     onDelete: 'CASCADE',
     nullable: false,
   })

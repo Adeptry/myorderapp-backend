@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { BusinessHoursPeriod } from 'src/locations/entities/business-hours-period.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
+import { BusinessHoursPeriod } from '../../locations/entities/business-hours-period.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
 export class BusinessHoursPeriodsService extends EntityRepositoryService<BusinessHoursPeriod> {

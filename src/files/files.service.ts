@@ -5,22 +5,22 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
-import * as AWS from 'aws-sdk';
-import { AllConfigType } from 'src/config.type';
+import S3 from 'aws-sdk/clients/s3.js';
 import { Repository } from 'typeorm';
-import { FileEntity } from './entities/file.entity';
+import { AllConfigType } from '../config.type.js';
+import { FileEntity } from './entities/file.entity.js';
 
 @Injectable()
 export class FilesService {
   private readonly logger = new Logger(FilesService.name);
-  private readonly s3;
+  private readonly s3: S3;
 
   constructor(
     private readonly configService: ConfigService<AllConfigType>,
     @InjectRepository(FileEntity)
     private readonly fileRepository: Repository<FileEntity>,
   ) {
-    this.s3 = new AWS.S3({
+    this.s3 = new S3({
       accessKeyId: this.configService.get('file.accessKeyId', { infer: true }),
       secretAccessKey: this.configService.get('file.secretAccessKey', {
         infer: true,
@@ -36,10 +36,10 @@ export class FilesService {
 
     const bucketName = this.configService.get('file.awsDefaultS3Bucket', {
       infer: true,
-    });
+    })!;
     const key = `${Date.now()}-${file.originalname}`;
 
-    const params = {
+    const params: S3.PutObjectRequest = {
       Bucket: bucketName,
       Key: key,
       Body: file.buffer,

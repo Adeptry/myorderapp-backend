@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from 'src/auth/auth.module';
-import { CustomersModule } from 'src/customers/customers.module';
-import { GuardsModule } from 'src/guards/guards.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
-import { SquareModule } from 'src/square/square.module';
-import { CardsController } from './cards.controller';
+import { AuthModule } from '../auth/auth.module.js';
+import { CustomersModule } from '../customers/customers.module.js';
+import { GuardsModule } from '../guards/guards.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
+import { SquareModule } from '../square/square.module.js';
+import { CardsController } from './cards.controller.js';
 
 @Module({
   imports: [

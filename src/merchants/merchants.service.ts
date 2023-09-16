@@ -10,26 +10,27 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { credential } from 'firebase-admin';
-import { CatalogsService } from 'src/catalogs/catalogs.service';
-import { Catalog } from 'src/catalogs/entities/catalog.entity';
-import { AllConfigType } from 'src/config.type';
-import { FirebaseAdminService } from 'src/firebase-admin/firebase-admin.service';
-import { LocationsService } from 'src/locations/locations.service';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { SquareCatalogVersionUpdatedEventPayload } from 'src/square/payloads/square-catalog-version-updated-payload.entity';
-import { SquareLocationCreatedEventPayload } from 'src/square/payloads/square-location-created-event-payload.entity';
-import { SquareLocationUpdatedEventPayload } from 'src/square/payloads/square-location-updated-event-payload.entity';
-import { SquareConfigUtils } from 'src/square/square.config.utils';
-import { SquareService } from 'src/square/square.service';
-import { StripeConfigUtils } from 'src/stripe/stripe.config.utils';
-import { StripeService } from 'src/stripe/stripe.service';
-import { User } from 'src/users/entities/user.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
+import firebaseAdminPkg from 'firebase-admin';
 import Stripe from 'stripe';
 import { Repository } from 'typeorm';
-import { MerchantUpdateInput } from './dto/update-merchant.input';
-import { MerchantTierEnum } from './entities/merchant-tier.enum';
+import { CatalogsService } from '../catalogs/catalogs.service.js';
+import { Catalog } from '../catalogs/entities/catalog.entity.js';
+import { AllConfigType } from '../config.type.js';
+import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
+import { LocationsService } from '../locations/locations.service.js';
+import { Merchant } from '../merchants/entities/merchant.entity.js';
+import { SquareCatalogVersionUpdatedEventPayload } from '../square/payloads/square-catalog-version-updated-payload.entity.js';
+import { SquareLocationCreatedEventPayload } from '../square/payloads/square-location-created-event-payload.entity.js';
+import { SquareLocationUpdatedEventPayload } from '../square/payloads/square-location-updated-event-payload.entity.js';
+import { SquareConfigUtils } from '../square/square.config.utils.js';
+import { SquareService } from '../square/square.service.js';
+import { StripeConfigUtils } from '../stripe/stripe.config.utils.js';
+import { StripeService } from '../stripe/stripe.service.js';
+import { User } from '../users/entities/user.entity.js';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { MerchantUpdateInput } from './dto/update-merchant.input.js';
+import { MerchantTierEnum } from './entities/merchant-tier.enum.js';
+const { credential } = firebaseAdminPkg;
 
 @Injectable()
 export class MerchantsService extends EntityRepositoryService<Merchant> {

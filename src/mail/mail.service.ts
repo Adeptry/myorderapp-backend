@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { MailData } from './interfaces/mail-data.interface';
+import { MailData } from './interfaces/mail-data.interface.js';
 
 @Injectable()
 export class MailService {

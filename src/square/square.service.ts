@@ -18,9 +18,9 @@ import {
   FileWrapper,
   UpdateOrderRequest,
 } from 'square';
-import { RequestOptions } from 'square/dist/types/core';
+import { RequestOptions } from 'square/dist/types/core.js';
 import { Readable } from 'stream';
-import { SquareCatalogObjectTypeEnum } from './square-catalog-object-type.enum';
+import { SquareCatalogObjectTypeEnum } from './square-catalog-object-type.enum.js';
 
 @Injectable()
 export class SquareService {
@@ -97,6 +97,7 @@ export class SquareService {
     const client = this.client({ accessToken });
     const catalogObjects: CatalogObject[] = [];
     const theTypes = types.join(',');
+
     let listCatalogResponse = await client.catalogApi.listCatalog(
       undefined,
       theTypes,

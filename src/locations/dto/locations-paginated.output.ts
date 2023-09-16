@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Location } from 'src/locations/entities/location.entity';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
+import { Location } from '../../locations/entities/location.entity.js';
+import { InfinityPaginationResultType } from '../../utils/types/infinity-pagination-result.type.js';
 
 export class LocationPaginatedResponse extends InfinityPaginationResultType<Location> {
   @ApiProperty({

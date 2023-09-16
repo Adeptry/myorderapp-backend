@@ -1,5 +1,5 @@
 import { ConfigService } from '@nestjs/config';
-import { AllConfigType } from 'src/config.type';
+import { AllConfigType } from '../config.type.js';
 
 export class StripeConfigUtils {
   constructor(private configService: ConfigService<AllConfigType>) {}

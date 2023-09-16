@@ -1,11 +1,6 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { ModifierLocationOverride } from 'src/catalogs/entities/modifier-location-override.entity';
-import { VariationLocationOverride } from 'src/catalogs/entities/variation-location-override.entity';
-import { Customer } from 'src/customers/entities/customer.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -20,8 +15,13 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Address } from './address.entity';
-import { BusinessHoursPeriod } from './business-hours-period.entity';
+import { ModifierLocationOverride } from '../../catalogs/entities/modifier-location-override.entity.js';
+import { VariationLocationOverride } from '../../catalogs/entities/variation-location-override.entity.js';
+import { Customer } from '../../customers/entities/customer.entity.js';
+import { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { Address } from './address.entity.js';
+import { BusinessHoursPeriod } from './business-hours-period.entity.js';
 
 @Entity('location')
 export class Location extends EntityHelper {

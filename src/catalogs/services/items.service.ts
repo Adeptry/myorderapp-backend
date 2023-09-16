@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import {
   ItemUpdateAllDto,
   ItemUpdateDto,
-} from 'src/catalogs/dto/item-update.dto';
-import { Item } from 'src/catalogs/entities/item.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
-import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
+} from '../../catalogs/dto/item-update.dto.js';
+import { Item } from '../../catalogs/entities/item.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
 export class ItemsService extends EntityRepositoryService<Item> {

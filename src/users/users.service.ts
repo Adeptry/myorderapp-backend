@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
-import { paginatedResults } from 'src/utils/paginated';
-import { InfinityPaginationResultType } from 'src/utils/types/infinity-pagination-result.type';
-import { PaginationOptions } from 'src/utils/types/pagination-options';
 import { DeepPartial, Repository } from 'typeorm';
-import { User } from './entities/user.entity';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { paginatedResults } from '../utils/paginated.js';
+import { InfinityPaginationResultType } from '../utils/types/infinity-pagination-result.type.js';
+import { PaginationOptions } from '../utils/types/pagination-options.js';
+import { User } from './entities/user.entity.js';
 
 @Injectable()
 export class UsersService extends EntityRepositoryService<User> {

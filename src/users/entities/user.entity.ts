@@ -2,11 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { AuthProvidersEnum } from 'src/auth/auth-providers.enum';
-import { FileEntity } from 'src/files/entities/file.entity';
-import { Role } from 'src/roles/entities/role.entity';
-import { Status } from 'src/statuses/entities/status.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   AfterLoad,
   BeforeInsert,
@@ -20,6 +15,11 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
+import { AuthProvidersEnum } from '../../auth/auth-providers.enum.js';
+import { FileEntity } from '../../files/entities/file.entity.js';
+import { Role } from '../../roles/entities/role.entity.js';
+import { Status } from '../../statuses/entities/status.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
 export class User extends EntityHelper {

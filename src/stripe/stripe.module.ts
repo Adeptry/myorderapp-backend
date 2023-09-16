@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
-import { StripeService } from './stripe.service';
-import { StripeWebhookController } from './stripe.webhooks.controller';
+import { StripeService } from './stripe.service.js';
+import { StripeWebhookController } from './stripe.webhooks.controller.js';
 
 @Module({
   imports: [],

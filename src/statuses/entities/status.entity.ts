@@ -1,7 +1,7 @@
-import { Column, Entity, PrimaryColumn } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
-import { EntityHelper } from 'src/utils/entity-helper';
+import { Column, Entity, PrimaryColumn } from 'typeorm';
+import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
 export class Status extends EntityHelper {

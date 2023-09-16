@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { RoleEnum } from 'src/roles/roles.enum';
-import { StatusEnum } from 'src/statuses/statuses.enum';
-import { User } from 'src/users/entities/user.entity';
 import { Repository } from 'typeorm';
+import { RoleEnum } from '../../../roles/roles.enum.js';
+import { StatusEnum } from '../../../statuses/statuses.enum.js';
+import { User } from '../../../users/entities/user.entity.js';
 
 @Injectable()
 export class UserSeedService {

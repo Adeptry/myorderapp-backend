@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../../users/entities/user.entity.js';
 
 export class LoginResponseType {
   @ApiProperty()

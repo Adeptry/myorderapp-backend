@@ -1,9 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { Category } from 'src/catalogs/entities/category.entity';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   CreateDateColumn,
@@ -15,10 +12,13 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Item } from './item.entity';
-import { ModifierList } from './modifier-list.entity';
-import { Modifier } from './modifier.entity';
-import { Variation } from './variation.entity';
+import { Category } from '../../catalogs/entities/category.entity.js';
+import type { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { Item } from './item.entity.js';
+import { ModifierList } from './modifier-list.entity.js';
+import { Modifier } from './modifier.entity.js';
+import { Variation } from './variation.entity.js';
 
 @Entity('catalog')
 export class Catalog extends EntityHelper {
@@ -91,7 +91,7 @@ export class Catalog extends EntityHelper {
   /*
    * Merchant
    */
-  @OneToOne(() => Merchant, (merchant) => merchant.catalog, {
+  @OneToOne('Merchant', 'catalog', {
     onDelete: 'CASCADE',
   })
   merchant?: Merchant;

@@ -28,17 +28,17 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
-import { CustomersController } from 'src/customers/customers.controller';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { CustomersGuard } from 'src/guards/customers.guard';
+import { CustomersController } from '../customers/customers.controller.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { CustomersGuard } from '../guards/customers.guard.js';
 import {
   SquareCard,
   SquareDisableCardResponse,
   SquareListCardsResponse,
-} from 'src/square/square.dto';
-import { SquareService } from 'src/square/square.service';
-import { NestError } from 'src/utils/error';
-import { CreateCardDto } from './dto/card-create.dto';
+} from '../square/square.dto.js';
+import { SquareService } from '../square/square.service.js';
+import { NestError } from '../utils/error.js';
+import { CreateCardDto } from './dto/card-create.dto.js';
 
 @ApiTags('Cards')
 @UseGuards(ApiKeyAuthGuard)

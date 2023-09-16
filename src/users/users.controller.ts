@@ -20,12 +20,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { UsersGuardedRequest } from 'src/guards/users.guard';
-import { NestError } from 'src/utils/error';
-import { UserUpdateDto } from './dto/user-update.dto';
-import { User } from './entities/user.entity';
-import { UsersService } from './users.service';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { UsersGuardedRequest } from '../guards/users.guard.js';
+import { NestError } from '../utils/error.js';
+import { UserUpdateDto } from './dto/user-update.dto.js';
+import { User } from './entities/user.entity.js';
+import { UsersService } from './users.service.js';
 
 @ApiBearerAuth()
 @ApiSecurity('Api-Key')

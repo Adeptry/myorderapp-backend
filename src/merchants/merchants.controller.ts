@@ -29,21 +29,21 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService } from 'src/auth/auth.service';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
-import { UsersGuard } from 'src/guards/users.guard';
-import { StripeCheckoutCreateDto } from 'src/merchants/dto/stripe-checkout-create.input';
-import { SquareService } from 'src/square/square.service';
-import { StripeService } from 'src/stripe/stripe.service';
-import { NestError } from 'src/utils/error';
-import { StripeCheckoutDto } from './dto/stripe-checkout.dto';
+import { AuthService } from '../auth/auth.service.js';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { MerchantsGuard } from '../guards/merchants.guard.js';
+import { UsersGuard } from '../guards/users.guard.js';
+import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
+import { SquareService } from '../square/square.service.js';
+import { StripeService } from '../stripe/stripe.service.js';
+import { NestError } from '../utils/error.js';
+import { StripeCheckoutDto } from './dto/stripe-checkout.dto.js';
 import {
   StripeBillingPortalCreateInput,
   StripeBillingPortalCreateOutput,
-} from './dto/stripe-portal.dto';
-import { Merchant } from './entities/merchant.entity';
-import { MerchantsService } from './merchants.service';
+} from './dto/stripe-portal.dto.js';
+import { Merchant } from './entities/merchant.entity.js';
+import { MerchantsService } from './merchants.service.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')

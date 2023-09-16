@@ -1,15 +1,15 @@
 import { S3Client } from '@aws-sdk/client-s3';
 import { Module, UnprocessableEntityException } from '@nestjs/common';
-import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { diskStorage } from 'multer';
 import multerS3 from 'multer-s3';
-import { AllConfigType } from 'src/config.type';
-import { FileEntity } from './entities/file.entity';
-import { FilesController } from './files.controller';
-import { FilesService } from './files.service';
+import { AllConfigType } from '../config.type.js';
+import { FileEntity } from './entities/file.entity.js';
+import { FilesController } from './files.controller.js';
+import { FilesService } from './files.service.js';
 
 @Module({
   imports: [

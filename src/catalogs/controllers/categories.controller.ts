@@ -26,22 +26,22 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CategoryPaginatedResponse } from 'src/catalogs/dto/categories-paginated.output';
+import { CategoryPaginatedResponse } from '../../catalogs/dto/categories-paginated.output.js';
 import {
   CategoryUpdateAllDto,
   CategoryUpdateDto,
-} from 'src/catalogs/dto/category-update.dto';
-import { Category } from 'src/catalogs/entities/category.entity';
-import { CategoriesService } from 'src/catalogs/services/categories.service';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
+} from '../../catalogs/dto/category-update.dto.js';
+import { Category } from '../../catalogs/entities/category.entity.js';
+import { CategoriesService } from '../../catalogs/services/categories.service.js';
+import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
+import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
-} from 'src/guards/user-type.guard';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dto';
-import { NestError } from 'src/utils/error';
+} from '../../guards/user-type.guard.js';
+import { MerchantsService } from '../../merchants/merchants.service.js';
+import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
+import { NestError } from '../../utils/error.js';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)

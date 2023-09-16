@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { FirebaseAdminService } from './firebase-admin.service';
+import { FirebaseAdminService } from './firebase-admin.service.js';
 
 @Module({
   exports: [FirebaseAdminService],

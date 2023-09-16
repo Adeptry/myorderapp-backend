@@ -5,14 +5,14 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { LocationsService } from 'src/locations/locations.service';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { SquareService } from 'src/square/square.service';
-import { UsersService } from 'src/users/users.service';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
-import { CustomerUpdateDto } from './dto/update-customer.dto';
-import { Customer } from './entities/customer.entity';
+import { LocationsService } from '../locations/locations.service.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { SquareService } from '../square/square.service.js';
+import { UsersService } from '../users/users.service.js';
+import { EntityRepositoryService } from '../utils/entity-repository-service.js';
+import { CustomerUpdateDto } from './dto/update-customer.dto.js';
+import { Customer } from './entities/customer.entity.js';
 
 @Injectable()
 export class CustomersService extends EntityRepositoryService<Customer> {

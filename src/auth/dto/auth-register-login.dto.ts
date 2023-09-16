@@ -7,8 +7,8 @@ import {
   Length,
   Validate,
 } from 'class-validator';
-import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
-import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
+import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
+import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
 
 export class AuthRegisterLoginDto {
   @ApiProperty({ example: 'test1@example.com' })

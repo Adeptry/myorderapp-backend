@@ -1,6 +1,6 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)

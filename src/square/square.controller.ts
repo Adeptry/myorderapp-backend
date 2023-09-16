@@ -1,7 +1,7 @@
 import { Controller, UseGuards } from '@nestjs/common';
 import { ApiSecurity, ApiTags } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { SquareService } from './square.service';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { SquareService } from './square.service.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiTags('Square')

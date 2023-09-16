@@ -8,9 +8,9 @@ import {
   isWithinInterval,
 } from 'date-fns';
 import { Order as SquareOrder } from 'square';
-import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity';
-import { Order } from './entities/order.entity';
-import { LineItemService } from './services/line-item.service';
+import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity.js';
+import { Order } from './entities/order.entity.js';
+import { LineItemService } from './services/line-item.service.js';
 
 export class OrdersUtils {
   private readonly logger = new Logger(OrdersUtils.name);

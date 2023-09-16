@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
-import { AdminController } from 'src/admin/admin.controller';
-import { AuthModule } from 'src/auth/auth.module';
-import { FilesModule } from 'src/files/files.module';
-import { MerchantsModule } from 'src/merchants/merchants.module';
+import { AdminController } from '../admin/admin.controller.js';
+import { AuthModule } from '../auth/auth.module.js';
+import { FilesModule } from '../files/files.module.js';
+import { MerchantsModule } from '../merchants/merchants.module.js';
 
 @Module({
   imports: [AuthModule, FilesModule, MerchantsModule],

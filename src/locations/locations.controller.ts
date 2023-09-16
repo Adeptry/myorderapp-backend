@@ -26,22 +26,22 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from 'src/guards/apikey-auth.guard';
-import { MerchantsGuard } from 'src/guards/merchants.guard';
+import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { MerchantsGuard } from '../guards/merchants.guard.js';
 import {
   UserTypeGuard,
   UserTypeGuardedRequest,
-} from 'src/guards/user-type.guard';
+} from '../guards/user-type.guard.js';
 import {
   LocationUpdateAllDto,
   LocationUpdateDto,
-} from 'src/locations/dto/location-update.input';
-import { LocationPaginatedResponse } from 'src/locations/dto/locations-paginated.output';
-import { Location as MoaLocation } from 'src/locations/entities/location.entity';
-import { LocationsService } from 'src/locations/locations.service';
-import { UserTypeEnum } from 'src/users/dto/type-user.dto';
-import { NestError } from 'src/utils/error';
-import { paginatedResults } from 'src/utils/paginated';
+} from '../locations/dto/location-update.input.js';
+import { LocationPaginatedResponse } from '../locations/dto/locations-paginated.output.js';
+import { Location as MoaLocation } from '../locations/entities/location.entity.js';
+import { LocationsService } from '../locations/locations.service.js';
+import { UserTypeEnum } from '../users/dto/type-user.dto.js';
+import { NestError } from '../utils/error.js';
+import { paginatedResults } from '../utils/paginated.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')

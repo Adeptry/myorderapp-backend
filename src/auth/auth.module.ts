@@ -2,18 +2,18 @@ import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
-import { ForgotModule } from 'src/forgot/forgot.module';
-import { MailModule } from 'src/mail/mail.module';
-import { SessionModule } from 'src/session/session.module';
-import { UsersModule } from 'src/users/users.module';
-import { IsExist } from 'src/utils/validators/is-exists.validator';
-import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
-import { AuthController } from './auth.controller';
-import { AuthService } from './auth.service';
-import { AnonymousStrategy } from './strategies/anonymous.strategy';
-import { ApiKeyStrategy } from './strategies/apikey.strategy';
-import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy';
-import { JwtStrategy } from './strategies/jwt.strategy';
+import { ForgotModule } from '../forgot/forgot.module.js';
+import { MailModule } from '../mail/mail.module.js';
+import { SessionModule } from '../session/session.module.js';
+import { UsersModule } from '../users/users.module.js';
+import { IsExist } from '../utils/validators/is-exists.validator.js';
+import { IsNotExist } from '../utils/validators/is-not-exists.validator.js';
+import { AuthController } from './auth.controller.js';
+import { AuthService } from './auth.service.js';
+import { AnonymousStrategy } from './strategies/anonymous.strategy.js';
+import { ApiKeyStrategy } from './strategies/apikey.strategy.js';
+import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy.js';
+import { JwtStrategy } from './strategies/jwt.strategy.js';
 
 @Module({
   imports: [

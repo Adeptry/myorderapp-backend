@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CatalogImage } from 'src/catalogs/entities/catalog-image.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
+import { CatalogImage } from '../../catalogs/entities/catalog-image.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
 export class CatalogImagesService extends EntityRepositoryService<CatalogImage> {

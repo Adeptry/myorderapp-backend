@@ -1,11 +1,11 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
-import { Role } from 'src/roles/entities/role.entity';
-import { Status } from 'src/statuses/entities/status.entity';
-import { lowerCaseTransformer } from 'src/utils/transformers/lower-case.transformer';
-import { IsExist } from 'src/utils/validators/is-exists.validator';
-import { IsNotExist } from 'src/utils/validators/is-not-exists.validator';
+import { Role } from '../../roles/entities/role.entity.js';
+import { Status } from '../../statuses/entities/status.entity.js';
+import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
+import { IsExist } from '../../utils/validators/is-exists.validator.js';
+import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
 
 export class UserCreateDto {
   @ApiProperty({ example: 'test1@example.com' })

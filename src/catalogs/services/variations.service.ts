@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
-import { Variation } from 'src/catalogs/entities/variation.entity';
-import { Location } from 'src/locations/entities/location.entity';
-import { EntityRepositoryService } from 'src/utils/entity-repository-service';
 import { Repository } from 'typeorm';
-import { VariationUpdateDto } from '../dto/variation-update.dto';
-import { VariationLocationOverride } from '../entities/variation-location-override.entity';
-import { VariationLocationOverridesService } from './variation-location-overrides.service';
+import { Variation } from '../../catalogs/entities/variation.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
+import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
+import { VariationUpdateDto } from '../dto/variation-update.dto.js';
+import { VariationLocationOverride } from '../entities/variation-location-override.entity.js';
+import { VariationLocationOverridesService } from './variation-location-overrides.service.js';
 
 @Injectable()
 export class VariationsService extends EntityRepositoryService<Variation> {

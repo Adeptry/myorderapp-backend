@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Forgot } from './entities/forgot.entity';
-import { ForgotService } from './forgot.service';
+import { Forgot } from './entities/forgot.entity.js';
+import { ForgotService } from './forgot.service.js';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Forgot])],

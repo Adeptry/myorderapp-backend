@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import { EntityHelper } from 'src/utils/entity-helper';
 import {
   BeforeInsert,
   Column,
@@ -15,10 +14,11 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { CatalogImage } from './catalog-image.entity';
-import { Catalog } from './catalog.entity';
-import { Item } from './item.entity';
-import { VariationLocationOverride } from './variation-location-override.entity';
+import { EntityHelper } from '../../utils/entity-helper.js';
+import { CatalogImage } from './catalog-image.entity.js';
+import type { Catalog } from './catalog.entity.js';
+import type { Item } from './item.entity.js';
+import { VariationLocationOverride } from './variation-location-override.entity.js';
 
 @Entity('variation')
 export class Variation extends EntityHelper {
@@ -91,7 +91,7 @@ export class Variation extends EntityHelper {
   @Column({ nullable: true })
   itemId?: string;
 
-  @ManyToOne(() => Item, (entity) => entity.variations, {
+  @ManyToOne('Item', 'variations', {
     onDelete: 'CASCADE',
     nullable: false,
   })
@@ -102,7 +102,7 @@ export class Variation extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne(() => Catalog, (entity) => entity.variations, {
+  @ManyToOne('Catalog', 'variations', {
     nullable: false,
     onDelete: 'CASCADE',
   })

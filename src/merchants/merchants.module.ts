@@ -1,17 +1,17 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from 'src/auth/auth.module';
-import { CatalogsModule } from 'src/catalogs/catalogs.module';
-import { FirebaseAdminModule } from 'src/firebase-admin/firebase-admin.module';
-import { GuardsModule } from 'src/guards/guards.module';
-import { LocationsModule } from 'src/locations/locations.module';
-import { Merchant } from 'src/merchants/entities/merchant.entity';
-import { MerchantsController } from 'src/merchants/merchants.controller';
-import { MerchantsService } from 'src/merchants/merchants.service';
-import { SquareModule } from 'src/square/square.module';
-import { StripeModule } from 'src/stripe/stripe.module';
-import { UsersModule } from 'src/users/users.module';
+import { AuthModule } from '../auth/auth.module.js';
+import { CatalogsModule } from '../catalogs/catalogs.module.js';
+import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module.js';
+import { GuardsModule } from '../guards/guards.module.js';
+import { LocationsModule } from '../locations/locations.module.js';
+import { Merchant } from '../merchants/entities/merchant.entity.js';
+import { MerchantsController } from '../merchants/merchants.controller.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
+import { SquareModule } from '../square/square.module.js';
+import { StripeModule } from '../stripe/stripe.module.js';
+import { UsersModule } from '../users/users.module.js';
 
 @Module({
   imports: [
