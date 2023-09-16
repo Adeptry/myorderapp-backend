@@ -19,5 +19,8 @@
     "forceConsistentCasingInFileNames": false,
     "noFallthroughCasesInSwitch": false,
     "esModuleInterop": true
+  },
+  "ts-node": {
+    "esm": true
   }
 }
