@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
+import pRetry from 'p-retry';
 import {
   CalculateOrderRequest,
   CatalogObject,
@@ -65,21 +66,25 @@ export class SquareService {
   }
 
   obtainToken(params: { oauthAccessCode: string }) {
-    return this.defaultClient.oAuthApi.obtainToken({
-      clientId: this.clientId,
-      clientSecret: this.clientSecret,
-      grantType: 'authorization_code',
-      code: params.oauthAccessCode,
-    });
+    return pRetry(() =>
+      this.defaultClient.oAuthApi.obtainToken({
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        grantType: 'authorization_code',
+        code: params.oauthAccessCode,
+      }),
+    );
   }
 
   async refreshToken(params: { oauthRefreshToken: string }) {
-    return this.defaultClient.oAuthApi.obtainToken({
-      clientId: this.clientId,
-      clientSecret: this.clientSecret,
-      grantType: 'refresh_token',
-      refreshToken: params.oauthRefreshToken,
-    });
+    return pRetry(() =>
+      this.defaultClient.oAuthApi.obtainToken({
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        grantType: 'refresh_token',
+        refreshToken: params.oauthRefreshToken,
+      }),
+    );
   }
 
   client(params: { accessToken: string }): Client {
@@ -98,9 +103,8 @@ export class SquareService {
     const catalogObjects: CatalogObject[] = [];
     const theTypes = types.join(',');
 
-    let listCatalogResponse = await client.catalogApi.listCatalog(
-      undefined,
-      theTypes,
+    let listCatalogResponse = await pRetry(() =>
+      client.catalogApi.listCatalog(undefined, theTypes),
     );
     this.logger.verbose(
       `listCatalog undefined ${theTypes} result length ${
@@ -111,9 +115,8 @@ export class SquareService {
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await client.catalogApi.listCatalog(
-        cursor,
-        theTypes,
+      listCatalogResponse = await pRetry(() =>
+        client.catalogApi.listCatalog(cursor, theTypes),
       );
       this.logger.verbose(
         `listCatalog ${cursor} ${theTypes} result length ${
@@ -129,16 +132,20 @@ export class SquareService {
 
   listLocations(params: { accessToken: string }) {
     const { accessToken } = params;
-    return this.client({
-      accessToken: accessToken,
-    }).locationsApi?.listLocations();
+    return pRetry(() =>
+      this.client({
+        accessToken: accessToken,
+      }).locationsApi?.listLocations(),
+    );
   }
 
   retrieveLocation(params: { accessToken: string; locationSquareId: string }) {
     const { accessToken, locationSquareId } = params;
-    return this.client({
-      accessToken: accessToken,
-    }).locationsApi.retrieveLocation(locationSquareId);
+    return pRetry(() =>
+      this.client({
+        accessToken: accessToken,
+      }).locationsApi.retrieveLocation(locationSquareId),
+    );
   }
 
   createCustomer(params: {
@@ -146,16 +153,20 @@ export class SquareService {
     request: CreateCustomerRequest;
   }) {
     const { accessToken, request } = params;
-    return this.client({
-      accessToken: accessToken,
-    }).customersApi.createCustomer(request);
+    return pRetry(() =>
+      this.client({
+        accessToken: accessToken,
+      }).customersApi.createCustomer(request),
+    );
   }
 
   retrieveCustomer(params: { accessToken: string; squareId: string }) {
     const { accessToken, squareId } = params;
-    return this.client({
-      accessToken: accessToken,
-    }).customersApi.retrieveCustomer(squareId);
+    return pRetry(() =>
+      this.client({
+        accessToken: accessToken,
+      }).customersApi.retrieveCustomer(squareId),
+    );
   }
 
   createOrder(params: {
@@ -164,9 +175,11 @@ export class SquareService {
     requestOptions?: RequestOptions;
   }) {
     const { accessToken, body, requestOptions } = params;
-    return this.client({
-      accessToken,
-    }).ordersApi.createOrder(body, requestOptions);
+    return pRetry(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.createOrder(body, requestOptions),
+    );
   }
 
   retrieveOrder(params: {
@@ -175,9 +188,11 @@ export class SquareService {
     requestOptions?: RequestOptions;
   }) {
     const { accessToken, orderId, requestOptions } = params;
-    return this.client({ accessToken }).ordersApi.retrieveOrder(
-      orderId,
-      requestOptions,
+    return pRetry(() =>
+      this.client({ accessToken }).ordersApi.retrieveOrder(
+        orderId,
+        requestOptions,
+      ),
     );
   }
 
@@ -188,9 +203,11 @@ export class SquareService {
     requestOptions?: RequestOptions;
   }) {
     const { accessToken, orderId, requestOptions, body } = params;
-    return this.client({
-      accessToken,
-    }).ordersApi.updateOrder(orderId, body, requestOptions);
+    return pRetry(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.updateOrder(orderId, body, requestOptions),
+    );
   }
 
   calculateOrder(params: {
@@ -199,9 +216,11 @@ export class SquareService {
     requestOptions?: RequestOptions;
   }) {
     const { accessToken, body, requestOptions } = params;
-    return this.client({
-      accessToken,
-    }).ordersApi.calculateOrder(body, requestOptions);
+    return pRetry(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.calculateOrder(body, requestOptions),
+    );
   }
 
   createPayment(params: {
@@ -210,9 +229,11 @@ export class SquareService {
     requestOptions?: RequestOptions;
   }) {
     const { accessToken, body, requestOptions } = params;
-    return this.client({
-      accessToken: accessToken,
-    }).paymentsApi.createPayment(body, requestOptions);
+    return pRetry(() =>
+      this.client({
+        accessToken: accessToken,
+      }).paymentsApi.createPayment(body, requestOptions),
+    );
   }
 
   listCards(params: {
@@ -231,25 +252,31 @@ export class SquareService {
       referenceId,
       sortOrder,
     } = params;
-    return this.client({ accessToken }).cardsApi.listCards(
-      cursor,
-      customerId,
-      includeDisabled,
-      referenceId,
-      sortOrder,
+    return pRetry(() =>
+      this.client({ accessToken }).cardsApi.listCards(
+        cursor,
+        customerId,
+        includeDisabled,
+        referenceId,
+        sortOrder,
+      ),
     );
   }
 
   createCard(params: { accessToken: string; body: CreateCardRequest }) {
-    return this.client({ accessToken: params.accessToken }).cardsApi.createCard(
-      params.body,
+    return pRetry(() =>
+      this.client({ accessToken: params.accessToken }).cardsApi.createCard(
+        params.body,
+      ),
     );
   }
 
   disableCard(params: { accessToken: string; cardId: string }) {
-    return this.client({
-      accessToken: params.accessToken,
-    }).cardsApi.disableCard(params.cardId);
+    return pRetry(() =>
+      this.client({
+        accessToken: params.accessToken,
+      }).cardsApi.disableCard(params.cardId),
+    );
   }
 
   async uploadCatalogImage(params: {
@@ -273,21 +300,23 @@ export class SquareService {
     });
 
     try {
-      const response = await this.client({
-        accessToken: params.accessToken,
-      }).catalogApi.createCatalogImage(
-        {
-          idempotencyKey: idempotencyKey,
-          objectId: objectId,
-          image: {
-            type: 'IMAGE',
-            id: `#${nanoid()}`,
-            imageData: {
-              caption: caption,
+      const response = await pRetry(() =>
+        this.client({
+          accessToken: params.accessToken,
+        }).catalogApi.createCatalogImage(
+          {
+            idempotencyKey: idempotencyKey,
+            objectId: objectId,
+            image: {
+              type: 'IMAGE',
+              id: `#${nanoid()}`,
+              imageData: {
+                caption: caption,
+              },
             },
           },
-        },
-        fileWrapper,
+          fileWrapper,
+        ),
       );
 
       return response.result;

@@ -9,10 +9,12 @@ import {
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { Cron, CronExpression } from '@nestjs/schedule';
 import { InjectRepository } from '@nestjs/typeorm';
 import firebaseAdminPkg from 'firebase-admin';
 import Stripe from 'stripe';
-import { Repository } from 'typeorm';
+import { LessThan, Repository } from 'typeorm';
+import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
 import { AllConfigType } from '../config.type.js';
@@ -112,21 +114,36 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
     }
   }
 
-  async squareRefreshOauth(id: string) {
-    const merchant = await this.findOneOrFail({
-      where: { id },
+  @Cron(CronExpression.EVERY_DAY_AT_4AM)
+  async refreshTokensCron() {
+    const seventyTwoHoursFromNow = new Date(
+      new Date().getTime() + 72 * 60 * 60 * 1000,
+    );
+    const merchantsWhereSquareTokenExpiresInLessThan72Hours = await this.find({
+      where: {
+        squareExpiresAt: LessThan(
+          DateUtils.mixedDateToUtcDatetimeString(seventyTwoHoursFromNow),
+        ),
+      },
     });
-    const oauthRefreshToken = merchant.squareRefreshToken ?? '';
-    const result = (
-      await this.squareService.refreshToken({
-        oauthRefreshToken,
-      })
-    ).result;
-    merchant.squareAccessToken = result.accessToken;
-    merchant.squareExpiresAt = new Date(Date.parse(result.expiresAt ?? ''));
-    merchant.squareId = result.merchantId;
-    merchant.squareRefreshToken = result.refreshToken;
-    return await this.save(merchant);
+
+    for (const merchant of merchantsWhereSquareTokenExpiresInLessThan72Hours) {
+      try {
+        const oauthRefreshToken = merchant.squareRefreshToken ?? '';
+        const result = (
+          await this.squareService.refreshToken({
+            oauthRefreshToken,
+          })
+        ).result;
+        merchant.squareAccessToken = result.accessToken;
+        merchant.squareExpiresAt = new Date(Date.parse(result.expiresAt ?? ''));
+        merchant.squareId = result.merchantId;
+        merchant.squareRefreshToken = result.refreshToken;
+        await this.save(merchant);
+      } catch (error) {
+        this.logger.error("Failed to refresh merchant's Square token", error);
+      }
+    }
   }
 
   async squareCatalogSync(params: { merchantId: string }) {
