@@ -23,7 +23,6 @@ import { nanoid } from 'nanoid';
 import { AdminsGuard } from '../guards/admins.guard.js';
 
 @ApiTags('Health')
-@ApiSecurity('Api-Key')
 @Controller({
   path: 'health',
   version: '2',
@@ -35,8 +34,6 @@ export class HealthController {
     private readonly httpHealthIndicator: HttpHealthIndicator,
   ) {}
 
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('database')
   @HealthCheck()
   @ApiOperation({ summary: 'Check database health' })
@@ -48,6 +45,7 @@ export class HealthController {
     ]);
   }
 
+  @ApiSecurity('Api-Key')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('error')
@@ -57,6 +55,7 @@ export class HealthController {
     throw new InternalServerErrorException(nanoid());
   }
 
+  @ApiSecurity('Api-Key')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('sentry/error')
@@ -79,6 +78,7 @@ export class HealthController {
     }, 99);
   }
 
+  @ApiSecurity('Api-Key')
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('http')
