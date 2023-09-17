@@ -99,7 +99,7 @@ export class Merchant extends EntityHelper {
   @Column({ nullable: true })
   userId?: string;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ type: () => User, required: false, nullable: true })
   @ManyToOne(() => User)
   user?: Relation<User>;
 

@@ -98,13 +98,6 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   minimumVersion?: string;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  showAds?: boolean;
-
   /* App Icon */
 
   @Exclude({ toPlainOnly: true })
