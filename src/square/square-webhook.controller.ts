@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Inject,
-  Logger,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Body, Controller, Headers, Logger, Post, Req } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
@@ -19,14 +11,13 @@ export class SquareWebhookController {
   private readonly logger = new Logger(SquareWebhookController.name);
 
   constructor(
-    @Inject(ConfigService)
     private configService: ConfigService<AllConfigType>,
     private eventEmitter: EventEmitter2,
   ) {}
 
   @ApiExcludeEndpoint()
   @Post()
-  webhook(
+  post(
     @Headers('x-square-signature') signature: string,
     @Body() body: any,
     @Req() request: Request,

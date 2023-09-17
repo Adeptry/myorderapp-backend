@@ -29,7 +29,7 @@ export class StripeWebhookController {
 
   @ApiExcludeEndpoint()
   @Post()
-  webhook(
+  post(
     @Headers('stripe-signature') signature: string,
     @Req() request: RawBodyRequest<Request>,
     @Res({ passthrough: true }) response: Response,

@@ -44,6 +44,8 @@ import {
 } from './dto/stripe-portal.dto.js';
 import { Merchant } from './entities/merchant.entity.js';
 import { MerchantsService } from './merchants.service.js';
+import { MerchantsSquareService } from './merchants.square.service.js';
+import { MerchantsStripeService } from './merchants.stripe.service.js';
 
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
@@ -57,6 +59,8 @@ export class MerchantsController {
 
   constructor(
     protected readonly service: MerchantsService,
+    protected readonly merchantsSquareService: MerchantsSquareService,
+    protected readonly merchantsStripeService: MerchantsStripeService,
     protected readonly squareService: SquareService,
     protected readonly authService: AuthService,
     @Inject(StripeService)
@@ -78,7 +82,7 @@ export class MerchantsController {
   @ApiOkResponse({ description: 'Merchant created' })
   async create(@Req() request: any) {
     if (
-      await this.service.findOne({
+      await this.service.findOneOrFail({
         where: { userId: request.user.id },
       })
     ) {
@@ -175,51 +179,31 @@ export class MerchantsController {
     @Req() request: any,
     @Query('oauthAccessCode') oauthAccessCode: string,
   ): Promise<void> {
-    await this.service.squareConfirmOauth({
+    await this.merchantsSquareService.confirmOauthAndSave({
       oauthAccessCode,
-      merchant: request.merchant,
+      merchantId: request.merchant.id,
     });
 
     return;
   }
 
-  @Get('me/square/catalog/sync')
+  @Get('me/square/sync')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Sync your Square Catalog',
-    operationId: 'syncSquareCatalog',
+    operationId: 'squareSync',
   })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async squareCatalogSync(@Req() request: any): Promise<void> {
-    return this.service.squareCatalogSync({
+  async squareSync(@Req() request: any): Promise<void> {
+    return this.merchantsSquareService.sync({
       merchantId: request.merchant.id,
     });
-  }
-
-  @Get('me/square/locations/sync')
-  @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
-  @ApiBearerAuth()
-  @ApiOperation({
-    summary: 'Sync your Square Locations',
-    operationId: 'syncSquareLocations',
-  })
-  @ApiOkResponse()
-  @ApiUnauthorizedResponse({
-    description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
-  })
-  async squareLocationsSync(@Req() request: any): Promise<void> {
-    await this.service.squareLocationsSync({
-      merchant: request.merchant,
-    });
-    return;
   }
 
   @Post('me/stripe/checkout/create')
@@ -240,10 +224,11 @@ export class MerchantsController {
     @Req() request,
     @Body() input: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
-    const checkoutSessionId = await this.service.stripeCreateCheckoutSessionId({
-      merchant: request.merchant,
-      ...input,
-    });
+    const checkoutSessionId =
+      await this.merchantsStripeService.createCheckoutSessionId({
+        merchantId: request.merchant.id,
+        ...input,
+      });
 
     if (!checkoutSessionId) {
       throw new InternalServerErrorException(
@@ -272,8 +257,8 @@ export class MerchantsController {
     @Req() request,
     @Body() input: StripeBillingPortalCreateInput,
   ): Promise<StripeBillingPortalCreateOutput | null> {
-    const url = await this.service.stripeCreateBillingPortalSession({
-      merchant: request.merchant,
+    const url = await this.merchantsStripeService.createBillingPortalSession({
+      merchantId: request.merchant.id,
       ...input,
     });
 

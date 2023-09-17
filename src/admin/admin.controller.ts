@@ -24,7 +24,7 @@ import { LoginResponseType } from '../auth/types/login-response.type.js';
 import { FilesService } from '../files/files.service.js';
 import { AdminsGuard } from '../guards/admins.guard.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { MerchantsService } from '../merchants/merchants.service.js';
+import { MerchantsSquareService } from '../merchants/merchants.square.service.js';
 import { NestError } from '../utils/error.js';
 
 @ApiTags('Admin')
@@ -40,7 +40,7 @@ export class AdminController {
   constructor(
     protected readonly authService: AuthService,
     protected readonly filesService: FilesService,
-    protected readonly merchantsService: MerchantsService,
+    protected readonly merchantsSquareService: MerchantsSquareService,
   ) {}
 
   @Post('email/login')
@@ -73,7 +73,7 @@ export class AdminController {
   async squareCatalogSync(
     @Query('merchantId') merchantId: string,
   ): Promise<void> {
-    return this.merchantsService.squareCatalogSync({
+    return this.merchantsSquareService.sync({
       merchantId,
     });
   }

@@ -12,6 +12,8 @@ import { MerchantsService } from '../merchants/merchants.service.js';
 import { SquareModule } from '../square/square.module.js';
 import { StripeModule } from '../stripe/stripe.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { MerchantsSquareService } from './merchants.square.service.js';
+import { MerchantsStripeService } from './merchants.stripe.service.js';
 
 @Module({
   imports: [
@@ -27,7 +29,7 @@ import { UsersModule } from '../users/users.module.js';
     forwardRef(() => LocationsModule),
   ],
   controllers: [MerchantsController],
-  providers: [MerchantsService],
-  exports: [MerchantsService],
+  providers: [MerchantsService, MerchantsSquareService, MerchantsStripeService],
+  exports: [MerchantsService, MerchantsSquareService, MerchantsStripeService],
 })
 export class MerchantsModule {}
