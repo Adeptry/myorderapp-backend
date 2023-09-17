@@ -11,12 +11,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { LineItemModifier } from './line-item-modifier.entity.js';
-import type { Order } from './order.entity.js';
+import { Order } from './order.entity.js';
 
 @Entity('line_item')
 export class LineItem extends EntityHelper {
@@ -107,12 +108,12 @@ export class LineItem extends EntityHelper {
   @Column({ nullable: true })
   orderId?: string;
 
-  @ManyToOne('Order', 'lineItems', {
+  @ManyToOne(() => Order, (entity) => entity.lineItems, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'orderId' })
-  order?: Order;
+  order?: Relation<Order>;
 
   @ApiProperty({
     required: false,

@@ -13,6 +13,7 @@ import {
   Index,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthProvidersEnum } from '../../auth/auth-providers.enum.js';
@@ -94,19 +95,19 @@ export class User extends EntityHelper {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  photo?: FileEntity | null;
+  photo?: Relation<FileEntity> | null;
 
   @ManyToOne(() => Role, {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  role?: Role | null;
+  role?: Relation<Role> | null;
 
   @ManyToOne(() => Status, {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  status?: Status;
+  status?: Relation<Status>;
 
   @Column({ type: String, nullable: true })
   @Index()

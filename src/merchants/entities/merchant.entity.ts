@@ -12,13 +12,13 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { AppConfig } from '../../app-config/entities/app-config.entity.js';
 import { Catalog } from '../../catalogs/entities/catalog.entity.js';
 import { Customer } from '../../customers/entities/customer.entity.js';
-import { FileEntity } from '../../files/entities/file.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
 import { User } from '../../users/entities/user.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
@@ -101,7 +101,7 @@ export class Merchant extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @ManyToOne(() => User)
-  user?: User;
+  user?: Relation<User>;
 
   /*
    * App config
@@ -112,7 +112,7 @@ export class Merchant extends EntityHelper {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  appConfig?: AppConfig;
+  appConfig?: Relation<AppConfig>;
 
   /*
    * Square
@@ -160,7 +160,7 @@ export class Merchant extends EntityHelper {
     nullable: true,
   })
   @JoinColumn({ name: 'catalogId' })
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 
   /*
    * Locations
@@ -195,44 +195,4 @@ export class Merchant extends EntityHelper {
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   firebaseDatabaseUrl?: string;
-
-  /*
-   * Files
-   */
-
-  /* Android Zip */
-
-  @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true })
-  androidZipFileId?: string;
-
-  @ApiProperty({
-    type: () => FileEntity,
-    required: false,
-    nullable: true,
-  })
-  @OneToOne(() => FileEntity, {
-    onDelete: 'SET NULL',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'androidZipFileId' })
-  androidZipFile?: FileEntity | null;
-
-  /* iOS Zip */
-
-  @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true })
-  iosZipFileId?: string;
-
-  @ApiProperty({
-    type: () => FileEntity,
-    required: false,
-    nullable: true,
-  })
-  @OneToOne(() => FileEntity, {
-    onDelete: 'SET NULL',
-    nullable: true,
-  })
-  @JoinColumn({ name: 'iosZipFileId' })
-  iosZipFile?: FileEntity | null;
 }

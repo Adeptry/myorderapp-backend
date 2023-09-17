@@ -9,12 +9,13 @@ import {
   Entity,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Item } from './item.entity.js';
-import type { ModifierList } from './modifier-list.entity.js';
+import { Item } from './item.entity.js';
+import { ModifierList } from './modifier-list.entity.js';
 
 @Entity('item_modifier_list')
 export class ItemModifierList extends EntityHelper {
@@ -64,22 +65,22 @@ export class ItemModifierList extends EntityHelper {
     required: false,
     nullable: true,
   })
-  @ManyToOne('Item', 'itemModifierLists', {
+  @ManyToOne(() => Item, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
-  item: Item;
+  item: Relation<Item>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })
   modifierListId?: string;
 
   @ApiProperty({
-    type: 'ModifierList',
+    type: () => ModifierList,
     required: false,
     nullable: true,
   })
-  @ManyToOne('ModifierList', 'itemModifierLists', {
+  @ManyToOne(() => ModifierList, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
-  modifierList: ModifierList;
+  modifierList: Relation<ModifierList>;
 }

@@ -10,11 +10,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { LineItem } from './line-item.entity.js';
+import { LineItem } from './line-item.entity.js';
 
 @Entity('line_item_modifier')
 export class LineItemModifier extends EntityHelper {
@@ -77,10 +78,10 @@ export class LineItemModifier extends EntityHelper {
   @Column({ nullable: true })
   lineItemId?: string;
 
-  @ManyToOne('LineItem', 'modifiers', {
+  @ManyToOne(() => LineItem, (entity) => entity.modifiers, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'lineItemId' })
-  lineItem?: LineItem;
+  lineItem?: Relation<LineItem>;
 }

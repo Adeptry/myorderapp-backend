@@ -5,6 +5,7 @@ import {
   Index,
   ManyToOne,
   PrimaryGeneratedColumn,
+  Relation,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
@@ -18,7 +19,7 @@ export class Session extends EntityHelper {
     eager: true,
   })
   @Index()
-  user: User;
+  user: Relation<User>;
 
   @CreateDateColumn()
   createdAt: Date;

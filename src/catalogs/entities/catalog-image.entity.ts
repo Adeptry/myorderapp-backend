@@ -8,6 +8,7 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -15,10 +16,10 @@ import {
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Catalog } from './catalog.entity.js';
+import { Catalog } from './catalog.entity.js';
 import { Category } from './category.entity.js';
 import { Item } from './item.entity.js';
-import type { ModifierList } from './modifier-list.entity.js';
+import { ModifierList } from './modifier-list.entity.js';
 import { Variation } from './variation.entity.js';
 
 @Entity('catalog_image')
@@ -80,7 +81,7 @@ export class CatalogImage extends EntityHelper {
     nullable: false,
   })
   @JoinColumn({ name: 'itemId' })
-  item?: Item;
+  item?: Relation<Item>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
@@ -91,7 +92,7 @@ export class CatalogImage extends EntityHelper {
     nullable: false,
   })
   @JoinColumn({ name: 'variationId' })
-  variation?: Variation;
+  variation?: Relation<Variation>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
@@ -102,27 +103,27 @@ export class CatalogImage extends EntityHelper {
     nullable: false,
   })
   @JoinColumn({ name: 'categoryId' })
-  category?: Category;
+  category?: Relation<Category>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   modifierListId?: string;
 
-  @ManyToOne('ModifierList', 'images', {
+  @ManyToOne(() => ModifierList, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'modifierListId' })
-  modifierList?: ModifierList;
+  modifierList?: Relation<ModifierList>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'variations', {
+  @ManyToOne(() => Catalog, (entity) => entity.variations, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'catalogId' })
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 }

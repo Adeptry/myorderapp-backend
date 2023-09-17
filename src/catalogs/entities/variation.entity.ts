@@ -11,13 +11,14 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { CatalogImage } from './catalog-image.entity.js';
-import type { Catalog } from './catalog.entity.js';
-import type { Item } from './item.entity.js';
+import { Catalog } from './catalog.entity.js';
+import { Item } from './item.entity.js';
 import { VariationLocationOverride } from './variation-location-override.entity.js';
 
 @Entity('variation')
@@ -91,23 +92,23 @@ export class Variation extends EntityHelper {
   @Column({ nullable: true })
   itemId?: string;
 
-  @ManyToOne('Item', 'variations', {
+  @ManyToOne(() => Item, (entity) => entity.variations, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  item?: Item;
+  item?: Relation<Item>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'variations', {
+  @ManyToOne(() => Catalog, (entity) => entity.variations, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'catalogId' })
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 
   @OneToMany(() => VariationLocationOverride, (entity) => entity.variation, {
     nullable: true,

@@ -9,11 +9,12 @@ import {
   Entity,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Location } from './location.entity.js';
+import { Location } from './location.entity.js';
 
 @Entity('business_hours_period')
 export class BusinessHoursPeriod extends EntityHelper {
@@ -86,8 +87,8 @@ export class BusinessHoursPeriod extends EntityHelper {
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne('Location', 'businessHours', {
+  @ManyToOne(() => Location, (entity) => entity.businessHours, {
     onDelete: 'SET NULL',
   })
-  location?: Location;
+  location?: Relation<Location>;
 }

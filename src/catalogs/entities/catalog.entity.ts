@@ -9,11 +9,12 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { Category } from '../../catalogs/entities/category.entity.js';
-import type { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { Merchant } from '../../merchants/entities/merchant.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { Item } from './item.entity.js';
 import { ModifierList } from './modifier-list.entity.js';
@@ -91,8 +92,8 @@ export class Catalog extends EntityHelper {
   /*
    * Merchant
    */
-  @OneToOne('Merchant', 'catalog', {
+  @OneToOne(() => Merchant, (entity) => entity.catalog, {
     onDelete: 'CASCADE',
   })
-  merchant?: Merchant;
+  merchant?: Relation<Merchant>;
 }

@@ -11,6 +11,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -19,7 +20,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Catalog } from './catalog.entity.js';
+import { Catalog } from './catalog.entity.js';
 import { ModifierList } from './modifier-list.entity.js';
 import { ModifierLocationOverride } from './modifier-location-override.entity.js';
 
@@ -82,18 +83,18 @@ export class Modifier extends EntityHelper {
     nullable: false,
   })
   @JoinColumn()
-  modifierList?: ModifierList | null;
+  modifierList?: Relation<ModifierList> | null;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'modifiers', {
+  @ManyToOne(() => Catalog, (entity) => entity.modifiers, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 
   // Locations
 

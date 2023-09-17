@@ -11,11 +11,12 @@ import {
   ManyToOne,
   OneToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { FileEntity } from '../../files/entities/file.entity.js';
-import type { Merchant } from '../../merchants/entities/merchant.entity.js';
+import { Merchant } from '../../merchants/entities/merchant.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { ThemeModeEnum } from './theme-mode.enum.js';
 
@@ -121,7 +122,7 @@ export class AppConfig extends EntityHelper {
     eager: true,
   })
   @JoinColumn({ name: 'iconFileId' })
-  iconFile?: FileEntity | null;
+  iconFile?: Relation<FileEntity> | null;
 
   // @ApiProperty({ required: false, nullable: true })
   // @Column({ nullable: true })
@@ -133,9 +134,9 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne('Merchant', 'appConfig', {
+  @ManyToOne(() => Merchant, (entity) => entity.appConfig, {
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  merchant?: Merchant;
+  merchant?: Relation<Merchant>;
 }

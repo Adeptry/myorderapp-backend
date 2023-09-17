@@ -13,6 +13,7 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -20,7 +21,7 @@ import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { MoaSelectionType } from '../dto/catalogs.types.js';
 import { CatalogImage } from './catalog-image.entity.js';
-import type { Catalog } from './catalog.entity.js';
+import { Catalog } from './catalog.entity.js';
 import { ItemModifierList } from './item-modifier-list.entity.js';
 import { Modifier } from './modifier.entity.js';
 
@@ -149,10 +150,10 @@ export class ModifierList extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'modifierLists', {
+  @ManyToOne(() => Catalog, (entity) => entity.modifierLists, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 }

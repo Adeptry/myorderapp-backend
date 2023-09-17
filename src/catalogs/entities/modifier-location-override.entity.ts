@@ -8,13 +8,14 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import type { Location } from '../../locations/entities/location.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { Modifier } from './modifier.entity.js';
 
@@ -70,16 +71,16 @@ export class ModifierLocationOverride extends EntityHelper {
     nullable: false,
   })
   @JoinColumn({ name: 'modifierId' })
-  modifier?: Modifier;
+  modifier?: Relation<Modifier>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne('Location', 'modifierLocationOverrides', {
+  @ManyToOne(() => Location, (entity) => entity.modifierLocationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'locationId' })
-  location?: Location;
+  location?: Relation<Location>;
 }

@@ -8,15 +8,16 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
-import type { Location } from '../../locations/entities/location.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Variation } from './variation.entity.js';
+import { Variation } from './variation.entity.js';
 
 @Entity('variation_location_override')
 export class VariationLocationOverride extends EntityHelper {
@@ -65,21 +66,21 @@ export class VariationLocationOverride extends EntityHelper {
   @Column({ nullable: true })
   variationId?: string;
 
-  @ManyToOne('Variation', 'locationOverrides', {
+  @ManyToOne(() => Variation, (entity) => entity.locationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'variationId' })
-  variation?: Variation;
+  variation?: Relation<Variation>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   locationId?: string;
 
-  @ManyToOne('Location', 'variationLocationOverrides', {
+  @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'locationId' })
-  location?: Location;
+  location?: Relation<Location>;
 }

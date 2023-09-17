@@ -12,6 +12,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -164,7 +165,7 @@ export class Location extends EntityHelper {
   @ManyToOne(() => Merchant, (entity) => entity.locations, {
     onDelete: 'SET NULL',
   })
-  merchant?: Merchant;
+  merchant?: Relation<Merchant>;
 
   /*
    * Merchant
@@ -206,7 +207,7 @@ export class Location extends EntityHelper {
   })
   @JoinColumn({ name: 'addressId' })
   @ApiProperty({ type: Address, required: false, nullable: true })
-  address?: Address | null;
+  address?: Relation<Address> | null;
 
   /*
    * Overrides

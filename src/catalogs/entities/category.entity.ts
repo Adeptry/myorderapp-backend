@@ -11,12 +11,13 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { CatalogImage } from './catalog-image.entity.js';
-import type { Catalog } from './catalog.entity.js';
+import { Catalog } from './catalog.entity.js';
 import { Item } from './item.entity.js';
 
 @Entity('category')
@@ -83,12 +84,12 @@ export class Category extends EntityHelper {
   @Column({ nullable: true })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'categories', {
+  @ManyToOne(() => Catalog, (entity) => entity.categories, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 
   @ApiProperty({
     type: () => Item,

@@ -12,6 +12,7 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -59,7 +60,7 @@ export class Customer extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @ManyToOne(() => User)
-  user?: User;
+  user?: Relation<User>;
 
   /* Merchant */
 
@@ -68,7 +69,7 @@ export class Customer extends EntityHelper {
   merchantId?: string;
 
   @ManyToOne(() => Merchant)
-  merchant?: Merchant;
+  merchant?: Relation<Merchant>;
 
   /* Current order */
 
@@ -81,7 +82,7 @@ export class Customer extends EntityHelper {
     nullable: true,
   })
   @JoinColumn({ name: 'currentOrderId' })
-  currentOrder?: Order | null;
+  currentOrder?: Relation<Order> | null;
 
   /* Orders */
 
@@ -119,5 +120,5 @@ export class Customer extends EntityHelper {
     nullable: false,
   })
   @JoinColumn({ name: 'preferredLocationId' })
-  preferredLocation?: Location | null;
+  preferredLocation?: Relation<Location> | null;
 }

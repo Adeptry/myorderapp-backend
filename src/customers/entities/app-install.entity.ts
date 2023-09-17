@@ -10,11 +10,12 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import type { Customer } from './customer.entity.js';
+import { Customer } from './customer.entity.js';
 
 @Entity('app_install')
 export class AppInstall extends EntityHelper {
@@ -71,9 +72,9 @@ export class AppInstall extends EntityHelper {
   @Column({ nullable: true })
   customerId?: string;
 
-  @ManyToOne('Customer', 'appInstalls', {
+  @ManyToOne(() => Customer, (entity) => entity.appInstalls, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
-  customer: Customer;
+  customer: Relation<Customer>;
 }

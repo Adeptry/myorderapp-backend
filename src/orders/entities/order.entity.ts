@@ -11,11 +11,12 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import type { Customer } from '../../customers/entities/customer.entity.js';
-import type { Location } from '../../locations/entities/location.entity.js';
+import { Customer } from '../../customers/entities/customer.entity.js';
+import { Location } from '../../locations/entities/location.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { LineItem } from './line-item.entity.js';
@@ -60,12 +61,12 @@ export class Order extends EntityHelper {
     type: 'Customer',
     nullable: true,
   })
-  @ManyToOne('Customer', 'orders', {
+  @ManyToOne(() => Customer, (entity) => entity.orders, {
     nullable: true,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  customer?: Customer;
+  customer?: Relation<Customer>;
 
   /*
    * Merchant
@@ -76,7 +77,7 @@ export class Order extends EntityHelper {
 
   @ManyToOne(() => Merchant, { onDelete: 'SET NULL', nullable: true })
   @JoinColumn()
-  merchant?: Merchant;
+  merchant?: Relation<Merchant>;
 
   /*
    * Location
@@ -90,9 +91,9 @@ export class Order extends EntityHelper {
     type: 'Location',
     nullable: true,
   })
-  @ManyToOne('Location', { onDelete: 'SET NULL' })
+  @ManyToOne(() => Location, { onDelete: 'SET NULL' })
   @JoinColumn()
-  location?: Location;
+  location?: Relation<Location>;
 
   /*
    * Square

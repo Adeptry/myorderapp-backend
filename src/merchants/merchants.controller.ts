@@ -132,10 +132,6 @@ export class MerchantsController {
     appConfig?: boolean,
     @Query('locations', new DefaultValuePipe(false), ParseBoolPipe)
     locations?: boolean,
-    @Query('androidZipFile', new DefaultValuePipe(false), ParseBoolPipe)
-    androidZipFile?: boolean,
-    @Query('iosZipFile', new DefaultValuePipe(false), ParseBoolPipe)
-    iosZipFile?: boolean,
   ): Promise<Merchant> {
     const { user } = request;
     const merchant = await this.service.findOne({
@@ -143,8 +139,6 @@ export class MerchantsController {
       relations: {
         appConfig,
         locations,
-        androidZipFile,
-        iosZipFile,
       },
     });
 

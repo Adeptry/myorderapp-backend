@@ -13,14 +13,15 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
+  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { CatalogImage } from './catalog-image.entity.js';
-import type { Catalog } from './catalog.entity.js';
-import type { Category } from './category.entity.js';
+import { Catalog } from './catalog.entity.js';
+import { Category } from './category.entity.js';
 import { ItemModifierList } from './item-modifier-list.entity.js';
 import { Variation } from './variation.entity.js';
 
@@ -102,12 +103,12 @@ export class Item extends EntityHelper {
   @Column({ nullable: true })
   categoryId?: string;
 
-  @ManyToOne('Category', 'items', {
+  @ManyToOne(() => Category, (entity) => entity.items, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn()
-  category?: Category;
+  category?: Relation<Category>;
 
   /*
    * Modifier lists
@@ -148,12 +149,12 @@ export class Item extends EntityHelper {
   @Column({ nullable: false })
   catalogId?: string;
 
-  @ManyToOne('Catalog', 'items', {
+  @ManyToOne(() => Catalog, (entity) => entity.items, {
     nullable: false,
     onDelete: 'CASCADE',
   })
   @JoinColumn()
-  catalog?: Catalog;
+  catalog?: Relation<Catalog>;
 
   /*
    *  Locations
