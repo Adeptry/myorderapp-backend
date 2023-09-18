@@ -17,10 +17,10 @@ export class SquareError {
     description:
       'Indicates the specific error that occurred during a request to a Square API.',
   })
-  category: string;
+  category?: string;
 
   @ApiProperty({ required: false, nullable: true })
-  code: string;
+  code?: string;
 
   @ApiProperty({
     required: false,
@@ -162,11 +162,11 @@ export class SquareCard {
 export class SquareCreateCustomerCardInput {
   @ApiProperty({ example: nanoid() })
   @IsNotEmpty()
-  idempotencyKey: string;
+  idempotencyKey?: string;
 
   @ApiProperty({ example: 'cnon:card-nonce-ok' })
   @IsNotEmpty()
-  sourceId: string;
+  sourceId?: string;
 
   @ApiProperty({ required: false, default: null, nullable: true })
   @IsOptional()
@@ -174,7 +174,7 @@ export class SquareCreateCustomerCardInput {
 
   @ApiProperty({ type: () => SquareCard })
   @IsNotEmpty()
-  card: SquareCard;
+  card?: SquareCard;
 }
 
 export class SquareDisableCardResponse {
@@ -214,11 +214,11 @@ export class SquareListCardsResponse {
 export class SquareMeasurementUnitCustom {
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  name: string;
+  name?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  abbreviation: string;
+  abbreviation?: string;
 }
 
 export class SquareMeasurementUnit {
@@ -324,7 +324,7 @@ export class SquareOrderLineItemAppliedTax {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  taxUid: string;
+  taxUid?: string;
 
   @ApiProperty({ type: SquareMoney })
   @ValidateNested()
@@ -338,7 +338,7 @@ export class SquareOrderLineItemAppliedDiscount {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  discountUid: string;
+  discountUid?: string;
 
   @ApiProperty({ type: SquareMoney })
   @ValidateNested()
@@ -352,7 +352,7 @@ export class SquareOrderLineItemAppliedServiceCharge {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  serviceChargeUid: string;
+  serviceChargeUid?: string;
 
   @ApiProperty({ type: SquareMoney })
   @ValidateNested()
@@ -408,7 +408,7 @@ export class SquareOrderLineItem {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  quantity: string;
+  quantity?: string;
 
   @ApiProperty({ type: SquareOrderQuantityUnit })
   @ValidateNested()
@@ -662,11 +662,11 @@ export class SquareFulfillmentFulfillmentEntry {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  lineItemUid: string;
+  lineItemUid?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  quantity: string;
+  quantity?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @IsNotEmpty()
@@ -976,11 +976,11 @@ export class SquareOrderPricingOptions {
 export class SquareOrderReward {
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  id: string;
+  id?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  rewardTierId: string;
+  rewardTierId?: string;
 }
 
 export class SquareOrder {
@@ -990,7 +990,7 @@ export class SquareOrder {
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()
-  locationId: string;
+  locationId?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()

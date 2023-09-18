@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -44,10 +43,8 @@ import { CatalogImagesService } from '../../catalogs/services/catalog-images.ser
 import { CatalogSortService } from '../../catalogs/services/catalog-sort.service.js';
 import { ItemsService } from '../../catalogs/services/items.service.js';
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
-import {
-  MerchantsGuard,
-  MerchantsGuardedRequest,
-} from '../../guards/merchants.guard.js';
+import type { MerchantsGuardedRequest } from '../../guards/merchants.guard.js';
+import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import { SquareService } from '../../square/square.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { NestError } from '../../utils/error.js';
@@ -60,8 +57,6 @@ import { paginatedResults } from '../../utils/paginated.js';
   version: '2',
 })
 export class ItemsController {
-  private readonly logger = new Logger(ItemsController.name);
-
   constructor(
     private readonly service: ItemsService,
     private readonly catalogSortService: CatalogSortService,

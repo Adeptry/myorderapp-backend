@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -11,7 +12,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -58,7 +58,7 @@ export class LineItem extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
-  quantity: string;
+  quantity?: string;
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })

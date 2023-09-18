@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -13,7 +14,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -128,7 +128,7 @@ export class ModifierList extends EntityHelper {
     () => ItemModifierList,
     (itemModifierList) => itemModifierList.modifierList,
   )
-  itemModifierLists: ItemModifierList[];
+  itemModifierLists?: ItemModifierList[];
 
   // Modifiers
 

@@ -5,7 +5,7 @@ import { RoleEnum } from '../../roles/roles.enum.js';
 export class AuthAppleLoginDto {
   @ApiProperty({ example: 'abc' })
   @IsNotEmpty()
-  idToken: string;
+  idToken!: string;
 
   @Allow()
   @ApiProperty({ required: false, nullable: true })
@@ -19,5 +19,5 @@ export class AuthAppleLoginDto {
     enum: Object.values(RoleEnum),
   })
   @IsNotEmpty()
-  role: RoleEnum;
+  role!: RoleEnum;
 }

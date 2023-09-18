@@ -32,6 +32,7 @@ import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto.js';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto.js';
 import { AuthResetPasswordDto } from './dto/auth-reset-password.dto.js';
 import { AuthUpdateDto } from './dto/auth-update.dto.js';
+import type { JwtGuardedRequest } from './strategies/jwt.strategy.js';
 import { LoginResponseType } from './types/login-response.type.js';
 
 @ApiTags('Auth')
@@ -128,7 +129,7 @@ export class AuthController {
     operationId: 'currentAuth',
   })
   @ApiOkResponse({ type: User })
-  public me(@Req() request): Promise<NullableType<User>> {
+  public me(@Req() request: JwtGuardedRequest): Promise<NullableType<User>> {
     return this.service.me(request.user);
   }
 
@@ -144,7 +145,9 @@ export class AuthController {
     operationId: 'refreshToken',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public refresh(@Req() request): Promise<Omit<LoginResponseType, 'user'>> {
+  public refresh(
+    @Req() request: JwtGuardedRequest,
+  ): Promise<Omit<LoginResponseType, 'user'>> {
     this.logger.log(`refresh: ${JSON.stringify(request.user)}`);
     if (request.user.sessionId == undefined) {
       throw new UnauthorizedException();
@@ -161,7 +164,7 @@ export class AuthController {
     operationId: 'logout',
   })
   @ApiNoContentResponse()
-  public async logout(@Req() request): Promise<void> {
+  public async logout(@Req() request: JwtGuardedRequest): Promise<void> {
     await this.service.logout({
       sessionId: request.user.sessionId,
     });
@@ -181,7 +184,7 @@ export class AuthController {
   @ApiOkResponse({ type: User })
   @ApiBody({ type: AuthUpdateDto })
   public update(
-    @Req() request,
+    @Req() request: JwtGuardedRequest,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
     return this.service.update(request.user, userDto);

@@ -21,8 +21,9 @@ import { UserSeedModule } from './user/user-seed.module.js';
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
+      dataSourceFactory: async (options: DataSourceOptions | undefined) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return new DataSource(options!).initialize();
       },
     }),
   ],

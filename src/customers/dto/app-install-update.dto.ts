@@ -10,7 +10,7 @@ export class AppInstallUpdateDto {
     example: '123456789',
   })
   @IsString()
-  firebaseInstallationId: string;
+  firebaseInstallationId?: string;
 
   @ApiProperty({
     type: String,

@@ -38,14 +38,10 @@ import {
 } from '@nestjs/swagger';
 import { IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import {
-  CustomersGuard,
-  CustomersGuardedRequest,
-} from '../guards/customers.guard.js';
-import {
-  UserTypeGuard,
-  UserTypeGuardedRequest,
-} from '../guards/user-type.guard.js';
+import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
+import { CustomersGuard } from '../guards/customers.guard.js';
+import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
+import { UserTypeGuard } from '../guards/user-type.guard.js';
 import { OrdersService } from '../orders/orders.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { NestError } from '../utils/error.js';
@@ -589,7 +585,7 @@ export class OrdersController {
           location: location,
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(error);
       throw new BadRequestException(error);
     }

@@ -18,11 +18,11 @@ export class AuthRegisterLoginDto {
   })
   @IsEmail()
   @Length(3, 512)
-  email: string;
+  email!: string;
 
   @ApiProperty({ example: '123456' })
   @Length(6, 512)
-  password: string;
+  password!: string;
 
   @ApiProperty({ example: 'John', nullable: true, required: false })
   @IsString()

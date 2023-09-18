@@ -21,7 +21,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { UsersGuardedRequest } from '../guards/users.guard.js';
+import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { NestError } from '../utils/error.js';
 import { UserUpdateDto } from './dto/user-update.dto.js';
 import { User } from './entities/user.entity.js';
@@ -65,7 +65,8 @@ export class UsersController {
     @Req() request: UsersGuardedRequest,
     @Body() updateUserDto: UserUpdateDto,
   ) {
-    return await this.service.patch(request.user.id, updateUserDto);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return await this.service.patch(request.user.id!, updateUserDto);
   }
 
   @Delete('me')
@@ -78,6 +79,7 @@ export class UsersController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   async deleteMe(@Req() request: UsersGuardedRequest) {
-    return this.service.softDelete(request.user.id);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    return this.service.softDelete(request.user.id!);
   }
 }

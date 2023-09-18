@@ -27,33 +27,33 @@ class EnvironmentVariablesValidator {
   @Min(0)
   @Max(65535)
   @IsOptional()
-  MAIL_PORT: number;
+  MAIL_PORT?: number;
 
   @IsString()
-  MAIL_HOST: string;
-
-  @IsString()
-  @IsOptional()
-  MAIL_USER: string;
+  MAIL_HOST?: string;
 
   @IsString()
   @IsOptional()
-  MAIL_PASSWORD: string;
+  MAIL_USER?: string;
+
+  @IsString()
+  @IsOptional()
+  MAIL_PASSWORD?: string;
 
   @IsEmail()
-  MAIL_DEFAULT_EMAIL: string;
+  MAIL_DEFAULT_EMAIL?: string;
 
   @IsString()
-  MAIL_DEFAULT_NAME: string;
+  MAIL_DEFAULT_NAME?: string;
 
   @IsBoolean()
-  MAIL_IGNORE_TLS: boolean;
+  MAIL_IGNORE_TLS?: boolean;
 
   @IsBoolean()
-  MAIL_SECURE: boolean;
+  MAIL_SECURE?: boolean;
 
   @IsBoolean()
-  MAIL_REQUIRE_TLS: boolean;
+  MAIL_REQUIRE_TLS?: boolean;
 }
 
 export default registerAs<MailConfig>('mail', () => {

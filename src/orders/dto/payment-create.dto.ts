@@ -9,18 +9,18 @@ export class PaymentCreateDto {
       'The timestamp that represents the start of the pickup window. Must be in RFC 3339 timestamp format, e.g., "2016-09-04T23:59:33.123Z".',
   })
   @IsRFC3339()
-  pickupAt: string;
+  pickupAt!: string;
 
   @ApiProperty()
   @IsString()
-  paymentSquareId: string;
+  paymentSquareId!: string;
 
   @IsString()
   @ApiProperty({ example: nanoid(), required: true, nullable: false })
-  idempotencyKey: string;
+  idempotencyKey!: string;
 
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  orderTipMoney?: number;
+  orderTipMoney!: number;
 }

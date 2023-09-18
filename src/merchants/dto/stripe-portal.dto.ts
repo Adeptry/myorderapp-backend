@@ -5,12 +5,12 @@ export class StripeBillingPortalCreateOutput {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  url: string;
+  url!: string;
 }
 
 export class StripeBillingPortalCreateInput {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  returnUrl: string;
+  returnUrl!: string;
 }

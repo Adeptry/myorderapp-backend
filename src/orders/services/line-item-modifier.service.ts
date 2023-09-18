@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderLineItemModifier } from 'square';
 import { Repository } from 'typeorm';
@@ -7,8 +7,6 @@ import { EntityRepositoryService } from '../../utils/entity-repository-service.j
 
 @Injectable()
 export class LineItemModifierService extends EntityRepositoryService<LineItemModifier> {
-  private readonly logger = new Logger(LineItemModifierService.name);
-
   constructor(
     @InjectRepository(LineItemModifier)
     protected readonly repository: Repository<LineItemModifier>,

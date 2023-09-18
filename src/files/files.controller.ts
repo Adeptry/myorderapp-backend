@@ -1,9 +1,6 @@
 import {
   Controller,
-  Get,
-  Param,
   Post,
-  Response,
   UploadedFile,
   UseGuards,
   UseInterceptors,
@@ -56,10 +53,5 @@ export class FilesController {
     @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
   ) {
     return this.filesService.uploadFile(file);
-  }
-
-  @Get(':path')
-  download(@Param('path') path, @Response() response) {
-    return response.sendFile(path, { root: './files' });
   }
 }

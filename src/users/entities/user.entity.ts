@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
 import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   AfterLoad,
   BeforeInsert,
@@ -13,7 +14,6 @@ import {
   Index,
   ManyToOne,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthProvidersEnum } from '../../auth/auth-providers.enum.js';
@@ -26,26 +26,38 @@ import { EntityHelper } from '../../utils/entity-helper.js';
 export class User extends EntityHelper {
   @PrimaryColumn('varchar')
   @ApiProperty()
-  id: string;
+  id?: string;
 
   @BeforeInsert()
   setId() {
     this.id = nanoid();
   }
 
+  @CreateDateColumn()
+  @Exclude({ toPlainOnly: true })
+  createdAt?: Date;
+
+  @UpdateDateColumn()
+  @Exclude({ toPlainOnly: true })
+  updatedAt?: Date;
+
+  @DeleteDateColumn()
+  @Exclude({ toPlainOnly: true })
+  deletedAt?: Date;
+
   // For "string | null" we need to use String type.
   // More info: https://github.com/typeorm/typeorm/issues/2567
   @Column({ type: String, unique: true, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
   @ApiProperty({ required: false, type: String, nullable: true })
-  email: string | null;
+  email?: string | null;
 
   @Column({ nullable: true })
   @Exclude({ toPlainOnly: true })
-  password: string;
+  password?: string;
 
   @Exclude({ toPlainOnly: true })
-  public previousPassword: string;
+  public previousPassword?: string;
 
   @AfterLoad()
   public loadPreviousPassword(): void {
@@ -73,23 +85,23 @@ export class User extends EntityHelper {
     enum: Object.values(AuthProvidersEnum),
     nullable: true,
   })
-  provider: string;
+  provider?: string;
 
   @Index()
   @Column({ type: String, nullable: true })
   @Expose({ groups: ['me', 'admin'] })
   @ApiProperty({ required: false, type: String, nullable: true })
-  socialId: string | null;
+  socialId?: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
   @ApiProperty({ required: false, type: String, nullable: true })
-  firstName: string | null;
+  firstName?: string | null;
 
   @Index()
   @Column({ type: String, nullable: true })
   @ApiProperty({ required: false, type: String, nullable: true })
-  lastName: string | null;
+  lastName?: string | null;
 
   @ManyToOne(() => FileEntity, {
     eager: true,
@@ -112,17 +124,5 @@ export class User extends EntityHelper {
   @Column({ type: String, nullable: true })
   @Index()
   @Exclude({ toPlainOnly: true })
-  hash: string | null;
-
-  @CreateDateColumn()
-  @Exclude({ toPlainOnly: true })
-  createdAt: Date;
-
-  @UpdateDateColumn()
-  @Exclude({ toPlainOnly: true })
-  updatedAt: Date;
-
-  @DeleteDateColumn()
-  @Exclude({ toPlainOnly: true })
-  deletedAt: Date;
+  hash?: string | null;
 }

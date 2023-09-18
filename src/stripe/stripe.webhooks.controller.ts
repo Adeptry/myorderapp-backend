@@ -1,17 +1,17 @@
+import type { RawBodyRequest } from '@nestjs/common';
 import {
   Controller,
   Headers,
   Inject,
   Logger,
   Post,
-  RawBodyRequest,
   Req,
   Res,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
-import { Request, Response } from 'express';
+import type { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
 import { StripeService } from './stripe.service.js';
@@ -53,7 +53,7 @@ export class StripeWebhookController {
         signature,
         webhookSecret,
       );
-    } catch (err) {
+    } catch (err: any) {
       this.logger.error(`Stripe webhook received: ${err.message}`);
       response.status(400).send(`Webhook Error: ${err.message}`);
       return;

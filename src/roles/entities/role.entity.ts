@@ -6,5 +6,5 @@ import { EntityHelper } from '../../utils/entity-helper.js';
 export class Role extends EntityHelper {
   @ApiProperty({ example: 'admin' })
   @PrimaryColumn({ type: 'varchar' })
-  id: string;
+  id?: string;
 }

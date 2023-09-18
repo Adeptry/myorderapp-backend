@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -12,7 +13,6 @@ import {
   OneToMany,
   OneToOne,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';

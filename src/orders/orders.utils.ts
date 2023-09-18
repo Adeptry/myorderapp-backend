@@ -26,7 +26,8 @@ export class OrdersUtils {
       `updating ${order.id} for square order ${squareOrder?.id}}`,
     );
     order.squareId = squareOrder?.id;
-    order.squareVersion = squareOrder?.version ?? order.squareVersion + 1;
+    order.squareVersion =
+      squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
 
     order.currency = squareOrder?.totalMoney?.currency;
     order.totalMoneyAmount = Number(squareOrder?.totalMoney?.amount);

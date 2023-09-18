@@ -2,7 +2,7 @@ import { Body, Controller, Headers, Logger, Post, Req } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
-import { Request } from 'express';
+import type { Request } from 'express';
 import { WebhooksHelper } from 'square';
 import { AllConfigType } from '../config.type.js';
 

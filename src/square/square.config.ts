@@ -17,34 +17,34 @@ export type SquareConfig = {
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  SQUARE_WEBHOOK_SIGNATURE_KEY: string;
+  SQUARE_WEBHOOK_SIGNATURE_KEY?: string;
   @IsString()
   @IsOptional()
-  SQUARE_OAUTH_CLIENT_ID: string;
+  SQUARE_OAUTH_CLIENT_ID?: string;
   @IsString()
   @IsOptional()
-  SQUARE_OAUTH_CLIENT_SECRET: string;
+  SQUARE_OAUTH_CLIENT_SECRET?: string;
   @IsString()
   @IsOptional()
-  SQUARE_CLIENT_ENVIRONMENT: string;
+  SQUARE_CLIENT_ENVIRONMENT?: string;
   @IsString()
   @IsOptional()
-  SQUARE_BASE_URL: string;
+  SQUARE_BASE_URL?: string;
   @IsString()
   @IsOptional()
-  SQUARE_TEST_CODE: string;
+  SQUARE_TEST_CODE?: string;
   @IsString()
   @IsOptional()
-  SQUARE_TEST_ACCESS_TOKEN: string;
+  SQUARE_TEST_ACCESS_TOKEN?: string;
   @IsString()
   @IsOptional()
-  SQUARE_TEST_REFRESH_TOKEN: string;
+  SQUARE_TEST_REFRESH_TOKEN?: string;
   @IsString()
   @IsOptional()
-  SQUARE_TEST_EXPIRE_AT: string;
+  SQUARE_TEST_EXPIRE_AT?: string;
   @IsString()
   @IsOptional()
-  SQUARE_TEST_ID: string;
+  SQUARE_TEST_ID?: string;
 }
 
 export default registerAs('square', () => {

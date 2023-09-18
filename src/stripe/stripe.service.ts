@@ -23,6 +23,7 @@ export class StripeService {
       });
     } else {
       this.logger.error('Missing Stripe API key');
+      throw new InternalServerErrorException('Missing Stripe API key');
     }
   }
 
@@ -32,7 +33,7 @@ export class StripeService {
   ): Promise<Stripe.Customer> {
     try {
       return await this.client.customers.create(params, options);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to create customer: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
@@ -44,7 +45,7 @@ export class StripeService {
   ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
     try {
       return await this.client.checkout.sessions.create(params, options);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to create checkout session: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
@@ -57,7 +58,7 @@ export class StripeService {
   ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
     try {
       return await this.client.checkout.sessions.retrieve(id, params, options);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to retrieve checkout session: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
@@ -69,7 +70,7 @@ export class StripeService {
   ): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
     try {
       return await this.client.billingPortal.sessions.create(params, options);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to createBillingPortalSession: ${error}`);
       throw new InternalServerErrorException(error.message);
     }

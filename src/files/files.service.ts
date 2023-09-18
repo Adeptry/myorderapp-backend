@@ -56,7 +56,7 @@ export class FilesService {
           url: uploadResult.Location,
         }),
       );
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(`Failed to upload to S3: ${error}`);
       throw new UnprocessableEntityException('Failed to upload to S3');
     }

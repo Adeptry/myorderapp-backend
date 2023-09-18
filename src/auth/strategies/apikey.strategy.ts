@@ -11,6 +11,8 @@ export class ApiKeyStrategy extends PassportStrategy(
 ) {
   constructor(
     private authService: AuthService,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
     private configService: ConfigService,
   ) {
     const headerKeyApiKey =
@@ -19,7 +21,10 @@ export class ApiKeyStrategy extends PassportStrategy(
     super(
       { header: headerKeyApiKey, prefix: '' },
       true,
-      (apiKey: string, done) => {
+      (
+        apiKey: string,
+        done: (err: Error | null, user?: any, info?: any) => void,
+      ) => {
         if (this.authService.validateApiKey(apiKey)) {
           done(null, true);
         }

@@ -5,5 +5,5 @@ export class VariationUpdateDto {
   @IsBoolean()
   @IsOptional()
   @ApiProperty({ required: true })
-  moaEnabled: boolean;
+  moaEnabled?: boolean;
 }

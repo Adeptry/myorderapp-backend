@@ -19,28 +19,28 @@ enum FileDriver {
 
 class EnvironmentVariablesValidator {
   @IsEnum(FileDriver)
-  FILE_DRIVER: FileDriver;
+  FILE_DRIVER?: FileDriver;
 
   @ValidateIf((envValues) => envValues.FILE_DRIVER === FileDriver.S3)
   @IsString()
-  ACCESS_KEY_ID: string;
+  ACCESS_KEY_ID?: string;
 
   @ValidateIf((envValues) => envValues.FILE_DRIVER === FileDriver.S3)
   @IsString()
-  SECRET_ACCESS_KEY: string;
+  SECRET_ACCESS_KEY?: string;
 
   @ValidateIf((envValues) => envValues.FILE_DRIVER === FileDriver.S3)
   @IsString()
-  AWS_DEFAULT_S3_BUCKET: string;
+  AWS_DEFAULT_S3_BUCKET?: string;
 
   @ValidateIf((envValues) => envValues.FILE_DRIVER === FileDriver.S3)
   @IsString()
   @IsOptional()
-  AWS_DEFAULT_S3_URL: string;
+  AWS_DEFAULT_S3_URL?: string;
 
   @ValidateIf((envValues) => envValues.FILE_DRIVER === FileDriver.S3)
   @IsString()
-  AWS_S3_REGION: string;
+  AWS_S3_REGION?: string;
 }
 
 export default registerAs<FileConfig>('file', () => {

@@ -32,44 +32,44 @@ export type AppConfig = {
 class EnvironmentVariablesValidator {
   @IsEnum(Environment)
   @IsOptional()
-  NODE_ENV: Environment;
+  NODE_ENV?: Environment;
 
   @IsInt()
   @Min(0)
   @Max(65535)
   @IsOptional()
-  PORT: number;
+  PORT?: number;
 
   @IsUrl({ require_tld: false })
   @IsOptional()
-  FRONTEND_URL: string;
+  FRONTEND_URL?: string;
 
   @IsUrl({ require_tld: false })
   @IsOptional()
-  BACKEND_URL: string;
+  BACKEND_URL?: string;
 
   @IsString()
-  CORS_ORIGIN_REG_EXP: string;
-
-  @IsString()
-  @IsOptional()
-  API_PREFIX: string;
+  CORS_ORIGIN_REG_EXP?: string;
 
   @IsString()
   @IsOptional()
-  APP_FALLBACK_LANGUAGE: string;
+  API_PREFIX?: string;
 
   @IsString()
   @IsOptional()
-  APP_HEADER_LANGUAGE: string;
+  APP_FALLBACK_LANGUAGE?: string;
 
   @IsString()
   @IsOptional()
-  HEADER_KEY_API_KEY: string;
+  APP_HEADER_LANGUAGE?: string;
 
   @IsString()
   @IsOptional()
-  API_KEYS: string;
+  HEADER_KEY_API_KEY?: string;
+
+  @IsString()
+  @IsOptional()
+  API_KEYS?: string;
 }
 
 export default registerAs<AppConfig>('app', () => {

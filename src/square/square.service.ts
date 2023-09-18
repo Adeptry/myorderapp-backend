@@ -320,7 +320,7 @@ export class SquareService {
       );
 
       return response.result;
-    } catch (error) {
+    } catch (error: any) {
       throw new InternalServerErrorException(
         `An error occurred while processing your request. ${JSON.stringify(
           error,

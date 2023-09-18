@@ -81,7 +81,7 @@ export class CardsController {
         cursor,
       });
       return response.result as SquareListCardsResponse;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
     }
@@ -131,7 +131,7 @@ export class CardsController {
         },
       });
       return response.result.card;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
     }
@@ -163,7 +163,7 @@ export class CardsController {
         cardId,
       });
       return;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error(error);
       throw new InternalServerErrorException(error);
     }

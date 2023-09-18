@@ -8,7 +8,6 @@ import {
   HttpStatus,
   Inject,
   InternalServerErrorException,
-  Logger,
   ParseBoolPipe,
   Post,
   Query,
@@ -31,7 +30,9 @@ import {
 } from '@nestjs/swagger';
 import { AuthService } from '../auth/auth.service.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
+import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
 import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
 import { SquareService } from '../square/square.service.js';
@@ -55,8 +56,6 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
   version: '2',
 })
 export class MerchantsController {
-  private readonly logger = new Logger(MerchantsController.name);
-
   constructor(
     protected readonly service: MerchantsService,
     protected readonly merchantsSquareService: MerchantsSquareService,
@@ -125,7 +124,7 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: Merchant })
   async me(
-    @Req() request,
+    @Req() request: UsersGuardedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
     @Query('appConfig', new DefaultValuePipe(false), ParseBoolPipe)
@@ -215,12 +214,13 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: StripeCheckoutDto })
   async stripeCreateCheckoutSessionId(
-    @Req() request,
+    @Req() request: MerchantsGuardedRequest,
     @Body() input: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
-        merchantId: request.merchant.id,
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        merchantId: request.merchant.id!,
         ...input,
       });
 
@@ -248,11 +248,12 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: StripeBillingPortalCreateOutput })
   async stripeCreateBillingSessionUrl(
-    @Req() request,
+    @Req() request: MerchantsGuardedRequest,
     @Body() input: StripeBillingPortalCreateInput,
   ): Promise<StripeBillingPortalCreateOutput | null> {
     const url = await this.merchantsStripeService.createBillingPortalSession({
-      merchantId: request.merchant.id,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      merchantId: request.merchant.id!,
       ...input,
     });
 

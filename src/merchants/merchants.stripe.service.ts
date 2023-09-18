@@ -18,6 +18,8 @@ export class MerchantsStripeService {
   private readonly stripeConfigUtils: StripeConfigUtils;
   constructor(
     protected readonly service: MerchantsService,
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    //@ts-ignore
     private readonly configService: ConfigService<AllConfigType>,
     private readonly stripeService: StripeService,
   ) {

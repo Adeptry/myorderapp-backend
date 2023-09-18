@@ -1,4 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
+import { Exclude } from 'class-transformer';
+import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -11,13 +14,9 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-
-import { Exclude } from 'class-transformer';
-import { nanoid } from 'nanoid';
 import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { Catalog } from './catalog.entity.js';

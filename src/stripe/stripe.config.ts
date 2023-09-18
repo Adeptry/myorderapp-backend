@@ -24,35 +24,35 @@ export type StripeConfig = {
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  STRIPE_API_KEY: string;
+  STRIPE_API_KEY?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_WEBHOOK_SECRET: string;
+  STRIPE_WEBHOOK_SECRET?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_USD: string;
+  STRIPE_PRO_PRICE_USD?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_ID_EUR: string;
+  STRIPE_PRO_PRICE_ID_EUR?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_ID_GBP: string;
+  STRIPE_PRO_PRICE_ID_GBP?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_ID_JPY: string;
+  STRIPE_PRO_PRICE_ID_JPY?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_ID_CAD: string;
+  STRIPE_PRO_PRICE_ID_CAD?: string;
 
   @IsString()
   @IsOptional()
-  STRIPE_PRO_PRICE_ID_AUD: string;
+  STRIPE_PRO_PRICE_ID_AUD?: string;
 }
 
 export default registerAs('stripe', () => {

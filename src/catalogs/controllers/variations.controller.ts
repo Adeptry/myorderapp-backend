@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Param,
   Patch,
   Query,
@@ -22,7 +21,6 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { CatalogSortService } from '../../catalogs/services/catalog-sort.service.js';
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import { NestError } from '../../utils/error.js';
@@ -37,12 +35,7 @@ import { VariationsService } from '../services/variations.service.js';
   version: '2',
 })
 export class VariationsController {
-  private readonly logger = new Logger(VariationsController.name);
-
-  constructor(
-    private readonly service: VariationsService,
-    private readonly catalogSortService: CatalogSortService,
-  ) {}
+  constructor(private readonly service: VariationsService) {}
 
   @ApiBearerAuth()
   @Get('items/:id/variations')

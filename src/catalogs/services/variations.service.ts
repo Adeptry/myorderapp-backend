@@ -97,7 +97,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
 
     try {
       await this.save(moaVariation);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.log(error);
     }
 

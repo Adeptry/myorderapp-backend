@@ -245,7 +245,7 @@ export class MerchantsSquareService {
         merchant.squareId = result.merchantId;
         merchant.squareRefreshToken = result.refreshToken;
         await this.service.save(merchant);
-      } catch (error) {
+      } catch (error: any) {
         this.logger.error("Failed to refresh merchant's Square token", error);
       }
     }

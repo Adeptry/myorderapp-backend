@@ -1,6 +1,5 @@
 import {
   Injectable,
-  Logger,
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -35,8 +34,6 @@ import { LoginResponseType } from './types/login-response.type.js';
 
 @Injectable()
 export class AuthService {
-  private readonly logger = new Logger(AuthService.name);
-
   constructor(
     private readonly jwtService: JwtService,
     private readonly usersService: UsersService,
@@ -77,10 +74,11 @@ export class AuthService {
       throw new UnprocessableEntityException(`Login via ${user.provider}`);
     }
 
-    const isValidPassword = await bcrypt.compare(
-      loginDto.password,
-      user.password,
-    );
+    if (user.password === undefined) {
+      throw new UnprocessableEntityException(`Password not set`);
+    }
+
+    const isValidPassword = bcrypt.compare(loginDto.password, user.password);
 
     if (!isValidPassword) {
       throw new UnprocessableEntityException(`Incorrect password`);
@@ -123,7 +121,7 @@ export class AuthService {
       },
     });
 
-    if (user) {
+    if (user && user.id) {
       if (socialEmail && !userByEmail) {
         user.email = socialEmail;
       }
@@ -286,6 +284,11 @@ export class AuthService {
     }
 
     const user = forgot.user;
+
+    if (!user) {
+      throw new UnprocessableEntityException(`Couldn't find user`);
+    }
+
     user.password = password;
 
     await this.sessionService.softDelete({
@@ -294,7 +297,9 @@ export class AuthService {
       },
     });
     await user.save();
-    await this.forgotService.softDelete(forgot.id);
+    if (forgot.id) {
+      await this.forgotService.softDelete(forgot.id);
+    }
   }
 
   async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {
@@ -317,11 +322,11 @@ export class AuthService {
           },
         });
 
-        if (!currentUser) {
+        if (!currentUser || !currentUser.password) {
           throw new UnprocessableEntityException(`Couldn't find user`);
         }
 
-        const isValidOldPassword = await bcrypt.compare(
+        const isValidOldPassword = bcrypt.compare(
           userDto.oldPassword,
           currentUser.password,
         );
@@ -339,6 +344,10 @@ export class AuthService {
       } else {
         throw new UnprocessableEntityException(`Incorrect old password`);
       }
+    }
+
+    if (!userJwtPayload.id) {
+      throw new UnprocessableEntityException(`No JWT id`);
     }
 
     await this.usersService.patch(userJwtPayload.id, userDto);
@@ -363,7 +372,7 @@ export class AuthService {
       },
     });
 
-    if (!session) {
+    if (!session || !session.user) {
       throw new UnauthorizedException();
     }
 
@@ -381,7 +390,9 @@ export class AuthService {
   }
 
   async softDelete(user: User): Promise<void> {
-    await this.usersService.softDelete(user.id);
+    if (user.id) {
+      await this.usersService.softDelete(user.id);
+    }
   }
 
   async logout(data: Pick<JwtRefreshPayloadType, 'sessionId'>) {

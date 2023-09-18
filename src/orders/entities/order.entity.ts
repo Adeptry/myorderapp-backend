@@ -1,6 +1,7 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -11,7 +12,6 @@ import {
   ManyToOne,
   OneToMany,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -83,8 +83,8 @@ export class Order extends EntityHelper {
    * Location
    */
 
-  @Column({})
-  locationId: string;
+  @Column({ type: String, nullable: true })
+  locationId?: string;
 
   @ApiProperty({
     required: false,
@@ -118,8 +118,8 @@ export class Order extends EntityHelper {
 
   @ApiHideProperty()
   @Exclude()
-  @Column({})
-  squareVersion: number;
+  @Column({ type: Number, nullable: true })
+  squareVersion?: number;
 
   @ApiProperty({
     required: false,

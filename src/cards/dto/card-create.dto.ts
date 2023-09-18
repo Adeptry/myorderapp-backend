@@ -4,7 +4,7 @@ import { IsNotEmpty, IsOptional } from 'class-validator';
 export class CreateCardDto {
   @ApiProperty({ example: 'cnon:card-nonce-ok' })
   @IsNotEmpty()
-  sourceId: string;
+  sourceId!: string;
 
   @ApiProperty({ nullable: true, required: false })
   @IsOptional()

@@ -11,5 +11,5 @@ export class AuthUpdateDto {
   @ApiProperty()
   @IsOptional()
   @IsNotEmpty({ message: 'mustBeNotEmpty' })
-  oldPassword: string;
+  oldPassword!: string;
 }

@@ -15,7 +15,7 @@ export class UserCreateDto {
     message: 'emailAlreadyExists',
   })
   @IsEmail()
-  email: string | null;
+  email?: string | null;
 
   @ApiProperty()
   @MinLength(6)
@@ -27,11 +27,11 @@ export class UserCreateDto {
 
   @ApiProperty({ example: 'John' })
   @IsNotEmpty()
-  firstName: string | null;
+  firstName?: string | null;
 
   @ApiProperty({ example: 'Doe' })
   @IsNotEmpty()
-  lastName: string | null;
+  lastName?: string | null;
 
   // @ApiProperty({ type: () => FileEntity })
   // @IsOptional()

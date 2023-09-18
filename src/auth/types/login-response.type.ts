@@ -3,14 +3,14 @@ import { User } from '../../users/entities/user.entity.js';
 
 export class LoginResponseType {
   @ApiProperty()
-  token: string;
+  token!: string;
 
   @ApiProperty()
-  refreshToken: string;
+  refreshToken!: string;
 
   @ApiProperty()
-  tokenExpires: number;
+  tokenExpires!: number;
 
   @ApiProperty({ type: User, required: false, nullable: true })
-  user: User;
+  user!: User;
 }

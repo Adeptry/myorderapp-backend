@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
@@ -9,8 +9,6 @@ import { User } from './entities/user.entity.js';
 
 @Injectable()
 export class UsersService extends EntityRepositoryService<User> {
-  private readonly logger = new Logger(UsersService.name);
-
   constructor(
     @InjectRepository(User)
     protected repository: Repository<User>,

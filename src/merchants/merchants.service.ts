@@ -50,7 +50,7 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
         entity.id,
       );
       return app;
-    } catch (error) {
+    } catch (error: any) {
       this.logger.log(error);
       return null;
     }

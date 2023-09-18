@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   ParseBoolPipe,
   ParseIntPipe,
   Patch,
@@ -29,14 +28,12 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { Response } from 'express';
+import type { Response } from 'express';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import {
-  CustomersGuard,
-  CustomersGuardedRequest,
-} from '../guards/customers.guard.js';
+import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
+import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
 import { NestError } from '../utils/error.js';
@@ -58,8 +55,6 @@ import { AppInstallsService } from './services/app-installs.service.js';
   version: '2',
 })
 export class CustomersController {
-  private readonly logger = new Logger(CustomersController.name);
-
   constructor(
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,

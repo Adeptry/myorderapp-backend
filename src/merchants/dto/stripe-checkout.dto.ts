@@ -5,5 +5,5 @@ export class StripeCheckoutDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  checkoutSessionId: string;
+  checkoutSessionId?: string;
 }

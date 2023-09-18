@@ -7,7 +7,7 @@ import { EntityHelper } from '../../utils/entity-helper.js';
 export class Status extends EntityHelper {
   @ApiProperty({ example: 1 })
   @PrimaryColumn()
-  id: number;
+  id?: number;
 
   @Allow()
   @ApiProperty({ example: 'Active' })

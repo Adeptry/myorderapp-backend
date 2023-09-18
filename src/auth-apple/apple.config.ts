@@ -9,7 +9,7 @@ export type AppleConfig = {
 class EnvironmentVariablesValidator {
   @IsJSON()
   @IsOptional()
-  APPLE_APP_AUDIENCE: string;
+  APPLE_APP_AUDIENCE?: string;
 }
 
 export default registerAs<AppleConfig>('apple', () => {

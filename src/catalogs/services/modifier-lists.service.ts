@@ -44,8 +44,8 @@ export class ModifierListsService extends EntityRepositoryService<ModifierList> 
           squareId: params.catalogObject.id,
           name: squareModifierList?.name,
           ordinal: squareModifierList?.ordinal,
-          selectionType:
-            MoaSelectionType[squareModifierList?.selectionType ?? 'SINGLE'],
+          selectionType: (squareModifierList?.selectionType ??
+            'SINGLE') as MoaSelectionType,
           catalogId: moaCatalogId,
         }),
       );
@@ -56,8 +56,8 @@ export class ModifierListsService extends EntityRepositoryService<ModifierList> 
     } else {
       moaModifierList.name = squareModifierList?.name;
       moaModifierList.ordinal = squareModifierList?.ordinal;
-      moaModifierList.selectionType =
-        MoaSelectionType[squareModifierList?.selectionType ?? 'SINGLE'];
+      moaModifierList.selectionType = (squareModifierList?.selectionType ??
+        'SINGLE') as MoaSelectionType;
       moaModifierList = await this.save(moaModifierList);
     }
 

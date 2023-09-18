@@ -3,7 +3,6 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
-  Logger,
   Post,
   Query,
   UseGuards,
@@ -35,8 +34,6 @@ import { NestError } from '../utils/error.js';
   version: '2',
 })
 export class AdminController {
-  private readonly logger = new Logger(AdminController.name);
-
   constructor(
     protected readonly authService: AuthService,
     protected readonly filesService: FilesService,

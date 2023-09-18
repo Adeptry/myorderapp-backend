@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
@@ -9,7 +10,6 @@ import {
   Entity,
   ManyToOne,
   PrimaryColumn,
-  Relation,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
@@ -68,7 +68,7 @@ export class ItemModifierList extends EntityHelper {
   @ManyToOne(() => Item, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
-  item: Relation<Item>;
+  item?: Relation<Item>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: false })
@@ -82,5 +82,5 @@ export class ItemModifierList extends EntityHelper {
   @ManyToOne(() => ModifierList, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
-  modifierList: Relation<ModifierList>;
+  modifierList?: Relation<ModifierList>;
 }

@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -35,10 +34,8 @@ import { Category } from '../../catalogs/entities/category.entity.js';
 import { CategoriesService } from '../../catalogs/services/categories.service.js';
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
-import {
-  UserTypeGuard,
-  UserTypeGuardedRequest,
-} from '../../guards/user-type.guard.js';
+import type { UserTypeGuardedRequest } from '../../guards/user-type.guard.js';
+import { UserTypeGuard } from '../../guards/user-type.guard.js';
 import { MerchantsService } from '../../merchants/merchants.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { NestError } from '../../utils/error.js';
@@ -50,8 +47,6 @@ import { NestError } from '../../utils/error.js';
   version: '2',
 })
 export class CategoriesController {
-  private readonly logger = new Logger(CategoriesController.name);
-
   constructor(
     private readonly service: CategoriesService,
     private readonly merchantsService: MerchantsService,

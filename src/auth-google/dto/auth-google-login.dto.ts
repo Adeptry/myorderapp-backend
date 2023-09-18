@@ -5,11 +5,11 @@ import { RoleEnum } from '../../roles/roles.enum.js';
 export class AuthGoogleLoginDto {
   @ApiProperty({ example: 'abc' })
   @IsNotEmpty()
-  idToken: string;
+  idToken!: string;
 
   @ApiProperty({
     enum: Object.values(RoleEnum),
   })
   @IsNotEmpty()
-  role: RoleEnum;
+  role!: RoleEnum;
 }

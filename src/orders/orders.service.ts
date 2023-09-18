@@ -163,7 +163,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
 
       customer.currentOrder = order;
       await customer.save();
-    } catch (error) {
+    } catch (error: any) {
       await this.remove(order);
       throw error;
     }
@@ -251,7 +251,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       } else {
         throw new InternalServerErrorException('No Square Order returned');
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new InternalServerErrorException(error);
     }
   }
@@ -320,7 +320,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
           `No Square Order returned from Square`,
         );
       }
-    } catch (error) {
+    } catch (error: any) {
       throw new InternalServerErrorException(error);
     }
   }
@@ -505,7 +505,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
           },
         },
       });
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error updating Square order:', error);
       throw new InternalServerErrorException(
         error,
@@ -554,7 +554,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       await customer.save();
 
       return this.save(updatedOrder);
-    } catch (error) {
+    } catch (error: any) {
       this.logger.error('Error creating Square payment:', error);
       throw new InternalServerErrorException('Failed to create Square payment');
     }
@@ -565,7 +565,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     payload: SquareOrderFulfillmentUpdatedPayload,
   ) {
     const squareOrderId =
-      payload.data.object.order_fulfillment_updated.order_id;
+      payload.data?.object?.order_fulfillment_updated?.order_id;
     if (!squareOrderId) {
       this.logger.error(
         `Missing order_id in SquareOrderFulfillmentUpdatedPayload`,
@@ -611,11 +611,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
       );
 
     const messaging = this.firebaseAdminService.messaging(app);
-    const orderFulfillment = payload.data.object.order_fulfillment_updated;
-    const latestUpdate =
-      orderFulfillment.fulfillment_update[
-        orderFulfillment.fulfillment_update.length - 1
-      ];
+    const orderFulfillment = payload?.data?.object?.order_fulfillment_updated;
+    const latestUpdate = (orderFulfillment?.fulfillment_update ?? [])[
+      (orderFulfillment?.fulfillment_update?.length ?? 0) - 1
+    ];
     const body = `Your order with ID ${order.id} has been updated from ${latestUpdate.old_state} to ${latestUpdate.new_state}.`;
 
     for (const appInstall of appInstalls) {

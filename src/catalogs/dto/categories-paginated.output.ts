@@ -9,5 +9,5 @@ export class CategoryPaginatedResponse extends InfinityPaginationResultType<Cate
     required: false,
     nullable: true,
   })
-  data: Category[];
+  data!: Category[];
 }

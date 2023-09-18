@@ -9,5 +9,5 @@ export class CustomersPaginatedResponse extends InfinityPaginationResultType<Cus
     required: false,
     nullable: true,
   })
-  data: Customer[];
+  data!: Customer[];
 }

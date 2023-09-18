@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   NotFoundException,
   Param,
   ParseIntPipe,
@@ -28,10 +27,8 @@ import {
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
-import {
-  UserTypeGuard,
-  UserTypeGuardedRequest,
-} from '../guards/user-type.guard.js';
+import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
+import { UserTypeGuard } from '../guards/user-type.guard.js';
 import {
   LocationUpdateAllDto,
   LocationUpdateDto,
@@ -48,8 +45,6 @@ import { paginatedResults } from '../utils/paginated.js';
 @ApiTags('Locations')
 @Controller('v2/locations')
 export class LocationsController {
-  private readonly logger = new Logger(LocationsController.name);
-
   constructor(private readonly service: LocationsService) {}
 
   @ApiBearerAuth()
@@ -126,10 +121,7 @@ export class LocationsController {
     summary: 'Get a Location with ID',
     operationId: 'getLocation',
   })
-  async getLocation(
-    @Req() request: UserTypeGuardedRequest,
-    @Param('id') id: string,
-  ): Promise<MoaLocation> {
+  async getLocation(@Param('id') id: string): Promise<MoaLocation> {
     const entity = await this.service.findOne({
       where: { id },
     });
@@ -186,7 +178,6 @@ export class LocationsController {
     operationId: 'updateLocations',
   })
   async updateLocations(
-    @Req() request: any,
     @Body() input: LocationUpdateAllDto[],
   ): Promise<MoaLocation[]> {
     return await this.service.updateAll(input);

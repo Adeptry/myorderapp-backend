@@ -6,7 +6,6 @@ import { HeaderResolver, I18nModule } from 'nestjs-i18n';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
-import { AdminController } from './admin/admin.controller.js';
 import { AdminModule } from './admin/admin.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
 import appConfig from './app.config.js';
@@ -62,8 +61,9 @@ import { UsersModule } from './users/users.module.js';
     }),
     TypeOrmModule.forRootAsync({
       useClass: TypeOrmConfigService,
-      dataSourceFactory: async (options: DataSourceOptions) => {
-        return new DataSource(options).initialize();
+      dataSourceFactory: async (options: DataSourceOptions | undefined) => {
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        return new DataSource(options!).initialize();
       },
     }),
     I18nModule.forRootAsync({
@@ -114,6 +114,6 @@ import { UsersModule } from './users/users.module.js';
     HealthModule,
     AdminModule,
   ],
-  controllers: [AdminController],
+  controllers: [],
 })
 export class AppModule {}

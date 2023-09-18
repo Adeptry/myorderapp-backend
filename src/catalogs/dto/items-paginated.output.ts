@@ -9,5 +9,5 @@ export class ItemPaginatedResponse extends InfinityPaginationResultType<Item> {
     required: false,
     nullable: true,
   })
-  data: Item[];
+  data!: Item[];
 }

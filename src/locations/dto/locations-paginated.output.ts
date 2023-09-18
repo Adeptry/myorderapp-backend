@@ -9,5 +9,5 @@ export class LocationPaginatedResponse extends InfinityPaginationResultType<Loca
     required: false,
     nullable: true,
   })
-  data: Location[];
+  data!: Location[];
 }

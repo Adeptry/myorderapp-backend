@@ -9,5 +9,5 @@ export class OrdersPaginatedReponse extends InfinityPaginationResultType<Order> 
     required: false,
     nullable: true,
   })
-  data: Order[];
+  data!: Order[];
 }

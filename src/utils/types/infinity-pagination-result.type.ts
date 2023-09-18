@@ -2,9 +2,9 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class InfinityPaginationResultType<T> {
   @ApiProperty()
-  data: T[];
+  data!: T[];
   @ApiProperty()
-  pages: number;
+  pages!: number;
   @ApiProperty()
-  count: number;
+  count!: number;
 }

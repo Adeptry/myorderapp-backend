@@ -10,11 +10,11 @@ export type GoogleConfig = {
 class EnvironmentVariablesValidator {
   @IsString()
   @IsOptional()
-  GOOGLE_CLIENT_ID: string;
+  GOOGLE_CLIENT_ID?: string;
 
   @IsString()
   @IsOptional()
-  GOOGLE_CLIENT_SECRET: string;
+  GOOGLE_CLIENT_SECRET?: string;
 }
 
 export default registerAs<GoogleConfig>('google', () => {
