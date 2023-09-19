@@ -2,6 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { AppLogger } from '../../../logger/app.logger.js';
 import { RoleEnum } from '../../../roles/roles.enum.js';
 import { StatusEnum } from '../../../statuses/statuses.enum.js';
 import { User } from '../../../users/entities/user.entity.js';
@@ -11,9 +12,13 @@ export class UserSeedService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+    private logger: AppLogger,
+  ) {
+    this.logger.setContext(UserSeedService.name);
+  }
 
   async run() {
+    this.logger.verbose(this.run.name);
     const countAdmin = await this.userRepository.count({
       where: {
         role: {
