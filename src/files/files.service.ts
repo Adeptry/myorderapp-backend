@@ -17,9 +17,9 @@ export class FilesService {
   private readonly s3: S3;
 
   constructor(
-    private readonly configService: ConfigService<AllConfigType>,
     @InjectRepository(FileEntity)
     private readonly fileRepository: Repository<FileEntity>,
+    private readonly configService: ConfigService<AllConfigType>,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(FilesService.name);

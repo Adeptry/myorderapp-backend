@@ -121,8 +121,6 @@ export class MerchantsController {
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'appConfig', required: false, type: Boolean })
   @ApiQuery({ name: 'locations', required: false, type: Boolean })
-  @ApiQuery({ name: 'androidZipFile', required: false, type: Boolean })
-  @ApiQuery({ name: 'iosZipFile', required: false, type: Boolean })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,

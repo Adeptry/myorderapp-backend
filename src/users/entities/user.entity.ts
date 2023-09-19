@@ -103,6 +103,10 @@ export class User extends EntityHelper {
   @ApiProperty({ required: false, type: String, nullable: true })
   lastName?: string | null;
 
+  @Column({ type: String, nullable: true })
+  @ApiProperty({ required: false, type: String, nullable: true })
+  language?: string | null;
+
   @ManyToOne(() => FileEntity, {
     eager: true,
   })

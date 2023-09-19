@@ -1,4 +1,3 @@
 {
-  "confirmEmail": "Confirm email",
-  "resetPassword": "Reset password"
+  "emailFooter": "Powered by MyOrderApp"
 }

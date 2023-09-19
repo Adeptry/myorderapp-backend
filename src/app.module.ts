@@ -1,8 +1,11 @@
+import { MailerModule } from '@nestjs-modules/mailer';
+import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter.js';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HeaderResolver, I18nModule } from 'nestjs-i18n';
+import { HeaderResolver, I18nModule, I18nService } from 'nestjs-i18n';
+import * as NodemailerMailgunTransport from 'nodemailer-mailgun-transport';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
@@ -29,8 +32,8 @@ import { GuardsModule } from './guards/guards.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { LoggerModule } from './logger/logger.module.js';
+import mailConfig from './mail/mail.config.js';
 import { MailModule } from './mail/mail.module.js';
-import mailConfig from './mailer/mail.config.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SessionModule } from './session/session.module.js';
@@ -73,9 +76,17 @@ import { UsersModule } from './users/users.module.js';
           infer: true,
         }),
         loaderOptions: {
-          path: path.join(dirname(fileURLToPath(import.meta.url)), '/i18n/'),
+          path: path.join(
+            dirname(fileURLToPath(import.meta.url)),
+            '../src/i18n/',
+          ),
           watch: true,
         },
+        typesOutputPath: path.join(
+          dirname(fileURLToPath(import.meta.url)),
+          '../src/i18n/i18n.generated.ts',
+        ),
+        viewEngine: 'hbs',
       }),
       resolvers: [
         {
@@ -92,6 +103,40 @@ import { UsersModule } from './users/users.module.js';
       ],
       imports: [ConfigModule],
       inject: [ConfigService],
+    }),
+    MailerModule.forRootAsync({
+      useFactory: (
+        configService: ConfigService<AllConfigType>,
+        i18n: I18nService,
+      ) => ({
+        transport: NodemailerMailgunTransport.default({
+          auth: {
+            api_key: configService.getOrThrow('mail.authApiKey', {
+              infer: true,
+            }),
+            domain: configService.getOrThrow('mail.authDomain', {
+              infer: true,
+            }),
+          },
+        }),
+        defaults: {
+          from: configService.getOrThrow('mail.defaultsFrom', {
+            infer: true,
+          }),
+        },
+        template: {
+          dir: path.join(
+            dirname(fileURLToPath(import.meta.url)),
+            '../src/mail/templates/',
+          ),
+          adapter: new HandlebarsAdapter({ t: i18n.hbsHelper }),
+          options: {
+            strict: true,
+          },
+        },
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService, I18nService],
     }),
     LoggerModule,
     UsersModule,

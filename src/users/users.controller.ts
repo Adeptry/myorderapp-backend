@@ -73,8 +73,11 @@ export class UsersController {
     @Body() updateUserDto: UserUpdateDto,
   ) {
     this.logger.verbose(this.patchMe.name);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return await this.service.patch(request.user.id!, updateUserDto);
+    return await this.service.patchOne(
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      { where: { id: request.user.id! } },
+      updateUserDto,
+    );
   }
 
   @Delete('me')

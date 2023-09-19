@@ -36,4 +36,13 @@ export class UserUpdateDto {
   })
   @IsOptional()
   lastName?: string | null;
+
+  @ApiProperty({
+    type: String,
+    example: 'en',
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  language?: string | null;
 }

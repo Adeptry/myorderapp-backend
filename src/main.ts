@@ -106,6 +106,11 @@ async function bootstrap() {
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
+        .addGlobalParameters({
+          name: 'x-custom-lang',
+          in: 'header',
+          required: false,
+        })
         .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
       {
@@ -143,6 +148,11 @@ async function bootstrap() {
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
+        .addGlobalParameters({
+          name: 'x-custom-lang',
+          in: 'header',
+          required: false,
+        })
         .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
       {

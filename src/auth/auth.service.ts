@@ -14,6 +14,7 @@ import ms from 'ms';
 import { AllConfigType } from '../config.type.js';
 import { ForgotService } from '../forgot/forgot.service.js';
 import { AppLogger } from '../logger/app.logger.js';
+import { MailService } from '../mail/mail.service.js';
 import { Role } from '../roles/entities/role.entity.js';
 import { RoleEnum } from '../roles/roles.enum.js';
 import { Session } from '../session/entities/session.entity.js';
@@ -40,6 +41,7 @@ export class AuthService {
     private readonly forgotService: ForgotService,
     private readonly sessionService: SessionService,
     private readonly configService: ConfigService<AllConfigType>,
+    private readonly mailService: MailService,
     private readonly logger: AppLogger,
   ) {
     this.logger.setContext(AuthService.name);
@@ -130,7 +132,7 @@ export class AuthService {
       if (socialEmail && !userByEmail) {
         user.email = socialEmail;
       }
-      await this.usersService.patch(user.id, user);
+      await this.usersService.patchOne({ where: { id: user.id } }, user);
     } else if (userByEmail) {
       user = userByEmail;
     } else {
@@ -251,15 +253,15 @@ export class AuthService {
     await user.save();
   }
 
-  async forgotPassword(email: string): Promise<void> {
-    this.logger.verbose(this.forgotPassword.name);
+  async createForgotPasswordOrThrow(email: string): Promise<void> {
+    this.logger.verbose(this.createForgotPasswordOrThrow.name);
     const user = await this.usersService.findOne({
       where: {
         email,
       },
     });
 
-    if (!user) {
+    if (!user || !user.email || !user.firstName) {
       throw new UnprocessableEntityException(`No account with that email`);
     }
 
@@ -267,9 +269,18 @@ export class AuthService {
       .createHash('sha256')
       .update(randomStringGenerator())
       .digest('hex');
-    this.forgotService.create({
-      hash,
-      user,
+    await this.forgotService.save(
+      this.forgotService.create({
+        hash,
+        user,
+      }),
+    );
+    await this.mailService.sendForgotPasswordOrThrow({
+      to: user.email,
+      args: {
+        user,
+        hash,
+      },
     });
   }
 
@@ -354,7 +365,10 @@ export class AuthService {
       throw new UnprocessableEntityException(`No JWT id`);
     }
 
-    await this.usersService.patch(userJwtPayload.id, userDto);
+    await this.usersService.patchOne(
+      { where: { id: userJwtPayload.id } },
+      userDto,
+    );
 
     return this.usersService.findOne({
       where: {

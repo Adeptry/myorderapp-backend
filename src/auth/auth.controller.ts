@@ -107,7 +107,7 @@ export class AuthController {
     @Body() forgotPasswordDto: AuthForgotPasswordDto,
   ): Promise<void> {
     this.logger.verbose(this.forgotPassword.name);
-    return this.service.forgotPassword(forgotPasswordDto.email);
+    return this.service.createForgotPasswordOrThrow(forgotPasswordDto.email);
   }
 
   @Post('reset/password')
