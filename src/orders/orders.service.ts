@@ -165,6 +165,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       customer.currentOrder = order;
       await customer.save();
     } catch (error: any) {
+      this.logger.error(error);
       await this.remove(order);
       throw error;
     }
@@ -211,50 +212,46 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new InternalServerErrorException('No location ID');
     }
 
-    try {
-      const existingOrderResponse = await this.squareService.retrieveOrder({
-        accessToken: merchant.squareAccessToken,
-        orderId: order.squareId,
-      });
-      const existingSquareOrder = existingOrderResponse.result.order;
-      const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
-        (lineItem) => {
-          return {
-            catalogObjectId: lineItem.catalogObjectId,
-            quantity: lineItem.quantity,
-            note: lineItem.note,
-            modifiers: lineItem.modifiers?.map((modifier) => {
-              return { catalogObjectId: modifier.catalogObjectId };
-            }),
-          };
-        },
-      );
+    const existingOrderResponse = await this.squareService.retrieveOrder({
+      accessToken: merchant.squareAccessToken,
+      orderId: order.squareId,
+    });
+    const existingSquareOrder = existingOrderResponse.result.order;
+    const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
+      (lineItem) => {
+        return {
+          catalogObjectId: lineItem.catalogObjectId,
+          quantity: lineItem.quantity,
+          note: lineItem.note,
+          modifiers: lineItem.modifiers?.map((modifier) => {
+            return { catalogObjectId: modifier.catalogObjectId };
+          }),
+        };
+      },
+    );
 
-      const newSquareOrderResponse = await this.squareService.createOrder({
-        accessToken: merchant.squareAccessToken,
-        body: {
-          order: {
-            locationId: location.locationSquareId,
-            lineItems: existingSquareOrderLineItems,
-            state: 'DRAFT',
-            fulfillments: existingSquareOrder?.fulfillments,
-          },
+    const newSquareOrderResponse = await this.squareService.createOrder({
+      accessToken: merchant.squareAccessToken,
+      body: {
+        order: {
+          locationId: location.locationSquareId,
+          lineItems: existingSquareOrderLineItems,
+          state: 'DRAFT',
+          fulfillments: existingSquareOrder?.fulfillments,
         },
-      });
-      const newSquareOrder = newSquareOrderResponse.result.order;
+      },
+    });
+    const newSquareOrder = newSquareOrderResponse.result.order;
 
-      if (newSquareOrder) {
-        order.locationId = location.id;
-        order.location = location;
-        return await this.utils.updateForSquareOrder({
-          order: order,
-          squareOrder: newSquareOrder,
-        });
-      } else {
-        throw new InternalServerErrorException('No Square Order returned');
-      }
-    } catch (error: any) {
-      throw new InternalServerErrorException(error);
+    if (newSquareOrder) {
+      order.locationId = location.id;
+      order.location = location;
+      return await this.utils.updateForSquareOrder({
+        order: order,
+        squareOrder: newSquareOrder,
+      });
+    } else {
+      throw new InternalServerErrorException('No Square Order returned');
     }
   }
 
@@ -324,6 +321,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         );
       }
     } catch (error: any) {
+      this.logger.error(error);
       throw new InternalServerErrorException(error);
     }
   }
@@ -441,9 +439,8 @@ export class OrdersService extends EntityRepositoryService<Order> {
       squareRetrievedOrder?.fulfillments &&
       squareRetrievedOrder?.fulfillments?.length > 0;
 
-    let squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse>;
-    try {
-      squareUpdateOrderResponse = await this.squareService.updateOrder({
+    const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
+      await this.squareService.updateOrder({
         accessToken: squareAccessToken,
         orderId: order.squareId,
         body: {
@@ -470,13 +467,6 @@ export class OrdersService extends EntityRepositoryService<Order> {
           },
         },
       });
-    } catch (error: any) {
-      this.logger.error('Error updating Square order:', error);
-      throw new InternalServerErrorException(
-        error,
-        'Failed to update Square order',
-      );
-    }
 
     const squareOrderFromUpdate = squareUpdateOrderResponse.result.order;
     if (!squareOrderFromUpdate) {
@@ -493,35 +483,30 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new UnprocessableEntityException('Invalid order total amount');
     }
 
-    try {
-      await this.squareService.createPayment({
-        accessToken: squareAccessToken,
-        body: {
-          sourceId: input.paymentSquareId,
-          idempotencyKey: input.idempotencyKey,
-          customerId: customer.squareId,
-          locationId: order.location.locationSquareId,
-          amountMoney: orderTotalMoney,
-          tipMoney: {
-            amount: BigInt(Math.floor(input.orderTipMoney ?? 0)),
-            currency: orderTotalMoney.currency,
-          },
-          orderId: squareOrderFromUpdate.id,
-          referenceId: order.id,
+    await this.squareService.createPayment({
+      accessToken: squareAccessToken,
+      body: {
+        sourceId: input.paymentSquareId,
+        idempotencyKey: input.idempotencyKey,
+        customerId: customer.squareId,
+        locationId: order.location.locationSquareId,
+        amountMoney: orderTotalMoney,
+        tipMoney: {
+          amount: BigInt(Math.floor(input.orderTipMoney ?? 0)),
+          currency: orderTotalMoney.currency,
         },
-      });
+        orderId: squareOrderFromUpdate.id,
+        referenceId: order.id,
+      },
+    });
 
-      updatedOrder.closedAt = new Date();
-      updatedOrder.customerId = customer.id;
-      updatedOrder.totalMoneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
-      customer.currentOrder = null;
-      await customer.save();
+    updatedOrder.closedAt = new Date();
+    updatedOrder.customerId = customer.id;
+    updatedOrder.totalMoneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
+    customer.currentOrder = null;
+    await customer.save();
 
-      return this.save(updatedOrder);
-    } catch (error: any) {
-      this.logger.error('Error creating Square payment:', error);
-      throw new InternalServerErrorException('Failed to create Square payment');
-    }
+    return this.save(updatedOrder);
   }
 
   @OnEvent('square.order.fulfillment.updated')

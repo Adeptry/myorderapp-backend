@@ -44,41 +44,39 @@ export class MerchantsSquareService {
     const testCode = this.configService.get('square.testCode', { infer: true });
     const isTest = nodeEnv !== 'production' && oauthAccessCode === testCode;
 
-    try {
-      const accessTokenResult = isTest
-        ? this.squareConfigUtils.testTokenReponse()
-        : (
-            await this.squareService.obtainToken({
-              oauthAccessCode,
-            })
-          ).result;
+    const accessTokenResult = isTest
+      ? this.squareConfigUtils.testTokenReponse()
+      : (
+          await this.squareService.obtainToken({
+            oauthAccessCode,
+          })
+        ).result;
 
-      if (!accessTokenResult) {
-        throw new InternalServerErrorException(
-          'Failed to obtain token from Square service',
-        );
-      }
-
-      const { accessToken, expiresAt, merchantId, refreshToken } =
-        accessTokenResult;
-
-      if (!expiresAt) {
-        throw new InternalServerErrorException(
-          'No expiry date provided in the access token',
-        );
-      }
-
-      merchant.squareAccessToken = accessToken;
-      merchant.squareExpiresAt = new Date(Date.parse(expiresAt));
-      merchant.squareId = merchantId;
-      merchant.squareRefreshToken = refreshToken;
-
-      return this.service.save(merchant);
-    } catch {
+    if (!accessTokenResult) {
       throw new InternalServerErrorException(
         'Failed to obtain token from Square service',
       );
     }
+
+    const {
+      accessToken,
+      expiresAt,
+      merchantId: merchantSquareId,
+      refreshToken,
+    } = accessTokenResult;
+
+    if (!expiresAt) {
+      throw new InternalServerErrorException(
+        'No expiry date provided in the access token',
+      );
+    }
+
+    merchant.squareAccessToken = accessToken;
+    merchant.squareExpiresAt = new Date(Date.parse(expiresAt));
+    merchant.squareId = merchantSquareId;
+    merchant.squareRefreshToken = refreshToken;
+
+    return this.service.save(merchant);
   }
 
   async sync(params: { merchantId: string }) {

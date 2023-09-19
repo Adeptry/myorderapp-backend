@@ -1,14 +1,19 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import pRetry from 'p-retry';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
+import { AppLogger } from '../logger/app.logger.js';
 
 @Injectable()
 export class StripeService {
   private client: Stripe;
 
-  constructor(private configService: ConfigService<AllConfigType>) {
-    // this.logger.setContext(StripeService.name);
+  constructor(
+    private configService: ConfigService<AllConfigType>,
+    private logger: AppLogger,
+  ) {
+    logger.setContext(StripeService.name);
     const apiKey = this.configService.getOrThrow('stripe.apiKey', {
       infer: true,
     });
@@ -17,7 +22,7 @@ export class StripeService {
         apiVersion: '2022-11-15',
       });
     } else {
-      // this.logger.error('Missing Stripe API key');
+      this.logger.error('Missing Stripe API key');
       throw new InternalServerErrorException('Missing Stripe API key');
     }
   }
@@ -26,24 +31,30 @@ export class StripeService {
     params?: Stripe.CustomerCreateParams,
     options?: Stripe.RequestOptions,
   ): Promise<Stripe.Customer> {
-    try {
-      return await this.client.customers.create(params, options);
-    } catch (error: any) {
-      // this.logger.error(`Failed to create customer: ${error}`);
-      throw new InternalServerErrorException(error.message);
-    }
+    this.logger.verbose(this.createCheckoutSession.name);
+    return pRetry(() => this.client.customers.create(params, options), {
+      onFailedAttempt: (error) => {
+        this.logger.error(error);
+        if (error.retriesLeft === 0) {
+          throw new InternalServerErrorException(error);
+        }
+      },
+    });
   }
 
   async createCheckoutSession(
     params: Stripe.Checkout.SessionCreateParams,
     options?: Stripe.RequestOptions,
   ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    try {
-      return await this.client.checkout.sessions.create(params, options);
-    } catch (error: any) {
-      // this.logger.error(`Failed to create checkout session: ${error}`);
-      throw new InternalServerErrorException(error.message);
-    }
+    this.logger.verbose(this.createCheckoutSession.name);
+    return pRetry(() => this.client.checkout.sessions.create(params, options), {
+      onFailedAttempt: (error) => {
+        this.logger.error(error);
+        if (error.retriesLeft === 0) {
+          throw new InternalServerErrorException(error);
+        }
+      },
+    });
   }
 
   async retrieveCheckoutSession(
@@ -51,24 +62,36 @@ export class StripeService {
     params?: Stripe.Checkout.SessionRetrieveParams,
     options?: Stripe.RequestOptions,
   ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    try {
-      return await this.client.checkout.sessions.retrieve(id, params, options);
-    } catch (error: any) {
-      // this.logger.error(`Failed to retrieve checkout session: ${error}`);
-      throw new InternalServerErrorException(error.message);
-    }
+    this.logger.verbose(this.retrieveCheckoutSession.name);
+    return pRetry(
+      () => this.client.checkout.sessions.retrieve(id, params, options),
+      {
+        onFailedAttempt: (error) => {
+          this.logger.error(error);
+          if (error.retriesLeft === 0) {
+            throw new InternalServerErrorException(error);
+          }
+        },
+      },
+    );
   }
 
   async createBillingPortalSession(
     params: Stripe.BillingPortal.SessionCreateParams,
     options?: Stripe.RequestOptions,
   ): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
-    try {
-      return await this.client.billingPortal.sessions.create(params, options);
-    } catch (error: any) {
-      // this.logger.error(`Failed to createBillingPortalSession: ${error}`);
-      throw new InternalServerErrorException(error.message);
-    }
+    this.logger.verbose(this.createBillingPortalSession.name);
+    return pRetry(
+      () => this.client.billingPortal.sessions.create(params, options),
+      {
+        onFailedAttempt: (error) => {
+          this.logger.error(error);
+          if (error.retriesLeft === 0) {
+            throw new InternalServerErrorException(error);
+          }
+        },
+      },
+    );
   }
 
   webhooksConstructEvent(
@@ -79,6 +102,7 @@ export class StripeService {
     cryptoProvider?: Stripe.CryptoProvider | undefined,
     receivedAt?: number | undefined,
   ) {
+    this.logger.verbose(this.webhooksConstructEvent.name);
     return this.client.webhooks.constructEvent(
       payload,
       header,

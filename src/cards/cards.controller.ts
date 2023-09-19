@@ -5,7 +5,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  InternalServerErrorException,
   Param,
   Post,
   Query,
@@ -77,17 +76,12 @@ export class CardsController {
     @Query('cursor') cursor?: string,
   ): Promise<SquareListCardsResponse> {
     this.logger.verbose(this.getMe.name);
-    try {
-      const response = await this.squareService.listCards({
-        accessToken: request.merchant.squareAccessToken,
-        customerId: request.customer.squareId,
-        cursor,
-      });
-      return response.result as SquareListCardsResponse;
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error);
-    }
+    const response = await this.squareService.listCards({
+      accessToken: request.merchant.squareAccessToken,
+      customerId: request.customer.squareId,
+      cursor,
+    });
+    return response.result as SquareListCardsResponse;
   }
 
   @ApiCreatedResponse({ type: SquareCard })
@@ -115,27 +109,22 @@ export class CardsController {
   @Post('me')
   async postMe(@Body() createCardDto: CreateCardDto, @Req() request: any) {
     this.logger.verbose(this.postMe.name);
-    try {
-      const response = await this.squareService.createCard({
-        accessToken: request.merchant.squareAccessToken,
-        body: {
-          idempotencyKey: nanoid(),
-          sourceId: createCardDto.sourceId,
-          card: {
-            customerId: request.customer.squareId,
-            billingAddress: createCardDto.postalCode
-              ? {
-                  postalCode: createCardDto.postalCode,
-                }
-              : undefined,
-          },
+    const response = await this.squareService.createCard({
+      accessToken: request.merchant.squareAccessToken,
+      body: {
+        idempotencyKey: nanoid(),
+        sourceId: createCardDto.sourceId,
+        card: {
+          customerId: request.customer.squareId,
+          billingAddress: createCardDto.postalCode
+            ? {
+                postalCode: createCardDto.postalCode,
+              }
+            : undefined,
         },
-      });
-      return response.result.card;
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error);
-    }
+      },
+    });
+    return response.result.card;
   }
 
   @ApiOkResponse({ type: SquareDisableCardResponse })
@@ -159,15 +148,10 @@ export class CardsController {
   @Delete('me/:id')
   async deleteMe(@Req() request: any, @Param('id') cardId: string) {
     this.logger.verbose(this.deleteMe.name);
-    try {
-      await this.squareService.disableCard({
-        accessToken: request.merchant.squareAccessToken,
-        cardId,
-      });
-      return;
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new InternalServerErrorException(error);
-    }
+    await this.squareService.disableCard({
+      accessToken: request.merchant.squareAccessToken,
+      cardId,
+    });
+    return;
   }
 }

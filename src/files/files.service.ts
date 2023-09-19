@@ -1,7 +1,12 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import S3 from 'aws-sdk/clients/s3.js';
+import pRetry from 'p-retry';
 import { Repository } from 'typeorm';
 import { AllConfigType } from '../config.type.js';
 import { AppLogger } from '../logger/app.logger.js';
@@ -47,17 +52,19 @@ export class FilesService {
       Body: file.buffer,
     };
 
-    try {
-      const uploadResult = await this.s3.upload(params).promise();
+    const uploadResult = await pRetry(() => this.s3.upload(params).promise(), {
+      onFailedAttempt: (error) => {
+        this.logger.error(error);
+        if (error.retriesLeft === 0) {
+          throw new InternalServerErrorException(error);
+        }
+      },
+    });
 
-      return this.fileRepository.save(
-        this.fileRepository.create({
-          url: uploadResult.Location,
-        }),
-      );
-    } catch (error: any) {
-      this.logger.error(`Failed to upload to S3: ${error}`);
-      throw new UnprocessableEntityException('Failed to upload to S3');
-    }
+    return this.fileRepository.save(
+      this.fileRepository.create({
+        url: uploadResult.Location,
+      }),
+    );
   }
 }

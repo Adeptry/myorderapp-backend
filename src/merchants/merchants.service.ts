@@ -39,8 +39,9 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
     try {
       const app = this.firebaseAdminService.getApp(entity.id);
       return app;
-    } catch {
+    } catch (error) {
       // do nothing, the app doesn't exist
+      this.logger.log(error);
     }
     try {
       const appOptions = JSON.parse(JSON.stringify(entity.firebaseAppOptions));

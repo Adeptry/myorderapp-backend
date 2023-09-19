@@ -96,11 +96,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
       Number(squareItemVariationData.priceMoney?.amount ?? 0) ?? 0;
     moaVariation.priceCurrency = squareItemVariationData.priceMoney?.currency;
 
-    try {
-      await this.save(moaVariation);
-    } catch (error: any) {
-      this.logger.log(error);
-    }
+    await this.save(moaVariation);
 
     const squareVariationLocationOverrides =
       squareItemVariationData.locationOverrides;

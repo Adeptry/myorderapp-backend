@@ -172,7 +172,6 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
         await this.save(moaLocation);
       } catch (error: any) {
         this.logger.error('Failed to save location');
-        throw new Error('Failed to save location');
       }
     }
 
