@@ -1,21 +1,22 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogItemModifierListInfo } from 'square';
 import { Repository } from 'typeorm';
 import { ItemModifierList } from '../../catalogs/entities/item-modifier-list.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 
 @Injectable()
 export class ItemModifierListService extends EntityRepositoryService<ItemModifierList> {
-  private readonly logger = new Logger(ItemModifierListService.name);
-
   constructor(
     @InjectRepository(ItemModifierList)
     protected readonly repository: Repository<ItemModifierList>,
     protected readonly modifierListService: ModifierListsService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(ItemModifierListService.name);
+    super(repository, logger);
   }
 
   /*
@@ -49,14 +50,15 @@ export class ItemModifierListService extends EntityRepositoryService<ItemModifie
     "enabled": true
   },
   */
-  async processAndSave(params: {
+  async process(params: {
     squareItemModifierListInfo: CatalogItemModifierListInfo;
     moaItemId: string;
     catalogId: string;
   }) {
+    this.logger.verbose(this.process.name);
     const { squareItemModifierListInfo, moaItemId, catalogId } = params;
 
-    this.logger.verbose(
+    this.logger.debug(
       `Processing item modifier list ${squareItemModifierListInfo?.modifierListId} ${moaItemId}.`,
     );
 

@@ -5,12 +5,14 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import appConfig from '../../app.config.js';
 import databaseConfig from '../../database/database.config.js';
 import { TypeOrmConfigService } from '../../database/typeorm-config.service.js';
+import { LoggerModule } from '../../logger/logger.module.js';
 import { RoleSeedModule } from './role/role-seed.module.js';
 import { StatusSeedModule } from './status/status-seed.module.js';
 import { UserSeedModule } from './user/user-seed.module.js';
 
 @Module({
   imports: [
+    LoggerModule,
     RoleSeedModule,
     StatusSeedModule,
     UserSeedModule,

@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderLineItemModifier } from 'square';
 import { Repository } from 'typeorm';
+import { AppLogger } from '../../logger/app.logger.js';
 import { LineItemModifier } from '../../orders/entities/line-item-modifier.entity.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
@@ -10,8 +11,10 @@ export class LineItemModifierService extends EntityRepositoryService<LineItemMod
   constructor(
     @InjectRepository(LineItemModifier)
     protected readonly repository: Repository<LineItemModifier>,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(LineItemModifierService.name);
+    super(repository, logger);
   }
 
   fromSquareLineItemModifier(

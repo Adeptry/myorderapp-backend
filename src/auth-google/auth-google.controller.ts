@@ -15,6 +15,7 @@ import {
 import { AuthService } from '../auth/auth.service.js';
 import { LoginResponseType } from '../auth/types/login-response.type.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { AuthGoogleService } from './auth-google.service.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
@@ -29,7 +30,10 @@ export class AuthGoogleController {
   constructor(
     private readonly authService: AuthService,
     private readonly authGoogleService: AuthGoogleService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AuthGoogleController.name);
+  }
 
   @Post('login')
   @HttpCode(HttpStatus.OK)
@@ -41,6 +45,7 @@ export class AuthGoogleController {
   async login(
     @Body() loginDto: AuthGoogleLoginDto,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.login.name);
     const socialData = await this.authGoogleService.getProfileByToken(loginDto);
 
     return this.authService.validateSocialLogin(

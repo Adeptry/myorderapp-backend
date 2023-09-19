@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { LocationsService } from '../locations/locations.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogObjectTypeEnum } from '../square/square-catalog-object-type.enum.js';
 import { SquareService } from '../square/square.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
@@ -23,8 +24,6 @@ import { VariationsService } from './services/variations.service.js';
 
 @Injectable()
 export class CatalogsService extends EntityRepositoryService<Catalog> {
-  private readonly logger = new Logger(CatalogsService.name);
-
   constructor(
     @InjectRepository(Catalog)
     protected readonly repository: Repository<Catalog>,
@@ -41,8 +40,10 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
     private readonly squareService: SquareService,
     @Inject(LocationsService)
     private readonly locationsService: LocationsService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(CatalogImagesService.name);
+    super(repository, logger);
   }
 
   async squareSync(params: {
@@ -50,6 +51,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
     catalogId: string;
     merchantId: string;
   }) {
+    this.logger.verbose(this.squareSync.name);
     const { merchantId, catalogId, squareAccessToken: accessToken } = params;
     const moaCatalog = await this.findOneOrFail({
       where: { id: catalogId },
@@ -79,7 +81,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
         });
       });
       await this.variationsService.removeAll(deletedMoaVariations);
-      this.logger.verbose(`Deleted ${deletedMoaVariations.length} variations.`);
+      this.logger.debug(`Deleted ${deletedMoaVariations.length} variations.`);
 
       // Modifiers lists
 
@@ -92,7 +94,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
         moaCatalog,
         'modifierLists',
       );
-      this.logger.verbose(`Found ${moaModifierLists.length} modifier lists.`);
+      this.logger.debug(`Found ${moaModifierLists.length} modifier lists.`);
       const deletedMoaModifierLists = moaModifierLists.filter((moaValue) => {
         return !squareModifierListCatalogObjects.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -104,12 +106,12 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           return deletedValue.squareId === moaValue.squareId;
         });
       });
-      this.logger.verbose(
+      this.logger.debug(
         `Deleted ${deletedMoaModifierLists.length} modifier lists.`,
       );
 
       for (const squareModifierList of squareModifierListCatalogObjects) {
-        await this.modifierListsService.processAndSave({
+        await this.modifierListsService.process({
           catalogObject: squareModifierList,
           moaCatalogId: moaCatalog.id,
         });
@@ -137,10 +139,10 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           return deletedValue.squareId === moaValue.squareId;
         });
       });
-      this.logger.verbose(`Deleted ${deletedMoaModifiers.length} modifiers.`);
+      this.logger.debug(`Deleted ${deletedMoaModifiers.length} modifiers.`);
 
       for (const squareModifier of squareModifierCatalogObjects) {
-        await this.modifiersService.processAndSave({
+        await this.modifiersService.process({
           squareCatalogObject: squareModifier,
           moaCatalogId: moaCatalog.id,
           moaLocations,
@@ -169,13 +171,13 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           return deletedValue.squareId === moaValue.squareId;
         });
       });
-      this.logger.verbose(`Deleted ${deletedMoaCategories.length} categories.`);
+      this.logger.debug(`Deleted ${deletedMoaCategories.length} categories.`);
 
       for (const [
         squareCategoryIndex,
         squareCategoryCatalogObject,
       ] of squareCategoryCatalogObjects.entries()) {
-        await this.categoriesService.processAndSave({
+        await this.categoriesService.process({
           squareCategoryCatalogObject: squareCategoryCatalogObject,
           moaCatalogId: moaCatalog.id,
           moaOrdinal: squareCategoryIndex,
@@ -190,7 +192,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           types: [SquareCatalogObjectTypeEnum.item],
         })) ?? [];
       let moaItems = await this.loadManyRelation<Item>(moaCatalog, 'items');
-      this.logger.verbose(`Found ${moaItems.length} items.`);
+      this.logger.debug(`Found ${moaItems.length} items.`);
       const deletedMoaItems = moaItems.filter((moaValue) => {
         return !squareItemCatalogObjects.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -202,7 +204,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           return deletedValue.squareId === moaValue.squareId;
         });
       });
-      this.logger.verbose(`Deleted ${deletedMoaItems.length} items.`);
+      this.logger.debug(`Deleted ${deletedMoaItems.length} items.`);
 
       // Catalog images
       const squareImages =
@@ -220,7 +222,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
           continue;
         }
 
-        this.logger.verbose(
+        this.logger.debug(
           `Processing item ${squareItemCatalogObject.itemData?.name} ${squareItemCatalogObjectIndex}.`,
         );
 
@@ -273,7 +275,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
 
         for (const squareItemModifierListInfo of squareItemData.modifierListInfo ??
           []) {
-          await this.itemModifierListService.processAndSave({
+          await this.itemModifierListService.process({
             squareItemModifierListInfo: squareItemModifierListInfo,
             moaItemId: moaItem.id,
             catalogId: moaCatalog.id,
@@ -362,7 +364,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
             throw new Error(`No variation for ${squareItemDataVariation.id}.`);
           }
 
-          await this.variationsService.processAndSave({
+          await this.variationsService.process({
             squareCatalogObject: squareVariationCatalogObject,
             moaCatalogId: moaCatalog.id,
             moaLocations: moaLocations,

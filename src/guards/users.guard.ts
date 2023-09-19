@@ -5,6 +5,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 
 export interface UsersGuardedRequest extends Request {
@@ -13,9 +14,15 @@ export interface UsersGuardedRequest extends Request {
 
 @Injectable()
 export class UsersGuard implements CanActivate {
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    protected readonly logger: AppLogger,
+  ) {
+    logger.setContext(UsersGuard.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
     const user = await this.authService.me(request.user);
 

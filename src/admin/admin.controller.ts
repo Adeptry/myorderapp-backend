@@ -20,9 +20,9 @@ import {
 import { AuthService } from '../auth/auth.service.js';
 import { AuthEmailLoginDto } from '../auth/dto/auth-email-login.dto.js';
 import { LoginResponseType } from '../auth/types/login-response.type.js';
-import { FilesService } from '../files/files.service.js';
 import { AdminsGuard } from '../guards/admins.guard.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsSquareService } from '../merchants/merchants.square.service.js';
 import { NestError } from '../utils/error.js';
 
@@ -35,10 +35,12 @@ import { NestError } from '../utils/error.js';
 })
 export class AdminController {
   constructor(
-    protected readonly authService: AuthService,
-    protected readonly filesService: FilesService,
-    protected readonly merchantsSquareService: MerchantsSquareService,
-  ) {}
+    private readonly authService: AuthService,
+    private readonly merchantsSquareService: MerchantsSquareService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AdminController.name);
+  }
 
   @Post('email/login')
   @HttpCode(HttpStatus.OK)
@@ -47,9 +49,10 @@ export class AdminController {
     operationId: 'adminLogin',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public adminLogin(
+  public emailLogin(
     @Body() loginDTO: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.emailLogin.name);
     return this.authService.validateLogin(loginDTO, true);
   }
 
@@ -70,6 +73,7 @@ export class AdminController {
   async squareCatalogSync(
     @Query('merchantId') merchantId: string,
   ): Promise<void> {
+    this.logger.verbose(this.squareCatalogSync.name);
     return this.merchantsSquareService.sync({
       merchantId,
     });

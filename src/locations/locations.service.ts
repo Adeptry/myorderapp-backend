@@ -1,7 +1,8 @@
-import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
 import { Repository } from 'typeorm';
+import { AppLogger } from '../logger/app.logger.js';
 import { SquareService } from '../square/square.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
 import {
@@ -14,8 +15,6 @@ import { BusinessHoursPeriodsService } from './services/business-hours-period.se
 
 @Injectable()
 export class LocationsService extends EntityRepositoryService<MoaLocation> {
-  private readonly logger = new Logger(LocationsService.name);
-
   constructor(
     @InjectRepository(MoaLocation)
     protected readonly repository: Repository<MoaLocation>,
@@ -25,14 +24,17 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
     private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
     @Inject(SquareService)
     private readonly squareService: SquareService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(LocationsService.name);
+    super(repository, logger);
   }
 
-  async sync(params: {
+  async syncSquare(params: {
     merchantId: string;
     squareAccessToken: string;
   }): Promise<MoaLocation[]> {
+    this.logger.verbose(this.syncSquare.name);
     const { merchantId, squareAccessToken: accessToken } = params;
     const locations = await this.find({
       where: { merchantId },
@@ -177,10 +179,11 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
     return locations;
   }
 
-  async assignAndSave(params: {
+  async updateOne(params: {
     entity: MoaLocation;
     input: LocationUpdateDto;
   }): Promise<MoaLocation> {
+    this.logger.verbose(this.updateOne.name);
     if (params.input.moaOrdinal !== undefined) {
       params.entity.moaOrdinal = params.input.moaOrdinal;
     }
@@ -191,6 +194,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
   }
 
   async updateAll(inputs: LocationUpdateAllDto[]) {
+    this.logger.verbose(this.updateAll.name);
     const entities: MoaLocation[] = [];
 
     for (const input of inputs) {

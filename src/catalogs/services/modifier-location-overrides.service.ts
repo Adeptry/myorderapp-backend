@@ -4,6 +4,7 @@ import { ModifierLocationOverrides } from 'square';
 import { Repository } from 'typeorm';
 import { ModifierLocationOverride } from '../../catalogs/entities/modifier-location-override.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
@@ -11,15 +12,18 @@ export class ModifierLocationOverridesService extends EntityRepositoryService<Mo
   constructor(
     @InjectRepository(ModifierLocationOverride)
     protected readonly repository: Repository<ModifierLocationOverride>,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(ModifierLocationOverridesService.name);
+    super(repository, logger);
   }
 
-  async processAndSave(params: {
+  async process(params: {
     forModifierWithId: string;
     squareModifierLocationOverrides: ModifierLocationOverrides[];
     moaLocations: Location[];
   }) {
+    this.logger.verbose(this.process.name);
     const {
       squareModifierLocationOverrides,
       forModifierWithId: moaModifierId,

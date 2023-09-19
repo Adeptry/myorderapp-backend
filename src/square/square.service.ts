@@ -106,7 +106,7 @@ export class SquareService {
     let listCatalogResponse = await pRetry(() =>
       client.catalogApi.listCatalog(undefined, theTypes),
     );
-    this.logger.verbose(
+    this.logger.debug(
       `listCatalog undefined ${theTypes} result length ${
         listCatalogResponse?.result.objects?.length ?? 0
       }`,
@@ -118,7 +118,7 @@ export class SquareService {
       listCatalogResponse = await pRetry(() =>
         client.catalogApi.listCatalog(cursor, theTypes),
       );
-      this.logger.verbose(
+      this.logger.debug(
         `listCatalog ${cursor} ${theTypes} result length ${
           listCatalogResponse?.result.objects?.length ?? 0
         }`,

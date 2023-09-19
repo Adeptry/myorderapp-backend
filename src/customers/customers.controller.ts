@@ -35,7 +35,9 @@ import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
+import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { NestError } from '../utils/error.js';
 import { paginatedResults } from '../utils/paginated.js';
 import { AppInstallUpdateDto } from './dto/app-install-update.dto.js';
@@ -58,7 +60,10 @@ export class CustomersController {
   constructor(
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    logger.setContext(CustomersController.name);
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
@@ -78,9 +83,14 @@ export class CustomersController {
     operationId: 'createCustomer',
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
-  async create(@Req() request: any, @Query('merchantId') merchantId: string) {
-    return this.service.createAndSave({
-      userId: request.user.id,
+  async post(
+    @Req() request: UsersGuardedRequest,
+    @Query('merchantId') merchantId: string,
+  ) {
+    this.logger.verbose(this.post.name);
+    return this.service.createOne({
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      userId: request.user.id!,
       merchantId: merchantId,
     });
   }
@@ -99,7 +109,7 @@ export class CustomersController {
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
-  async me(
+  async getMe(
     @Req() request: CustomersGuardedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
@@ -110,6 +120,7 @@ export class CustomersController {
     @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
     preferredLocationRelation?: boolean,
   ): Promise<Customer> {
+    this.logger.verbose(this.getMe.name);
     const { customer, merchant } = request;
 
     return await this.service.findOneOrFail({
@@ -140,10 +151,11 @@ export class CustomersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @ApiBody({ type: CustomerUpdateDto })
-  async update(
+  async patchMe(
     @Req() request: CustomersGuardedRequest,
     @Body() customerUpdateDto: CustomerUpdateDto,
   ) {
+    this.logger.verbose(this.patchMe.name);
     const { customer, merchant } = request;
 
     if (!customer.id || !merchant.id) {
@@ -152,7 +164,7 @@ export class CustomersController {
       );
     }
 
-    return this.service.updateAndSave({
+    return this.service.updateOne({
       id: customer.id,
       merchantId: merchant.id,
       customerUpdateDto,
@@ -167,11 +179,12 @@ export class CustomersController {
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: CustomersPaginatedResponse })
   @ApiOperation({ summary: 'Get my Customers', operationId: 'getCustomers' })
-  async get(
+  async getMany(
     @Req() request: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
   ): Promise<CustomersPaginatedResponse> {
+    this.logger.verbose(this.getMany.name);
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id },
@@ -203,6 +216,7 @@ export class CustomersController {
     @Body() body: AppInstallUpdateDto,
     @Res({ passthrough: true }) res: Response,
   ) {
+    this.logger.verbose(this.updateMyAppInstall.name);
     // Find the AppInstall entity with the provided tokenId
     let appInstall = await this.appInstallsService.findOne({
       where: {

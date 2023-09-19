@@ -6,6 +6,7 @@ import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { GuardsModule } from '../guards/guards.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { SquareModule } from '../square/square.module.js';
 import { UsersModule } from '../users/users.module.js';
@@ -14,6 +15,7 @@ import { AppInstallsService } from './services/app-installs.service.js';
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([Customer, AppInstall]),
     SquareModule,
     GuardsModule,

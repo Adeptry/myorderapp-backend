@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { Variation } from '../../catalogs/entities/variation.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { VariationUpdateDto } from '../dto/variation-update.dto.js';
 import { VariationLocationOverride } from '../entities/variation-location-override.entity.js';
@@ -11,14 +12,14 @@ import { VariationLocationOverridesService } from './variation-location-override
 
 @Injectable()
 export class VariationsService extends EntityRepositoryService<Variation> {
-  private readonly logger = new Logger(VariationsService.name);
-
   constructor(
     @InjectRepository(Variation)
     protected readonly repository: Repository<Variation>,
     protected readonly variationLocationOverridesService: VariationLocationOverridesService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(VariationsService.name);
+    super(repository, logger);
   }
 
   /*
@@ -55,14 +56,14 @@ export class VariationsService extends EntityRepositoryService<Variation> {
         "stockable": true
       }
     },
-
   */
-  async processAndSave(params: {
+  async process(params: {
     squareCatalogObject: CatalogObject;
     moaCatalogId: string;
     moaLocations: Location[];
     moaItemId: string;
   }) {
+    this.logger.verbose(this.process.name);
     const { squareCatalogObject, moaCatalogId, moaLocations, moaItemId } =
       params;
     const squareItemVariationData = squareCatalogObject.itemVariationData;
@@ -71,7 +72,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
       throw new Error(`No itemVariationData for ${squareCatalogObject.id}.`);
     }
 
-    this.logger.verbose(
+    this.logger.debug(
       `Processing variation ${squareItemVariationData?.name} ${squareCatalogObject.id}.`,
     );
     let moaVariation = await this.findOne({
@@ -141,6 +142,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
   }
 
   joinManyQuery(params: { itemId: string; locationId?: string }) {
+    this.logger.verbose(this.joinManyQuery.name);
     const { itemId, locationId } = params;
 
     const query = this.createQueryBuilder('variations').where(
@@ -167,7 +169,8 @@ export class VariationsService extends EntityRepositoryService<Variation> {
     return query;
   }
 
-  async assignAndSave(params: { id: string; input: VariationUpdateDto }) {
+  async updateOne(params: { id: string; input: VariationUpdateDto }) {
+    this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({ where: { id: params.id } });
     if (params.input.moaEnabled !== undefined) {
       entity.moaEnabled = params.input.moaEnabled;

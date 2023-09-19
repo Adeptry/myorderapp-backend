@@ -6,6 +6,7 @@ import { CatalogsModule } from '../catalogs/catalogs.module.js';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module.js';
 import { GuardsModule } from '../guards/guards.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsController } from '../merchants/merchants.controller.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
@@ -17,6 +18,7 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([Merchant]),
     StripeModule,
     FirebaseAdminModule,

@@ -38,6 +38,7 @@ import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
 import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { NestError } from '../utils/error.js';
 import { AppConfigUpdateDto } from './dto/app-config-update.input.js';
@@ -54,7 +55,10 @@ export class AppConfigController {
   constructor(
     private readonly service: AppConfigService,
     private readonly filesService: FilesService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AppConfigController.name);
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
@@ -76,6 +80,7 @@ export class AppConfigController {
     @Req() request: UserTypeGuardedRequest,
     @Query('merchantId') merchantId?: string,
   ) {
+    this.logger.verbose(this.getMyConfig.name);
     const appConfig = await this.service.findOne({
       where: { merchantId: merchantId ?? request.merchant.id },
     });
@@ -98,6 +103,7 @@ export class AppConfigController {
     operationId: 'getConfigForMerchant',
   })
   async get(@Query('merchantId') merchantId: string) {
+    this.logger.verbose(this.get.name);
     const appConfig = await this.service.findOne({
       where: { merchantId: merchantId },
     });
@@ -130,6 +136,7 @@ export class AppConfigController {
     @Body()
     createAppConfigDto: AppConfigUpdateDto,
   ) {
+    this.logger.verbose(this.create.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
@@ -162,6 +169,7 @@ export class AppConfigController {
     @Req() request: MerchantsGuardedRequest,
     @Body() updateAppConfigDto: AppConfigUpdateDto,
   ) {
+    this.logger.verbose(this.update.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
@@ -208,6 +216,7 @@ export class AppConfigController {
     @Req() request: MerchantsGuardedRequest,
     @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
   ) {
+    this.logger.verbose(this.uploadFile.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
@@ -224,7 +233,7 @@ export class AppConfigController {
       });
     }
 
-    appConfig.iconFile = await this.filesService.uploadFile(file);
+    appConfig.iconFile = await this.filesService.upload(file);
     return this.service.save(appConfig);
   }
 }

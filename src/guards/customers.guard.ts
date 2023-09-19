@@ -10,6 +10,7 @@ import { Request } from 'express';
 import { AuthService } from '../auth/auth.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { User } from '../users/entities/user.entity.js';
@@ -29,9 +30,13 @@ export class CustomersGuard implements CanActivate {
     private customersService: CustomersService,
     @Inject(forwardRef(() => MerchantsService))
     private merchantsService: MerchantsService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    logger.setContext(CustomersGuard.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
     const merchantId = request.query.merchantId;
 

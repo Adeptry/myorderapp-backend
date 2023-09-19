@@ -36,6 +36,7 @@ import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import type { UserTypeGuardedRequest } from '../../guards/user-type.guard.js';
 import { UserTypeGuard } from '../../guards/user-type.guard.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { MerchantsService } from '../../merchants/merchants.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { NestError } from '../../utils/error.js';
@@ -50,7 +51,10 @@ export class CategoriesController {
   constructor(
     private readonly service: CategoriesService,
     private readonly merchantsService: MerchantsService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(CategoriesController.name);
+  }
 
   @ApiBearerAuth()
   @Get('catalog')
@@ -75,7 +79,7 @@ export class CategoriesController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async categories(
+  async getCatalog(
     @Query('merchantId') merchantId: string,
     @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
@@ -86,6 +90,7 @@ export class CategoriesController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
+    this.logger.verbose(this.getCatalog.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -152,7 +157,7 @@ export class CategoriesController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async myCategories(
+  async getCatalogMe(
     @Req() request: UserTypeGuardedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -162,6 +167,7 @@ export class CategoriesController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
+    this.logger.verbose(this.getCatalogMe.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -211,11 +217,12 @@ export class CategoriesController {
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
   @ApiOperation({ summary: 'Update a Category', operationId: 'updateCategory' })
-  async update(
+  async patchCategory(
     @Param('id') id: string,
     @Body() input: CategoryUpdateDto,
   ): Promise<Category> {
-    return this.service.assignAndSave({
+    this.logger.verbose(this.patchCategory.name);
+    return this.service.updateOne({
       id,
       input,
     });
@@ -235,9 +242,10 @@ export class CategoriesController {
     summary: 'Update multiple Categories',
     operationId: 'updateCategories',
   })
-  async updateMultiple(
+  async patchCategories(
     @Body() input: CategoryUpdateAllDto[],
   ): Promise<Category[]> {
+    this.logger.verbose(this.patchCategories.name);
     return await this.service.updateAll(input);
   }
 }

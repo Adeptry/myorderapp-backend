@@ -6,7 +6,6 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
-  Logger,
   Param,
   Post,
   Query,
@@ -28,9 +27,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
-import { CustomersController } from '../customers/customers.controller.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import {
   SquareCard,
   SquareDisableCardResponse,
@@ -48,9 +47,12 @@ import { CreateCardDto } from './dto/card-create.dto.js';
   version: '2',
 })
 export class CardsController {
-  private readonly logger = new Logger(CustomersController.name);
-
-  constructor(private readonly squareService: SquareService) {}
+  constructor(
+    private readonly squareService: SquareService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(CardsController.name);
+  }
 
   @ApiOkResponse({ type: SquareListCardsResponse })
   @ApiBearerAuth()
@@ -70,10 +72,11 @@ export class CardsController {
   })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get('me')
-  async listMyCards(
+  async getMe(
     @Req() request: any,
     @Query('cursor') cursor?: string,
   ): Promise<SquareListCardsResponse> {
+    this.logger.verbose(this.getMe.name);
     try {
       const response = await this.squareService.listCards({
         accessToken: request.merchant.squareAccessToken,
@@ -110,10 +113,8 @@ export class CardsController {
     },
   })
   @Post('me')
-  async createMyCard(
-    @Body() createCardDto: CreateCardDto,
-    @Req() request: any,
-  ) {
+  async postMe(@Body() createCardDto: CreateCardDto, @Req() request: any) {
+    this.logger.verbose(this.postMe.name);
     try {
       const response = await this.squareService.createCard({
         accessToken: request.merchant.squareAccessToken,
@@ -156,7 +157,8 @@ export class CardsController {
   })
   @ApiParam({ name: 'id', required: true, type: String })
   @Delete('me/:id')
-  async disableMyCard(@Req() request: any, @Param('id') cardId: string) {
+  async deleteMe(@Req() request: any, @Param('id') cardId: string) {
+    this.logger.verbose(this.deleteMe.name);
     try {
       await this.squareService.disableCard({
         accessToken: request.merchant.squareAccessToken,

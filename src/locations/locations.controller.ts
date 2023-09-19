@@ -157,7 +157,7 @@ export class LocationsController {
       throw new NotFoundException(`Location with id ${id} not found`);
     }
 
-    return this.service.assignAndSave({
+    return this.service.updateOne({
       entity,
       input,
     });

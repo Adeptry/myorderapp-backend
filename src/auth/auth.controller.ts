@@ -4,7 +4,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   Patch,
   Post,
   Req,
@@ -24,6 +23,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthService } from './auth.service.js';
@@ -43,8 +43,12 @@ import { LoginResponseType } from './types/login-response.type.js';
   version: '2',
 })
 export class AuthController {
-  private readonly logger = new Logger(AuthController.name);
-  constructor(private readonly service: AuthService) {}
+  constructor(
+    private readonly service: AuthService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AuthController.name);
+  }
 
   @SerializeOptions({
     groups: ['me'],
@@ -59,6 +63,7 @@ export class AuthController {
   async emailLogin(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.emailLogin.name);
     const response = await this.service.validateLogin(loginDto, false);
     return response;
   }
@@ -73,6 +78,7 @@ export class AuthController {
   async emailRegister(
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.emailRegister.name);
     const response = await this.service.register(createUserDto);
     return response;
   }
@@ -100,6 +106,7 @@ export class AuthController {
   async forgotPassword(
     @Body() forgotPasswordDto: AuthForgotPasswordDto,
   ): Promise<void> {
+    this.logger.verbose(this.forgotPassword.name);
     return this.service.forgotPassword(forgotPasswordDto.email);
   }
 
@@ -111,6 +118,7 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   resetPassword(@Body() resetPasswordDto: AuthResetPasswordDto): Promise<void> {
+    this.logger.verbose(this.resetPassword.name);
     return this.service.resetPassword(
       resetPasswordDto.hash,
       resetPasswordDto.password,
@@ -130,6 +138,7 @@ export class AuthController {
   })
   @ApiOkResponse({ type: User })
   public me(@Req() request: JwtGuardedRequest): Promise<NullableType<User>> {
+    this.logger.verbose(this.me.name);
     return this.service.me(request.user);
   }
 
@@ -148,7 +157,7 @@ export class AuthController {
   public refresh(
     @Req() request: JwtGuardedRequest,
   ): Promise<Omit<LoginResponseType, 'user'>> {
-    this.logger.log(`refresh: ${JSON.stringify(request.user)}`);
+    this.logger.verbose(this.refresh.name);
     if (request.user.sessionId == undefined) {
       throw new UnauthorizedException();
     }
@@ -165,6 +174,7 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   public async logout(@Req() request: JwtGuardedRequest): Promise<void> {
+    this.logger.verbose(this.logout.name);
     await this.service.logout({
       sessionId: request.user.sessionId,
     });
@@ -187,6 +197,7 @@ export class AuthController {
     @Req() request: JwtGuardedRequest,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
+    this.logger.verbose(this.update.name);
     return this.service.update(request.user, userDto);
   }
 

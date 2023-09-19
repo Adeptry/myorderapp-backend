@@ -1,19 +1,14 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
 
 @Injectable()
 export class StripeService {
-  private readonly logger = new Logger(StripeService.name);
-
   private client: Stripe;
 
   constructor(private configService: ConfigService<AllConfigType>) {
+    // this.logger.setContext(StripeService.name);
     const apiKey = this.configService.getOrThrow('stripe.apiKey', {
       infer: true,
     });
@@ -22,7 +17,7 @@ export class StripeService {
         apiVersion: '2022-11-15',
       });
     } else {
-      this.logger.error('Missing Stripe API key');
+      // this.logger.error('Missing Stripe API key');
       throw new InternalServerErrorException('Missing Stripe API key');
     }
   }
@@ -34,7 +29,7 @@ export class StripeService {
     try {
       return await this.client.customers.create(params, options);
     } catch (error: any) {
-      this.logger.error(`Failed to create customer: ${error}`);
+      // this.logger.error(`Failed to create customer: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
   }
@@ -46,7 +41,7 @@ export class StripeService {
     try {
       return await this.client.checkout.sessions.create(params, options);
     } catch (error: any) {
-      this.logger.error(`Failed to create checkout session: ${error}`);
+      // this.logger.error(`Failed to create checkout session: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
   }
@@ -59,7 +54,7 @@ export class StripeService {
     try {
       return await this.client.checkout.sessions.retrieve(id, params, options);
     } catch (error: any) {
-      this.logger.error(`Failed to retrieve checkout session: ${error}`);
+      // this.logger.error(`Failed to retrieve checkout session: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
   }
@@ -71,7 +66,7 @@ export class StripeService {
     try {
       return await this.client.billingPortal.sessions.create(params, options);
     } catch (error: any) {
-      this.logger.error(`Failed to createBillingPortalSession: ${error}`);
+      // this.logger.error(`Failed to createBillingPortalSession: ${error}`);
       throw new InternalServerErrorException(error.message);
     }
   }

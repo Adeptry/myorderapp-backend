@@ -2,6 +2,7 @@ import { forwardRef, Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { SquareModule } from '../square/square.module.js';
 import { Address } from './entities/address.entity.js';
@@ -14,6 +15,7 @@ import { BusinessHoursPeriodsService } from './services/business-hours-period.se
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([Location, Address, BusinessHoursPeriod]),
     AuthModule,
     SquareModule,

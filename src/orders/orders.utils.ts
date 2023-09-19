@@ -1,4 +1,9 @@
-import { BadRequestException, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import {
   addDays,
   addHours,
@@ -7,17 +12,25 @@ import {
   isBefore,
   isWithinInterval,
 } from 'date-fns';
-import { Order as SquareOrder } from 'square';
+import { OrderLineItem, Order as SquareOrder } from 'square';
+import { In } from 'typeorm';
+import { ModifiersService } from '../catalogs/services/modifiers.service.js';
+import { VariationsService } from '../catalogs/services/variations.service.js';
 import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity.js';
+import { VariationAddDto } from './dto/variation-add.dto.js';
 import { Order } from './entities/order.entity.js';
 import { LineItemService } from './services/line-item.service.js';
 
 export class OrdersUtils {
   private readonly logger = new Logger(OrdersUtils.name);
 
-  constructor(private lineItemsService: LineItemService) {}
+  constructor(
+    private readonly lineItemsService: LineItemService,
+    private readonly variationsService: VariationsService,
+    private readonly modifiersService: ModifiersService,
+  ) {}
 
-  async updateAndSaveOrderForSquareOrder(params: {
+  async updateForSquareOrder(params: {
     order: Order;
     squareOrder: SquareOrder;
   }): Promise<Order> {
@@ -40,10 +53,10 @@ export class OrdersUtils {
       squareOrder?.totalServiceChargeMoney?.amount,
     );
 
-    return this.updateAndSaveOrderForSquareOrderLineItems(params);
+    return this.updateOrderForSquareOrderLineItems(params);
   }
 
-  async updateAndSaveOrderForSquareOrderLineItems(params: {
+  async updateOrderForSquareOrderLineItems(params: {
     order: Order;
     squareOrder: SquareOrder;
   }) {
@@ -100,5 +113,43 @@ export class OrdersUtils {
       start: new Date(),
       end: addHours(new Date(), 1),
     });
+  }
+
+  async squareOrderLineItemsFor(params: { variations: VariationAddDto[] }) {
+    const orderLineItems: OrderLineItem[] = [];
+    for (const dto of params.variations) {
+      const variation = await this.variationsService.findOneOrFail({
+        where: { id: dto.id },
+      });
+      if (!variation.squareId) {
+        throw new UnprocessableEntityException(`Invalid variation`);
+      }
+      const squareOrderLineItem: OrderLineItem = {
+        catalogObjectId: variation.squareId,
+        quantity: `${dto.quantity}`,
+        modifiers: [],
+        note: dto.note,
+      };
+      if (dto.modifierIds && dto.modifierIds.length > 0) {
+        const modifiers = await this.modifiersService.findBy({
+          id: In(dto.modifierIds),
+        });
+
+        if (modifiers.length !== dto.modifierIds.length) {
+          throw new NotFoundException(`Invalid modifiers`);
+        }
+
+        for (const modifier of modifiers) {
+          if (!modifier.squareId) {
+            throw new UnprocessableEntityException(`Invalid modifier`);
+          }
+          squareOrderLineItem.modifiers?.push({
+            catalogObjectId: modifier.squareId,
+          });
+        }
+      }
+      orderLineItems.push(squareOrderLineItem);
+    }
+    return orderLineItems;
   }
 }

@@ -6,12 +6,13 @@ import { MulterModule } from '@nestjs/platform-express';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import multerS3 from 'multer-s3';
 import { AllConfigType } from '../config.type.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { FileEntity } from './entities/file.entity.js';
-import { FilesController } from './files.controller.js';
 import { FilesService } from './files.service.js';
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([FileEntity]),
     MulterModule.registerAsync({
       imports: [ConfigModule],
@@ -67,7 +68,7 @@ import { FilesService } from './files.service.js';
       },
     }),
   ],
-  controllers: [FilesController],
+  controllers: [],
   providers: [ConfigModule, ConfigService, FilesService],
   exports: [FilesService],
 })

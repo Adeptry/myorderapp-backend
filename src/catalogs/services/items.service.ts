@@ -6,6 +6,7 @@ import {
   ItemUpdateDto,
 } from '../../catalogs/dto/item-update.dto.js';
 import { Item } from '../../catalogs/entities/item.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
@@ -13,8 +14,10 @@ export class ItemsService extends EntityRepositoryService<Item> {
   constructor(
     @InjectRepository(Item)
     protected readonly repository: Repository<Item>,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(ItemsService.name);
+    super(repository, logger);
   }
 
   joinManyQuery(params: {
@@ -27,6 +30,8 @@ export class ItemsService extends EntityRepositoryService<Item> {
     leftJoinImages?: boolean;
     whereOnlyEnabled?: boolean;
   }) {
+    this.logger.verbose(this.joinManyQuery.name);
+
     const {
       categoryId,
       locationId,
@@ -62,6 +67,7 @@ export class ItemsService extends EntityRepositoryService<Item> {
     leftJoinImages?: boolean;
     whereOnlyEnabled?: boolean;
   }) {
+    this.logger.verbose(this.joinOneQuery.name);
     const {
       locationId,
       leftJoinVariations,
@@ -96,6 +102,7 @@ export class ItemsService extends EntityRepositoryService<Item> {
       whereOnlyEnabled?: boolean;
     },
   ) {
+    this.logger.verbose(this.join.name);
     const {
       locationId,
       leftJoinModifierLists,
@@ -191,7 +198,8 @@ export class ItemsService extends EntityRepositoryService<Item> {
     return query.orderBy('item.moaOrdinal', 'ASC');
   }
 
-  async assignAndSave(params: { id: string; input: ItemUpdateDto }) {
+  async updateOne(params: { id: string; input: ItemUpdateDto }) {
+    this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({ where: { id: params.id } });
     if (params.input.moaOrdinal !== undefined) {
       entity.moaOrdinal = params.input.moaOrdinal;
@@ -203,6 +211,7 @@ export class ItemsService extends EntityRepositoryService<Item> {
   }
 
   async updateAll(inputs: ItemUpdateAllDto[]) {
+    this.logger.verbose(this.updateAll.name);
     const entities: Item[] = [];
 
     for (const input of inputs) {

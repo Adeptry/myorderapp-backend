@@ -21,6 +21,7 @@ import {
 import * as Sentry from '@sentry/node';
 import { nanoid } from 'nanoid';
 import { AdminsGuard } from '../guards/admins.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 
 @ApiTags('Health')
 @Controller({
@@ -32,7 +33,10 @@ export class HealthController {
     private readonly service: HealthCheckService,
     private readonly dbHealthIndicator: TypeOrmHealthIndicator,
     private readonly httpHealthIndicator: HttpHealthIndicator,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(HealthController.name);
+  }
 
   @Get('database')
   @HealthCheck()
@@ -40,6 +44,7 @@ export class HealthController {
   @ApiResponse({ status: 200, description: 'Database is healthy' })
   @ApiResponse({ status: 503, description: 'Database is down' })
   database() {
+    this.logger.verbose(this.database.name);
     return this.service.check([
       () => this.dbHealthIndicator.pingCheck('database'),
     ]);
@@ -52,6 +57,7 @@ export class HealthController {
   @ApiOperation({ summary: 'Trigger an internal server error' })
   @ApiResponse({ status: 500, description: 'Internal Server Error triggered' })
   error() {
+    this.logger.verbose(this.error.name);
     throw new InternalServerErrorException(nanoid());
   }
 
@@ -62,6 +68,7 @@ export class HealthController {
   @ApiOperation({ summary: 'Trigger an internal server error' })
   @ApiResponse({ status: 500, description: 'Internal Server Error triggered' })
   sentryError() {
+    this.logger.verbose(this.sentryError.name);
     const transaction = Sentry.startTransaction({
       op: 'test',
       name: 'test-transaction',
@@ -87,6 +94,7 @@ export class HealthController {
   @ApiResponse({ status: 200, description: 'HTTP ping successful' })
   @ApiResponse({ status: 503, description: 'HTTP ping failed' })
   http() {
+    this.logger.verbose(this.http.name);
     return this.service.check([
       () =>
         this.httpHealthIndicator.pingCheck(

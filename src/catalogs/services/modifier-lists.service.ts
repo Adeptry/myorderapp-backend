@@ -1,32 +1,33 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { ModifierList } from '../../catalogs/entities/modifier-list.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { MoaSelectionType } from '../dto/catalogs.types.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
 @Injectable()
 export class ModifierListsService extends EntityRepositoryService<ModifierList> {
-  private readonly logger = new Logger(ModifierListsService.name);
-
   constructor(
     @InjectRepository(ModifierList)
     protected readonly repository: Repository<ModifierList>,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(ModifierListsService.name);
+    super(repository, logger);
   }
 
-  async processAndSave(params: {
+  async process(params: {
     catalogObject: CatalogObject;
     moaCatalogId: string;
   }) {
     const squareModifierList = params.catalogObject.modifierListData;
     const moaCatalogId = params.moaCatalogId;
 
-    this.logger.verbose(
+    this.logger.debug(
       `Processing modifier list ${squareModifierList?.name} ${params.catalogObject.id}.`,
     );
 
@@ -50,7 +51,7 @@ export class ModifierListsService extends EntityRepositoryService<ModifierList> 
         }),
       );
       moaModifierList.modifiers = [];
-      this.logger.verbose(
+      this.logger.debug(
         `Created modifier list ${moaModifierList.name} ${moaModifierList.id}.`,
       );
     } else {

@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
@@ -7,6 +7,7 @@ import {
   CategoryUpdateDto,
 } from '../../catalogs/dto/category-update.dto.js';
 import { Category } from '../../catalogs/entities/category.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { paginatedResults } from '../../utils/paginated.js';
 import { CatalogSortService } from './catalog-sort.service.js';
@@ -14,15 +15,15 @@ import { ItemsService } from './items.service.js';
 
 @Injectable()
 export class CategoriesService extends EntityRepositoryService<Category> {
-  private readonly logger = new Logger(CategoriesService.name);
-
   constructor(
     @InjectRepository(Category)
     protected readonly repository: Repository<Category>,
     private readonly itemsService: ItemsService,
     private readonly catalogSortService: CatalogSortService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(CategoriesService.name);
+    super(repository, logger);
   }
 
   async findPaginatedResults(params: {
@@ -36,6 +37,7 @@ export class CategoriesService extends EntityRepositoryService<Category> {
     leftJoinVariations: boolean | undefined;
     leftJoinModifierLists: boolean | undefined;
   }) {
+    this.logger.verbose(this.findPaginatedResults.name);
     const {
       catalogId,
       whereOnlyEnabled,
@@ -103,11 +105,12 @@ export class CategoriesService extends EntityRepositoryService<Category> {
       }
     },
   */
-  async processAndSave(params: {
+  async process(params: {
     squareCategoryCatalogObject: CatalogObject;
     moaCatalogId: string;
     moaOrdinal: number;
   }) {
+    this.logger.verbose(this.process.name);
     const { squareCategoryCatalogObject, moaCatalogId, moaOrdinal } = params;
     this.logger.verbose(
       `Processing category ${squareCategoryCatalogObject.categoryData?.name}.`,
@@ -125,7 +128,7 @@ export class CategoriesService extends EntityRepositoryService<Category> {
         catalogId: moaCatalogId,
       });
       moaCategory.moaOrdinal = moaOrdinal;
-      this.logger.verbose(
+      this.logger.debug(
         `Created category ${squareCategoryCatalogObject.categoryData?.name}.`,
       );
     }
@@ -134,12 +137,13 @@ export class CategoriesService extends EntityRepositoryService<Category> {
     return await this.save(moaCategory);
   }
 
-  async assignAndSave(params: { id: string; input: CategoryUpdateDto }) {
+  async updateOne(params: { id: string; input: CategoryUpdateDto }) {
+    this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({
       where: { id: params.id },
     });
     if (params.input.moaOrdinal != undefined) {
-      this.logger.verbose(
+      this.logger.debug(
         `Updating category ${params.id} moaOrdinal: ${params.input.moaOrdinal}`,
       );
       entity.moaOrdinal = params.input.moaOrdinal;
@@ -151,6 +155,7 @@ export class CategoriesService extends EntityRepositoryService<Category> {
   }
 
   async updateAll(inputs: CategoryUpdateAllDto[]) {
+    this.logger.verbose(this.updateAll.name);
     const entities: Category[] = [];
 
     for (const input of inputs) {

@@ -1,19 +1,13 @@
 import {
   Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 
-import {
-  ApiResponse,
-  OrderLineItem,
-  UpdateOrderRequest,
-  UpdateOrderResponse,
-} from 'square';
+import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
 import { In, Repository } from 'typeorm';
 import { ModifiersService } from '../catalogs/services/modifiers.service.js';
 import { VariationsService } from '../catalogs/services/variations.service.js';
@@ -22,6 +16,7 @@ import { AppInstall } from '../customers/entities/app-install.entity.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
 import { LocationsService } from '../locations/locations.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { Order } from '../orders/entities/order.entity.js';
@@ -35,8 +30,7 @@ import { LineItemService } from './services/line-item.service.js';
 
 @Injectable()
 export class OrdersService extends EntityRepositoryService<Order> {
-  private readonly logger = new Logger(OrdersService.name);
-  private readonly ordersUtils: OrdersUtils;
+  private readonly utils: OrdersUtils;
   constructor(
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
@@ -48,18 +42,25 @@ export class OrdersService extends EntityRepositoryService<Order> {
     protected readonly merchantsService: MerchantsService,
     protected readonly customersService: CustomersService,
     protected readonly firebaseAdminService: FirebaseAdminService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
-    this.ordersUtils = new OrdersUtils(lineItemsService);
+    logger.setContext(OrdersService.name);
+    super(repository, logger);
+    this.utils = new OrdersUtils(
+      lineItemsService,
+      variationsService,
+      modifiersService,
+    );
   }
 
-  async createAndSaveCurrent(params: {
+  async createOne(params: {
     variations?: VariationAddDto[];
     idempotencyKey?: string;
     customer: Customer;
     locationId?: string;
     merchant: Merchant;
   }): Promise<Order> {
+    this.logger.verbose(this.createOne.name);
     const { variations, merchant, customer } = params;
     if (!merchant.squareAccessToken) {
       throw new Error('Merchant does not have a Square access token');
@@ -114,7 +115,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
 
     const squareOrderLineItems = variations
-      ? await this.squareOrderLineItemsFor({
+      ? await this.utils.squareOrderLineItemsFor({
           variations,
         })
       : [];
@@ -156,7 +157,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         order.location = location;
       }
 
-      await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+      await this.utils.updateForSquareOrder({
         order,
         squareOrder,
       });
@@ -171,12 +172,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
     return order;
   }
 
-  async updateAndSaveLocation(params: {
+  async updateOne(params: {
     locationMoaId: string;
     merchant: Merchant;
     orderId: string;
     idempotencyKey?: string;
   }) {
+    this.logger.verbose(this.updateOne.name);
     const { locationMoaId, merchant, orderId } = params;
 
     const order = await this.findOneOrFail({
@@ -244,7 +246,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       if (newSquareOrder) {
         order.locationId = location.id;
         order.location = location;
-        return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+        return await this.utils.updateForSquareOrder({
           order: order,
           squareOrder: newSquareOrder,
         });
@@ -256,12 +258,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
   }
 
-  async updateAndSaveVariations(params: {
+  async updateMany(params: {
     variations: VariationAddDto[];
     orderId: string;
     squareAccessToken: string;
     idempotencyKey?: string;
   }) {
+    this.logger.verbose(this.updateMany.name);
     const {
       orderId,
       variations: variationDtos,
@@ -292,7 +295,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
 
     const newLineItems =
-      (await this.squareOrderLineItemsFor({
+      (await this.utils.squareOrderLineItemsFor({
         variations: variationDtos,
       })) ?? [];
     const squareUpdateBody: UpdateOrderRequest = {
@@ -311,7 +314,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
-        return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+        return await this.utils.updateForSquareOrder({
           order,
           squareOrder,
         });
@@ -330,6 +333,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     squareAccessToken: string;
     orderId: string;
   }) {
+    this.logger.verbose(this.removeLineItems.name);
     const { orderId, lineItemIds, squareAccessToken } = params;
 
     const order = await this.findOneOrFail({
@@ -371,7 +375,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
     const squareOrder = response.result.order;
     if (squareOrder) {
-      return await this.ordersUtils.updateAndSaveOrderForSquareOrder({
+      return await this.utils.updateForSquareOrder({
         order,
         squareOrder,
       });
@@ -382,50 +386,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
   }
 
-  async squareOrderLineItemsFor(params: { variations: VariationAddDto[] }) {
-    const orderLineItems: OrderLineItem[] = [];
-    for (const dto of params.variations) {
-      const variation = await this.variationsService.findOneOrFail({
-        where: { id: dto.id },
-      });
-      if (!variation.squareId) {
-        throw new UnprocessableEntityException(`Invalid variation`);
-      }
-      const squareOrderLineItem: OrderLineItem = {
-        catalogObjectId: variation.squareId,
-        quantity: `${dto.quantity}`,
-        modifiers: [],
-        note: dto.note,
-      };
-      if (dto.modifierIds && dto.modifierIds.length > 0) {
-        const modifiers = await this.modifiersService.findBy({
-          id: In(dto.modifierIds),
-        });
-
-        if (modifiers.length !== dto.modifierIds.length) {
-          throw new NotFoundException(`Invalid modifiers`);
-        }
-
-        for (const modifier of modifiers) {
-          if (!modifier.squareId) {
-            throw new UnprocessableEntityException(`Invalid modifier`);
-          }
-          squareOrderLineItem.modifiers?.push({
-            catalogObjectId: modifier.squareId,
-          });
-        }
-      }
-      orderLineItems.push(squareOrderLineItem);
-    }
-    return orderLineItems;
-  }
-
   async createPayment(params: {
     orderId: string;
     customer: Customer;
     input: PaymentCreateDto;
     merchant: Merchant;
   }) {
+    this.logger.verbose(this.createPayment.name);
     const { orderId, customer, input, merchant } = params;
     const { squareAccessToken } = merchant;
     const { pickupAt } = input;
@@ -460,7 +427,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       );
     }
 
-    this.ordersUtils.validatePickupTime(
+    this.utils.validatePickupTime(
       pickupAt,
       order.location?.businessHours ?? [],
     );
@@ -490,9 +457,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
                   {
                     type: 'PICKUP',
                     pickupDetails: {
-                      scheduleType: this.ordersUtils.isWithinHour(
-                        new Date(pickupAt),
-                      )
+                      scheduleType: this.utils.isWithinHour(new Date(pickupAt))
                         ? 'ASAP'
                         : 'SCHEDULED',
                       pickupAt: pickupAt,
@@ -518,11 +483,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new NotFoundException('Square order not found');
     }
 
-    const updatedOrder =
-      await this.ordersUtils.updateAndSaveOrderForSquareOrder({
-        order,
-        squareOrder: squareOrderFromUpdate,
-      });
+    const updatedOrder = await this.utils.updateForSquareOrder({
+      order,
+      squareOrder: squareOrderFromUpdate,
+    });
 
     const orderTotalMoney = squareOrderFromUpdate?.totalMoney;
     if (!orderTotalMoney) {
@@ -564,6 +528,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
   async handleSquareOrderFulfillmentUpdate(
     payload: SquareOrderFulfillmentUpdatedPayload,
   ) {
+    this.logger.verbose(this.handleSquareOrderFulfillmentUpdate.name);
     const squareOrderId =
       payload.data?.object?.order_fulfillment_updated?.order_id;
     if (!squareOrderId) {

@@ -5,6 +5,7 @@ import { CatalogsModule } from '../catalogs/catalogs.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { LineItemModifier } from '../orders/entities/line-item-modifier.entity.js';
 import { LineItem } from '../orders/entities/line-item.entity.js';
@@ -17,6 +18,7 @@ import { SquareModule } from '../square/square.module.js';
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([Order, LineItem, LineItemModifier]),
     SquareModule,
     AuthModule,

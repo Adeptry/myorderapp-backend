@@ -22,6 +22,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { NestError } from '../utils/error.js';
 import { UserUpdateDto } from './dto/user-update.dto.js';
 import { User } from './entities/user.entity.js';
@@ -39,7 +40,12 @@ import { UsersService } from './users.service.js';
   version: '2',
 })
 export class UsersController {
-  constructor(private readonly service: UsersService) {}
+  constructor(
+    private readonly service: UsersService,
+    protected readonly logger: AppLogger,
+  ) {
+    logger.setContext(UsersController.name);
+  }
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
@@ -48,6 +54,7 @@ export class UsersController {
   @ApiOperation({ summary: 'Get your User', operationId: 'getCurrentUser' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   getMe(@Req() request: UsersGuardedRequest) {
+    this.logger.verbose(this.getMe.name);
     return this.service.findOne({ where: { id: request.user.id } });
   }
 
@@ -61,10 +68,11 @@ export class UsersController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: UserUpdateDto })
-  async updateMe(
+  async patchMe(
     @Req() request: UsersGuardedRequest,
     @Body() updateUserDto: UserUpdateDto,
   ) {
+    this.logger.verbose(this.patchMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return await this.service.patch(request.user.id!, updateUserDto);
   }
@@ -79,6 +87,7 @@ export class UsersController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   async deleteMe(@Req() request: UsersGuardedRequest) {
+    this.logger.verbose(this.deleteMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     return this.service.softDelete(request.user.id!);
   }

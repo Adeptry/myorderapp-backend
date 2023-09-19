@@ -34,6 +34,7 @@ import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
 import { SquareService } from '../square/square.service.js';
 import { StripeService } from '../stripe/stripe.service.js';
@@ -64,7 +65,10 @@ export class MerchantsController {
     protected readonly authService: AuthService,
     @Inject(StripeService)
     private readonly stripeService: StripeService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    logger.setContext(MerchantsController.name);
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
@@ -79,7 +83,8 @@ export class MerchantsController {
     operationId: 'createMerchant',
   })
   @ApiOkResponse({ description: 'Merchant created' })
-  async create(@Req() request: any) {
+  async post(@Req() request: any) {
+    this.logger.verbose(this.post.name);
     if (
       await this.service.findOneOrFail({
         where: { userId: request.user.id },
@@ -123,7 +128,7 @@ export class MerchantsController {
     type: NestError,
   })
   @ApiOkResponse({ type: Merchant })
-  async me(
+  async getMe(
     @Req() request: UsersGuardedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
@@ -132,6 +137,7 @@ export class MerchantsController {
     @Query('locations', new DefaultValuePipe(false), ParseBoolPipe)
     locations?: boolean,
   ): Promise<Merchant> {
+    this.logger.verbose(this.getMe.name);
     const { user } = request;
     const merchant = await this.service.findOne({
       where: { userId: user.id },
@@ -168,11 +174,12 @@ export class MerchantsController {
     type: NestError,
   })
   @ApiOkResponse({ description: 'Square Oauth confirmed' })
-  async squareConfirmOauth(
+  async postSquareOauth(
     @Req() request: any,
     @Query('oauthAccessCode') oauthAccessCode: string,
   ): Promise<void> {
-    await this.merchantsSquareService.confirmOauthAndSave({
+    this.logger.verbose(this.postSquareOauth.name);
+    await this.merchantsSquareService.updateOauth({
       oauthAccessCode,
       merchantId: request.merchant.id,
     });
@@ -194,6 +201,7 @@ export class MerchantsController {
     type: NestError,
   })
   async squareSync(@Req() request: any): Promise<void> {
+    this.logger.verbose(this.squareSync.name);
     return this.merchantsSquareService.sync({
       merchantId: request.merchant.id,
     });
@@ -217,6 +225,7 @@ export class MerchantsController {
     @Req() request: MerchantsGuardedRequest,
     @Body() input: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
+    this.logger.verbose(this.stripeCreateCheckoutSessionId.name);
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -251,6 +260,7 @@ export class MerchantsController {
     @Req() request: MerchantsGuardedRequest,
     @Body() input: StripeBillingPortalCreateInput,
   ): Promise<StripeBillingPortalCreateOutput | null> {
+    this.logger.verbose(this.stripeCreateBillingSessionUrl.name);
     const url = await this.merchantsStripeService.createBillingPortalSession({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       merchantId: request.merchant.id!,

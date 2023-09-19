@@ -23,6 +23,7 @@ import {
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { NestError } from '../../utils/error.js';
 import { VariationUpdateDto } from '../dto/variation-update.dto.js';
 import { Variation } from '../entities/variation.entity.js';
@@ -35,7 +36,12 @@ import { VariationsService } from '../services/variations.service.js';
   version: '2',
 })
 export class VariationsController {
-  constructor(private readonly service: VariationsService) {}
+  constructor(
+    private readonly service: VariationsService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(VariationsController.name);
+  }
 
   @ApiBearerAuth()
   @Get('items/:id/variations')
@@ -51,10 +57,11 @@ export class VariationsController {
   })
   @ApiNotFoundResponse({ description: 'Item not found', type: NestError })
   @ApiQuery({ name: 'locationId', required: false, type: String })
-  async variations(
+  async get(
     @Param('id') itemId: string,
     @Query('locationId') locationId?: string,
   ): Promise<Variation[]> {
+    this.logger.verbose(this.get.name);
     return await this.service.joinManyQuery({ itemId, locationId }).getMany();
   }
 
@@ -72,11 +79,12 @@ export class VariationsController {
     summary: 'Update an Variation',
     operationId: 'updateVariation',
   })
-  async updateVariation(
+  async patch(
     @Param('id') variationId: string,
     @Body() input: VariationUpdateDto,
   ): Promise<Variation> {
-    return this.service.assignAndSave({
+    this.logger.verbose(this.patch.name);
+    return this.service.updateOne({
       id: variationId,
       input,
     });

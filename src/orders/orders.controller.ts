@@ -107,7 +107,7 @@ export class OrdersController {
       throw new UnprocessableEntityException(`No Square Customer ID`);
     }
 
-    const savedOrder = await this.service.createAndSaveCurrent({
+    const savedOrder = await this.service.createOne({
       variations,
       idempotencyKey,
       customer,
@@ -313,7 +313,7 @@ export class OrdersController {
     }
 
     if (body.locationId) {
-      await this.service.updateAndSaveLocation({
+      await this.service.updateOne({
         locationMoaId: body.locationId,
         merchant,
         orderId: currentOrderId,
@@ -387,7 +387,7 @@ export class OrdersController {
     if (variations && variations.length > 0) {
       if (currentOrderId != null) {
         if (await this.service.exist({ where: { id: currentOrderId } })) {
-          await this.service.updateAndSaveVariations({
+          await this.service.updateMany({
             variations,
             orderId: currentOrderId,
             squareAccessToken: merchant.squareAccessToken,
@@ -401,7 +401,7 @@ export class OrdersController {
         }
       } else {
         returnOrderId = (
-          await this.service.createAndSaveCurrent({
+          await this.service.createOne({
             variations,
             idempotencyKey,
             customer,

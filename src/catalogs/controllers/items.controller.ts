@@ -45,6 +45,7 @@ import { ItemsService } from '../../catalogs/services/items.service.js';
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import type { MerchantsGuardedRequest } from '../../guards/merchants.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { SquareService } from '../../square/square.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { NestError } from '../../utils/error.js';
@@ -62,7 +63,10 @@ export class ItemsController {
     private readonly catalogSortService: CatalogSortService,
     private readonly catalogImagesService: CatalogImagesService,
     private readonly squareService: SquareService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(ItemsController.name);
+  }
 
   @ApiBearerAuth()
   @ApiQuery({ name: 'merchantId', required: false, type: String })
@@ -84,7 +88,7 @@ export class ItemsController {
     summary: 'Get Items in Category',
     operationId: 'getItemsInCategory',
   })
-  async getItemsInCategory(
+  async getCategoryItems(
     @Param('id') categoryId: string,
     @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
@@ -94,6 +98,7 @@ export class ItemsController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<ItemPaginatedResponse> {
+    this.logger.verbose(this.getCategoryItems.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -139,10 +144,11 @@ export class ItemsController {
   @ApiOperation({ summary: 'Get Item with ID', operationId: 'getItem' })
   @ApiNotFoundResponse({ description: 'Item not found', type: NestError })
   @ApiQuery({ name: 'locationId', required: false, type: String })
-  async item(
+  async getItem(
     @Param('id') id: string,
     @Query('locationId') locationId?: string,
   ): Promise<Item> {
+    this.logger.verbose(this.getItem.name);
     const entity = await this.service
       .joinOneQuery({
         id,
@@ -178,11 +184,12 @@ export class ItemsController {
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
   @ApiOperation({ summary: 'Update an Item', operationId: 'updateItem' })
-  async updateItem(
+  async patchItem(
     @Param('id') itemId: string,
     @Body() input: ItemUpdateDto,
   ): Promise<Item> {
-    return this.service.assignAndSave({
+    this.logger.verbose(this.patchItem.name);
+    return this.service.updateOne({
       id: itemId,
       input,
     });
@@ -202,7 +209,8 @@ export class ItemsController {
     summary: 'Update multiple Items',
     operationId: 'updateItems',
   })
-  async updateItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
+  async patchItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
+    this.logger.verbose(this.patchItems.name);
     const items = await this.service.updateAll(input);
     await Promise.all(
       items.map(async (item) => {
@@ -246,6 +254,7 @@ export class ItemsController {
     @Query('idempotencyKey') idempotencyKey: string,
     @Param('id') id: string,
   ) {
+    this.logger.verbose(this.squareUploadCatalogFileForImage.name);
     const { merchant } = request;
 
     if (!merchant.squareAccessToken) {

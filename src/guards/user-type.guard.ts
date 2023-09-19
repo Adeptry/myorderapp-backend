@@ -10,6 +10,7 @@ import {
 import { AuthService } from '../auth/auth.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
@@ -29,9 +30,13 @@ export class UserTypeGuard implements CanActivate {
     private customersService: CustomersService,
     @Inject(forwardRef(() => MerchantsService))
     private merchantsService: MerchantsService,
-  ) {}
+    protected readonly logger: AppLogger,
+  ) {
+    logger.setContext(UserTypeGuard.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
     const userType: UserTypeEnum = request.query.actingAs;
     const merchantId: string = request.query.merchantId;

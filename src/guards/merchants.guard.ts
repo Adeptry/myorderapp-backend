@@ -7,6 +7,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { AuthService } from '../auth/auth.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { User } from '../users/entities/user.entity.js';
@@ -23,9 +24,13 @@ export class MerchantsGuard implements CanActivate {
     private authService: AuthService,
     @Inject(forwardRef(() => MerchantsService))
     private merchantsService: MerchantsService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    logger.setContext(MerchantsGuard.name);
+  }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
+    this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
     const user = await this.authService.me(request.user);
     if (!user) {

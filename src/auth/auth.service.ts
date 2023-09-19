@@ -13,6 +13,7 @@ import crypto from 'crypto';
 import ms from 'ms';
 import { AllConfigType } from '../config.type.js';
 import { ForgotService } from '../forgot/forgot.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { MailService } from '../mail/mail.service.js';
 import { Role } from '../roles/entities/role.entity.js';
 import { RoleEnum } from '../roles/roles.enum.js';
@@ -41,9 +42,13 @@ export class AuthService {
     private readonly sessionService: SessionService,
     private readonly mailService: MailService,
     private readonly configService: ConfigService<AllConfigType>,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AuthService.name);
+  }
 
   validateApiKey(apiKey: string) {
+    this.logger.verbose(this.validateApiKey.name);
     const apiKeys: string[] =
       this.configService.get<string>('API_KEYS', { infer: true })?.split(',') ||
       [];
@@ -54,6 +59,7 @@ export class AuthService {
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.validateLogin.name);
     const user = await this.usersService.findOne({
       where: {
         email: loginDto.email,
@@ -107,6 +113,7 @@ export class AuthService {
     socialData: SocialInterface,
     roleEnum: RoleEnum,
   ): Promise<LoginResponseType> {
+    this.logger.verbose(this.validateSocialLogin.name);
     let user: NullableType<User>;
     const socialEmail = socialData.email?.toLowerCase();
 
@@ -182,6 +189,7 @@ export class AuthService {
   }
 
   async register(dto: AuthRegisterLoginDto): Promise<LoginResponseType> {
+    this.logger.verbose(this.register.name);
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
@@ -227,6 +235,7 @@ export class AuthService {
   }
 
   async confirmEmail(hash: string): Promise<void> {
+    this.logger.verbose(this.confirmEmail.name);
     const user = await this.usersService.findOne({
       where: {
         hash,
@@ -245,6 +254,7 @@ export class AuthService {
   }
 
   async forgotPassword(email: string): Promise<void> {
+    this.logger.verbose(this.forgotPassword.name);
     const user = await this.usersService.findOne({
       where: {
         email,
@@ -264,7 +274,7 @@ export class AuthService {
       user,
     });
 
-    await this.mailService.forgotPassword({
+    this.mailService.forgotPassword({
       to: email,
       data: {
         hash,
@@ -273,6 +283,7 @@ export class AuthService {
   }
 
   async resetPassword(hash: string, password: string): Promise<void> {
+    this.logger.verbose(this.resetPassword.name);
     const forgot = await this.forgotService.findOne({
       where: {
         hash,
@@ -303,6 +314,7 @@ export class AuthService {
   }
 
   async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {
+    this.logger.verbose(this.me.name);
     return this.usersService.findOne({
       where: {
         id: userJwtPayload.id,
@@ -314,6 +326,7 @@ export class AuthService {
     userJwtPayload: JwtPayloadType,
     userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
+    this.logger.verbose(this.update.name);
     if (userDto.password) {
       if (userDto.oldPassword) {
         const currentUser = await this.usersService.findOne({
@@ -362,6 +375,7 @@ export class AuthService {
   async refreshToken(
     data: Pick<JwtRefreshPayloadType, 'sessionId'>,
   ): Promise<Omit<LoginResponseType, 'user'>> {
+    this.logger.verbose(this.refreshToken.name);
     if (data.sessionId == undefined) {
       throw new UnauthorizedException();
     }
@@ -389,13 +403,8 @@ export class AuthService {
     };
   }
 
-  async softDelete(user: User): Promise<void> {
-    if (user.id) {
-      await this.usersService.softDelete(user.id);
-    }
-  }
-
   async logout(data: Pick<JwtRefreshPayloadType, 'sessionId'>) {
+    this.logger.verbose(this.logout.name);
     return this.sessionService.softDelete({
       id: data.sessionId,
     });
@@ -406,6 +415,7 @@ export class AuthService {
     role: User['role'];
     sessionId: Session['id'];
   }) {
+    this.logger.verbose(this.getTokensData.name);
     const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
       infer: true,
     });

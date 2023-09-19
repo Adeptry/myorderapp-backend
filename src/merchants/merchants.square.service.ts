@@ -33,10 +33,7 @@ export class MerchantsSquareService {
     this.squareConfigUtils = new SquareConfigUtils(configService);
   }
 
-  async confirmOauthAndSave(params: {
-    oauthAccessCode: string;
-    merchantId: string;
-  }) {
+  async updateOauth(params: { oauthAccessCode: string; merchantId: string }) {
     const { merchantId, oauthAccessCode } = params;
 
     const merchant = await this.service.findOneOrFail({

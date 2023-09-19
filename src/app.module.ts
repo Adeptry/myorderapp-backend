@@ -28,6 +28,7 @@ import { ForgotModule } from './forgot/forgot.module.js';
 import { GuardsModule } from './guards/guards.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
+import { LoggerModule } from './logger/logger.module.js';
 import { MailModule } from './mail/mail.module.js';
 import mailConfig from './mailer/mail.config.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
@@ -92,6 +93,7 @@ import { UsersModule } from './users/users.module.js';
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
+    LoggerModule,
     UsersModule,
     AuthModule,
     AuthGoogleModule,

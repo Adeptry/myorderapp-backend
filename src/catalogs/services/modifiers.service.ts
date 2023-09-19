@@ -1,24 +1,25 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { Modifier } from '../../catalogs/entities/modifier.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
+import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
 @Injectable()
 export class ModifiersService extends EntityRepositoryService<Modifier> {
-  private readonly logger = new Logger(ModifiersService.name);
-
   constructor(
     @InjectRepository(Modifier)
     protected readonly repository: Repository<Modifier>,
     protected readonly modifierListsService: ModifierListsService,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(ModifiersService.name);
+    super(repository, logger);
   }
 
   /*
@@ -43,11 +44,12 @@ export class ModifiersService extends EntityRepositoryService<Modifier> {
       }
     },
   */
-  async processAndSave(params: {
+  async process(params: {
     squareCatalogObject: CatalogObject;
     moaCatalogId: string;
     moaLocations: Location[];
   }) {
+    this.logger.verbose(this.process.name);
     const { squareCatalogObject, moaCatalogId, moaLocations } = params;
     const squareModifierData = squareCatalogObject.modifierData;
 
@@ -57,7 +59,7 @@ export class ModifiersService extends EntityRepositoryService<Modifier> {
       );
     }
 
-    this.logger.verbose(
+    this.logger.debug(
       `Processing modifier ${squareModifierData?.name} ${squareCatalogObject.id}.`,
     );
 
@@ -73,7 +75,7 @@ export class ModifiersService extends EntityRepositoryService<Modifier> {
         squareId: squareCatalogObject.id,
         catalogId: moaCatalogId,
       });
-      this.logger.verbose(
+      this.logger.debug(
         `Created modifier ${moaModifier.name} ${moaModifier.id}.`,
       );
     }
@@ -137,7 +139,7 @@ export class ModifiersService extends EntityRepositoryService<Modifier> {
       moaModifier.absentAtLocations = [];
     }
 
-    await this.modifierLocationOverridesService.processAndSave({
+    await this.modifierLocationOverridesService.process({
       forModifierWithId: moaModifier.id,
       squareModifierLocationOverrides:
         squareModifierData?.locationOverrides ?? [],

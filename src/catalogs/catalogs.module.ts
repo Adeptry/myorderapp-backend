@@ -16,9 +16,9 @@ import { VariationsService } from '../catalogs/services/variations.service.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { GuardsModule } from '../guards/guards.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
+import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { SquareModule } from '../square/square.module.js';
-import { CatalogsController } from './catalogs.controller.js';
 import { CategoriesController } from './controllers/categories.controller.js';
 import { ItemsController } from './controllers/items.controller.js';
 import { VariationsController } from './controllers/variations.controller.js';
@@ -34,6 +34,7 @@ import { VariationLocationOverridesService } from './services/variation-location
 
 @Module({
   imports: [
+    LoggerModule,
     TypeOrmModule.forFeature([
       Item,
       Category,
@@ -78,11 +79,6 @@ import { VariationLocationOverridesService } from './services/variation-location
     CatalogSortService,
     ItemModifierListService,
   ],
-  controllers: [
-    CatalogsController,
-    CategoriesController,
-    ItemsController,
-    VariationsController,
-  ],
+  controllers: [CategoriesController, ItemsController, VariationsController],
 })
 export class CatalogsModule {}

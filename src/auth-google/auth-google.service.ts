@@ -2,6 +2,7 @@ import { Injectable, UnprocessableEntityException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
 import { AllConfigType } from '../config.type.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
@@ -9,7 +10,11 @@ import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 export class AuthGoogleService {
   private google: OAuth2Client;
 
-  constructor(private readonly configService: ConfigService<AllConfigType>) {
+  constructor(
+    private readonly configService: ConfigService<AllConfigType>,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(AuthGoogleService.name);
     this.google = new OAuth2Client(
       configService.get('google.clientId', { infer: true }),
       configService.get('google.clientSecret', { infer: true }),
@@ -19,6 +24,7 @@ export class AuthGoogleService {
   async getProfileByToken(
     loginDto: AuthGoogleLoginDto,
   ): Promise<SocialInterface> {
+    this.logger.verbose(this.getProfileByToken.name);
     const ticket = await this.google.verifyIdToken({
       idToken: loginDto.idToken,
       audience: [

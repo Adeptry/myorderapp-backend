@@ -7,6 +7,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { LocationsService } from '../locations/locations.service.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { SquareService } from '../square/square.service.js';
 import { UsersService } from '../users/users.service.js';
@@ -23,11 +24,14 @@ export class CustomersService extends EntityRepositoryService<Customer> {
     private readonly squareService: SquareService,
     private readonly merchantsService: MerchantsService,
     private readonly locationsService: LocationsService,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
+    logger.setContext(CustomersService.name);
+    super(repository, logger);
   }
 
-  async createAndSave(params: { userId: string; merchantId: string }) {
+  async createOne(params: { userId: string; merchantId: string }) {
+    this.logger.verbose(this.createOne.name);
     const { userId, merchantId } = params;
 
     const user = await this.usersService.findOne({ where: { id: userId } });
@@ -85,11 +89,12 @@ export class CustomersService extends EntityRepositoryService<Customer> {
     return await this.save(customer);
   }
 
-  async updateAndSave(params: {
+  async updateOne(params: {
     id: string;
     merchantId: string;
     customerUpdateDto: CustomerUpdateDto;
   }) {
+    this.logger.verbose(this.updateOne.name);
     const { id, merchantId, customerUpdateDto } = params;
     const customer = await this.findOne({
       where: { id, merchantId },

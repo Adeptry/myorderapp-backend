@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeepPartial, Repository } from 'typeorm';
+import { AppLogger } from '../logger/app.logger.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
 import { paginatedResults } from '../utils/paginated.js';
 import { InfinityPaginationResultType } from '../utils/types/infinity-pagination-result.type.js';
@@ -12,17 +13,16 @@ export class UsersService extends EntityRepositoryService<User> {
   constructor(
     @InjectRepository(User)
     protected repository: Repository<User>,
+    protected readonly logger: AppLogger,
   ) {
-    super(repository);
-  }
-
-  get(id: string): Promise<User | null> {
-    return this.repository.findOne({ where: { id } });
+    logger.setContext(UsersService.name);
+    super(repository, logger);
   }
 
   async getMany(
     pagination: PaginationOptions,
   ): Promise<InfinityPaginationResultType<User>> {
+    this.logger.verbose(this.getMany.name);
     return paginatedResults<User>({
       results: await this.repository.findAndCount({
         skip: (pagination.page - 1) * pagination.limit,
@@ -33,19 +33,9 @@ export class UsersService extends EntityRepositoryService<User> {
   }
 
   async patch(id: string, payload: DeepPartial<User>): Promise<User | null> {
+    this.logger.verbose(this.patch.name);
     const result = await this.repository.findOne({ where: { id } });
     await this.repository.save({ ...result, ...payload });
     return await this.repository.findOne({ where: { id } });
-  }
-
-  put(id: string, entity: DeepPartial<User>): Promise<DeepPartial<User>> {
-    return this.save({
-      id,
-      ...entity,
-    });
-  }
-
-  delete(id: string) {
-    return this.softDelete(id);
   }
 }
