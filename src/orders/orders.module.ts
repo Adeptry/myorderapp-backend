@@ -15,6 +15,7 @@ import { OrdersService } from '../orders/orders.service.js';
 import { LineItemModifierService } from '../orders/services/line-item-modifier.service.js';
 import { LineItemService } from '../orders/services/line-item.service.js';
 import { SquareModule } from '../square/square.module.js';
+import { OrdersUtils } from './orders.utils.js';
 
 @Module({
   imports: [
@@ -29,6 +30,11 @@ import { SquareModule } from '../square/square.module.js';
     forwardRef(() => CustomersModule),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService, LineItemService, LineItemModifierService],
+  providers: [
+    OrdersService,
+    LineItemService,
+    LineItemModifierService,
+    OrdersUtils,
+  ],
 })
 export class OrdersModule {}

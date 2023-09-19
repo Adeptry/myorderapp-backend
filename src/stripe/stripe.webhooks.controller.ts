@@ -1,31 +1,24 @@
 import type { RawBodyRequest } from '@nestjs/common';
-import {
-  Controller,
-  Headers,
-  Inject,
-  Logger,
-  Post,
-  Req,
-  Res,
-} from '@nestjs/common';
+import { Controller, Headers, Post, Req, Res } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { StripeService } from './stripe.service.js';
 
 @Controller('v2/stripe/webhook')
 export class StripeWebhookController {
-  private readonly logger = new Logger(StripeWebhookController.name);
-
   constructor(
     private readonly service: StripeService,
-    @Inject(ConfigService)
     private readonly configService: ConfigService<AllConfigType>,
     private readonly eventEmitter: EventEmitter2,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(StripeWebhookController.name);
+  }
 
   @ApiExcludeEndpoint()
   @Post()
@@ -34,6 +27,7 @@ export class StripeWebhookController {
     @Req() request: RawBodyRequest<Request>,
     @Res({ passthrough: true }) response: Response,
   ) {
+    this.logger.verbose(this.post.name);
     const webhookSecret = this.configService.getOrThrow(
       'stripe.webhookSecret',
       {

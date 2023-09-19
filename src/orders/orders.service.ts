@@ -30,7 +30,6 @@ import { LineItemService } from './services/line-item.service.js';
 
 @Injectable()
 export class OrdersService extends EntityRepositoryService<Order> {
-  private readonly utils: OrdersUtils;
   constructor(
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
@@ -42,15 +41,11 @@ export class OrdersService extends EntityRepositoryService<Order> {
     protected readonly merchantsService: MerchantsService,
     protected readonly customersService: CustomersService,
     protected readonly firebaseAdminService: FirebaseAdminService,
+    private readonly utils: OrdersUtils,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(OrdersService.name);
     super(repository, logger);
-    this.utils = new OrdersUtils(
-      lineItemsService,
-      variationsService,
-      modifiersService,
-    );
   }
 
   async createOne(params: {

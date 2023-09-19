@@ -1,11 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import twilio from 'twilio';
+import { AppLogger } from '../logger/app.logger.js';
 
 @Injectable()
 export class TwilioService {
-  private readonly logger = new Logger(TwilioService.name);
-
   twilioClient = twilio(
     this.configService.getOrThrow('twilio.accountSid', {
       infer: true,
@@ -15,7 +14,12 @@ export class TwilioService {
     }),
   );
 
-  constructor(private configService: ConfigService) {}
+  constructor(
+    private readonly configService: ConfigService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(TwilioService.name);
+  }
 
   async send(toPhone?: string, body?: string) {
     try {

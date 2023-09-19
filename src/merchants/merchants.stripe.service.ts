@@ -1,5 +1,5 @@
 import {
-  Logger,
+  Injectable,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -7,29 +7,32 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { StripeConfigUtils } from '../stripe/stripe.config.utils.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { User } from '../users/entities/user.entity.js';
 import { MerchantTierEnum } from './entities/merchant-tier.enum.js';
 import { MerchantsService } from './merchants.service.js';
 
+@Injectable()
 export class MerchantsStripeService {
-  private readonly logger = new Logger(MerchantsStripeService.name);
-  private readonly stripeConfigUtils: StripeConfigUtils;
   constructor(
     protected readonly service: MerchantsService,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     private readonly configService: ConfigService<AllConfigType>,
     private readonly stripeService: StripeService,
+    private readonly stripeConfigUtils: StripeConfigUtils,
+    private readonly logger: AppLogger,
   ) {
-    this.stripeConfigUtils = new StripeConfigUtils(configService);
+    this.logger.setContext(MerchantsStripeService.name);
   }
 
   async createBillingPortalSession(params: {
     merchantId: string;
     returnUrl: string;
   }) {
+    this.logger.verbose(this.createBillingPortalSession.name);
     const { merchantId, returnUrl } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -63,6 +66,7 @@ export class MerchantsStripeService {
     cancelUrl?: string;
     stripePriceId: string;
   }): Promise<string | null> {
+    this.logger.verbose(this.createCheckoutSessionId.name);
     const { merchantId, stripePriceId } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -103,6 +107,7 @@ export class MerchantsStripeService {
   // Sent when a customer’s subscription ends.
   @OnEvent('stripe.customer.subscription.deleted')
   async handleCustomerSubscriptionDeleted(event: Stripe.Event) {
+    this.logger.verbose(this.handleCustomerSubscriptionDeleted.name);
     const stripeSubscription = event.data.object as Stripe.Subscription;
 
     if (typeof stripeSubscription.customer === 'string') {
@@ -134,6 +139,7 @@ export class MerchantsStripeService {
    */
   @OnEvent('stripe.customer.subscription.updated')
   async handleCustomerSubscriptionUpdated(event: Stripe.Event) {
+    this.logger.verbose(this.handleCustomerSubscriptionUpdated.name);
     const stripeSubscription = event.data.object as Stripe.Subscription;
 
     if (typeof stripeSubscription.customer === 'string') {
@@ -190,6 +196,7 @@ export class MerchantsStripeService {
    */
   @OnEvent('stripe.customer.subscription.created')
   async handleStripeCustomerSubscriptionCreated(event: Stripe.Event) {
+    this.logger.verbose(this.handleStripeCustomerSubscriptionCreated.name);
     const stripeSubscription = event.data.object as Stripe.Subscription;
 
     if (typeof stripeSubscription.customer === 'string') {

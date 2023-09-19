@@ -1,6 +1,6 @@
 import {
   BadRequestException,
-  Logger,
+  Injectable,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
@@ -17,27 +17,28 @@ import { In } from 'typeorm';
 import { ModifiersService } from '../catalogs/services/modifiers.service.js';
 import { VariationsService } from '../catalogs/services/variations.service.js';
 import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { VariationAddDto } from './dto/variation-add.dto.js';
 import { Order } from './entities/order.entity.js';
 import { LineItemService } from './services/line-item.service.js';
 
+@Injectable()
 export class OrdersUtils {
-  private readonly logger = new Logger(OrdersUtils.name);
-
   constructor(
     private readonly lineItemsService: LineItemService,
     private readonly variationsService: VariationsService,
     private readonly modifiersService: ModifiersService,
-  ) {}
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(OrdersUtils.name);
+  }
 
   async updateForSquareOrder(params: {
     order: Order;
     squareOrder: SquareOrder;
   }): Promise<Order> {
+    this.logger.verbose(this.updateForSquareOrder.name);
     const { order, squareOrder } = params;
-    this.logger.debug(
-      `updating ${order.id} for square order ${squareOrder?.id}}`,
-    );
     order.squareId = squareOrder?.id;
     order.squareVersion =
       squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
@@ -53,13 +54,14 @@ export class OrdersUtils {
       squareOrder?.totalServiceChargeMoney?.amount,
     );
 
-    return this.updateOrderForSquareOrderLineItems(params);
+    return this.updateForSquareLineItems(params);
   }
 
-  async updateOrderForSquareOrderLineItems(params: {
+  async updateForSquareLineItems(params: {
     order: Order;
     squareOrder: SquareOrder;
   }) {
+    this.logger.verbose(this.updateForSquareLineItems.name);
     const { order, squareOrder } = params;
     const existingMoaLineItems = order.lineItems ?? [];
     this.logger.debug(
@@ -77,6 +79,7 @@ export class OrdersUtils {
   }
 
   validatePickupTime(pickupAt: string, businessHours: BusinessHoursPeriod[]) {
+    this.logger.verbose(this.validatePickupTime.name);
     const pickupDateTime = new Date(pickupAt);
     const now = new Date();
 
@@ -116,6 +119,8 @@ export class OrdersUtils {
   }
 
   async squareOrderLineItemsFor(params: { variations: VariationAddDto[] }) {
+    this.logger.verbose(this.squareOrderLineItemsFor.name);
+
     const orderLineItems: OrderLineItem[] = [];
     for (const dto of params.variations) {
       const variation = await this.variationsService.findOneOrFail({

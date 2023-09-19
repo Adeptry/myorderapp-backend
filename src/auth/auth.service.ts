@@ -14,7 +14,6 @@ import ms from 'ms';
 import { AllConfigType } from '../config.type.js';
 import { ForgotService } from '../forgot/forgot.service.js';
 import { AppLogger } from '../logger/app.logger.js';
-import { MailService } from '../mail/mail.service.js';
 import { Role } from '../roles/entities/role.entity.js';
 import { RoleEnum } from '../roles/roles.enum.js';
 import { Session } from '../session/entities/session.entity.js';
@@ -40,7 +39,6 @@ export class AuthService {
     private readonly usersService: UsersService,
     private readonly forgotService: ForgotService,
     private readonly sessionService: SessionService,
-    private readonly mailService: MailService,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly logger: AppLogger,
   ) {
@@ -269,16 +267,9 @@ export class AuthService {
       .createHash('sha256')
       .update(randomStringGenerator())
       .digest('hex');
-    await this.forgotService.create({
+    this.forgotService.create({
       hash,
       user,
-    });
-
-    this.mailService.forgotPassword({
-      to: email,
-      data: {
-        hash,
-      },
     });
   }
 

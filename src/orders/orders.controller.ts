@@ -7,7 +7,6 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Logger,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -42,6 +41,7 @@ import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
 import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { OrdersService } from '../orders/orders.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { NestError } from '../utils/error.js';
@@ -61,9 +61,12 @@ import { Order } from './entities/order.entity.js';
   type: NestError,
 })
 export class OrdersController {
-  private readonly logger = new Logger(OrdersController.name);
-
-  constructor(private readonly service: OrdersService) {}
+  constructor(
+    private readonly service: OrdersService,
+    private readonly logger: AppLogger,
+  ) {
+    this.logger.setContext(OrdersController.name);
+  }
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
@@ -94,6 +97,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
+    this.logger.verbose(this.createCurrent.name);
     const { customer, merchant } = { ...request };
     const { idempotencyKey, locationId, variations } = body;
 
@@ -150,6 +154,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ): Promise<Order> {
+    this.logger.verbose(this.getCurrent.name);
     const { customer, merchant } = { ...request };
 
     if (!customer.currentOrderId) {
@@ -204,6 +209,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
+    this.logger.verbose(this.getOne.name);
     const { merchant, customer } = { ...request };
     return await this.service.findOne({
       where: {
@@ -247,6 +253,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
+    this.logger.verbose(this.getMany.name);
     return paginatedResults({
       results: await this.service.findAndCount({
         where: {
@@ -301,6 +308,7 @@ export class OrdersController {
 
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
+    this.logger.verbose(this.patchCurrent.name);
     const { merchant, customer } = { ...request };
     const currentOrderId = customer.currentOrderId;
 
@@ -372,6 +380,7 @@ export class OrdersController {
 
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
+    this.logger.verbose(this.postCurrent.name);
     const { variations } = body;
     const { customer, merchant } = request;
     const currentOrderId = customer.currentOrderId;
@@ -451,6 +460,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
+    this.logger.verbose(this.deleteCurrentLineItem.name);
     const { customer, merchant } = { ...request };
     const squareAccessToken = merchant.squareAccessToken;
     const currentOrderId = customer.currentOrderId;
@@ -501,6 +511,7 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
+    this.logger.verbose(this.deleteCurrent.name);
     const { customer } = request;
 
     if (!customer.currentOrderId) {
@@ -550,6 +561,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
+    this.logger.verbose(this.postPaymentForCurrent.name);
     const { customer, merchant } = { ...request };
     const currentOrderId = customer.currentOrderId;
 

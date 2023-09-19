@@ -1,7 +1,9 @@
+import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { ObtainTokenResponse } from 'square';
 import { AllConfigType } from '../config.type.js';
 
+@Injectable()
 export class SquareConfigUtils {
   constructor(private configService: ConfigService<AllConfigType>) {}
 

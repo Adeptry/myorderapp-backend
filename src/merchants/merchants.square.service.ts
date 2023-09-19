@@ -1,6 +1,6 @@
 import {
+  Injectable,
   InternalServerErrorException,
-  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -13,6 +13,7 @@ import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
 import { AllConfigType } from '../config.type.js';
+import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogVersionUpdatedEventPayload } from '../square/payloads/square-catalog-version-updated-payload.entity.js';
 import { SquareLocationCreatedEventPayload } from '../square/payloads/square-location-created-event-payload.entity.js';
 import { SquareLocationUpdatedEventPayload } from '../square/payloads/square-location-updated-event-payload.entity.js';
@@ -21,19 +22,21 @@ import { SquareConfigUtils } from '../square/square.config.utils.js';
 import { SquareService } from '../square/square.service.js';
 import { MerchantsService } from './merchants.service.js';
 
+@Injectable()
 export class MerchantsSquareService {
-  private readonly logger = new Logger(MerchantsSquareService.name);
-  private readonly squareConfigUtils: SquareConfigUtils;
   constructor(
     protected readonly service: MerchantsService,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly squareService: SquareService,
     private readonly catalogsService: CatalogsService,
+    private readonly squareConfigUtils: SquareConfigUtils,
+    private readonly logger: AppLogger,
   ) {
-    this.squareConfigUtils = new SquareConfigUtils(configService);
+    logger.setContext(MerchantsSquareService.name);
   }
 
   async updateOauth(params: { oauthAccessCode: string; merchantId: string }) {
+    this.logger.verbose(this.updateOauth.name);
     const { merchantId, oauthAccessCode } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -80,6 +83,7 @@ export class MerchantsSquareService {
   }
 
   async sync(params: { merchantId: string }) {
+    this.logger.verbose(this.sync.name);
     await this.locationsSync(params);
 
     const merchant = await this.service.findOneOrFail({
@@ -123,6 +127,7 @@ export class MerchantsSquareService {
    * Private because it must happen before catalog sync
    */
   private async locationsSync(params: { merchantId: string }) {
+    this.logger.verbose(this.locationsSync.name);
     const merchant = await this.service.findOneOrFail({
       where: { id: params.merchantId },
     });
@@ -139,6 +144,7 @@ export class MerchantsSquareService {
 
   @OnEvent('square.location.created')
   async handleLocationCreated(payload: SquareLocationCreatedEventPayload) {
+    this.logger.verbose(this.handleLocationCreated.name);
     if (!payload.merchant_id) {
       this.logger.error(
         'Missing merchant_id in SquareLocationCreatedEventPayload',
@@ -160,6 +166,7 @@ export class MerchantsSquareService {
 
   @OnEvent('square.location.updated')
   async handleLocationUpdated(payload: SquareLocationUpdatedEventPayload) {
+    this.logger.verbose(this.handleLocationUpdated.name);
     if (!payload.merchant_id) {
       this.logger.error(
         'Missing merchant_id in SquareLocationCreatedEventPayload',
@@ -183,6 +190,7 @@ export class MerchantsSquareService {
   async handleCatalogVersionUpdated(
     payload: SquareCatalogVersionUpdatedEventPayload,
   ) {
+    this.logger.verbose(this.handleCatalogVersionUpdated.name);
     if (!payload.merchant_id) {
       this.logger.error(
         'Missing merchant_id in SquareLocationCreatedEventPayload',
@@ -215,6 +223,7 @@ export class MerchantsSquareService {
 
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async refreshTokensCron() {
+    this.logger.verbose(this.handleCatalogVersionUpdated.name);
     const seventyTwoHoursFromNow = new Date(
       new Date().getTime() + 72 * 60 * 60 * 1000,
     );
