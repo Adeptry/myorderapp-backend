@@ -71,7 +71,7 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors: ValidationError[]) => {
-        const messages = errors.reduce(
+        const fields = errors.reduce(
           (acc, e) => ({
             ...acc,
             [e.property]: Object.values(
@@ -84,7 +84,7 @@ async function bootstrap() {
         return new UnprocessableEntityException({
           statusCode: 422,
           error: 'Unprocessable Entity',
-          message: messages,
+          fields: fields,
         });
       },
     }),

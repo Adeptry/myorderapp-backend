@@ -4,7 +4,12 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { HeaderResolver, I18nModule, I18nService } from 'nestjs-i18n';
+import {
+  AcceptLanguageResolver,
+  HeaderResolver,
+  I18nModule,
+  I18nService,
+} from 'nestjs-i18n';
 import * as NodemailerMailgunTransport from 'nodemailer-mailgun-transport';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
@@ -100,6 +105,7 @@ import { UsersModule } from './users/users.module.js';
           },
           inject: [ConfigService],
         },
+        AcceptLanguageResolver,
       ],
       imports: [ConfigModule],
       inject: [ConfigService],
