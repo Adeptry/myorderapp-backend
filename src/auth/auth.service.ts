@@ -90,9 +90,11 @@ export class AuthService {
       throw new UnprocessableEntityException(`Incorrect password`);
     }
 
-    const session = await this.sessionService.create({
-      user,
-    });
+    const session = await this.sessionService.save(
+      this.sessionService.create({
+        user,
+      }),
+    );
 
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
@@ -166,9 +168,11 @@ export class AuthService {
       throw new UnprocessableEntityException(`User not found`);
     }
 
-    const session = await this.sessionService.create({
-      user,
-    });
+    const session = await this.sessionService.save(
+      this.sessionService.create({
+        user,
+      }),
+    );
 
     const {
       token: jwtToken,
@@ -209,9 +213,11 @@ export class AuthService {
       }),
     );
 
-    const session = await this.sessionService.create({
-      user,
-    });
+    const session = await this.sessionService.save(
+      this.sessionService.create({
+        user,
+      }),
+    );
 
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
       id: user.id,
@@ -304,14 +310,12 @@ export class AuthService {
 
     user.password = password;
 
-    await this.sessionService.softDelete({
-      user: {
-        id: user.id,
-      },
+    await this.sessionService.delete({
+      userId: user.id,
     });
     await user.save();
     if (forgot.id) {
-      await this.forgotService.softDelete(forgot.id);
+      await this.forgotService.delete(forgot.id);
     }
   }
 
@@ -349,7 +353,7 @@ export class AuthService {
         if (!isValidOldPassword) {
           throw new UnprocessableEntityException(`Incorrect old password`);
         } else {
-          await this.sessionService.softDelete({
+          await this.sessionService.deleteExcluding({
             user: {
               id: currentUser.id,
             },
@@ -410,7 +414,7 @@ export class AuthService {
 
   async logout(data: Pick<JwtRefreshPayloadType, 'sessionId'>) {
     this.logger.verbose(this.logout.name);
-    return this.sessionService.softDelete({
+    return this.sessionService.delete({
       id: data.sessionId,
     });
   }

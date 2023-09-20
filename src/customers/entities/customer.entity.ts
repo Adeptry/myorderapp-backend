@@ -59,7 +59,7 @@ export class Customer extends EntityHelper {
   userId?: string;
 
   @ApiProperty({ required: false, nullable: true })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user?: Relation<User>;
 
   /* Merchant */
@@ -68,7 +68,7 @@ export class Customer extends EntityHelper {
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => Merchant)
+  @ManyToOne(() => Merchant, { onDelete: 'SET NULL' })
   merchant?: Relation<Merchant>;
 
   /* Current order */
@@ -116,7 +116,7 @@ export class Customer extends EntityHelper {
 
   @ApiProperty({ type: () => Location, nullable: true, required: false })
   @ManyToOne(() => Location, (entity) => entity.variationLocationOverrides, {
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
     nullable: false,
   })
   @JoinColumn({ name: 'preferredLocationId' })

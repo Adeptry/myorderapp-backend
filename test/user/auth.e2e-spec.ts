@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { APP_URL } from '../utils/constants.js';
+import { APP_URL } from '../utils/constants';
 
 describe('Auth user (e2e)', () => {
   const app = APP_URL;
@@ -9,9 +9,10 @@ describe('Auth user (e2e)', () => {
   const newUserEmail = `User.${Date.now()}@example.com`;
   const newUserPassword = `secret`;
 
-  it('Register new user: /api/v2/auth/email/register (POST)', async () => {
+  it('Register new user: /v2/auth/email/register (POST)', async () => {
     return request(app)
-      .post('/api/v2/auth/email/register')
+      .post('/v2/auth/email/register')
+      .set('Api-Key', '1')
       .send({
         email: newUserEmail,
         password: newUserPassword,
@@ -21,9 +22,10 @@ describe('Auth user (e2e)', () => {
       .expect(201);
   });
 
-  it('Login unconfirmed user: /api/v2/auth/email/login (POST)', () => {
+  it('Login unconfirmed user: /v2/auth/email/login (POST)', () => {
     return request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .expect(200)
       .expect(({ body }) => {
@@ -31,7 +33,7 @@ describe('Auth user (e2e)', () => {
       });
   });
 
-  // it('Confirm email: /api/v2/auth/email/confirm (POST)', async () => {
+  // it('Confirm email: /v2/auth/email/confirm (POST)', async () => {
   //   const hash = await request(mail)
   //     .get('/email')
   //     .then(({ body }) =>
@@ -46,14 +48,14 @@ describe('Auth user (e2e)', () => {
   //     );
 
   //   return request(app)
-  //     .post('/api/v2/auth/email/confirm')
-  //     .send({
+  //     .post('/v2/auth/email/confirm')
+  //     .set('Api-Key', '1').send({
   //       hash,
   //     })
   //     .expect(204);
   // });
 
-  // it('Can not confirm email with same link twice: /api/v2/auth/email/confirm (POST)', async () => {
+  // it('Can not confirm email with same link twice: /v2/auth/email/confirm (POST)', async () => {
   //   const hash = await request(mail)
   //     .get('/email')
   //     .then(({ body }) =>
@@ -68,16 +70,17 @@ describe('Auth user (e2e)', () => {
   //     );
 
   //   return request(app)
-  //     .post('/api/v2/auth/email/confirm')
-  //     .send({
+  //     .post('/v2/auth/email/confirm')
+  //     .set('Api-Key', '1').send({
   //       hash,
   //     })
   //     .expect(404);
   // });
 
-  it('Login confirmed user: /api/v2/auth/email/login (POST)', () => {
+  it('Login confirmed user: /v2/auth/email/login (POST)', () => {
     return request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .expect(200)
       .expect(({ body }) => {
@@ -86,17 +89,19 @@ describe('Auth user (e2e)', () => {
       });
   });
 
-  it('Confirmed user retrieve profile: /api/v2/auth/me (GET)', async () => {
+  it('Confirmed user retrieve profile: /v2/users/me (GET)', async () => {
     const newUserApiToken = await request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .then(({ body }) => body.token);
 
     await request(app)
-      .get('/api/v2/auth/me')
+      .get('/v2/users/me')
       .auth(newUserApiToken, {
         type: 'bearer',
       })
+      .set('Api-Key', '1')
       .send()
       .expect(({ body }) => {
         expect(body.provider).toBeDefined();
@@ -107,17 +112,19 @@ describe('Auth user (e2e)', () => {
       });
   });
 
-  it('Refresh token: /api/v2/auth/refresh (GET)', async () => {
+  it('Refresh token: /v2/auth/refresh (GET)', async () => {
     const newUserRefreshToken = await request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .then(({ body }) => body.refreshToken);
 
     await request(app)
-      .post('/api/v2/auth/refresh')
+      .post('/v2/auth/refresh')
       .auth(newUserRefreshToken, {
         type: 'bearer',
       })
+      .set('Api-Key', '1')
       .send()
       .expect(({ body }) => {
         expect(body.token).toBeDefined();
@@ -126,19 +133,21 @@ describe('Auth user (e2e)', () => {
       });
   });
 
-  it('New user update profile: /api/v2/auth/me (PATCH)', async () => {
+  it('New user update profile: /v2/auth/me (PATCH)', async () => {
     const newUserNewName = Date.now();
     const newUserNewPassword = 'new-secret';
     const newUserApiToken = await request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .then(({ body }) => body.token);
 
     await request(app)
-      .patch('/api/v2/auth/me')
+      .patch('/v2/auth/me')
       .auth(newUserApiToken, {
         type: 'bearer',
       })
+      .set('Api-Key', '1')
       .send({
         firstName: newUserNewName,
         password: newUserNewPassword,
@@ -146,10 +155,11 @@ describe('Auth user (e2e)', () => {
       .expect(422);
 
     await request(app)
-      .patch('/api/v2/auth/me')
+      .patch('/v2/auth/me')
       .auth(newUserApiToken, {
         type: 'bearer',
       })
+      .set('Api-Key', '1')
       .send({
         firstName: newUserNewName,
         password: newUserNewPassword,
@@ -158,7 +168,8 @@ describe('Auth user (e2e)', () => {
       .expect(200);
 
     await request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserNewPassword })
       .expect(200)
       .expect(({ body }) => {
@@ -166,26 +177,33 @@ describe('Auth user (e2e)', () => {
       });
 
     await request(app)
-      .patch('/api/v2/auth/me')
+      .patch('/v2/auth/me')
       .auth(newUserApiToken, {
         type: 'bearer',
       })
+      .set('Api-Key', '1')
       .send({ password: newUserPassword, oldPassword: newUserNewPassword })
       .expect(200);
   });
 
-  it('New user delete profile: /api/v2/auth/me (DELETE)', async () => {
+  it('New user delete profile: /v2/auth/me (DELETE)', async () => {
     const newUserApiToken = await request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .then(({ body }) => body.token);
 
-    await request(app).delete('/api/v2/auth/me').auth(newUserApiToken, {
-      type: 'bearer',
-    });
+    await request(app)
+      .delete('/v2/users/me')
+      .set('Api-Key', '1')
+      .auth(newUserApiToken, {
+        type: 'bearer',
+      })
+      .expect(204);
 
     return request(app)
-      .post('/api/v2/auth/email/login')
+      .post('/v2/auth/email/login')
+      .set('Api-Key', '1')
       .send({ email: newUserEmail, password: newUserPassword })
       .expect(422);
   });

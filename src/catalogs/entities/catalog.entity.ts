@@ -4,9 +4,11 @@ import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   OneToMany,
   OneToOne,
   PrimaryColumn,
@@ -92,8 +94,14 @@ export class Catalog extends EntityHelper {
   /*
    * Merchant
    */
+
+  @ApiProperty({ required: false, nullable: true })
+  @Column({ nullable: true })
+  merchantId?: string;
+
   @OneToOne(() => Merchant, (entity) => entity.catalog, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'merchantId' })
   merchant?: Relation<Merchant>;
 }

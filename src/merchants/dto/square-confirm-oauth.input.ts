@@ -5,5 +5,5 @@ export class SquareConfirmOauthDto {
   @ApiProperty()
   @IsNotEmpty()
   @IsString()
-  oauthAccessCode?: string;
+  oauthAccessCode!: string;
 }

@@ -13,6 +13,7 @@ import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
 import { AllConfigType } from '../config.type.js';
+import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogVersionUpdatedEventPayload } from '../square/payloads/square-catalog-version-updated-payload.entity.js';
 import { SquareLocationCreatedEventPayload } from '../square/payloads/square-location-created-event-payload.entity.js';
@@ -30,6 +31,7 @@ export class MerchantsSquareService {
     private readonly squareService: SquareService,
     private readonly catalogsService: CatalogsService,
     private readonly squareConfigUtils: SquareConfigUtils,
+    private readonly locationsService: LocationsService,
     private readonly logger: AppLogger,
   ) {
     logger.setContext(MerchantsSquareService.name);
@@ -132,7 +134,8 @@ export class MerchantsSquareService {
       where: { id: params.merchantId },
     });
 
-    if (merchant.id == null) {
+    const merchantId = merchant.id;
+    if (merchantId == null) {
       throw new NotFoundException('Merchant id is null');
     }
 
@@ -140,6 +143,8 @@ export class MerchantsSquareService {
     if (squareAccessToken == null) {
       throw new UnauthorizedException('Square access token is null');
     }
+
+    await this.locationsService.syncSquare({ merchantId, squareAccessToken });
   }
 
   @OnEvent('square.location.created')

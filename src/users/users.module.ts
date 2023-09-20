@@ -2,6 +2,7 @@ import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthModule } from '../auth/auth.module.js';
 import { LoggerModule } from '../logger/logger.module.js';
+import { SessionModule } from '../session/session.module.js';
 import { IsExist } from '../utils/validators/is-exists.validator.js';
 import { IsNotExist } from '../utils/validators/is-not-exists.validator.js';
 import { User } from './entities/user.entity.js';
@@ -13,6 +14,7 @@ import { UsersService } from './users.service.js';
     LoggerModule,
     TypeOrmModule.forFeature([User]),
     forwardRef(() => AuthModule),
+    SessionModule,
   ],
   controllers: [UsersController],
   providers: [IsExist, IsNotExist, UsersService],

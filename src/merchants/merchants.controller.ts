@@ -39,6 +39,7 @@ import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create
 import { SquareService } from '../square/square.service.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { NestError } from '../utils/error.js';
+import { SquareConfirmOauthDto } from './dto/square-confirm-oauth.input.js';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto.js';
 import {
   StripeBillingPortalCreateInput,
@@ -86,7 +87,7 @@ export class MerchantsController {
   async post(@Req() request: any) {
     this.logger.verbose(this.post.name);
     if (
-      await this.service.findOneOrFail({
+      await this.service.findOne({
         where: { userId: request.user.id },
       })
     ) {
@@ -166,7 +167,7 @@ export class MerchantsController {
     summary: 'Confirm Square Oauth',
     operationId: 'confirmSquareOauth',
   })
-  @ApiQuery({ name: 'oauthAccessCode', required: true, type: String })
+  @ApiBody({ type: SquareConfirmOauthDto })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -174,11 +175,12 @@ export class MerchantsController {
   @ApiOkResponse({ description: 'Square Oauth confirmed' })
   async postSquareOauth(
     @Req() request: any,
-    @Query('oauthAccessCode') oauthAccessCode: string,
+    @Body()
+    input: SquareConfirmOauthDto,
   ): Promise<void> {
     this.logger.verbose(this.postSquareOauth.name);
     await this.merchantsSquareService.updateOauth({
-      oauthAccessCode,
+      oauthAccessCode: input.oauthAccessCode,
       merchantId: request.merchant.id,
     });
 

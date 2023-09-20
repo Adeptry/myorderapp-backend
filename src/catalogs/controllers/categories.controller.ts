@@ -111,18 +111,17 @@ export class CategoriesController {
     }
     const merchant = await this.merchantsService.findOne({
       where: { id: merchantId },
+      relations: {
+        catalog: true,
+      },
     });
 
-    if (!merchant) {
-      throw new NotFoundException('Merchant not found');
-    }
-
-    if (!merchant.catalogId) {
-      throw new NotFoundException(`Catalog not found`);
+    if (!merchant || !merchant.catalog?.id) {
+      throw new NotFoundException('Merchants catalog not found');
     }
 
     return this.service.findPaginatedResults({
-      catalogId: merchant.catalogId,
+      catalogId: merchant.catalog?.id,
       page: parsedPage,
       limit: parsedLimit,
       whereOnlyEnabled: actingAs === UserTypeEnum.customer ? true : undefined,
@@ -186,15 +185,22 @@ export class CategoriesController {
         );
       }
     }
-    const { merchant, customer } = request;
+    const { merchant: requestMerchant, customer } = request;
     const whereOnlyEnabled = customer != undefined ? true : undefined;
 
-    if (!merchant.catalogId) {
-      throw new NotFoundException(`Catalog not found`);
+    const merchant = await this.merchantsService.findOne({
+      where: { id: requestMerchant.id },
+      relations: {
+        catalog: true,
+      },
+    });
+
+    if (!merchant || !merchant.catalog?.id || !requestMerchant.id) {
+      throw new NotFoundException('Merchants catalog not found');
     }
 
     return this.service.findPaginatedResults({
-      catalogId: merchant.catalogId,
+      catalogId: merchant.catalog.id,
       page: parsedPage,
       limit: parsedLimit,
       whereOnlyEnabled,

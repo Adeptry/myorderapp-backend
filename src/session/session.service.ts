@@ -1,35 +1,23 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeepPartial, Not, Repository } from 'typeorm';
+import { Not, Repository } from 'typeorm';
+import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
-import { FindOptions } from '../utils/types/find-options.type.js';
-import { NullableType } from '../utils/types/nullable.type.js';
+import { RestfulEntityRepositoryService } from '../utils/restful-entity-repository-service.js';
 import { Session } from './entities/session.entity.js';
 
 @Injectable()
-export class SessionService {
+export class SessionService extends RestfulEntityRepositoryService<Session> {
   constructor(
     @InjectRepository(Session)
     private readonly sessionRepository: Repository<Session>,
-  ) {}
-
-  async findOne(options: FindOptions<Session>): Promise<NullableType<Session>> {
-    return this.sessionRepository.findOne({
-      where: options.where,
-    });
+    protected readonly logger: AppLogger,
+  ) {
+    logger.setContext(SessionService.name);
+    super(sessionRepository, logger);
   }
 
-  async findMany(options: FindOptions<Session>): Promise<Session[]> {
-    return this.sessionRepository.find({
-      where: options.where,
-    });
-  }
-
-  async create(data: DeepPartial<Session>): Promise<Session> {
-    return this.sessionRepository.save(this.sessionRepository.create(data));
-  }
-
-  async softDelete({
+  async deleteExcluding({
     excludeId,
     ...criteria
   }: {
@@ -37,7 +25,7 @@ export class SessionService {
     user?: Pick<User, 'id'>;
     excludeId?: Session['id'];
   }): Promise<void> {
-    await this.sessionRepository.softDelete({
+    await this.sessionRepository.delete({
       ...criteria,
       id: criteria.id ? criteria.id : excludeId ? Not(excludeId) : undefined,
     });

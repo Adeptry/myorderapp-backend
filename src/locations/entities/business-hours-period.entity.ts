@@ -88,7 +88,7 @@ export class BusinessHoursPeriod extends EntityHelper {
   locationId?: string;
 
   @ManyToOne(() => Location, (entity) => entity.businessHours, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   location?: Relation<Location>;
 }

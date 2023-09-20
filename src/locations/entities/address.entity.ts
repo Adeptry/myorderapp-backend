@@ -1,17 +1,20 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
+import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
 import { EntityHelper } from '../../utils/entity-helper.js';
+import { Location } from './location.entity.js';
 
 @Entity('address')
 export class Address extends EntityHelper {
@@ -174,4 +177,11 @@ export class Address extends EntityHelper {
   })
   @Column({ type: 'varchar', nullable: true })
   lastName?: string | null;
+
+  /* Relations */
+
+  @OneToOne(() => Location, (entity) => entity.address, {
+    onDelete: 'CASCADE',
+  })
+  location?: Relation<Location>;
 }

@@ -23,6 +23,7 @@ import {
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
+import { SessionService } from '../session/session.service.js';
 import { NestError } from '../utils/error.js';
 import { UserUpdateDto } from './dto/user-update.dto.js';
 import { User } from './entities/user.entity.js';
@@ -42,6 +43,7 @@ import { UsersService } from './users.service.js';
 export class UsersController {
   constructor(
     private readonly service: UsersService,
+    private readonly sessionService: SessionService,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(UsersController.name);
@@ -49,7 +51,6 @@ export class UsersController {
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ type: User })
   @ApiOperation({ summary: 'Get your User', operationId: 'getCurrentUser' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
@@ -60,7 +61,6 @@ export class UsersController {
 
   @Patch('me')
   @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Update your User',
@@ -81,8 +81,7 @@ export class UsersController {
   }
 
   @Delete('me')
-  @HttpCode(HttpStatus.OK)
-  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Delete your User',
@@ -92,6 +91,9 @@ export class UsersController {
   async deleteMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.deleteMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    return this.service.softDelete(request.user.id!);
+    await this.service.delete(request.user.id!);
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    await this.sessionService.delete({ userId: request.user.id! });
+    return;
   }
 }

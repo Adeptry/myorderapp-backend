@@ -16,6 +16,7 @@ import {
 } from 'typeorm';
 import { Location } from '../../locations/entities/location.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
+import { Catalog } from './catalog.entity.js';
 import { Modifier } from './modifier.entity.js';
 
 @Entity('modifier_location_override')
@@ -82,4 +83,17 @@ export class ModifierLocationOverride extends EntityHelper {
   })
   @JoinColumn({ name: 'locationId' })
   location?: Relation<Location>;
+
+  // Catalog
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => Catalog, (entity) => entity.modifierLists, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Relation<Catalog>;
 }

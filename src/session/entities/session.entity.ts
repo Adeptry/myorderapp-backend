@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
+  Column,
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
@@ -41,8 +42,13 @@ export class Session extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true })
+  userId?: string;
+
   @ManyToOne(() => User, {
     eager: true,
+    onDelete: 'CASCADE',
   })
   @Index()
   user?: Relation<User>;

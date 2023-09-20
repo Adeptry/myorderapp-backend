@@ -163,7 +163,7 @@ export class Location extends EntityHelper {
   merchantId?: string;
 
   @ManyToOne(() => Merchant, (entity) => entity.locations, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   merchant?: Relation<Merchant>;
 

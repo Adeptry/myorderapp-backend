@@ -8,7 +8,6 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
-  JoinColumn,
   ManyToOne,
   OneToMany,
   OneToOne,
@@ -100,7 +99,7 @@ export class Merchant extends EntityHelper {
   userId?: string;
 
   @ApiProperty({ type: () => User, required: false, nullable: true })
-  @ManyToOne(() => User)
+  @ManyToOne(() => User, { onDelete: 'CASCADE' })
   user?: Relation<User>;
 
   /*
@@ -149,17 +148,12 @@ export class Merchant extends EntityHelper {
    * Catalog
    */
 
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  catalogId?: string;
-
   @ApiHideProperty()
   @Exclude({ toPlainOnly: true })
   @OneToOne(() => Catalog, (entity) => entity.merchant, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
     nullable: true,
   })
-  @JoinColumn({ name: 'catalogId' })
   catalog?: Relation<Catalog>;
 
   /*

@@ -144,6 +144,7 @@ export class ModifiersService extends EntityRepositoryService<Modifier> {
       squareModifierLocationOverrides:
         squareModifierData?.locationOverrides ?? [],
       moaLocations,
+      moaCatalogId,
     });
 
     return await this.save(moaModifier);

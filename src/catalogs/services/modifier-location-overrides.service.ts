@@ -22,6 +22,7 @@ export class ModifierLocationOverridesService extends EntityRepositoryService<Mo
     forModifierWithId: string;
     squareModifierLocationOverrides: ModifierLocationOverrides[];
     moaLocations: Location[];
+    moaCatalogId: string;
   }) {
     this.logger.verbose(this.process.name);
     const {
@@ -54,6 +55,7 @@ export class ModifierLocationOverridesService extends EntityRepositoryService<Mo
       );
       moaModifierLocationOverride.currency =
         modifierOverride.priceMoney?.currency;
+      moaModifierLocationOverride.catalogId = params.moaCatalogId;
 
       await this.save(moaModifierLocationOverride);
     }

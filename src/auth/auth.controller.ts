@@ -1,7 +1,7 @@
 import {
   Body,
   Controller,
-  Get,
+  Delete,
   HttpCode,
   HttpStatus,
   Patch,
@@ -27,6 +27,7 @@ import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthService } from './auth.service.js';
+import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto.js';
 import { AuthEmailLoginDto } from './dto/auth-email-login.dto.js';
 import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto.js';
 import { AuthRegisterLoginDto } from './dto/auth-register-login.dto.js';
@@ -60,10 +61,10 @@ export class AuthController {
     operationId: 'login',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  async emailLogin(
+  async postEmailLogin(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.emailLogin.name);
+    this.logger.verbose(this.postEmailLogin.name);
     const response = await this.service.validateLogin(loginDto, false);
     return response;
   }
@@ -75,71 +76,57 @@ export class AuthController {
     operationId: 'register',
   })
   @ApiCreatedResponse({ type: LoginResponseType })
-  async emailRegister(
+  async postEmailRegister(
     @Body() createUserDto: AuthRegisterLoginDto,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.emailRegister.name);
+    this.logger.verbose(this.postEmailRegister.name);
     const response = await this.service.register(createUserDto);
     return response;
   }
 
-  // @Post('email/confirm')
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @ApiOperation({
-  //   summary: 'Confirm email',
-  //   operationId: 'confirmEmail',
-  // })
-  // @ApiNoContentResponse()
-  // async confirmEmail(
-  //   @Body() confirmEmailDto: AuthConfirmEmailDto,
-  // ): Promise<void> {
-  //   return this.service.confirmEmail(confirmEmailDto.hash);
-  // }
+  @Post('email/confirm')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @ApiOperation({
+    summary: 'Confirm email',
+    operationId: 'confirmEmail',
+  })
+  @ApiNoContentResponse()
+  async postEmailConfirm(
+    @Body() confirmEmailDto: AuthConfirmEmailDto,
+  ): Promise<void> {
+    this.logger.verbose(this.postEmailConfirm.name);
+    return this.service.confirmEmail(confirmEmailDto.hash);
+  }
 
-  @Post('forgot/password')
+  @Post('password/forgot')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Forgot password',
     operationId: 'forgotPassword',
   })
   @ApiNoContentResponse()
-  async forgotPassword(
+  async postForgotPassword(
     @Body() forgotPasswordDto: AuthForgotPasswordDto,
   ): Promise<void> {
-    this.logger.verbose(this.forgotPassword.name);
+    this.logger.verbose(this.postForgotPassword.name);
     return this.service.createForgotPasswordOrThrow(forgotPasswordDto.email);
   }
 
-  @Post('reset/password')
+  @Post('password/reset')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Reset password',
     operationId: 'resetPassword',
   })
   @ApiNoContentResponse()
-  resetPassword(@Body() resetPasswordDto: AuthResetPasswordDto): Promise<void> {
-    this.logger.verbose(this.resetPassword.name);
+  postResetPassword(
+    @Body() resetPasswordDto: AuthResetPasswordDto,
+  ): Promise<void> {
+    this.logger.verbose(this.postResetPassword.name);
     return this.service.resetPassword(
       resetPasswordDto.hash,
       resetPasswordDto.password,
     );
-  }
-
-  @ApiBearerAuth()
-  @SerializeOptions({
-    groups: ['me'],
-  })
-  @Get('me')
-  @UseGuards(AuthGuard('jwt'))
-  @HttpCode(HttpStatus.OK)
-  @ApiOperation({
-    summary: 'Get current Auth',
-    operationId: 'currentAuth',
-  })
-  @ApiOkResponse({ type: User })
-  public me(@Req() request: JwtGuardedRequest): Promise<NullableType<User>> {
-    this.logger.verbose(this.me.name);
-    return this.service.me(request.user);
   }
 
   @ApiBearerAuth()
@@ -154,10 +141,10 @@ export class AuthController {
     operationId: 'refreshToken',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public refresh(
+  public postRefresh(
     @Req() request: JwtGuardedRequest,
   ): Promise<Omit<LoginResponseType, 'user'>> {
-    this.logger.verbose(this.refresh.name);
+    this.logger.verbose(this.postRefresh.name);
     if (request.user.sessionId == undefined) {
       throw new UnauthorizedException();
     }
@@ -165,7 +152,7 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @Post('logout')
+  @Delete('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
@@ -173,8 +160,8 @@ export class AuthController {
     operationId: 'logout',
   })
   @ApiNoContentResponse()
-  public async logout(@Req() request: JwtGuardedRequest): Promise<void> {
-    this.logger.verbose(this.logout.name);
+  public async deleteMe(@Req() request: JwtGuardedRequest): Promise<void> {
+    this.logger.verbose(this.deleteMe.name);
     await this.service.logout({
       sessionId: request.user.sessionId,
     });
@@ -193,24 +180,11 @@ export class AuthController {
   })
   @ApiOkResponse({ type: User })
   @ApiBody({ type: AuthUpdateDto })
-  public update(
+  public patchMe(
     @Req() request: JwtGuardedRequest,
     @Body() userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
-    this.logger.verbose(this.update.name);
+    this.logger.verbose(this.patchMe.name);
     return this.service.update(request.user, userDto);
   }
-
-  // @ApiBearerAuth()
-  // @Delete('me')
-  // @UseGuards(AuthGuard('jwt'))
-  // @HttpCode(HttpStatus.NO_CONTENT)
-  // @ApiOperation({
-  //   summary: 'Delete User',
-  //   operationId: 'deleteCurrentAuth',
-  // })
-  // @ApiNoContentResponse()
-  // public async delete(@Req() request): Promise<void> {
-  //   return this.service.softDelete(request.user);
-  // }
 }

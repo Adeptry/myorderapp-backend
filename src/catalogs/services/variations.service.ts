@@ -127,7 +127,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
           override.priceMoney?.amount ?? 0,
         );
         moaVariationLocationOverride.currency = override.priceMoney?.currency;
-
+        moaVariationLocationOverride.catalogId = moaCatalogId;
         await this.variationLocationOverridesService.save(
           moaVariationLocationOverride,
         );

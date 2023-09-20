@@ -4,6 +4,7 @@ import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
   BeforeInsert,
+  BeforeUpdate,
   Column,
   CreateDateColumn,
   DeleteDateColumn,
@@ -50,16 +51,33 @@ export class AppConfig extends EntityHelper {
 
   /* App config entity */
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  showsAds?: boolean;
+  @ApiProperty({ required: false, nullable: true })
+  @Column({ nullable: true, unique: true })
+  name?: string;
 
   @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  name?: string;
+  @Column({ nullable: true, unique: true })
+  pathComponent?: string;
+
+  @BeforeUpdate()
+  @BeforeInsert()
+  setPathComponent() {
+    let processedPathComponent = this.name?.toLowerCase();
+
+    // Remove leading and trailing whitespace
+    processedPathComponent = processedPathComponent?.trim();
+
+    // Replace spaces with hyphens
+    processedPathComponent = processedPathComponent?.replace(/\s+/g, '-');
+
+    // Remove all non-alphanumeric and non-hyphen characters
+    processedPathComponent = processedPathComponent?.replace(
+      /[^a-zA-Z0-9-]/g,
+      '',
+    );
+
+    this.pathComponent = processedPathComponent;
+  }
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
