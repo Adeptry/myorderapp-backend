@@ -1,5 +1,12 @@
+import fs from 'fs';
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
+
+const envConfig = fs.readFileSync('.env');
+for (const line of envConfig.toString().split('\n')) {
+  const [key, value] = line.split('=');
+  process.env[key] = value;
+}
 
 export const AppDataSource = new DataSource({
   type: process.env.DATABASE_TYPE,
@@ -14,7 +21,7 @@ export const AppDataSource = new DataSource({
   synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
   dropSchema: false,
   keepConnectionAlive: true,
-  logging: process.env.NODE_ENV !== 'production',
+  logging: process.env.DATABASE_LOGGING,
   entities: ['/src/**/*.entity{.ts,.js}'],
   migrations: ['/migrations/**/*{.ts,.js}'],
   cli: {

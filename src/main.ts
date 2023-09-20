@@ -8,7 +8,6 @@ import { ConfigService } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
-
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AdminModule } from './admin/admin.module.js';
