@@ -58,7 +58,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get access token',
-    operationId: 'login',
+    operationId: 'postEmailLogin',
   })
   @ApiOkResponse({ type: LoginResponseType })
   async postEmailLogin(
@@ -73,7 +73,7 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Create User and Authorize',
-    operationId: 'register',
+    operationId: 'postEmailRegister',
   })
   @ApiCreatedResponse({ type: LoginResponseType })
   async postEmailRegister(
@@ -88,7 +88,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Confirm email',
-    operationId: 'confirmEmail',
+    operationId: 'postEmailConfirm',
   })
   @ApiNoContentResponse()
   async postEmailConfirm(
@@ -102,13 +102,13 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Forgot password',
-    operationId: 'forgotPassword',
+    operationId: 'postPasswordForgot',
   })
   @ApiNoContentResponse()
-  async postForgotPassword(
+  async postPasswordForgot(
     @Body() forgotPasswordDto: AuthForgotPasswordDto,
   ): Promise<void> {
-    this.logger.verbose(this.postForgotPassword.name);
+    this.logger.verbose(this.postPasswordForgot.name);
     return this.service.createForgotPasswordOrThrow(forgotPasswordDto.email);
   }
 
@@ -116,13 +116,13 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Reset password',
-    operationId: 'resetPassword',
+    operationId: 'postPasswordReset',
   })
   @ApiNoContentResponse()
-  postResetPassword(
+  postPasswordReset(
     @Body() resetPasswordDto: AuthResetPasswordDto,
   ): Promise<void> {
-    this.logger.verbose(this.postResetPassword.name);
+    this.logger.verbose(this.postPasswordReset.name);
     return this.service.resetPassword(
       resetPasswordDto.hash,
       resetPasswordDto.password,
@@ -138,7 +138,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Refresh token',
-    operationId: 'refreshToken',
+    operationId: 'postRefresh',
   })
   @ApiOkResponse({ type: LoginResponseType })
   public postRefresh(
@@ -157,7 +157,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete Session',
-    operationId: 'logout',
+    operationId: 'deleteMeAuth',
   })
   @ApiNoContentResponse()
   public async deleteMe(@Req() request: JwtGuardedRequest): Promise<void> {
@@ -176,7 +176,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update password',
-    operationId: 'updateCurrentAuth',
+    operationId: 'patchMeAuth',
   })
   @ApiOkResponse({ type: User })
   @ApiBody({ type: AuthUpdateDto })

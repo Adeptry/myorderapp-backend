@@ -39,13 +39,13 @@ export class AuthGoogleController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Google login',
-    operationId: 'loginGoogle',
+    operationId: 'postLoginGoogle',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  async login(
+  async postLogin(
     @Body() loginDto: AuthGoogleLoginDto,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.login.name);
+    this.logger.verbose(this.postLogin.name);
     const socialData = await this.authGoogleService.getProfileByToken(loginDto);
 
     return this.authService.validateSocialLogin(

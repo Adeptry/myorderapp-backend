@@ -46,13 +46,13 @@ export class AdminController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Get admin access token',
-    operationId: 'adminLogin',
+    operationId: 'postAdminEmailLogin',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  public emailLogin(
+  public postEmailLogin(
     @Body() loginDTO: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.emailLogin.name);
+    this.logger.verbose(this.postEmailLogin.name);
     return this.authService.validateLogin(loginDTO, true);
   }
 
@@ -63,7 +63,7 @@ export class AdminController {
   @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @ApiOperation({
     summary: 'Sync a merchants Square Catalog',
-    operationId: 'syncMerchantSquareCatalog',
+    operationId: 'postAdminSquareCatalogSync',
   })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({

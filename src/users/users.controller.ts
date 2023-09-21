@@ -52,7 +52,7 @@ export class UsersController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: User })
-  @ApiOperation({ summary: 'Get your User', operationId: 'getCurrentUser' })
+  @ApiOperation({ summary: 'Get your User', operationId: 'getMeUser' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   getMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.getMe.name);
@@ -64,7 +64,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Update your User',
-    operationId: 'patchCurrentUser',
+    operationId: 'patchMeUser',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: UserUpdateDto })
@@ -85,7 +85,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Delete your User',
-    operationId: 'deleteCurrentUser',
+    operationId: 'deleteMeUser',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   async deleteMe(@Req() request: UsersGuardedRequest) {

@@ -7,10 +7,3 @@ export class StripeBillingPortalCreateOutput {
   @IsString()
   url!: string;
 }
-
-export class StripeBillingPortalCreateInput {
-  @ApiProperty()
-  @IsNotEmpty()
-  @IsString()
-  returnUrl!: string;
-}

@@ -56,11 +56,11 @@ export class CardsController {
   @ApiOkResponse({ type: SquareListCardsResponse })
   @ApiBearerAuth()
   @ApiOperation({
-    operationId: 'getSquareCards',
+    operationId: 'getMeCards',
     summary: 'List my Square Cards',
   })
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -87,13 +87,13 @@ export class CardsController {
   @ApiCreatedResponse({ type: SquareCard })
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
   @ApiOperation({
-    operationId: 'createSquareCard',
+    operationId: 'postMeCards',
     summary: 'Create my Square Card',
   })
   @ApiBody({
@@ -131,7 +131,7 @@ export class CardsController {
   @ApiBearerAuth()
   @HttpCode(HttpStatus.NO_CONTENT)
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -141,7 +141,7 @@ export class CardsController {
     type: NestError,
   })
   @ApiOperation({
-    operationId: 'deleteSquareCard',
+    operationId: 'deleteMeCards',
     summary: 'Disable my Square Card',
   })
   @ApiParam({ name: 'id', required: true, type: String })

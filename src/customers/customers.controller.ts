@@ -67,7 +67,7 @@ export class CustomersController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
-  @Post()
+  @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant does not have Square access token',
     type: NestError,
@@ -80,30 +80,31 @@ export class CustomersController {
   @ApiCreatedResponse({ type: Customer })
   @ApiOperation({
     summary: 'Create Customer for current User',
-    operationId: 'createCustomer',
+    operationId: 'postMeCustomer',
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async post(
     @Req() request: UsersGuardedRequest,
-    @Query('merchantId') merchantId: string,
+    @Query('merchantIdOrPath') merchantIdOrPath: string,
   ) {
     this.logger.verbose(this.post.name);
+
     return this.service.createOne({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       userId: request.user.id!,
-      merchantId: merchantId,
+      merchantIdOrPath: merchantIdOrPath,
     });
   }
 
   @ApiBearerAuth()
   @Get('me')
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Get current Customer',
-    operationId: 'getCurrentCustomer',
+    operationId: 'getMeCustomer',
   })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
@@ -146,10 +147,10 @@ export class CustomersController {
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Update your Customer',
-    operationId: 'updateMyCustomer',
+    operationId: 'patchMeCustomer',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiBody({ type: CustomerUpdateDto })
   async patchMe(
     @Req() request: CustomersGuardedRequest,
@@ -178,7 +179,10 @@ export class CustomersController {
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiOkResponse({ type: CustomersPaginatedResponse })
-  @ApiOperation({ summary: 'Get my Customers', operationId: 'getCustomers' })
+  @ApiOperation({
+    summary: 'Get my Customers',
+    operationId: 'getManyCustomers',
+  })
   async getMany(
     @Req() request: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -210,18 +214,21 @@ export class CustomersController {
   @ApiOkResponse({
     description: 'The record has been successfully updated.',
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async updateMyAppInstall(
     @Req() request: CustomersGuardedRequest,
     @Body() body: AppInstallUpdateDto,
     @Res({ passthrough: true }) res: Response,
   ) {
     this.logger.verbose(this.updateMyAppInstall.name);
+
+    const { customer } = request;
+
     // Find the AppInstall entity with the provided tokenId
     let appInstall = await this.appInstallsService.findOne({
       where: {
         firebaseInstallationId: body.firebaseInstallationId,
-        customerId: request.customer.id,
+        customerId: customer.id,
       },
     });
 
@@ -230,7 +237,7 @@ export class CustomersController {
     if (!appInstall) {
       // Create a new AppInstall entity
       appInstall = this.appInstallsService.create({
-        customerId: request.customer.id,
+        customerId: customer.id,
         firebaseInstallationId: body.firebaseInstallationId,
       });
       res.status(HttpStatus.CREATED);

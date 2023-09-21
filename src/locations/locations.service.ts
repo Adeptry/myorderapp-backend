@@ -1,7 +1,7 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { AppLogger } from '../logger/app.logger.js';
 import { SquareService } from '../square/square.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
@@ -18,16 +18,38 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
   constructor(
     @InjectRepository(MoaLocation)
     protected readonly repository: Repository<MoaLocation>,
-    @Inject(AddressService)
     private readonly addressService: AddressService,
-    @Inject(BusinessHoursPeriodsService)
     private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
-    @Inject(SquareService)
     private readonly squareService: SquareService,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(LocationsService.name);
     super(repository, logger);
+  }
+
+  async findAndCountWithMerchantIdOrPath(params: {
+    where: {
+      merchantIdOrPath: string;
+      status?: string;
+    };
+    relations?: FindOptionsRelations<MoaLocation>;
+  }) {
+    this.logger.verbose(this.findAndCountWithMerchantIdOrPath.name);
+    return await this.findAndCount({
+      where: [
+        {
+          merchant: { id: params.where.merchantIdOrPath },
+          status: params.where.status,
+        },
+        {
+          merchant: {
+            appConfig: { path: params.where.merchantIdOrPath },
+          },
+          status: params.where.status,
+        },
+      ],
+      relations: params.relations,
+    });
   }
 
   async syncSquare(params: {

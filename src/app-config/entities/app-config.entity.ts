@@ -57,7 +57,7 @@ export class AppConfig extends EntityHelper {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, unique: true })
-  pathComponent?: string;
+  path?: string;
 
   @BeforeUpdate()
   @BeforeInsert()
@@ -76,7 +76,7 @@ export class AppConfig extends EntityHelper {
       '',
     );
 
-    this.pathComponent = processedPathComponent;
+    this.path = processedPathComponent;
   }
 
   @ApiProperty({ required: false, nullable: true })

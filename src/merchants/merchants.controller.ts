@@ -41,10 +41,7 @@ import { StripeService } from '../stripe/stripe.service.js';
 import { NestError } from '../utils/error.js';
 import { SquareConfirmOauthDto } from './dto/square-confirm-oauth.input.js';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto.js';
-import {
-  StripeBillingPortalCreateInput,
-  StripeBillingPortalCreateOutput,
-} from './dto/stripe-portal.dto.js';
+import { StripeBillingPortalCreateOutput } from './dto/stripe-portal.dto.js';
 import { Merchant } from './entities/merchant.entity.js';
 import { MerchantsService } from './merchants.service.js';
 import { MerchantsSquareService } from './merchants.square.service.js';
@@ -73,7 +70,7 @@ export class MerchantsController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UsersGuard)
-  @Post()
+  @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant already exists',
     type: NestError,
@@ -81,11 +78,11 @@ export class MerchantsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Create Merchant for current User',
-    operationId: 'createMerchant',
+    operationId: 'postMeMerchant',
   })
-  @ApiOkResponse({ description: 'Merchant created' })
-  async post(@Req() request: any) {
-    this.logger.verbose(this.post.name);
+  @ApiOkResponse({ description: 'Merchant created', type: Merchant })
+  async postMe(@Req() request: any) {
+    this.logger.verbose(this.postMe.name);
     if (
       await this.service.findOne({
         where: { userId: request.user.id },
@@ -104,8 +101,7 @@ export class MerchantsController {
     });
     merchant.stripeId = stripeCustomer?.id;
 
-    await this.service.save(merchant);
-    return;
+    return await this.service.save(merchant);
   }
 
   @Get('me')
@@ -117,7 +113,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
-    operationId: 'getCurrentMerchant',
+    operationId: 'getMeMerchant',
   })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'appConfig', required: false, type: Boolean })
@@ -165,7 +161,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Confirm Square Oauth',
-    operationId: 'confirmSquareOauth',
+    operationId: 'postMeSquareOauth',
   })
   @ApiBody({ type: SquareConfirmOauthDto })
   @ApiUnauthorizedResponse({
@@ -173,12 +169,12 @@ export class MerchantsController {
     type: NestError,
   })
   @ApiOkResponse({ description: 'Square Oauth confirmed' })
-  async postSquareOauth(
+  async postMeSquareOauth(
     @Req() request: any,
     @Body()
     input: SquareConfirmOauthDto,
   ): Promise<void> {
-    this.logger.verbose(this.postSquareOauth.name);
+    this.logger.verbose(this.postMeSquareOauth.name);
     await this.merchantsSquareService.updateOauth({
       oauthAccessCode: input.oauthAccessCode,
       merchantId: request.merchant.id,
@@ -193,27 +189,27 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Sync your Square Catalog',
-    operationId: 'squareSync',
+    operationId: 'getMeSquareSync',
   })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async squareSync(@Req() request: any): Promise<void> {
-    this.logger.verbose(this.squareSync.name);
+  async getMeSquareSync(@Req() request: any): Promise<void> {
+    this.logger.verbose(this.getMeSquareSync.name);
     return this.merchantsSquareService.sync({
       merchantId: request.merchant.id,
     });
   }
 
-  @Post('me/stripe/checkout/create')
+  @Post('me/stripe/checkout/')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start Stripe checkout',
-    operationId: 'createStripeCheckout',
+    operationId: 'postMeStripeCheckout',
   })
   @ApiBody({ type: StripeCheckoutCreateDto })
   @ApiUnauthorizedResponse({
@@ -221,11 +217,11 @@ export class MerchantsController {
     type: NestError,
   })
   @ApiOkResponse({ type: StripeCheckoutDto })
-  async stripeCreateCheckoutSessionId(
+  async postMeStripeCheckout(
     @Req() request: MerchantsGuardedRequest,
     @Body() input: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
-    this.logger.verbose(this.stripeCreateCheckoutSessionId.name);
+    this.logger.verbose(this.postMeStripeCheckout.name);
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -242,29 +238,29 @@ export class MerchantsController {
     return { checkoutSessionId };
   }
 
-  @Post('me/stripe/billing-session/create')
+  @Get('me/stripe/billing-session/')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start create billing session url',
-    operationId: 'createStripeBillingSessionUrl',
+    operationId: 'getMeStripeBillingSession',
   })
-  @ApiBody({ type: StripeBillingPortalCreateInput })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
   @ApiOkResponse({ type: StripeBillingPortalCreateOutput })
-  async stripeCreateBillingSessionUrl(
+  @ApiQuery({ name: 'returnUrl', required: true, type: String })
+  async getMeStripeBillingSession(
     @Req() request: MerchantsGuardedRequest,
-    @Body() input: StripeBillingPortalCreateInput,
+    @Query('returnUrl') returnUrl: string,
   ): Promise<StripeBillingPortalCreateOutput | null> {
-    this.logger.verbose(this.stripeCreateBillingSessionUrl.name);
+    this.logger.verbose(this.getMeStripeBillingSession.name);
     const url = await this.merchantsStripeService.createBillingPortalSession({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       merchantId: request.merchant.id!,
-      ...input,
+      returnUrl: returnUrl,
     });
 
     if (!url) {

@@ -39,11 +39,13 @@ export class AuthAppleController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Apple login',
-    operationId: 'loginApple',
+    operationId: 'postLoginApple',
   })
   @ApiOkResponse({ type: LoginResponseType })
-  async login(@Body() loginDto: AuthAppleLoginDto): Promise<LoginResponseType> {
-    this.logger.verbose(this.login.name);
+  async postLogin(
+    @Body() loginDto: AuthAppleLoginDto,
+  ): Promise<LoginResponseType> {
+    this.logger.verbose(this.postLogin.name);
     const socialData = await this.authAppleService.getProfileByToken(loginDto);
 
     return this.authService.validateSocialLogin(

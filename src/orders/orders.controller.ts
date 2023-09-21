@@ -78,7 +78,7 @@ export class OrdersController {
   @ApiNotFoundResponse({ description: 'Invalid location ID', type: NestError })
   @ApiOperation({
     summary: 'Create Order',
-    operationId: 'createCurrentOrder',
+    operationId: 'postOrder',
   })
   @ApiUnprocessableEntityResponse({
     description: 'No Square tokens',
@@ -86,10 +86,10 @@ export class OrdersController {
   })
   @ApiCreatedResponse({ type: Order })
   @ApiBody({ required: true, type: OrderCreateDto })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
-  async createCurrent(
+  async post(
     @Req() request: CustomersGuardedRequest,
     @Body() body: OrderCreateDto,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
@@ -97,7 +97,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.createCurrent.name);
+    this.logger.verbose(this.post.name);
     const { customer, merchant } = { ...request };
     const { idempotencyKey, locationId, variations } = body;
 
@@ -144,7 +144,7 @@ export class OrdersController {
     summary: 'Get current Order',
     operationId: 'getCurrentOrder',
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async getCurrent(
@@ -191,54 +191,15 @@ export class OrdersController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
-  @Get(':id')
-  @ApiOperation({
-    summary: 'Get Order',
-    operationId: 'getOrder',
-  })
-  @ApiOkResponse({ type: Order })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
-  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
-  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
-  @ApiQuery({ name: 'location', required: false, type: Boolean })
-  async getOne(
-    @Req() request: UserTypeGuardedRequest,
-    @Param('id') id: string,
-    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
-    lineItems?: boolean,
-    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
-    location?: boolean,
-  ) {
-    this.logger.verbose(this.getOne.name);
-    const { merchant, customer } = { ...request };
-    return await this.service.findOne({
-      where: {
-        id: id,
-        customerId: customer?.id,
-        merchantId: merchant?.id,
-      },
-      relations: {
-        lineItems: lineItems
-          ? {
-              modifiers: lineItems,
-            }
-          : undefined,
-        location: location,
-      },
-    });
-  }
-
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
   @Get('me')
   @ApiOperation({
     summary: 'Get my Orders',
-    operationId: 'getOrders',
+    operationId: 'getManyOrders',
   })
   @ApiOkResponse({ type: OrdersPaginatedReponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'closed', required: false, type: Boolean })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
@@ -253,7 +214,9 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.getMany.name);
+    this.logger.verbose(
+      `${this.getMany.name} merchantId:${request.merchant?.id} customerId: ${request.customer?.id}`,
+    );
     return paginatedResults({
       results: await this.service.findAndCount({
         where: {
@@ -278,11 +241,50 @@ export class OrdersController {
   }
 
   @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @Get(':id')
+  @ApiOperation({
+    summary: 'Get Order',
+    operationId: 'getOneOrder',
+  })
+  @ApiOkResponse({ type: Order })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
+  @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
+  @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
+  @ApiQuery({ name: 'location', required: false, type: Boolean })
+  async getOne(
+    @Req() request: UserTypeGuardedRequest,
+    @Param('id') id: string,
+    @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
+    lineItems?: boolean,
+    @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
+    location?: boolean,
+  ) {
+    this.logger.verbose(`${this.getOne.name} id:${id}`);
+    const { merchant, customer } = { ...request };
+    return await this.service.findOne({
+      where: {
+        id: id,
+        customerId: customer?.id,
+        merchantId: merchant?.id,
+      },
+      relations: {
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location,
+      },
+    });
+  }
+
+  @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @Patch('current')
   @ApiOperation({
     summary: 'Patch update Order, e.g. modify Location',
-    operationId: 'patchUpdateCurrentOrder',
+    operationId: 'patchCurrentOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -294,7 +296,7 @@ export class OrdersController {
     description: 'Square error',
     type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
@@ -352,7 +354,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Post update Order, e.g. add Variations & Modifiers in Line Items',
-    operationId: 'postUpdateCurrentOrder',
+    operationId: 'postCurrentOrder',
   })
   @ApiBadRequestResponse({
     description: 'No current Order or Invalid variation',
@@ -366,7 +368,7 @@ export class OrdersController {
     description: 'Square error',
     type: NestError,
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
@@ -449,7 +451,7 @@ export class OrdersController {
     summary: 'Remove Line Items from Order',
     operationId: 'deleteCurrentLineItem',
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async deleteCurrentLineItem(
@@ -509,7 +511,7 @@ export class OrdersController {
     summary: 'Delete Order',
     operationId: 'deleteCurrentOrder',
   })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
     this.logger.verbose(this.deleteCurrent.name);
     const { customer } = request;
@@ -538,10 +540,10 @@ export class OrdersController {
   @Post('current/payment/square')
   @ApiOperation({
     summary: 'Pay for Order',
-    operationId: 'postPaymentForCurrentOrder',
+    operationId: 'postCurrentOrderPaymentSquare',
   })
   @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiNotFoundResponse({ description: 'No current order', type: NestError })
   @ApiUnprocessableEntityResponse({
     description: 'No Square Access Token',
@@ -553,7 +555,7 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
-  async postPaymentForCurrent(
+  async postCurrentPaymentSquare(
     @Req() request: CustomersGuardedRequest,
     @Body() body: PaymentCreateDto,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
@@ -561,7 +563,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.postPaymentForCurrent.name);
+    this.logger.verbose(this.postCurrentPaymentSquare.name);
     const { customer, merchant } = { ...request };
     const currentOrderId = customer.currentOrderId;
 

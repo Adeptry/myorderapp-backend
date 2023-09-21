@@ -5,7 +5,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
@@ -30,9 +30,58 @@ export class CustomersService extends EntityRepositoryService<Customer> {
     super(repository, logger);
   }
 
-  async createOne(params: { userId: string; merchantId: string }) {
+  async findOneWithUserIdAndMerchantIdOrPath(params: {
+    where: {
+      userId: string;
+      merchantIdOrPath: string;
+    };
+    relations?: FindOptionsRelations<Customer>;
+  }) {
+    return await this.findOne({
+      where: [
+        {
+          userId: params.where.userId,
+          merchantId: params.where.merchantIdOrPath,
+        },
+        {
+          userId: params.where.userId,
+          merchant: {
+            appConfig: {
+              path: params.where.merchantIdOrPath,
+            },
+          },
+        },
+      ],
+      relations: params.relations,
+    });
+  }
+
+  async findOneWithIdAndMerchantIdOrPath(params: {
+    where: {
+      id: string;
+      merchantIdOrPath: string;
+    };
+    relations?: FindOptionsRelations<Customer>;
+  }) {
+    return await this.findOne({
+      where: [
+        { id: params.where.id, merchantId: params.where.merchantIdOrPath },
+        {
+          id: params.where.id,
+          merchant: {
+            appConfig: {
+              path: params.where.merchantIdOrPath,
+            },
+          },
+        },
+      ],
+      relations: params.relations,
+    });
+  }
+
+  async createOne(params: { userId: string; merchantIdOrPath: string }) {
     this.logger.verbose(this.createOne.name);
-    const { userId, merchantId } = params;
+    const { userId, merchantIdOrPath } = params;
 
     const user = await this.usersService.findOne({ where: { id: userId } });
 
@@ -40,19 +89,19 @@ export class CustomersService extends EntityRepositoryService<Customer> {
       throw new NotFoundException(`User ${userId} not found`);
     }
 
+    const merchant = await this.merchantsService.findOneByIdOrPath({
+      where: { idOrPath: merchantIdOrPath },
+    });
+    if (!merchant?.id) {
+      throw new NotFoundException(`Merchant ${merchantIdOrPath} not found`);
+    }
+
     if (
       await this.findOne({
-        where: { userId, merchantId },
+        where: { userId, merchantId: merchant.id },
       })
     ) {
       throw new BadRequestException('Customer already exists');
-    }
-
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
-    });
-    if (!merchant) {
-      throw new NotFoundException(`Merchant ${merchantId} not found`);
     }
 
     if (!merchant?.squareAccessToken) {
@@ -67,6 +116,10 @@ export class CustomersService extends EntityRepositoryService<Customer> {
         userId: userId,
       }),
     );
+
+    customer.preferredLocation = await this.locationsService.findOne({
+      where: { isMain: true },
+    });
 
     const response = await this.squareService.createCustomer({
       accessToken: merchant.squareAccessToken,

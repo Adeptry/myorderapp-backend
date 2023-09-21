@@ -1,21 +1,19 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import firebaseAdminPkg from 'firebase-admin';
-import { Repository } from 'typeorm';
+import { FindOptionsRelations, Repository } from 'typeorm';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
-import { EntityRepositoryService } from '../utils/entity-repository-service.js';
-import { MerchantUpdateInput } from './dto/update-merchant.input.js';
+import { RestfulEntityRepositoryService } from '../utils/restful-entity-repository-service.js';
 
 const { credential } = firebaseAdminPkg;
 
 @Injectable()
-export class MerchantsService extends EntityRepositoryService<Merchant> {
+export class MerchantsService extends RestfulEntityRepositoryService<Merchant> {
   constructor(
     @InjectRepository(Merchant)
     protected readonly repository: Repository<Merchant>,
-    @Inject(FirebaseAdminService)
     private readonly firebaseAdminService: FirebaseAdminService,
     protected readonly logger: AppLogger,
   ) {
@@ -23,10 +21,17 @@ export class MerchantsService extends EntityRepositoryService<Merchant> {
     super(repository, logger);
   }
 
-  async updateOne(id: string, updateInput: MerchantUpdateInput) {
-    const entity = await this.findOneOrFail({ where: { id } });
-    Object.assign(entity, updateInput);
-    return await this.save(entity);
+  async findOneByIdOrPath(params: {
+    where: { idOrPath: string };
+    relations?: FindOptionsRelations<Merchant>;
+  }) {
+    return await this.findOne({
+      where: [
+        { id: params.where.idOrPath },
+        { appConfig: { path: params.where.idOrPath } },
+      ],
+      relations: params.relations,
+    });
   }
 
   /*

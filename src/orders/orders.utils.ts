@@ -123,14 +123,14 @@ export class OrdersUtils {
 
     const orderLineItems: OrderLineItem[] = [];
     for (const dto of params.variations) {
-      const variation = await this.variationsService.findOneOrFail({
+      const variation = await this.variationsService.findOne({
         where: { id: dto.id },
       });
-      if (!variation.squareId) {
+      if (!variation?.squareId) {
         throw new UnprocessableEntityException(`Invalid variation`);
       }
       const squareOrderLineItem: OrderLineItem = {
-        catalogObjectId: variation.squareId,
+        catalogObjectId: variation?.squareId,
         quantity: `${dto.quantity}`,
         modifiers: [],
         note: dto.note,

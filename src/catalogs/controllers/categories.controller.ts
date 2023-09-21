@@ -57,10 +57,10 @@ export class CategoriesController {
   }
 
   @ApiBearerAuth()
-  @Get('catalog')
+  @Get('categories')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
   @ApiQuery({ name: 'locationId', required: false, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -72,15 +72,15 @@ export class CategoriesController {
   @ApiOperation({
     summary:
       'Get Categories for Merchant ID with Items, Variations, and/or ModifierLists',
-    operationId: 'getCatalog',
+    operationId: 'getCategories',
   })
   @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async getCatalog(
-    @Query('merchantId') merchantId: string,
+  async getCategories(
+    @Query('merchantIdOrPath') merchantIdOrPath: string,
     @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -90,7 +90,7 @@ export class CategoriesController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
-    this.logger.verbose(this.getCatalog.name);
+    this.logger.verbose(this.getCategories.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -109,8 +109,8 @@ export class CategoriesController {
         );
       }
     }
-    const merchant = await this.merchantsService.findOne({
-      where: { id: merchantId },
+    const merchant = await this.merchantsService.findOneByIdOrPath({
+      where: { idOrPath: merchantIdOrPath },
       relations: {
         catalog: true,
       },
@@ -135,10 +135,10 @@ export class CategoriesController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
-  @Get('catalog/me')
+  @Get('categories/me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'locationId', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -149,14 +149,14 @@ export class CategoriesController {
   @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get your Categories with Items, Variations, and/or ModifierLists',
-    operationId: 'getMyCatalog',
+    operationId: 'getCategoriesMe',
   })
   @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  async getCatalogMe(
+  async getCategoriesMe(
     @Req() request: UserTypeGuardedRequest,
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -166,7 +166,7 @@ export class CategoriesController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
-    this.logger.verbose(this.getCatalogMe.name);
+    this.logger.verbose(this.getCategoriesMe.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -222,7 +222,7 @@ export class CategoriesController {
   })
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
-  @ApiOperation({ summary: 'Update a Category', operationId: 'updateCategory' })
+  @ApiOperation({ summary: 'Update a Category', operationId: 'patchCategory' })
   async patchCategory(
     @Param('id') id: string,
     @Body() input: CategoryUpdateDto,
@@ -246,7 +246,7 @@ export class CategoriesController {
   @ApiBody({ type: [CategoryUpdateAllDto] })
   @ApiOperation({
     summary: 'Update multiple Categories',
-    operationId: 'updateCategories',
+    operationId: 'patchCategories',
   })
   async patchCategories(
     @Body() input: CategoryUpdateAllDto[],

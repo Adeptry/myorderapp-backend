@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  InternalServerErrorException,
   NotFoundException,
   Patch,
   Post,
@@ -31,6 +32,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { QueryFailedError } from 'typeorm';
 import { AppConfigService } from '../app-config/app-config.service.js';
 import { FilesService } from '../files/files.service.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
@@ -44,7 +46,7 @@ import { NestError } from '../utils/error.js';
 import { AppConfigUpdateDto } from './dto/app-config-update.input.js';
 import { AppConfig } from './entities/app-config.entity.js';
 
-@ApiTags('Configs')
+@ApiTags('AppConfigs')
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
 @Controller({
@@ -62,7 +64,7 @@ export class AppConfigController {
 
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), UserTypeGuard)
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
@@ -74,15 +76,18 @@ export class AppConfigController {
   @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
   @ApiOperation({
     summary: 'Get your Config',
-    operationId: 'getMyConfig',
+    operationId: 'getMeAppConfig',
   })
-  async getMyConfig(
+  async getMe(
     @Req() request: UserTypeGuardedRequest,
-    @Query('merchantId') merchantId?: string,
+    @Query('merchantIdOrPath') merchantIdOrPath?: string,
   ) {
-    this.logger.verbose(this.getMyConfig.name);
+    this.logger.verbose(this.getMe.name);
     const appConfig = await this.service.findOne({
-      where: { merchantId: merchantId ?? request.merchant.id },
+      where: [
+        { merchantId: merchantIdOrPath ?? request.merchant.id },
+        { path: merchantIdOrPath },
+      ],
     });
 
     if (!appConfig) {
@@ -93,19 +98,19 @@ export class AppConfigController {
   }
 
   @ApiBearerAuth()
-  @ApiQuery({ name: 'merchantId', required: true, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
   @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
   @ApiOperation({
     summary: 'Get Config for Merchant ID',
-    operationId: 'getConfigForMerchant',
+    operationId: 'getAppConfig',
   })
-  async get(@Query('merchantId') merchantId: string) {
+  async get(@Query('merchantIdOrPath') merchantIdOrPath: string) {
     this.logger.verbose(this.get.name);
     const appConfig = await this.service.findOne({
-      where: { merchantId: merchantId },
+      where: [{ merchantId: merchantIdOrPath }, { path: merchantIdOrPath }],
     });
 
     if (!appConfig) {
@@ -128,15 +133,18 @@ export class AppConfigController {
     description: 'AppConfig already exists',
     type: NestError,
   })
-  @ApiOperation({ summary: 'Create your Config', operationId: 'createConfig' })
+  @ApiOperation({
+    summary: 'Create your Config',
+    operationId: 'postMeAppConfig',
+  })
   @ApiBody({ type: AppConfigUpdateDto })
   @UseInterceptors(FileInterceptor('file'))
-  async create(
+  async postMe(
     @Req() request: MerchantsGuardedRequest,
     @Body()
     createAppConfigDto: AppConfigUpdateDto,
   ) {
-    this.logger.verbose(this.create.name);
+    this.logger.verbose(this.postMe.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
@@ -149,12 +157,22 @@ export class AppConfigController {
       );
     }
 
-    return this.service.save(
-      this.service.create({
-        merchantId: merchant.id,
-        ...createAppConfigDto,
-      }),
-    );
+    try {
+      return this.service.save(
+        this.service.create({
+          merchantId: merchant.id,
+          ...createAppConfigDto,
+        }),
+      );
+    } catch (error) {
+      if (error instanceof QueryFailedError) {
+        throw new BadRequestException(error.message);
+      } else if (error instanceof Error) {
+        throw new InternalServerErrorException(error.message);
+      } else {
+        throw new InternalServerErrorException(error);
+      }
+    }
   }
 
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
@@ -162,14 +180,17 @@ export class AppConfigController {
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
   @ApiOkResponse({ type: AppConfig })
-  @ApiOperation({ summary: 'Update your Config', operationId: 'updateConfig' })
+  @ApiOperation({
+    summary: 'Update your Config',
+    operationId: 'patchMeAppConfig',
+  })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: AppConfigUpdateDto })
-  async update(
+  async patchMe(
     @Req() request: MerchantsGuardedRequest,
     @Body() updateAppConfigDto: AppConfigUpdateDto,
   ) {
-    this.logger.verbose(this.update.name);
+    this.logger.verbose(this.patchMe.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
@@ -211,12 +232,12 @@ export class AppConfigController {
     },
   })
   @UseInterceptors(FileInterceptor('file')) // 1
-  @ApiOperation({ summary: 'Upload icon', operationId: 'uploadIcon' })
-  async uploadFile(
+  @ApiOperation({ summary: 'Upload icon', operationId: 'postMeIconUpload' })
+  async postMeIconUpload(
     @Req() request: MerchantsGuardedRequest,
     @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
   ) {
-    this.logger.verbose(this.uploadFile.name);
+    this.logger.verbose(this.postMeIconUpload.name);
     const { merchant } = request;
 
     if (!merchant?.id) {

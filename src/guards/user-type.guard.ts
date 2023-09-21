@@ -39,7 +39,8 @@ export class UserTypeGuard implements CanActivate {
     this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
     const userType: UserTypeEnum = request.query.actingAs;
-    const merchantId: string = request.query.merchantId;
+    const queryMerchantIdOrPath: string | undefined =
+      request.query.merchantIdOrPath;
 
     const user = await this.authService.me(request.user);
 
@@ -60,19 +61,19 @@ export class UserTypeGuard implements CanActivate {
       }
       request.merchant = merchant;
     } else if (userType === UserTypeEnum.customer) {
-      if (!merchantId) {
+      if (!queryMerchantIdOrPath) {
         throw new BadRequestException(`merchantId is required`);
       }
       const customer = await this.customersService.findOne({
-        where: { userId: user.id, merchantId },
+        where: { userId: user.id },
       });
       if (!customer) {
         throw new UnauthorizedException(`Customer not found`);
       }
       request.customer = customer;
-      const customersMerchant = await this.merchantsService.findOne({
+      const customersMerchant = await this.merchantsService.findOneByIdOrPath({
         where: {
-          id: merchantId,
+          idOrPath: queryMerchantIdOrPath,
         },
       });
       if (!customersMerchant) {

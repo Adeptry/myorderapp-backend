@@ -69,7 +69,7 @@ export class ItemsController {
   }
 
   @ApiBearerAuth()
-  @ApiQuery({ name: 'merchantId', required: false, type: String })
+  @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @Get('categories/:id/items')
   @HttpCode(HttpStatus.OK)
@@ -86,9 +86,9 @@ export class ItemsController {
   @ApiQuery({ name: 'modifierLists', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get Items in Category',
-    operationId: 'getItemsInCategory',
+    operationId: 'getCategoriesItems',
   })
-  async getCategoryItems(
+  async getCategoriesItems(
     @Param('id') categoryId: string,
     @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page') page?: string,
@@ -98,7 +98,7 @@ export class ItemsController {
     @Query('variations') variations?: boolean,
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<ItemPaginatedResponse> {
-    this.logger.verbose(this.getCategoryItems.name);
+    this.logger.verbose(this.getCategoriesItems.name);
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
@@ -183,7 +183,7 @@ export class ItemsController {
   })
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
-  @ApiOperation({ summary: 'Update an Item', operationId: 'updateItem' })
+  @ApiOperation({ summary: 'Update an Item', operationId: 'patchItem' })
   async patchItem(
     @Param('id') itemId: string,
     @Body() input: ItemUpdateDto,
@@ -207,7 +207,7 @@ export class ItemsController {
   @ApiBody({ type: [ItemUpdateAllDto] })
   @ApiOperation({
     summary: 'Update multiple Items',
-    operationId: 'updateItems',
+    operationId: 'patchItems',
   })
   async patchItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
     this.logger.verbose(this.patchItems.name);
@@ -222,7 +222,7 @@ export class ItemsController {
 
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiBearerAuth()
-  @Post('items/:id/square/image')
+  @Post('items/:id/square/image/upload')
   @UseInterceptors(FileInterceptor('file'))
   @ApiCreatedResponse({ type: CatalogImage })
   @ApiQuery({
@@ -246,15 +246,15 @@ export class ItemsController {
   })
   @ApiOperation({
     summary: 'Upload Square Catalog Image',
-    operationId: 'uploadImageToSquareCatalog',
+    operationId: 'postItemSquareImageUpload',
   })
-  async squareUploadCatalogFileForImage(
+  async postItemSquareImageUpload(
     @UploadedFile() file: Express.Multer.File,
     @Req() request: MerchantsGuardedRequest,
     @Query('idempotencyKey') idempotencyKey: string,
     @Param('id') id: string,
   ) {
-    this.logger.verbose(this.squareUploadCatalogFileForImage.name);
+    this.logger.verbose(this.postItemSquareImageUpload.name);
     const { merchant } = request;
 
     if (!merchant.squareAccessToken) {
