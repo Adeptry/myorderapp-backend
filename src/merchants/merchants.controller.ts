@@ -118,6 +118,7 @@ export class MerchantsController {
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'appConfig', required: false, type: Boolean })
   @ApiQuery({ name: 'locations', required: false, type: Boolean })
+  @ApiQuery({ name: 'catalog', required: false, type: Boolean })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
@@ -131,6 +132,8 @@ export class MerchantsController {
     appConfig?: boolean,
     @Query('locations', new DefaultValuePipe(false), ParseBoolPipe)
     locations?: boolean,
+    @Query('catalog', new DefaultValuePipe(false), ParseBoolPipe)
+    catalog?: boolean,
   ): Promise<Merchant> {
     this.logger.verbose(this.getMe.name);
     const { user } = request;
@@ -139,6 +142,7 @@ export class MerchantsController {
       relations: {
         appConfig,
         locations,
+        catalog,
       },
     });
 

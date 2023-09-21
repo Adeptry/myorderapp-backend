@@ -11,7 +11,6 @@ import { AppLogger } from '../logger/app.logger.js';
 import { StripeConfigUtils } from '../stripe/stripe.config.utils.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { User } from '../users/entities/user.entity.js';
-import { MerchantTierEnum } from './entities/merchant-tier.enum.js';
 import { MerchantsService } from './merchants.service.js';
 
 @Injectable()
@@ -116,6 +115,9 @@ export class MerchantsStripeService {
         where: {
           stripeId: stripeCustomerId,
         },
+        relations: {
+          appConfig: true,
+        },
       });
 
       if (!merchant) {
@@ -124,7 +126,17 @@ export class MerchantsStripeService {
       }
 
       // You can set the merchant tier to a default or 'inactive' state
-      merchant.tier = MerchantTierEnum.deleted;
+      merchant.tier = -1;
+
+      const appConfig = merchant.appConfig;
+      if (!appConfig) {
+        this.logger.error(`AppConfig not found for merchant ${merchant.id}`);
+        return;
+      }
+
+      appConfig.enabled = false;
+      await appConfig.save();
+
       this.logger.debug(`Setting merchant ${merchant.id} to deleted tier`);
       await this.service.save(merchant);
     } else {
@@ -148,6 +160,9 @@ export class MerchantsStripeService {
         where: {
           stripeId: stripeCustomerId,
         },
+        relations: {
+          appConfig: true,
+        },
       });
 
       if (!merchant) {
@@ -159,25 +174,27 @@ export class MerchantsStripeService {
         stripeSubscription.items?.data[0]?.price?.id;
 
       if (updateSubscriptionPriceId) {
-        if (
-          this.stripeConfigUtils.isProStripePriceId(updateSubscriptionPriceId)
-        ) {
-          if (merchant.tier !== MerchantTierEnum.pro) {
-            merchant.tier = MerchantTierEnum.pro;
-            this.logger.debug(`merchant ${merchant.tier} to pro tier`);
-            await this.service.save(merchant);
+        const tier = this.stripeConfigUtils.tierForStripePriceId(
+          updateSubscriptionPriceId,
+        );
+
+        if (tier != null) {
+          merchant.tier = tier;
+          await this.service.save(merchant);
+
+          const appConfig = merchant.appConfig;
+          if (!appConfig) {
+            this.logger.error(
+              `AppConfig not found for merchant ${merchant.id}`,
+            );
+            return;
           }
-        } else if (
-          this.stripeConfigUtils.isFreeStripePriceId(updateSubscriptionPriceId)
-        ) {
-          if (merchant.tier !== MerchantTierEnum.free) {
-            this.logger.debug(`Setting merchant ${merchant.id} to free tier`);
-            merchant.tier = MerchantTierEnum.free;
-            await this.service.save(merchant);
-          }
+
+          appConfig.enabled = true;
+          await appConfig.save();
         } else {
           this.logger.error(
-            `Unknown price id ${updateSubscriptionPriceId} for subscription`,
+            `Unknown tier for priceId ${updateSubscriptionPriceId}`,
           );
         }
       } else {
@@ -213,19 +230,11 @@ export class MerchantsStripeService {
       }
 
       const priceId = stripeSubscription.items?.data[0]?.price?.id;
+      const tier = this.stripeConfigUtils.tierForStripePriceId(priceId);
 
       if (priceId) {
-        if (this.stripeConfigUtils.isProStripePriceId(priceId)) {
-          this.logger.debug(`Setting merchant ${merchant.id} to pro tier`);
-          merchant.tier = MerchantTierEnum.pro;
-          await this.service.save(merchant);
-        } else if (this.stripeConfigUtils.isFreeStripePriceId(priceId)) {
-          this.logger.debug(`Setting merchant ${merchant.id} to free tier`);
-          merchant.tier = MerchantTierEnum.free;
-          await this.service.save(merchant);
-        } else {
-          this.logger.error(`Unknown price id ${priceId} for subscription`);
-        }
+        merchant.tier = tier;
+        await this.service.save(merchant);
       } else {
         this.logger.error(`Missing 'priceId' in stripeSubscription`);
       }

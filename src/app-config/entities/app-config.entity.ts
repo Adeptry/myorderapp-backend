@@ -59,6 +59,13 @@ export class AppConfig extends EntityHelper {
   @Column({ nullable: true, unique: true })
   path?: string;
 
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true, default: false })
+  enabled?: boolean;
+
   @BeforeUpdate()
   @BeforeInsert()
   setPathComponent() {

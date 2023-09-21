@@ -63,7 +63,7 @@ export class Order extends EntityHelper {
   })
   @ManyToOne(() => Customer, (entity) => entity.orders, {
     nullable: true,
-    onDelete: 'CASCADE',
+    onDelete: 'SET NULL',
   })
   @JoinColumn()
   customer?: Relation<Customer>;

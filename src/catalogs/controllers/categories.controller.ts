@@ -2,11 +2,13 @@ import {
   BadRequestException,
   Body,
   Controller,
+  DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
   NotFoundException,
   Param,
+  ParseBoolPipe,
   Patch,
   Query,
   Req,
@@ -85,10 +87,13 @@ export class CategoriesController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
-    @Query('items') items?: boolean,
-    @Query('images') images?: boolean,
-    @Query('variations') variations?: boolean,
-    @Query('modifierLists') modifierLists?: boolean,
+    @Query('items', new DefaultValuePipe(false), ParseBoolPipe) items?: boolean,
+    @Query('images', new DefaultValuePipe(false), ParseBoolPipe)
+    images?: boolean,
+    @Query('variations', new DefaultValuePipe(false), ParseBoolPipe)
+    variations?: boolean,
+    @Query('modifierLists', new DefaultValuePipe(false), ParseBoolPipe)
+    modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
     this.logger.verbose(this.getCategories.name);
     let parsedPage: number | undefined;
@@ -161,10 +166,13 @@ export class CategoriesController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('locationId') locationId?: string,
-    @Query('items') items?: boolean,
-    @Query('images') images?: boolean,
-    @Query('variations') variations?: boolean,
-    @Query('modifierLists') modifierLists?: boolean,
+    @Query('items', new DefaultValuePipe(false), ParseBoolPipe) items?: boolean,
+    @Query('images', new DefaultValuePipe(false), ParseBoolPipe)
+    images?: boolean,
+    @Query('variations', new DefaultValuePipe(false), ParseBoolPipe)
+    variations?: boolean,
+    @Query('modifierLists', new DefaultValuePipe(false), ParseBoolPipe)
+    modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
     this.logger.verbose(this.getCategoriesMe.name);
     let parsedPage: number | undefined;

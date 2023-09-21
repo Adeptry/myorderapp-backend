@@ -21,8 +21,6 @@ import { Customer } from '../../customers/entities/customer.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
 import { User } from '../../users/entities/user.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
-import { MerchantAppStatusEnum as MerchantAppStoreStatusEnum } from './merchant-app-store-status.enum.js';
-import { MerchantTierEnum } from './merchant-tier.enum.js';
 
 @Entity('merchant')
 export class Merchant extends EntityHelper {
@@ -53,42 +51,9 @@ export class Merchant extends EntityHelper {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-    enum: Object.values(MerchantTierEnum),
-    enumName: 'MerchantTierEnum',
-  })
-  @Column({ type: 'simple-enum', nullable: true, enum: MerchantTierEnum })
-  tier?: MerchantTierEnum;
-
-  @ApiProperty({
-    required: false,
-    nullable: true,
-    enum: Object.values(MerchantAppStoreStatusEnum),
-    enumName: 'MerchantAppStoreStatusEnum',
-  })
-  @Column({
-    type: 'simple-enum',
-    nullable: true,
-    enum: MerchantAppStoreStatusEnum,
-    default: MerchantAppStoreStatusEnum.pending,
-  })
-  androidStatus?: MerchantAppStoreStatusEnum;
-
-  @ApiProperty({
-    required: false,
-    nullable: true,
-    enum: Object.values(MerchantAppStoreStatusEnum),
-    enumName: 'MerchantAppStoreStatusEnum',
-  })
-  @Column({
-    type: 'simple-enum',
-    nullable: true,
-    enum: MerchantAppStoreStatusEnum,
-    default: MerchantAppStoreStatusEnum.pending,
-  })
-  iosStatus?: MerchantAppStoreStatusEnum;
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true })
+  tier?: number | null;
 
   /*
    * User
@@ -148,8 +113,7 @@ export class Merchant extends EntityHelper {
    * Catalog
    */
 
-  @ApiHideProperty()
-  @Exclude({ toPlainOnly: true })
+  @ApiProperty({ required: false, nullable: true, type: () => Catalog })
   @OneToOne(() => Catalog, (entity) => entity.merchant, {
     onDelete: 'CASCADE',
     nullable: true,

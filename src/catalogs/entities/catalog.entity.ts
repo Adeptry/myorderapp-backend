@@ -58,7 +58,7 @@ export class Catalog extends EntityHelper {
    */
   @ApiProperty({
     required: false,
-    type: () => [Category],
+    type: () => Category,
     isArray: true,
     nullable: true,
   })
