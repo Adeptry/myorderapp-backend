@@ -50,6 +50,12 @@ export class AuthService {
     this.logger.setContext(AuthService.name);
   }
 
+  currentLanguageTranslations() {
+    return this.i18n.t('auth', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
   validateApiKey(apiKey: string) {
     this.logger.verbose(this.validateApiKey.name);
     const apiKeys: string[] =
@@ -58,18 +64,12 @@ export class AuthService {
     return apiKeys.find((key) => apiKey == key) || apiKeys.length === 0;
   }
 
-  currentLanguageServiceTranslations() {
-    return this.i18n.t('auth', {
-      lang: I18nContext.current()?.lang,
-    });
-  }
-
   async validateLoginOrThrow(
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.validateLoginOrThrow.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
 
     const user = await this.usersService.findOne({
       where: {
@@ -146,7 +146,7 @@ export class AuthService {
     roleEnum: RoleEnum,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.validateSocialLogin.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     let user: NullableType<User>;
     const socialEmail = socialData.email?.toLowerCase();
 
@@ -225,7 +225,7 @@ export class AuthService {
 
   async registerOrThrow(dto: AuthRegisterLoginDto): Promise<LoginResponseType> {
     this.logger.verbose(this.registerOrThrow.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
@@ -283,7 +283,7 @@ export class AuthService {
 
   async confirmEmail(hash: string): Promise<void> {
     this.logger.verbose(this.confirmEmail.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     const user = await this.usersService.findOne({
       where: {
         hash,
@@ -303,7 +303,7 @@ export class AuthService {
 
   async createForgotPasswordOrThrow(email: string): Promise<void> {
     this.logger.verbose(this.createForgotPasswordOrThrow.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     const user = await this.usersService.findOne({
       where: {
         email,
@@ -335,7 +335,7 @@ export class AuthService {
 
   async resetPassword(hash: string, password: string): Promise<void> {
     this.logger.verbose(this.resetPassword.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     const forgot = await this.forgotService.findOne({
       where: {
         hash,
@@ -377,7 +377,7 @@ export class AuthService {
     userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
     this.logger.verbose(this.update.name);
-    const translations = this.currentLanguageServiceTranslations();
+    const translations = this.currentLanguageTranslations();
     if (userDto.password) {
       if (userDto.oldPassword) {
         const currentUser = await this.usersService.findOne({

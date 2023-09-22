@@ -6,9 +6,7 @@ import {
   IsString,
   Length,
   Matches,
-  Validate,
 } from 'class-validator';
-import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
 import { ThemeModeEnum } from '../entities/theme-mode.enum.js';
 
 export class AppConfigUpdateDto {
@@ -18,9 +16,6 @@ export class AppConfigUpdateDto {
   @Length(3, 30)
   @Matches(/^[a-zA-Z0-9\s]*$/, {
     message: 'Name should contain only alphanumeric characters and spaces',
-  })
-  @Validate(IsNotExist, ['AppConfig'], {
-    message: 'nameAlreadyExists',
   })
   name?: string;
 

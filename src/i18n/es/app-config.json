@@ -1,0 +1,7 @@
+{
+  "notFound": "Aplicación no encontrada",
+  "alreadyExists": "La aplicación ya existe",
+  "unauthorized": "Comerciante no encontrado",
+  "nameAlreadyExists": "Ya existe una aplicación con ese nombre",
+  "nameNeedsToBeUnique": "El nombre de la aplicación debe ser único"
+}

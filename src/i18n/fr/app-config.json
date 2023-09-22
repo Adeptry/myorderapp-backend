@@ -1,0 +1,7 @@
+{
+  "notFound": "Application introuvable",
+  "alreadyExists": "L'application existe déjà",
+  "unauthorized": "Commerçant introuvable",
+  "nameAlreadyExists": "Une application avec ce nom existe déjà",
+  "nameNeedsToBeUnique": "Le nom de l'application doit être unique"
+}

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Body,
+  ConflictException,
   Controller,
   Get,
   HttpCode,
@@ -19,9 +20,9 @@ import {
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
-  ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiConsumes,
   ApiCreatedResponse,
   ApiNotFoundResponse,
@@ -32,7 +33,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { QueryFailedError } from 'typeorm';
+import { I18nContext, I18nService } from 'nestjs-i18n';
+import { Not, QueryFailedError } from 'typeorm';
 import { AppConfigService } from '../app-config/app-config.service.js';
 import { FilesService } from '../files/files.service.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
@@ -40,6 +42,7 @@ import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
 import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { NestError } from '../utils/error.js';
@@ -56,10 +59,17 @@ import { AppConfig } from './entities/app-config.entity.js';
 export class AppConfigController {
   constructor(
     private readonly service: AppConfigService,
-    private readonly filesService: FilesService,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly logger: AppLogger,
+    private readonly filesService: FilesService,
   ) {
     this.logger.setContext(AppConfigController.name);
+  }
+
+  currentLanguageTranslations() {
+    return this.i18n.t('app-config', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -83,6 +93,7 @@ export class AppConfigController {
     @Query('merchantIdOrPath') merchantIdOrPath?: string,
   ) {
     this.logger.verbose(this.getMe.name);
+    const translations = this.currentLanguageTranslations();
     const appConfig = await this.service.findOne({
       where: [
         { merchantId: merchantIdOrPath ?? request.merchant.id },
@@ -91,7 +102,7 @@ export class AppConfigController {
     });
 
     if (!appConfig) {
-      throw new NotFoundException(`App config not found`);
+      throw new NotFoundException(translations.notFound);
     }
 
     return appConfig;
@@ -109,12 +120,13 @@ export class AppConfigController {
   })
   async get(@Query('merchantIdOrPath') merchantIdOrPath: string) {
     this.logger.verbose(this.get.name);
+    const translations = this.currentLanguageTranslations();
     const appConfig = await this.service.findOne({
       where: [{ merchantId: merchantIdOrPath }, { path: merchantIdOrPath }],
     });
 
     if (!appConfig) {
-      throw new NotFoundException(`App config not found`);
+      throw new NotFoundException(translations.notFound);
     }
 
     return appConfig;
@@ -129,7 +141,7 @@ export class AppConfigController {
     description: 'You need to be authenticated to access this endpoint.',
     type: NestError,
   })
-  @ApiBadRequestResponse({
+  @ApiConflictResponse({
     description: 'AppConfig already exists',
     type: NestError,
   })
@@ -145,16 +157,15 @@ export class AppConfigController {
     createAppConfigDto: AppConfigUpdateDto,
   ) {
     this.logger.verbose(this.postMe.name);
+    const translations = this.currentLanguageTranslations();
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(`AppConfig not found`);
+      throw new UnauthorizedException(translations.notFound);
     }
 
     if (await this.service.exist({ where: { merchantId: merchant.id } })) {
-      throw new BadRequestException(
-        `AppConfig with merchant id ${merchant.id} already exists`,
-      );
+      throw new ConflictException(translations.alreadyExists);
     }
 
     try {
@@ -185,16 +196,18 @@ export class AppConfigController {
     operationId: 'patchAppConfigMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiConflictResponse({ description: 'Conflict', type: NestError })
   @ApiBody({ type: AppConfigUpdateDto })
   async patchMe(
     @Req() request: MerchantsGuardedRequest,
     @Body() updateAppConfigDto: AppConfigUpdateDto,
   ) {
     this.logger.verbose(this.patchMe.name);
+    const translations = this.currentLanguageTranslations();
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(`AppConfig not found`);
+      throw new UnauthorizedException(translations.unauthorized);
     }
 
     let appConfig = await this.service.findOne({
@@ -205,6 +218,24 @@ export class AppConfigController {
       appConfig = this.service.create({
         merchantId: merchant.id,
       });
+    }
+
+    if (updateAppConfigDto.name != undefined) {
+      if (
+        await this.service.exist({
+          where: {
+            name: updateAppConfigDto.name,
+            id: appConfig.id ? Not(appConfig.id) : undefined,
+          },
+        })
+      ) {
+        throw new ConflictException({
+          message: translations.nameAlreadyExists,
+          fields: {
+            name: translations.nameNeedsToBeUnique,
+          },
+        });
+      }
     }
 
     Object.assign(appConfig, updateAppConfigDto);
@@ -238,10 +269,11 @@ export class AppConfigController {
     @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
   ) {
     this.logger.verbose(this.postIconUploadMe.name);
+    const translations = this.currentLanguageTranslations();
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(`Merchant not found`);
+      throw new UnauthorizedException(translations.notFound);
     }
 
     let appConfig = await this.service.findOne({

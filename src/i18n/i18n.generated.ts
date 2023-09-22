@@ -2,6 +2,13 @@
 
 import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
+    "app-config": {
+        "notFound": string;
+        "alreadyExists": string;
+        "unauthorized": string;
+        "nameAlreadyExists": string;
+        "nameNeedsToBeUnique": string;
+    };
     "auth": {
         "emailAlreadyExists": string;
         "emailNotFound": string;
