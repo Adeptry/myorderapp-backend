@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   Inject,
   Injectable,
+  NotFoundException,
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
@@ -62,7 +64,7 @@ export class CustomersGuard implements CanActivate {
       });
 
     if (!customer) {
-      throw new UnauthorizedException(
+      throw new NotFoundException(
         `Customer with userId ${user.id} and merchantId ${merchantIdOrPath} does not exist`,
       );
     }
@@ -74,12 +76,12 @@ export class CustomersGuard implements CanActivate {
       where: { idOrPath: merchantIdOrPath },
     });
     if (!merchant) {
-      throw new UnauthorizedException(
+      throw new NotFoundException(
         `Merchant with id ${merchantIdOrPath} does not exist`,
       );
     }
     if (!merchant.squareAccessToken) {
-      throw new UnauthorizedException(
+      throw new BadRequestException(
         `Merchant with id ${merchantIdOrPath} does not have a Square access token`,
       );
     }
