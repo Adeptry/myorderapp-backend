@@ -19,7 +19,7 @@ import { AppLogger } from '../logger/app.logger.js';
 import { AuthGoogleService } from './auth-google.service.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
-@ApiTags('Auth')
+@ApiTags('Authentication')
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
 @Controller({

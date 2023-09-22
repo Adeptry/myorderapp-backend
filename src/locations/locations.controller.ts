@@ -69,7 +69,7 @@ export class LocationsController {
   @ApiQuery({ name: 'businessHours', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get Locations for Merchant',
-    operationId: 'getManyLocations',
+    operationId: 'getLocations',
   })
   async getMany(
     @Query('merchantIdOrPath') merchantIdOrPath: string,
@@ -110,7 +110,7 @@ export class LocationsController {
   @ApiQuery({ name: 'businessHours', required: false, type: Boolean })
   @ApiOperation({
     summary: 'Get all your Locations',
-    operationId: 'getMeLocations',
+    operationId: 'getLocationsMe',
   })
   async getMe(
     @Req() request: UserTypeGuardedRequest,
@@ -146,7 +146,7 @@ export class LocationsController {
   @ApiOkResponse({ type: MoaLocation })
   @ApiOperation({
     summary: 'Get a Location with ID',
-    operationId: 'getOneLocation',
+    operationId: 'getLocation',
   })
   async getOne(@Param('id') id: string): Promise<MoaLocation> {
     this.logger.verbose(this.getOne.name);

@@ -80,7 +80,7 @@ export class CustomersController {
   @ApiCreatedResponse({ type: Customer })
   @ApiOperation({
     summary: 'Create Customer for current User',
-    operationId: 'postMeCustomer',
+    operationId: 'postCustomerMe',
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async post(
@@ -104,7 +104,7 @@ export class CustomersController {
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Get current Customer',
-    operationId: 'getMeCustomer',
+    operationId: 'getCustomerMe',
   })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
@@ -147,7 +147,7 @@ export class CustomersController {
   @ApiOkResponse({ type: Customer })
   @ApiOperation({
     summary: 'Update your Customer',
-    operationId: 'patchMeCustomer',
+    operationId: 'patchCustomerMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
@@ -205,7 +205,7 @@ export class CustomersController {
   @Post('me/app-install')
   @ApiOperation({
     summary: 'Create or update Customer App Install',
-    operationId: 'updateAppInstall',
+    operationId: 'updateAppInstallMe',
   })
   @ApiBody({ type: AppInstallUpdateDto })
   @ApiCreatedResponse({

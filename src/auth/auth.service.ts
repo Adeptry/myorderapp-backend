@@ -11,8 +11,10 @@ import bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import ms from 'ms';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { AllConfigType } from '../config.type.js';
 import { ForgotService } from '../forgot/forgot.service.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { MailService } from '../mail/mail.service.js';
 import { Role } from '../roles/entities/role.entity.js';
@@ -43,6 +45,7 @@ export class AuthService {
     private readonly configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
     private readonly logger: AppLogger,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.setContext(AuthService.name);
   }
@@ -55,11 +58,19 @@ export class AuthService {
     return apiKeys.find((key) => apiKey == key) || apiKeys.length === 0;
   }
 
-  async validateLogin(
+  currentLanguageServiceTranslations() {
+    return this.i18n.t('auth', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
+  async validateLoginOrThrow(
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.validateLogin.name);
+    this.logger.verbose(this.validateLoginOrThrow.name);
+    const translations = this.currentLanguageServiceTranslations();
+
     const user = await this.usersService.findOne({
       where: {
         email: loginDto.email,
@@ -73,21 +84,40 @@ export class AuthService {
           ? user.role.id === RoleEnum.admin
           : [RoleEnum.user].includes(user.role.id as RoleEnum)))
     ) {
-      throw new UnprocessableEntityException('Wrong email or password');
+      throw new UnprocessableEntityException(
+        translations.invalidEmailOrPassword,
+      );
     }
 
     if (user.provider !== AuthProvidersEnum.email) {
-      throw new UnprocessableEntityException(`Login via ${user.provider}`);
+      throw new UnprocessableEntityException({
+        message: this.i18n.t('auth.loginViaProvider', {
+          args: { provider: user.provider },
+        }),
+      });
     }
 
     if (user.password === undefined) {
-      throw new UnprocessableEntityException(`Password not set`);
+      throw new UnprocessableEntityException({
+        message: translations.loginFailed,
+        fields: {
+          password: translations.passwordRequired,
+        },
+      });
     }
 
-    const isValidPassword = bcrypt.compare(loginDto.password, user.password);
+    const isValidPassword = await bcrypt.compare(
+      loginDto.password,
+      user.password,
+    );
 
     if (!isValidPassword) {
-      throw new UnprocessableEntityException(`Incorrect password`);
+      throw new UnprocessableEntityException({
+        message: translations.loginFailed,
+        fields: {
+          password: translations.passwordInvalid,
+        },
+      });
     }
 
     const session = await this.sessionService.save(
@@ -116,6 +146,7 @@ export class AuthService {
     roleEnum: RoleEnum,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.validateSocialLogin.name);
+    const translations = this.currentLanguageServiceTranslations();
     let user: NullableType<User>;
     const socialEmail = socialData.email?.toLowerCase();
 
@@ -165,7 +196,7 @@ export class AuthService {
     }
 
     if (!user) {
-      throw new UnprocessableEntityException(`User not found`);
+      throw new UnprocessableEntityException(translations.userNotFound);
     }
 
     const session = await this.sessionService.save(
@@ -192,12 +223,22 @@ export class AuthService {
     };
   }
 
-  async register(dto: AuthRegisterLoginDto): Promise<LoginResponseType> {
-    this.logger.verbose(this.register.name);
+  async registerOrThrow(dto: AuthRegisterLoginDto): Promise<LoginResponseType> {
+    this.logger.verbose(this.registerOrThrow.name);
+    const translations = this.currentLanguageServiceTranslations();
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
       .digest('hex');
+
+    if (await this.usersService.exist({ where: { email: dto.email } })) {
+      throw new UnprocessableEntityException({
+        message: translations.registrationFailed,
+        fields: {
+          email: translations.emailAlreadyExists,
+        },
+      });
+    }
 
     const user = await this.usersService.save(
       this.usersService.create({
@@ -242,6 +283,7 @@ export class AuthService {
 
   async confirmEmail(hash: string): Promise<void> {
     this.logger.verbose(this.confirmEmail.name);
+    const translations = this.currentLanguageServiceTranslations();
     const user = await this.usersService.findOne({
       where: {
         hash,
@@ -249,7 +291,7 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new NotFoundException(`User not found`);
+      throw new NotFoundException(translations.userNotFound);
     }
 
     user.hash = null;
@@ -261,6 +303,7 @@ export class AuthService {
 
   async createForgotPasswordOrThrow(email: string): Promise<void> {
     this.logger.verbose(this.createForgotPasswordOrThrow.name);
+    const translations = this.currentLanguageServiceTranslations();
     const user = await this.usersService.findOne({
       where: {
         email,
@@ -268,7 +311,7 @@ export class AuthService {
     });
 
     if (!user || !user.email || !user.firstName) {
-      throw new UnprocessableEntityException(`No account with that email`);
+      throw new UnprocessableEntityException(translations.emailNotFound);
     }
 
     const hash = crypto
@@ -292,6 +335,7 @@ export class AuthService {
 
   async resetPassword(hash: string, password: string): Promise<void> {
     this.logger.verbose(this.resetPassword.name);
+    const translations = this.currentLanguageServiceTranslations();
     const forgot = await this.forgotService.findOne({
       where: {
         hash,
@@ -299,13 +343,13 @@ export class AuthService {
     });
 
     if (!forgot) {
-      throw new UnprocessableEntityException(`Couldn't find reset token`);
+      throw new UnprocessableEntityException(translations.invalidResetToken);
     }
 
     const user = forgot.user;
 
     if (!user) {
-      throw new UnprocessableEntityException(`Couldn't find user`);
+      throw new NotFoundException(translations.userNotFound);
     }
 
     user.password = password;
@@ -333,6 +377,7 @@ export class AuthService {
     userDto: AuthUpdateDto,
   ): Promise<NullableType<User>> {
     this.logger.verbose(this.update.name);
+    const translations = this.currentLanguageServiceTranslations();
     if (userDto.password) {
       if (userDto.oldPassword) {
         const currentUser = await this.usersService.findOne({
@@ -342,16 +387,21 @@ export class AuthService {
         });
 
         if (!currentUser || !currentUser.password) {
-          throw new UnprocessableEntityException(`Couldn't find user`);
+          throw new UnprocessableEntityException(translations.userNotFound);
         }
 
-        const isValidOldPassword = bcrypt.compare(
+        const isValidOldPassword = await bcrypt.compare(
           userDto.oldPassword,
           currentUser.password,
         );
 
         if (!isValidOldPassword) {
-          throw new UnprocessableEntityException(`Incorrect old password`);
+          throw new UnprocessableEntityException({
+            message: translations.invalidOldPassword,
+            fields: {
+              oldPassword: translations.passwordInvalid,
+            },
+          });
         } else {
           await this.sessionService.deleteExcluding({
             user: {
@@ -361,12 +411,12 @@ export class AuthService {
           });
         }
       } else {
-        throw new UnprocessableEntityException(`Incorrect old password`);
+        throw new UnprocessableEntityException(translations.invalidOldPassword);
       }
     }
 
     if (!userJwtPayload.id) {
-      throw new UnprocessableEntityException(`No JWT id`);
+      throw new NotFoundException(translations.invalidSession);
     }
 
     await this.usersService.patchOne(

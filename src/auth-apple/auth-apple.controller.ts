@@ -19,7 +19,7 @@ import { AppLogger } from '../logger/app.logger.js';
 import { AuthAppleService } from './auth-apple.service.js';
 import { AuthAppleLoginDto } from './dto/auth-apple-login.dto.js';
 
-@ApiTags('Auth')
+@ApiTags('Authentication')
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
 @Controller({

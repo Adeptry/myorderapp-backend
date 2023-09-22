@@ -7,7 +7,6 @@ import {
   HttpStatus,
   Patch,
   Req,
-  SerializeOptions,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -32,9 +31,6 @@ import { UsersService } from './users.service.js';
 @ApiBearerAuth()
 @ApiSecurity('Api-Key')
 @UseGuards(ApiKeyAuthGuard, AuthGuard('jwt'))
-@SerializeOptions({
-  groups: ['me', 'admin'],
-})
 @ApiTags('Users')
 @Controller({
   path: 'users',
@@ -52,7 +48,7 @@ export class UsersController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: User })
-  @ApiOperation({ summary: 'Get your User', operationId: 'getMeUser' })
+  @ApiOperation({ summary: 'Get your User', operationId: 'getUserMe' })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   getMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.getMe.name);
@@ -64,7 +60,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Update your User',
-    operationId: 'patchMeUser',
+    operationId: 'patchUserMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: UserUpdateDto })
@@ -85,7 +81,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({
     summary: 'Delete your User',
-    operationId: 'deleteMeUser',
+    operationId: 'deleteUserMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   async deleteMe(@Req() request: UsersGuardedRequest) {

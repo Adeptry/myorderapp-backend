@@ -142,7 +142,7 @@ export class OrdersController {
   @ApiOkResponse({ type: Order })
   @ApiOperation({
     summary: 'Get current Order',
-    operationId: 'getCurrentOrder',
+    operationId: 'getOrderCurrent',
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
@@ -194,7 +194,7 @@ export class OrdersController {
   @Get('me')
   @ApiOperation({
     summary: 'Get my Orders',
-    operationId: 'getManyOrders',
+    operationId: 'getOrders',
   })
   @ApiOkResponse({ type: OrdersPaginatedReponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -245,7 +245,7 @@ export class OrdersController {
   @Get(':id')
   @ApiOperation({
     summary: 'Get Order',
-    operationId: 'getOneOrder',
+    operationId: 'getOrder',
   })
   @ApiOkResponse({ type: Order })
   @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
@@ -284,7 +284,7 @@ export class OrdersController {
   @Patch('current')
   @ApiOperation({
     summary: 'Patch update Order, e.g. modify Location',
-    operationId: 'patchCurrentOrder',
+    operationId: 'patchOrderCurrent',
   })
   @ApiOkResponse({ type: Order })
   @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
@@ -354,7 +354,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Post update Order, e.g. add Variations & Modifiers in Line Items',
-    operationId: 'postCurrentOrder',
+    operationId: 'postOrderCurrent',
   })
   @ApiBadRequestResponse({
     description: 'No current Order or Invalid variation',
@@ -449,7 +449,7 @@ export class OrdersController {
   })
   @ApiOperation({
     summary: 'Remove Line Items from Order',
-    operationId: 'deleteCurrentLineItem',
+    operationId: 'deleteLineItemCurrent',
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
@@ -509,7 +509,7 @@ export class OrdersController {
   @ApiNoContentResponse({ description: 'Order Deleted Successfully' })
   @ApiOperation({
     summary: 'Delete Order',
-    operationId: 'deleteCurrentOrder',
+    operationId: 'deleteOrderCurrent',
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
@@ -540,7 +540,7 @@ export class OrdersController {
   @Post('current/payment/square')
   @ApiOperation({
     summary: 'Pay for Order',
-    operationId: 'postCurrentOrderPaymentSquare',
+    operationId: 'postSquarePaymentOrderCurrent',
   })
   @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })

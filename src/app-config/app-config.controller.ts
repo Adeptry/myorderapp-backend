@@ -76,7 +76,7 @@ export class AppConfigController {
   @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
   @ApiOperation({
     summary: 'Get your Config',
-    operationId: 'getMeAppConfig',
+    operationId: 'getAppConfigMe',
   })
   async getMe(
     @Req() request: UserTypeGuardedRequest,
@@ -135,7 +135,7 @@ export class AppConfigController {
   })
   @ApiOperation({
     summary: 'Create your Config',
-    operationId: 'postMeAppConfig',
+    operationId: 'postAppConfigMe',
   })
   @ApiBody({ type: AppConfigUpdateDto })
   @UseInterceptors(FileInterceptor('file'))
@@ -182,7 +182,7 @@ export class AppConfigController {
   @ApiOkResponse({ type: AppConfig })
   @ApiOperation({
     summary: 'Update your Config',
-    operationId: 'patchMeAppConfig',
+    operationId: 'patchAppConfigMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
   @ApiBody({ type: AppConfigUpdateDto })

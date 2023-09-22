@@ -7,7 +7,7 @@ import {
   Patch,
   Post,
   Req,
-  SerializeOptions,
+  Res,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -22,6 +22,7 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import type { Response } from 'express';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
@@ -36,7 +37,7 @@ import { AuthUpdateDto } from './dto/auth-update.dto.js';
 import type { JwtGuardedRequest } from './strategies/jwt.strategy.js';
 import { LoginResponseType } from './types/login-response.type.js';
 
-@ApiTags('Auth')
+@ApiTags('Authentication')
 @UseGuards(ApiKeyAuthGuard)
 @ApiSecurity('Api-Key')
 @Controller({
@@ -51,9 +52,6 @@ export class AuthController {
     this.logger.setContext(AuthController.name);
   }
 
-  @SerializeOptions({
-    groups: ['me'],
-  })
   @Post('email/login')
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -65,23 +63,37 @@ export class AuthController {
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.postEmailLogin.name);
-    const response = await this.service.validateLogin(loginDto, false);
+    const response = await this.service.validateLoginOrThrow(loginDto, false);
     return response;
   }
 
   @Post('email/register')
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
-    summary: 'Create User and Authorize',
+    summary: 'Create User and Authorize, note: tries to login first',
     operationId: 'postEmailRegister',
   })
   @ApiCreatedResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: LoginResponseType })
   async postEmailRegister(
     @Body() createUserDto: AuthRegisterLoginDto,
+    @Res({ passthrough: true }) response: Response,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.postEmailRegister.name);
-    const response = await this.service.register(createUserDto);
-    return response;
+
+    try {
+      this.logger.verbose('Trying to login first');
+      const result = await this.service.validateLoginOrThrow(
+        createUserDto,
+        false,
+      );
+      response.status(HttpStatus.OK);
+      return result;
+    } catch {
+      this.logger.verbose('Failed, trying register');
+      const result = await this.service.registerOrThrow(createUserDto);
+      response.status(HttpStatus.CREATED);
+      return result;
+    }
   }
 
   @Post('email/confirm')
@@ -130,9 +142,6 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @SerializeOptions({
-    groups: ['me'],
-  })
   @Post('refresh')
   @UseGuards(AuthGuard('jwt-refresh'))
   @HttpCode(HttpStatus.OK)
@@ -157,7 +166,7 @@ export class AuthController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOperation({
     summary: 'Delete Session',
-    operationId: 'deleteMeAuth',
+    operationId: 'deleteAuthMe',
   })
   @ApiNoContentResponse()
   public async deleteMe(@Req() request: JwtGuardedRequest): Promise<void> {
@@ -168,15 +177,12 @@ export class AuthController {
   }
 
   @ApiBearerAuth()
-  @SerializeOptions({
-    groups: ['me'],
-  })
   @Patch('me')
   @UseGuards(AuthGuard('jwt'))
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Update password',
-    operationId: 'patchMeAuth',
+    operationId: 'patchAuthMe',
   })
   @ApiOkResponse({ type: User })
   @ApiBody({ type: AuthUpdateDto })

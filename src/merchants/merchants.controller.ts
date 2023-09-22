@@ -12,7 +12,6 @@ import {
   Post,
   Query,
   Req,
-  SerializeOptions,
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
@@ -78,7 +77,7 @@ export class MerchantsController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Create Merchant for current User',
-    operationId: 'postMeMerchant',
+    operationId: 'postMerchantMe',
   })
   @ApiOkResponse({ description: 'Merchant created', type: Merchant })
   async postMe(@Req() request: any) {
@@ -105,15 +104,12 @@ export class MerchantsController {
   }
 
   @Get('me')
-  @SerializeOptions({
-    groups: ['me'],
-  })
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), UsersGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
-    operationId: 'getMeMerchant',
+    operationId: 'getMerchantMe',
   })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'appConfig', required: false, type: Boolean })
@@ -165,7 +161,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Confirm Square Oauth',
-    operationId: 'postMeSquareOauth',
+    operationId: 'postSquareOauthMe',
   })
   @ApiBody({ type: SquareConfirmOauthDto })
   @ApiUnauthorizedResponse({
@@ -193,7 +189,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Sync your Square Catalog',
-    operationId: 'getMeSquareSync',
+    operationId: 'getSquareSyncMe',
   })
   @ApiOkResponse()
   @ApiUnauthorizedResponse({
@@ -213,7 +209,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start Stripe checkout',
-    operationId: 'postMeStripeCheckout',
+    operationId: 'postStripeCheckoutMe',
   })
   @ApiBody({ type: StripeCheckoutCreateDto })
   @ApiUnauthorizedResponse({
@@ -248,7 +244,7 @@ export class MerchantsController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Start create billing session url',
-    operationId: 'getMeStripeBillingSession',
+    operationId: 'getStripeBillingSessionMe',
   })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',

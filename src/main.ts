@@ -99,16 +99,17 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.1.0')
+        .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
         .addGlobalParameters({
-          name: 'x-custom-lang',
+          name: configService.getOrThrow('app.headerLanguage', { infer: true }),
           in: 'header',
           required: false,
+          schema: { type: 'string' },
         })
         .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
@@ -141,16 +142,17 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Customers API')
-        .setVersion('2.1.0')
+        .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
           headerKeyApiKey,
         )
         .addGlobalParameters({
-          name: 'x-custom-lang',
+          name: configService.getOrThrow('app.headerLanguage', { infer: true }),
           in: 'header',
           required: false,
+          schema: { type: 'string' },
         })
         .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
         .build(),
@@ -182,7 +184,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.1.0')
+        .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: headerKeyApiKey, in: 'header' },

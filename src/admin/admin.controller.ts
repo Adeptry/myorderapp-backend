@@ -53,7 +53,7 @@ export class AdminController {
     @Body() loginDTO: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.postEmailLogin.name);
-    return this.authService.validateLogin(loginDTO, true);
+    return this.authService.validateLoginOrThrow(loginDTO, true);
   }
 
   @Post('/square/catalog/sync')

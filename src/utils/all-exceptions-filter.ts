@@ -4,7 +4,6 @@ import * as Sentry from '@sentry/node';
 @Catch()
 export class AllExceptionsFilter implements ExceptionFilter {
   catch(exception: any, host: ArgumentsHost): void {
-    console.log(exception);
     const ctx = host.switchToHttp();
     const response = ctx.getResponse();
     const statusCode = exception.getStatus ? exception.getStatus() : 500;
@@ -13,10 +12,15 @@ export class AllExceptionsFilter implements ExceptionFilter {
       Sentry.captureException(exception);
     }
 
-    response.status(statusCode).json({
+    const json = {
       statusCode: statusCode,
-      message: exception?.response?.error ?? exception?.message,
+      message:
+        exception?.message ??
+        exception?.response?.message ??
+        exception?.response?.error,
       fields: exception?.response?.fields ? exception.response.fields : {},
-    });
+    };
+
+    response.status(statusCode).json(json);
   }
 }

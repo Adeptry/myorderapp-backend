@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
-import { Exclude, Expose } from 'class-transformer';
+import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
@@ -48,7 +48,6 @@ export class User extends EntityHelper {
   // For "string | null" we need to use String type.
   // More info: https://github.com/typeorm/typeorm/issues/2567
   @Column({ type: String, unique: true, nullable: true })
-  @Expose({ groups: ['me', 'admin'] })
   @ApiProperty({ required: false, type: String, nullable: true })
   email?: string | null;
 
@@ -73,7 +72,6 @@ export class User extends EntityHelper {
     }
   }
 
-  // @Expose({ groups: ['me', 'admin'] })
   @Column({
     type: 'simple-enum',
     nullable: true,
@@ -89,7 +87,6 @@ export class User extends EntityHelper {
 
   @Index()
   @Column({ type: String, nullable: true })
-  @Expose({ groups: ['me', 'admin'] })
   @ApiProperty({ required: false, type: String, nullable: true })
   socialId?: string | null;
 

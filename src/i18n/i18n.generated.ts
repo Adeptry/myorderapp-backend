@@ -2,6 +2,20 @@
 
 import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
+    "auth": {
+        "emailAlreadyExists": string;
+        "emailNotFound": string;
+        "invalidEmailOrPassword": string;
+        "invalidOldPassword": string;
+        "invalidResetToken": string;
+        "invalidSession": string;
+        "loginFailed": string;
+        "loginViaProvider": string;
+        "passwordInvalid": string;
+        "passwordRequired": string;
+        "registrationFailed": string;
+        "userNotFound": string;
+    };
     "common": {
         "emailFooter": string;
     };
