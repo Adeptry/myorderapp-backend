@@ -26,6 +26,14 @@ export type I18nTranslations = {
     "common": {
         "emailFooter": string;
     };
+    "errors": {
+        "unauthorized": string;
+        "notFound": string;
+        "conflict": string;
+        "internalServerError": string;
+        "badRequest": string;
+        "unprocessableEntity": string;
+    };
     "forgotPasswordEmail": {
         "subject": string;
         "text": string;

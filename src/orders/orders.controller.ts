@@ -44,7 +44,7 @@ import { UserTypeGuard } from '../guards/user-type.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { OrdersService } from '../orders/orders.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
 import { OrderPatchDto } from './dto/order-patch.dto.js';
 import { OrderCreateDto, OrderPostDto } from './dto/order-post.dto.js';
@@ -58,7 +58,7 @@ import { Order } from './entities/order.entity.js';
 @Controller('v2/orders')
 @ApiUnauthorizedResponse({
   description: 'You need to be authenticated to access this endpoint.',
-  type: NestError,
+  type: ErrorResponse,
 })
 export class OrdersController {
   constructor(
@@ -73,16 +73,19 @@ export class OrdersController {
   @Post()
   @ApiBadRequestResponse({
     description: 'Current order already exists',
-    type: NestError,
+    type: ErrorResponse,
   })
-  @ApiNotFoundResponse({ description: 'Invalid location ID', type: NestError })
+  @ApiNotFoundResponse({
+    description: 'Invalid location ID',
+    type: ErrorResponse,
+  })
   @ApiOperation({
     summary: 'Create Order',
     operationId: 'postOrder',
   })
   @ApiUnprocessableEntityResponse({
     description: 'No Square tokens',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiCreatedResponse({ type: Order })
   @ApiBody({ required: true, type: OrderCreateDto })
@@ -287,14 +290,17 @@ export class OrdersController {
     operationId: 'patchOrderCurrent',
   })
   @ApiOkResponse({ type: Order })
-  @ApiBadRequestResponse({ description: 'Order not found', type: NestError })
+  @ApiBadRequestResponse({
+    description: 'Order not found',
+    type: ErrorResponse,
+  })
   @ApiUnprocessableEntityResponse({
     description: 'Invalid location ID',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiInternalServerErrorResponse({
     description: 'Square error',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
@@ -350,7 +356,7 @@ export class OrdersController {
   @ApiCreatedResponse({ type: Order })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     summary: 'Post update Order, e.g. add Variations & Modifiers in Line Items',
@@ -358,15 +364,15 @@ export class OrdersController {
   })
   @ApiBadRequestResponse({
     description: 'No current Order or Invalid variation',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiUnprocessableEntityResponse({
     description: 'No Square Order ID or Square Access Token',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiInternalServerErrorResponse({
     description: 'Square error',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'idempotencyKey', required: false, type: String })
@@ -445,7 +451,7 @@ export class OrdersController {
   @ApiOkResponse({ type: Order })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     summary: 'Remove Line Items from Order',
@@ -504,7 +510,7 @@ export class OrdersController {
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiNoContentResponse({ description: 'Order Deleted Successfully' })
   @ApiOperation({
@@ -544,14 +550,14 @@ export class OrdersController {
   })
   @ApiCreatedResponse({ description: 'Payment Successful', type: Order })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
-  @ApiNotFoundResponse({ description: 'No current order', type: NestError })
+  @ApiNotFoundResponse({ description: 'No current order', type: ErrorResponse })
   @ApiUnprocessableEntityResponse({
     description: 'No Square Access Token',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiBadRequestResponse({
     description: 'Invalid pickup time',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })

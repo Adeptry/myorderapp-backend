@@ -1,5 +1,6 @@
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
@@ -56,19 +57,21 @@ export class AuthService {
     });
   }
 
-  validateApiKey(apiKey: string) {
+  validateApiKey(apiKey: string): boolean {
     this.logger.verbose(this.validateApiKey.name);
     const apiKeys: string[] =
       this.configService.get<string>('API_KEYS', { infer: true })?.split(',') ||
       [];
-    return apiKeys.find((key) => apiKey == key) || apiKeys.length === 0;
+    return (
+      apiKeys.find((key) => apiKey == key) !== undefined || apiKeys.length === 0
+    );
   }
 
-  async validateLoginOrThrow(
+  async loginOrThrow(
     loginDto: AuthEmailLoginDto,
     onlyAdmin: boolean,
   ): Promise<LoginResponseType> {
-    this.logger.verbose(this.validateLoginOrThrow.name);
+    this.logger.verbose(this.loginOrThrow.name);
     const translations = this.currentLanguageTranslations();
 
     const user = await this.usersService.findOne({
@@ -84,21 +87,19 @@ export class AuthService {
           ? user.role.id === RoleEnum.admin
           : [RoleEnum.user].includes(user.role.id as RoleEnum)))
     ) {
-      throw new UnprocessableEntityException(
-        translations.invalidEmailOrPassword,
-      );
+      throw new UnauthorizedException(translations.invalidEmailOrPassword);
     }
 
     if (user.provider !== AuthProvidersEnum.email) {
-      throw new UnprocessableEntityException({
-        message: this.i18n.t('auth.loginViaProvider', {
+      throw new UnprocessableEntityException(
+        this.i18n.t('auth.loginViaProvider', {
           args: { provider: user.provider },
         }),
-      });
+      );
     }
 
     if (user.password === undefined) {
-      throw new UnprocessableEntityException({
+      throw new InternalServerErrorException({
         message: translations.loginFailed,
         fields: {
           password: translations.passwordRequired,
@@ -112,7 +113,7 @@ export class AuthService {
     );
 
     if (!isValidPassword) {
-      throw new UnprocessableEntityException({
+      throw new UnauthorizedException({
         message: translations.loginFailed,
         fields: {
           password: translations.passwordInvalid,

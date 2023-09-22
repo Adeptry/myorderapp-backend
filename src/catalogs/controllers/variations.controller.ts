@@ -24,7 +24,7 @@ import {
 import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import { AppLogger } from '../../logger/app.logger.js';
-import { NestError } from '../../utils/error.js';
+import { ErrorResponse } from '../../utils/error-response.js';
 import { VariationUpdateDto } from '../dto/variation-update.dto.js';
 import { Variation } from '../entities/variation.entity.js';
 import { VariationsService } from '../services/variations.service.js';
@@ -49,13 +49,13 @@ export class VariationsController {
   @ApiOkResponse({ type: Variation, isArray: true })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     summary: 'Get Item variations with ID',
     operationId: 'getVariationsForItem',
   })
-  @ApiNotFoundResponse({ description: 'Item not found', type: NestError })
+  @ApiNotFoundResponse({ description: 'Item not found', type: ErrorResponse })
   @ApiQuery({ name: 'locationId', required: false, type: String })
   async get(
     @Param('id') itemId: string,
@@ -71,7 +71,7 @@ export class VariationsController {
   @ApiOkResponse({ type: Variation })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })

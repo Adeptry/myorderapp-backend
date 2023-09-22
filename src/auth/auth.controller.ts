@@ -21,11 +21,14 @@ import {
   ApiOperation,
   ApiSecurity,
   ApiTags,
+  ApiUnauthorizedResponse,
+  ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthService } from './auth.service.js';
 import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto.js';
@@ -59,11 +62,19 @@ export class AuthController {
     operationId: 'postEmailLogin',
   })
   @ApiOkResponse({ type: LoginResponseType })
+  @ApiUnauthorizedResponse({
+    description: 'For invalid email/password',
+    type: ErrorResponse,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'If wrong provider, e.g. needs Apple/Google',
+    type: ErrorResponse,
+  })
   async postEmailLogin(
     @Body() loginDto: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.postEmailLogin.name);
-    const response = await this.service.validateLoginOrThrow(loginDto, false);
+    const response = await this.service.loginOrThrow(loginDto, false);
     return response;
   }
 
@@ -74,6 +85,14 @@ export class AuthController {
   })
   @ApiCreatedResponse({ type: LoginResponseType })
   @ApiOkResponse({ type: LoginResponseType })
+  @ApiUnauthorizedResponse({
+    description: 'If email already exists & invalid password',
+    type: ErrorResponse,
+  })
+  @ApiUnprocessableEntityResponse({
+    description: 'If email already exists or needs Apple/Google',
+    type: ErrorResponse,
+  })
   async postEmailRegister(
     @Body() createUserDto: AuthRegisterLoginDto,
     @Res({ passthrough: true }) response: Response,
@@ -82,10 +101,7 @@ export class AuthController {
 
     try {
       this.logger.verbose('Trying to login first');
-      const result = await this.service.validateLoginOrThrow(
-        createUserDto,
-        false,
-      );
+      const result = await this.service.loginOrThrow(createUserDto, false);
       response.status(HttpStatus.OK);
       return result;
     } catch {

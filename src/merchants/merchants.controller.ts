@@ -37,7 +37,7 @@ import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
 import { StripeService } from '../stripe/stripe.service.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { SquareConfirmOauthDto } from './dto/square-confirm-oauth.input.js';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto.js';
 import { StripeBillingPortalCreateOutput } from './dto/stripe-portal.dto.js';
@@ -76,7 +76,7 @@ export class MerchantsController {
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant already exists',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
@@ -86,7 +86,7 @@ export class MerchantsController {
   @ApiOkResponse({ description: 'Merchant created', type: Merchant })
   @ApiConflictResponse({
     description: 'Merchant already exists',
-    type: NestError,
+    type: ErrorResponse,
   })
   async postMe(@Req() request: any) {
     this.logger.verbose(this.postMe.name);
@@ -126,7 +126,7 @@ export class MerchantsController {
   @ApiQuery({ name: 'catalog', required: false, type: Boolean })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOkResponse({ type: Merchant })
   async getMe(
@@ -174,7 +174,7 @@ export class MerchantsController {
   @ApiBody({ type: SquareConfirmOauthDto })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOkResponse({ description: 'Square Oauth confirmed' })
   async postMeSquareOauth(
@@ -203,7 +203,7 @@ export class MerchantsController {
   @ApiOkResponse()
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   async getMeSquareSync(@Req() request: any): Promise<void> {
     this.logger.verbose(this.getMeSquareSync.name);
@@ -223,7 +223,7 @@ export class MerchantsController {
   @ApiBody({ type: StripeCheckoutCreateDto })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOkResponse({ type: StripeCheckoutDto })
   async postMeStripeCheckout(
@@ -257,7 +257,7 @@ export class MerchantsController {
   })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOkResponse({ type: StripeBillingPortalCreateOutput })
   @ApiQuery({ name: 'returnUrl', required: true, type: String })

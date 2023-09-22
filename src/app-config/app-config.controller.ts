@@ -45,7 +45,7 @@ import { UserTypeGuard } from '../guards/user-type.guard.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { AppConfigUpdateDto } from './dto/app-config-update.input.js';
 import { AppConfig } from './entities/app-config.entity.js';
 
@@ -78,12 +78,15 @@ export class AppConfigController {
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
-  @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
+  @ApiNotFoundResponse({
+    description: 'App config not found',
+    type: ErrorResponse,
+  })
   @ApiOperation({
     summary: 'Get your Config',
     operationId: 'getAppConfigMe',
@@ -113,7 +116,10 @@ export class AppConfigController {
   @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AppConfig })
-  @ApiNotFoundResponse({ description: 'App config not found', type: NestError })
+  @ApiNotFoundResponse({
+    description: 'App config not found',
+    type: ErrorResponse,
+  })
   @ApiOperation({
     summary: 'Get Config for Merchant ID',
     operationId: 'getAppConfig',
@@ -139,11 +145,11 @@ export class AppConfigController {
   @ApiCreatedResponse({ type: AppConfig })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiConflictResponse({
     description: 'AppConfig already exists',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     summary: 'Create your Config',
@@ -195,8 +201,8 @@ export class AppConfigController {
     summary: 'Update your Config',
     operationId: 'patchAppConfigMe',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
-  @ApiConflictResponse({ description: 'Conflict', type: NestError })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ErrorResponse })
+  @ApiConflictResponse({ description: 'Conflict', type: ErrorResponse })
   @ApiBody({ type: AppConfigUpdateDto })
   async patchMe(
     @Req() request: MerchantsGuardedRequest,
@@ -247,7 +253,7 @@ export class AppConfigController {
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @Post('me/icon/upload')
   @ApiConsumes('multipart/form-data')

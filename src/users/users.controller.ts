@@ -23,7 +23,7 @@ import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { SessionService } from '../session/session.service.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { UserUpdateDto } from './dto/user-update.dto.js';
 import { User } from './entities/user.entity.js';
 import { UsersService } from './users.service.js';
@@ -48,8 +48,8 @@ export class UsersController {
   @Get('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: User })
-  @ApiOperation({ summary: 'Get your User', operationId: 'getUserMe' })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiOperation({ operationId: 'getUserMe' })
+  @ApiUnauthorizedResponse({ type: ErrorResponse })
   getMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.getMe.name);
     return this.service.findOne({ where: { id: request.user.id } });
@@ -58,11 +58,8 @@ export class UsersController {
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: User })
-  @ApiOperation({
-    summary: 'Update your User',
-    operationId: 'patchUserMe',
-  })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiOperation({ operationId: 'patchUserMe' })
+  @ApiUnauthorizedResponse({ type: ErrorResponse })
   @ApiBody({ type: UserUpdateDto })
   async patchMe(
     @Req() request: UsersGuardedRequest,
@@ -79,11 +76,8 @@ export class UsersController {
   @Delete('me')
   @HttpCode(HttpStatus.NO_CONTENT)
   @ApiOkResponse({ type: User })
-  @ApiOperation({
-    summary: 'Delete your User',
-    operationId: 'deleteUserMe',
-  })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiOperation({ operationId: 'deleteUserMe' })
+  @ApiUnauthorizedResponse({ type: ErrorResponse })
   async deleteMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.deleteMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

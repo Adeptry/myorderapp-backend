@@ -1,0 +1,8 @@
+{
+  "unauthorized": "You don't have permission to do this.",
+  "notFound": "We couldn't find what you're looking for.",
+  "conflict": "Looks like there's a conflict. Try again.",
+  "internalServerError": "Something went wrong on our end. We're looking into it.",
+  "badRequest": "That request doesn't seem right. Check and try again.",
+  "unprocessableEntity": "We can't process your request as it is. Please double-check."
+}

@@ -38,7 +38,7 @@ import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
 import { AppInstallUpdateDto } from './dto/app-install-update.dto.js';
 import { CustomersPaginatedResponse } from './dto/customers-paginated.output.js';
@@ -47,7 +47,7 @@ import { AppInstallsService } from './services/app-installs.service.js';
 
 @ApiUnauthorizedResponse({
   description: 'You need to be authenticated to access this endpoint.',
-  type: NestError,
+  type: ErrorResponse,
 })
 @ApiTags('Customers')
 @UseGuards(ApiKeyAuthGuard)
@@ -70,11 +70,11 @@ export class CustomersController {
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant does not have Square access token',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiBadRequestResponse({
     description: 'Customer already exists',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.CREATED)
   @ApiCreatedResponse({ type: Customer })
@@ -149,7 +149,7 @@ export class CustomersController {
     summary: 'Update your Customer',
     operationId: 'patchCustomerMe',
   })
-  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: NestError })
+  @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ErrorResponse })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiBody({ type: CustomerUpdateDto })
   async patchMe(

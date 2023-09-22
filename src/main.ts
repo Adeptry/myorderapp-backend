@@ -22,12 +22,13 @@ import { AllConfigType } from './config.type.js';
 import { CustomersModule } from './customers/customers.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
+import { AppLogger } from './logger/app.logger.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SquareModule } from './square/square.module.js';
 import { UsersModule } from './users/users.module.js';
-import { AllExceptionsFilter } from './utils/all-exceptions-filter.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
+import { GlobalExceptionsFilter } from './utils/global-exceptions-filter.js';
 
 async function bootstrap() {
   Sentry.init({
@@ -40,10 +41,15 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
+  const logger = await app.resolve(AppLogger);
+  logger.setContext('MyOrderApp');
+  logger.log('Starting application...');
 
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
-  app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(
+    new GlobalExceptionsFilter(await app.resolve(AppLogger)),
+  );
 
   const configService = app.get(ConfigService<AllConfigType>);
   app.enableCors({
@@ -70,20 +76,15 @@ async function bootstrap() {
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors: ValidationError[]) => {
-        const fields = errors.reduce(
-          (acc, e) => ({
-            ...acc,
-            [e.property]: Object.values(
-              e.constraints ? e.constraints : {},
-            ).join(', '),
-          }),
-          {},
+        const fields = Object.fromEntries(
+          errors.map((error) => [
+            error.property,
+            Object.values(error.constraints ?? {}).join(', '),
+          ]),
         );
 
         return new UnprocessableEntityException({
-          statusCode: 422,
-          error: 'Unprocessable Entity',
-          fields: fields,
+          fields,
         });
       },
     }),
@@ -203,5 +204,6 @@ async function bootstrap() {
   );
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
+  logger.log('Application ready');
 }
 void bootstrap();

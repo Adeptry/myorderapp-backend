@@ -35,7 +35,7 @@ import {
   SquareListCardsResponse,
 } from '../square/square.dto.js';
 import { SquareService } from '../square/square.service.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { CreateCardDto } from './dto/card-create.dto.js';
 
 @ApiTags('Cards')
@@ -63,11 +63,11 @@ export class CardsController {
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiInternalServerErrorResponse({
     description: 'There was an error listing the cards.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'cursor', required: false, type: String })
   @Get('me')
@@ -90,7 +90,7 @@ export class CardsController {
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     operationId: 'postCardsMe',
@@ -134,11 +134,11 @@ export class CardsController {
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiInternalServerErrorResponse({
     description: 'There was an error disabling the card.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     operationId: 'deleteCardsMe',

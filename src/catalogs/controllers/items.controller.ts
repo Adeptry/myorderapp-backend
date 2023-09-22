@@ -48,7 +48,7 @@ import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import { AppLogger } from '../../logger/app.logger.js';
 import { SquareService } from '../../square/square.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
-import { NestError } from '../../utils/error.js';
+import { ErrorResponse } from '../../utils/error-response.js';
 import { paginatedResults } from '../../utils/paginated.js';
 
 @ApiTags('Catalogs')
@@ -76,7 +76,7 @@ export class ItemsController {
   @ApiOkResponse({ type: ItemPaginatedResponse })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
@@ -142,7 +142,7 @@ export class ItemsController {
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: Item })
   @ApiOperation({ summary: 'Get Item with ID', operationId: 'getItem' })
-  @ApiNotFoundResponse({ description: 'Item not found', type: NestError })
+  @ApiNotFoundResponse({ description: 'Item not found', type: ErrorResponse })
   @ApiQuery({ name: 'locationId', required: false, type: String })
   async getItem(
     @Param('id') id: string,
@@ -179,7 +179,7 @@ export class ItemsController {
   @ApiOkResponse({ type: Item }) // Assuming you have an Item model similar to Category
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
@@ -202,7 +202,7 @@ export class ItemsController {
   @ApiOkResponse({ type: [Item] }) // Array of Item
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiBody({ type: [ItemUpdateAllDto] })
   @ApiOperation({

@@ -41,7 +41,7 @@ import { UserTypeGuard } from '../../guards/user-type.guard.js';
 import { AppLogger } from '../../logger/app.logger.js';
 import { MerchantsService } from '../../merchants/merchants.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
-import { NestError } from '../../utils/error.js';
+import { ErrorResponse } from '../../utils/error-response.js';
 
 @ApiTags('Catalogs')
 @UseGuards(ApiKeyAuthGuard)
@@ -76,10 +76,13 @@ export class CategoriesController {
       'Get Categories for Merchant ID with Items, Variations, and/or ModifierLists',
     operationId: 'getCategories',
   })
-  @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
+  @ApiNotFoundResponse({
+    description: 'Catalog not found',
+    type: ErrorResponse,
+  })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   async getCategories(
     @Query('merchantIdOrPath') merchantIdOrPath: string,
@@ -156,10 +159,13 @@ export class CategoriesController {
     summary: 'Get your Categories with Items, Variations, and/or ModifierLists',
     operationId: 'getCategoriesMe',
   })
-  @ApiNotFoundResponse({ description: 'Catalog not found', type: NestError })
+  @ApiNotFoundResponse({
+    description: 'Catalog not found',
+    type: ErrorResponse,
+  })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   async getCategoriesMe(
     @Req() request: UserTypeGuardedRequest,
@@ -226,7 +232,7 @@ export class CategoriesController {
   @ApiOkResponse({ type: Category })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.OK)
   @ApiParam({ name: 'id', required: true, type: String })
@@ -249,7 +255,7 @@ export class CategoriesController {
   @ApiOkResponse({ type: [Category] }) // array of Category
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiBody({ type: [CategoryUpdateAllDto] })
   @ApiOperation({

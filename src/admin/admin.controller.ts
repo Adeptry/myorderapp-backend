@@ -24,7 +24,7 @@ import { AdminsGuard } from '../guards/admins.guard.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsSquareService } from '../merchants/merchants.square.service.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 
 @ApiTags('Admin')
 @UseGuards(ApiKeyAuthGuard)
@@ -53,7 +53,7 @@ export class AdminController {
     @Body() loginDTO: AuthEmailLoginDto,
   ): Promise<LoginResponseType> {
     this.logger.verbose(this.postEmailLogin.name);
-    return this.authService.validateLoginOrThrow(loginDTO, true);
+    return this.authService.loginOrThrow(loginDTO, true);
   }
 
   @Post('/square/catalog/sync')
@@ -68,7 +68,7 @@ export class AdminController {
   @ApiOkResponse()
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   async squareCatalogSync(
     @Query('merchantId') merchantId: string,

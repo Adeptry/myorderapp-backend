@@ -39,7 +39,7 @@ import { Location as MoaLocation } from '../locations/entities/location.entity.j
 import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
-import { NestError } from '../utils/error.js';
+import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
 
 @UseGuards(ApiKeyAuthGuard)
@@ -60,7 +60,7 @@ export class LocationsController {
   @ApiOkResponse({ type: LocationPaginatedResponse })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'page', required: false, type: Number })
@@ -100,7 +100,7 @@ export class LocationsController {
   @ApiOkResponse({ type: LocationPaginatedResponse })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
@@ -140,7 +140,7 @@ export class LocationsController {
   @ApiQuery({ name: 'actingAs', required: true, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: MoaLocation })
@@ -165,7 +165,7 @@ export class LocationsController {
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @Patch(':id')
   @ApiOkResponse({ type: MoaLocation }) // Assuming you have a Location model similar to Category
@@ -203,7 +203,7 @@ export class LocationsController {
   @ApiBody({ type: [LocationUpdateAllDto] })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
-    type: NestError,
+    type: ErrorResponse,
   })
   @ApiOperation({
     summary: 'Update Locations',
