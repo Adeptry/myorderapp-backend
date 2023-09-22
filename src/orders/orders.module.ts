@@ -26,6 +26,7 @@ import { OrdersUtils } from './orders.utils.js';
     LocationsModule,
     CatalogsModule,
     FirebaseAdminModule,
+    MerchantsModule,
     forwardRef(() => MerchantsModule),
     forwardRef(() => CustomersModule),
   ],

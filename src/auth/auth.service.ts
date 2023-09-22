@@ -39,13 +39,13 @@ import { LoginResponseType } from './types/login-response.type.js';
 export class AuthService {
   constructor(
     private readonly jwtService: JwtService,
+    private readonly i18n: I18nService<I18nTranslations>,
+    private readonly logger: AppLogger,
     private readonly usersService: UsersService,
     private readonly forgotService: ForgotService,
     private readonly sessionService: SessionService,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
-    private readonly logger: AppLogger,
-    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.setContext(AuthService.name);
   }

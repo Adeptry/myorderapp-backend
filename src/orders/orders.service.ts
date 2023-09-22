@@ -9,8 +9,6 @@ import { InjectRepository } from '@nestjs/typeorm';
 
 import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
 import { In, Repository } from 'typeorm';
-import { ModifiersService } from '../catalogs/services/modifiers.service.js';
-import { VariationsService } from '../catalogs/services/variations.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { AppInstall } from '../customers/entities/app-install.entity.js';
 import { Customer } from '../customers/entities/customer.entity.js';
@@ -18,7 +16,7 @@ import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.j
 import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
-import { MerchantsService } from '../merchants/merchants.service.js';
+import { MerchantsFirebaseService } from '../merchants/merchants.firebase.service.js';
 import { Order } from '../orders/entities/order.entity.js';
 import { SquareOrderFulfillmentUpdatedPayload } from '../square/payloads/square-order-fulfillment-updated.payload.js';
 import { SquareService } from '../square/square.service.js';
@@ -33,16 +31,14 @@ export class OrdersService extends EntityRepositoryService<Order> {
   constructor(
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
-    protected readonly lineItemsService: LineItemService,
-    protected readonly squareService: SquareService,
-    protected readonly locationsService: LocationsService,
-    protected readonly variationsService: VariationsService,
-    protected readonly modifiersService: ModifiersService,
-    protected readonly merchantsService: MerchantsService,
-    protected readonly customersService: CustomersService,
-    protected readonly firebaseAdminService: FirebaseAdminService,
-    private readonly utils: OrdersUtils,
     protected readonly logger: AppLogger,
+    private readonly lineItemsService: LineItemService,
+    private readonly squareService: SquareService,
+    private readonly locationsService: LocationsService,
+    private readonly merchantsFirebaseService: MerchantsFirebaseService,
+    private readonly customersService: CustomersService,
+    private readonly firebaseAdminService: FirebaseAdminService,
+    private readonly utils: OrdersUtils,
   ) {
     logger.setContext(OrdersService.name);
     super(repository, logger);
@@ -537,7 +533,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       return;
     }
 
-    const app = this.merchantsService.firebaseAdminApp({ merchant });
+    const app = this.merchantsFirebaseService.firebaseAdminApp({ merchant });
     if (!app) {
       this.logger.error(`Firebase app not found for merchant ${merchant.id}`);
       return;

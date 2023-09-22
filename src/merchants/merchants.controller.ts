@@ -1,12 +1,11 @@
 import {
-  BadRequestException,
   Body,
+  ConflictException,
   Controller,
   DefaultValuePipe,
   Get,
   HttpCode,
   HttpStatus,
-  Inject,
   InternalServerErrorException,
   ParseBoolPipe,
   Post,
@@ -20,6 +19,7 @@ import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiBody,
+  ApiConflictResponse,
   ApiOkResponse,
   ApiOperation,
   ApiQuery,
@@ -27,15 +27,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService } from '../auth/auth.service.js';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
-import { SquareService } from '../square/square.service.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { NestError } from '../utils/error.js';
 import { SquareConfirmOauthDto } from './dto/square-confirm-oauth.input.js';
@@ -55,16 +55,20 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
 })
 export class MerchantsController {
   constructor(
-    protected readonly service: MerchantsService,
-    protected readonly merchantsSquareService: MerchantsSquareService,
-    protected readonly merchantsStripeService: MerchantsStripeService,
-    protected readonly squareService: SquareService,
-    protected readonly authService: AuthService,
-    @Inject(StripeService)
-    private readonly stripeService: StripeService,
+    private readonly service: MerchantsService,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly logger: AppLogger,
+    private readonly merchantsSquareService: MerchantsSquareService,
+    private readonly merchantsStripeService: MerchantsStripeService,
+    private readonly stripeService: StripeService,
   ) {
     logger.setContext(MerchantsController.name);
+  }
+
+  currentTranslations() {
+    return this.i18n.t('merchants', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -80,14 +84,19 @@ export class MerchantsController {
     operationId: 'postMerchantMe',
   })
   @ApiOkResponse({ description: 'Merchant created', type: Merchant })
+  @ApiConflictResponse({
+    description: 'Merchant already exists',
+    type: NestError,
+  })
   async postMe(@Req() request: any) {
     this.logger.verbose(this.postMe.name);
+    const translations = this.currentTranslations();
     if (
       await this.service.findOne({
         where: { userId: request.user.id },
       })
     ) {
-      throw new BadRequestException('Merchant already exists');
+      throw new ConflictException(translations.alreadyExists);
     }
 
     const merchant = this.service.create({
@@ -132,6 +141,7 @@ export class MerchantsController {
     catalog?: boolean,
   ): Promise<Merchant> {
     this.logger.verbose(this.getMe.name);
+    const translations = this.currentTranslations();
     const { user } = request;
     const merchant = await this.service.findOne({
       where: { userId: user.id },
@@ -143,9 +153,7 @@ export class MerchantsController {
     });
 
     if (!merchant) {
-      throw new UnauthorizedException(
-        `Merchant with userId ${user.id} does not exist`,
-      );
+      throw new UnauthorizedException(translations.doesNotExist);
     }
 
     if (userRelation) {
@@ -175,6 +183,7 @@ export class MerchantsController {
     input: SquareConfirmOauthDto,
   ): Promise<void> {
     this.logger.verbose(this.postMeSquareOauth.name);
+
     await this.merchantsSquareService.updateOauth({
       oauthAccessCode: input.oauthAccessCode,
       merchantId: request.merchant.id,

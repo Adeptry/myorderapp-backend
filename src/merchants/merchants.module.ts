@@ -13,6 +13,7 @@ import { MerchantsService } from '../merchants/merchants.service.js';
 import { SquareModule } from '../square/square.module.js';
 import { StripeModule } from '../stripe/stripe.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { MerchantsFirebaseService } from './merchants.firebase.service.js';
 import { MerchantsSquareService } from './merchants.square.service.js';
 import { MerchantsStripeService } from './merchants.stripe.service.js';
 
@@ -31,7 +32,17 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
     forwardRef(() => LocationsModule),
   ],
   controllers: [MerchantsController],
-  providers: [MerchantsService, MerchantsSquareService, MerchantsStripeService],
-  exports: [MerchantsService, MerchantsSquareService, MerchantsStripeService],
+  providers: [
+    MerchantsService,
+    MerchantsSquareService,
+    MerchantsStripeService,
+    MerchantsFirebaseService,
+  ],
+  exports: [
+    MerchantsService,
+    MerchantsSquareService,
+    MerchantsStripeService,
+    MerchantsFirebaseService,
+  ],
 })
 export class MerchantsModule {}

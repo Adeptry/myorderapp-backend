@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Injectable,
   InternalServerErrorException,
   NotFoundException,
@@ -8,11 +9,13 @@ import {
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { LessThan } from 'typeorm';
 import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
 import { AllConfigType } from '../config.type.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogVersionUpdatedEventPayload } from '../square/payloads/square-catalog-version-updated-payload.entity.js';
@@ -27,18 +30,26 @@ import { MerchantsService } from './merchants.service.js';
 export class MerchantsSquareService {
   constructor(
     protected readonly service: MerchantsService,
+    private readonly logger: AppLogger,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly configService: ConfigService<AllConfigType>,
     private readonly squareService: SquareService,
     private readonly catalogsService: CatalogsService,
     private readonly squareConfigUtils: SquareConfigUtils,
     private readonly locationsService: LocationsService,
-    private readonly logger: AppLogger,
   ) {
     logger.setContext(MerchantsSquareService.name);
   }
 
+  currentTranslations() {
+    return this.i18n.t('merchants', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
   async updateOauth(params: { oauthAccessCode: string; merchantId: string }) {
     this.logger.verbose(this.updateOauth.name);
+    const translations = this.currentTranslations();
     const { merchantId, oauthAccessCode } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -59,7 +70,7 @@ export class MerchantsSquareService {
 
     if (!accessTokenResult) {
       throw new InternalServerErrorException(
-        'Failed to obtain token from Square service',
+        translations.invalidSquareResponse,
       );
     }
 
@@ -72,7 +83,7 @@ export class MerchantsSquareService {
 
     if (!expiresAt) {
       throw new InternalServerErrorException(
-        'No expiry date provided in the access token',
+        translations.invalidSquareResponse,
       );
     }
 
@@ -86,6 +97,7 @@ export class MerchantsSquareService {
 
   async sync(params: { merchantId: string }) {
     this.logger.verbose(this.sync.name);
+    const translations = this.currentTranslations();
     await this.locationsSync(params);
 
     const merchant = await this.service.findOneOrFail({
@@ -93,12 +105,12 @@ export class MerchantsSquareService {
     });
 
     if (merchant?.id == null) {
-      throw new NotFoundException('Merchant id is null');
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     const squareAccessToken = merchant.squareAccessToken;
     if (squareAccessToken == null) {
-      throw new UnauthorizedException('Square access token is null');
+      throw new UnauthorizedException(translations.needSquareAuthorization);
     }
 
     let catalog = await this.service.loadOneRelation<Catalog>(
@@ -113,7 +125,7 @@ export class MerchantsSquareService {
     }
 
     if (catalog.id == null) {
-      throw new Error('Catalog id is null');
+      throw new BadRequestException(translations.needsCatalog);
     }
 
     await this.catalogsService.squareSync({
@@ -130,18 +142,19 @@ export class MerchantsSquareService {
    */
   private async locationsSync(params: { merchantId: string }) {
     this.logger.verbose(this.locationsSync.name);
+    const translations = this.currentTranslations();
     const merchant = await this.service.findOneOrFail({
       where: { id: params.merchantId },
     });
 
     const merchantId = merchant.id;
     if (merchantId == null) {
-      throw new NotFoundException('Merchant id is null');
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     const squareAccessToken = merchant.squareAccessToken;
     if (squareAccessToken == null) {
-      throw new UnauthorizedException('Square access token is null');
+      throw new UnauthorizedException(translations.needSquareAuthorization);
     }
 
     await this.locationsService.syncSquare({ merchantId, squareAccessToken });

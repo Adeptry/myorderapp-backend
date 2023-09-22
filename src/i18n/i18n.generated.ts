@@ -25,5 +25,14 @@ export type I18nTranslations = {
         "html": string;
         "action": string;
     };
+    "merchants": {
+        "alreadyExists": string;
+        "doesNotExist": string;
+        "invalidSquareResponse": string;
+        "needSquareAuthorization": string;
+        "needsCatalog": string;
+        "needsStripeId": string;
+        "invalidStripeResponse": string;
+    };
 };
 export type I18nPath = Path<I18nTranslations>;

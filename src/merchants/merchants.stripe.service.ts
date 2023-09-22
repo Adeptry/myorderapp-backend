@@ -1,12 +1,15 @@
 import {
   Injectable,
+  InternalServerErrorException,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import Stripe from 'stripe';
 import { AllConfigType } from '../config.type.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { StripeConfigUtils } from '../stripe/stripe.config.utils.js';
 import { StripeService } from '../stripe/stripe.service.js';
@@ -20,11 +23,18 @@ export class MerchantsStripeService {
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
     private readonly configService: ConfigService<AllConfigType>,
+    private readonly logger: AppLogger,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly stripeService: StripeService,
     private readonly stripeConfigUtils: StripeConfigUtils,
-    private readonly logger: AppLogger,
   ) {
     this.logger.setContext(MerchantsStripeService.name);
+  }
+
+  currentTranslations() {
+    return this.i18n.t('merchants', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   async createBillingPortalSession(params: {
@@ -32,6 +42,7 @@ export class MerchantsStripeService {
     returnUrl: string;
   }) {
     this.logger.verbose(this.createBillingPortalSession.name);
+    const translations = this.currentTranslations();
     const { merchantId, returnUrl } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -39,12 +50,12 @@ export class MerchantsStripeService {
     });
 
     if (merchant.id == null) {
-      throw new NotFoundException('Merchant id is null');
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     const stripeId = merchant.stripeId;
     if (stripeId == null) {
-      throw new UnauthorizedException('Stripe id is null');
+      throw new UnauthorizedException(translations.needsStripeId);
     }
 
     const session = await this.stripeService.createBillingPortalSession({
@@ -53,7 +64,9 @@ export class MerchantsStripeService {
     });
 
     if (!session) {
-      throw new Error('Failed to retrieve session from Stripe service');
+      throw new InternalServerErrorException(
+        translations.invalidStripeResponse,
+      );
     }
 
     return session.url;
@@ -66,6 +79,7 @@ export class MerchantsStripeService {
     stripePriceId: string;
   }): Promise<string | null> {
     this.logger.verbose(this.createCheckoutSessionId.name);
+    const translations = this.currentTranslations();
     const { merchantId, stripePriceId } = params;
 
     const merchant = await this.service.findOneOrFail({
@@ -74,11 +88,11 @@ export class MerchantsStripeService {
 
     const user = await this.service.loadOneRelation<User>(merchant, 'user');
     if (!user) {
-      throw new NotFoundException(`User with id ${merchant.userId} not found`);
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     if (!merchant.stripeId) {
-      throw new UnauthorizedException('Stripe id is null');
+      throw new UnauthorizedException(translations.needsStripeId);
     }
 
     const session = await this.stripeService.createCheckoutSession({
@@ -97,7 +111,9 @@ export class MerchantsStripeService {
     });
 
     if (!session) {
-      throw new Error('Failed to retrieve session from Stripe service');
+      throw new InternalServerErrorException(
+        translations.invalidStripeResponse,
+      );
     }
 
     return session.id;

@@ -1,0 +1,9 @@
+{
+  "alreadyExists": "El comerciante ya existe",
+  "doesNotExist": "El comerciante no existe",
+  "invalidSquareResponse": "Respuesta no válida de Square",
+  "needSquareAuthorization": "Necesita autorización de Square",
+  "needsCatalog": "Necesita catálogo",
+  "needsStripeId": "Necesita ID de Stripe",
+  "invalidStripeResponse": "Respuesta no válida de Stripe"
+}

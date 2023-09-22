@@ -232,12 +232,12 @@ export class AppConfigController {
     },
   })
   @UseInterceptors(FileInterceptor('file')) // 1
-  @ApiOperation({ summary: 'Upload icon', operationId: 'postMeIconUpload' })
-  async postMeIconUpload(
+  @ApiOperation({ summary: 'Upload icon', operationId: 'postIconUploadMe' })
+  async postIconUploadMe(
     @Req() request: MerchantsGuardedRequest,
     @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
   ) {
-    this.logger.verbose(this.postMeIconUpload.name);
+    this.logger.verbose(this.postIconUploadMe.name);
     const { merchant } = request;
 
     if (!merchant?.id) {
