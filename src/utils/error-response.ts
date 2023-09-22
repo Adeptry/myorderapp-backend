@@ -1,22 +1,27 @@
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ErrorResponse {
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   statusCode?: number;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   message?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   url?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   method?: string;
 
-  @ApiProperty()
+  @ApiProperty({ required: false, nullable: true })
   timestamp?: string;
 
-  @ApiProperty()
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: 'object',
+    additionalProperties: { type: 'string' },
+  })
   fields?: Record<string, string>;
 
   constructor(partial: Partial<ErrorResponse>) {
