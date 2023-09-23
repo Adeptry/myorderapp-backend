@@ -80,8 +80,8 @@ export class CustomersService extends EntityRepositoryService<Customer> {
   }
 
   async createOne(params: { userId: string; merchantIdOrPath: string }) {
-    this.logger.verbose(this.createOne.name);
     const { userId, merchantIdOrPath } = params;
+    this.logger.verbose(this.createOne.name);
 
     const user = await this.usersService.findOne({ where: { id: userId } });
 
@@ -118,10 +118,10 @@ export class CustomersService extends EntityRepositoryService<Customer> {
     );
 
     customer.preferredLocation = await this.locationsService.findOne({
-      where: { isMain: true },
+      where: { isMain: true, merchantId: merchant.id },
     });
 
-    const response = await this.squareService.createCustomer({
+    const response = await this.squareService.createCustomerOrThrow({
       accessToken: merchant.squareAccessToken,
       request: {
         emailAddress: user.email ?? undefined,

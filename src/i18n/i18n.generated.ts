@@ -49,5 +49,20 @@ export type I18nTranslations = {
         "needsStripeId": string;
         "invalidStripeResponse": string;
     };
+    "orders": {
+        "merchantNoSquareId": string;
+        "locationNoSquareId": string;
+        "noMainLocation": string;
+        "customerNoSquareId": string;
+        "locationNoId": string;
+        "pickupInPast": string;
+        "pickupTooFarInFuture": string;
+        "pickupOutsideBusinessHours": string;
+        "invalidResponseFromSquare": string;
+        "merchantNoSquareAccessToken": string;
+        "orderNoSquareId": string;
+        "orderExists": string;
+        "orderNotFound": string;
+    };
 };
 export type I18nPath = Path<I18nTranslations>;

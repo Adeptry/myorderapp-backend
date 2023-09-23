@@ -6,17 +6,23 @@ export class PaymentCreateDto {
   @ApiProperty({
     example: new Date().toISOString(),
     description:
-      'The timestamp that represents the start of the pickup window. Must be in RFC 3339 timestamp format, e.g., "2016-09-04T23:59:33.123Z".',
+      'If not provided, prepare ASAP, else will validate it\'s within business hours and schedule. Represents the start of the pickup window. Must be in RFC 3339 timestamp format, e.g., "2016-09-04T23:59:33.123Z".',
   })
+  @IsOptional()
   @IsRFC3339()
-  pickupAt!: string;
+  pickupAt?: string;
 
   @ApiProperty()
   @IsString()
   paymentSquareId!: string;
 
   @IsString()
-  @ApiProperty({ example: nanoid(), required: true, nullable: false })
+  @ApiProperty({
+    example: nanoid(),
+    required: true,
+    nullable: false,
+    description: 'Should be generated on checkout screen presentation.',
+  })
   idempotencyKey!: string;
 
   @ApiProperty()

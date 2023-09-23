@@ -6,13 +6,15 @@ import {
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-
+import { addMinutes } from 'date-fns';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
 import { In, Repository } from 'typeorm';
 import { CustomersService } from '../customers/customers.service.js';
 import { AppInstall } from '../customers/entities/app-install.entity.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
@@ -32,6 +34,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
     @InjectRepository(Order)
     protected readonly repository: Repository<Order>,
     protected readonly logger: AppLogger,
+    protected readonly i18n: I18nService<I18nTranslations>,
     private readonly lineItemsService: LineItemService,
     private readonly squareService: SquareService,
     private readonly locationsService: LocationsService,
@@ -44,6 +47,12 @@ export class OrdersService extends EntityRepositoryService<Order> {
     super(repository, logger);
   }
 
+  currentLanguageTranslations() {
+    return this.i18n.t('orders', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
   async createOne(params: {
     variations?: VariationAddDto[];
     idempotencyKey?: string;
@@ -51,10 +60,11 @@ export class OrdersService extends EntityRepositoryService<Order> {
     locationId?: string;
     merchant: Merchant;
   }): Promise<Order> {
-    this.logger.verbose(this.createOne.name);
     const { variations, merchant, customer } = params;
+    this.logger.verbose(this.createOne.name);
+    const translations = this.currentLanguageTranslations();
     if (!merchant.squareAccessToken) {
-      throw new Error('Merchant does not have a Square access token');
+      throw new UnprocessableEntityException(translations.merchantNoSquareId);
     }
 
     let locationId = params.locationId;
@@ -63,13 +73,16 @@ export class OrdersService extends EntityRepositoryService<Order> {
       if (customer.preferredLocationId) {
         locationId = customer.preferredLocationId;
       } else {
-        const squareMainLocation = await this.squareService.retrieveLocation({
-          accessToken: merchant.squareAccessToken,
-          locationSquareId: 'main',
-        });
+        const squareMainLocation =
+          await this.squareService.retrieveLocationOrThrow({
+            accessToken: merchant.squareAccessToken,
+            locationSquareId: 'main',
+          });
         const locationSquareId = squareMainLocation.result.location?.id;
         if (!locationSquareId) {
-          throw new InternalServerErrorException('No Square Location ID');
+          throw new UnprocessableEntityException(
+            translations.locationNoSquareId,
+          );
         }
         const moaMainLocation = await this.locationsService.findOne({
           where: {
@@ -78,13 +91,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
           },
         });
         if (!moaMainLocation) {
-          throw new InternalServerErrorException('No MOA Location');
+          throw new UnprocessableEntityException(translations.noMainLocation);
         }
         locationId = moaMainLocation.id;
       }
     }
 
-    const order = await this.save(
+    const moaOrder = await this.save(
       this.create({
         customerId: customer.id,
         locationId,
@@ -92,7 +105,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         squareVersion: 1,
       }),
     );
-    order.lineItems = [];
+    moaOrder.lineItems = [];
 
     let location = await this.locationsService.findOne({
       where: {
@@ -101,8 +114,8 @@ export class OrdersService extends EntityRepositoryService<Order> {
       },
     });
 
-    if (!params.locationId && !location) {
-      throw new NotFoundException(`Invalid location ID`);
+    if (!location) {
+      throw new NotFoundException(translations.locationNoId);
     }
 
     const squareOrderLineItems = variations
@@ -112,13 +125,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
       : [];
 
     try {
-      const response = await this.squareService.createOrder({
+      const response = await this.squareService.createOrderOrThrow({
         accessToken: merchant.squareAccessToken,
         body: {
           idempotencyKey: params.idempotencyKey,
           order: {
             state: 'DRAFT',
-            referenceId: order.id,
+            referenceId: moaOrder.id,
             customerId: customer.squareId,
             locationId: location?.locationSquareId ?? 'main',
             lineItems: squareOrderLineItems,
@@ -129,7 +142,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       const squareOrder = response.result.order;
       if (!squareOrder) {
         throw new InternalServerErrorException(
-          `No Square Order returned from Square`,
+          translations.invalidResponseFromSquare,
         );
       }
 
@@ -142,26 +155,26 @@ export class OrdersService extends EntityRepositoryService<Order> {
           },
         });
         if (!location.id) {
-          throw new InternalServerErrorException('No location ID');
+          throw new UnprocessableEntityException(translations.locationNoId);
         }
-        order.locationId = location.id;
-        order.location = location;
+        moaOrder.locationId = location.id;
+        moaOrder.location = location;
       }
 
-      await this.utils.updateForSquareOrder({
-        order,
+      await this.utils.saveFromSquareOrder({
+        order: moaOrder,
         squareOrder,
       });
 
-      customer.currentOrder = order;
+      customer.currentOrder = moaOrder;
       await customer.save();
     } catch (error: any) {
       this.logger.error(error);
-      await this.remove(order);
+      await this.remove(moaOrder);
       throw error;
     }
 
-    return order;
+    return moaOrder;
   }
 
   async updateOne(params: {
@@ -170,8 +183,9 @@ export class OrdersService extends EntityRepositoryService<Order> {
     orderId: string;
     idempotencyKey?: string;
   }) {
-    this.logger.verbose(this.updateOne.name);
     const { locationMoaId, merchant, orderId } = params;
+    this.logger.verbose(this.updateOne.name);
+    const translations = this.currentLanguageTranslations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -187,26 +201,30 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
 
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Access Token`);
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
     }
     if (!order.squareId) {
-      throw new UnprocessableEntityException(`No Square Order ID`);
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
     const location = await this.locationsService.findOneOrFail({
       where: { id: locationMoaId, merchantId: params.merchant.id },
     });
     if (!location.locationSquareId) {
-      throw new UnprocessableEntityException(`No Square Location ID`);
+      throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
     if (!location.id) {
-      throw new InternalServerErrorException('No location ID');
+      throw new InternalServerErrorException(translations.locationNoId);
     }
 
-    const existingOrderResponse = await this.squareService.retrieveOrder({
-      accessToken: merchant.squareAccessToken,
-      orderId: order.squareId,
-    });
+    const existingOrderResponse = await this.squareService.retrieveOrderOrThrow(
+      {
+        accessToken: merchant.squareAccessToken,
+        orderId: order.squareId,
+      },
+    );
     const existingSquareOrder = existingOrderResponse.result.order;
     const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
       (lineItem) => {
@@ -221,7 +239,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       },
     );
 
-    const newSquareOrderResponse = await this.squareService.createOrder({
+    const newSquareOrderResponse = await this.squareService.createOrderOrThrow({
       accessToken: merchant.squareAccessToken,
       body: {
         order: {
@@ -237,12 +255,14 @@ export class OrdersService extends EntityRepositoryService<Order> {
     if (newSquareOrder) {
       order.locationId = location.id;
       order.location = location;
-      return await this.utils.updateForSquareOrder({
+      return await this.utils.saveFromSquareOrder({
         order: order,
         squareOrder: newSquareOrder,
       });
     } else {
-      throw new InternalServerErrorException('No Square Order returned');
+      throw new InternalServerErrorException(
+        translations.invalidResponseFromSquare,
+      );
     }
   }
 
@@ -252,13 +272,14 @@ export class OrdersService extends EntityRepositoryService<Order> {
     squareAccessToken: string;
     idempotencyKey?: string;
   }) {
-    this.logger.verbose(this.updateMany.name);
     const {
       orderId,
       variations: variationDtos,
       squareAccessToken,
       idempotencyKey,
     } = params;
+    this.logger.verbose(this.updateMany.name);
+    const translations = this.currentLanguageTranslations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -276,10 +297,10 @@ export class OrdersService extends EntityRepositoryService<Order> {
     const locationSquareId = order.location?.locationSquareId;
 
     if (!order.squareId) {
-      throw new UnprocessableEntityException(`No Square Order ID`);
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
     if (!locationSquareId) {
-      throw new UnprocessableEntityException(`No Square Location ID`);
+      throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
     const newLineItems =
@@ -295,20 +316,20 @@ export class OrdersService extends EntityRepositoryService<Order> {
     };
 
     try {
-      const response = await this.squareService.updateOrder({
+      const response = await this.squareService.updateOrderOrThrow({
         accessToken: squareAccessToken,
         orderId: order.squareId,
         body: { ...squareUpdateBody, idempotencyKey },
       });
       const squareOrder = response.result.order;
       if (squareOrder) {
-        return await this.utils.updateForSquareOrder({
+        return await this.utils.saveFromSquareOrder({
           order,
           squareOrder,
         });
       } else {
         throw new InternalServerErrorException(
-          `No Square Order returned from Square`,
+          translations.invalidResponseFromSquare,
         );
       }
     } catch (error: any) {
@@ -322,8 +343,9 @@ export class OrdersService extends EntityRepositoryService<Order> {
     squareAccessToken: string;
     orderId: string;
   }) {
-    this.logger.verbose(this.removeLineItems.name);
     const { orderId, lineItemIds, squareAccessToken } = params;
+    this.logger.verbose(this.removeLineItems.name);
+    const translations = this.currentLanguageTranslations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -335,13 +357,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
 
     if (!order.squareId) {
-      throw new InternalServerErrorException('No Square Order ID');
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
     const location = await this.locationsService.findOne({
       where: { id: order.locationId },
     });
     if (!location?.locationSquareId) {
-      throw new InternalServerErrorException('No location ID');
+      throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
     const localLineItems = await this.lineItemsService.find({
@@ -349,7 +371,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
         id: In(lineItemIds),
       },
     });
-    const response = await this.squareService.updateOrder({
+    const response = await this.squareService.updateOrderOrThrow({
       accessToken: squareAccessToken,
       orderId: order.squareId,
       body: {
@@ -364,27 +386,29 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
     const squareOrder = response.result.order;
     if (squareOrder) {
-      return await this.utils.updateForSquareOrder({
+      return await this.utils.saveFromSquareOrder({
         order,
         squareOrder,
       });
     } else {
       throw new InternalServerErrorException(
-        `No Square Order returned from Square`,
+        translations.invalidResponseFromSquare,
       );
     }
   }
 
-  async createPayment(params: {
+  async createPaymentOrThrow(params: {
     orderId: string;
     customer: Customer;
     input: PaymentCreateDto;
     merchant: Merchant;
   }) {
-    this.logger.verbose(this.createPayment.name);
     const { orderId, customer, input, merchant } = params;
     const { squareAccessToken } = merchant;
     const { pickupAt } = input;
+
+    this.logger.verbose(this.createPaymentOrThrow.name);
+    const translations = this.currentLanguageTranslations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -399,39 +423,32 @@ export class OrdersService extends EntityRepositoryService<Order> {
     });
 
     if (!order.location?.locationSquareId) {
-      throw new NotFoundException('Invalid location');
+      throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
     if (!order.squareId) {
-      throw new NotFoundException('Square ID not found for Order');
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
 
     if (!squareAccessToken) {
-      throw new NotFoundException('Square access token not found for Merchant');
-    }
-
-    if (!customer.squareId) {
       throw new UnprocessableEntityException(
-        "Customer doesn't have a Square ID",
+        translations.merchantNoSquareAccessToken,
       );
     }
 
-    this.utils.validatePickupTime(
-      pickupAt,
-      order.location?.businessHours ?? [],
-    );
+    if (!customer.squareId) {
+      throw new UnprocessableEntityException(translations.customerNoSquareId);
+    }
 
-    const squareRetrieveOrderResponse = await this.squareService.retrieveOrder({
-      accessToken: squareAccessToken,
-      orderId: order.squareId,
+    const newPickupAt = pickupAt ?? addMinutes(new Date(), 15).toISOString();
+
+    this.utils.validatePickupTimeOrThrow({
+      pickupAt: newPickupAt,
+      businessHours: order.location?.businessHours ?? [],
     });
-    const squareRetrievedOrder = squareRetrieveOrderResponse.result.order;
-    const squareRetrievedOrderHasFulfillment =
-      squareRetrievedOrder?.fulfillments &&
-      squareRetrievedOrder?.fulfillments?.length > 0;
 
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
-      await this.squareService.updateOrder({
+      await this.squareService.updateOrderOrThrow({
         accessToken: squareAccessToken,
         orderId: order.squareId,
         body: {
@@ -439,42 +456,42 @@ export class OrdersService extends EntityRepositoryService<Order> {
             locationId: order.location.locationSquareId,
             version: order.squareVersion,
             state: 'OPEN',
-            fulfillments: squareRetrievedOrderHasFulfillment
-              ? undefined
-              : [
-                  {
-                    type: 'PICKUP',
-                    pickupDetails: {
-                      scheduleType: this.utils.isWithinHour(new Date(pickupAt))
-                        ? 'ASAP'
-                        : 'SCHEDULED',
-                      pickupAt: pickupAt,
-                      recipient: {
-                        customerId: customer.squareId,
-                      },
-                    },
+            fulfillments: [
+              {
+                type: 'PICKUP',
+                pickupDetails: {
+                  scheduleType: pickupAt ? 'SCHEDULED' : 'ASAP',
+                  pickupAt: pickupAt ? pickupAt : newPickupAt,
+                  recipient: {
+                    customerId: customer.squareId,
                   },
-                ],
+                },
+              },
+            ],
           },
         },
       });
 
     const squareOrderFromUpdate = squareUpdateOrderResponse.result.order;
     if (!squareOrderFromUpdate) {
-      throw new NotFoundException('Square order not found');
+      throw new InternalServerErrorException(
+        translations.invalidResponseFromSquare,
+      );
     }
 
-    const updatedOrder = await this.utils.updateForSquareOrder({
+    const updatedOrder = await this.utils.saveFromSquareOrder({
       order,
       squareOrder: squareOrderFromUpdate,
     });
 
     const orderTotalMoney = squareOrderFromUpdate?.totalMoney;
     if (!orderTotalMoney) {
-      throw new UnprocessableEntityException('Invalid order total amount');
+      throw new UnprocessableEntityException(
+        translations.invalidResponseFromSquare,
+      );
     }
 
-    await this.squareService.createPayment({
+    await this.squareService.createPaymentOrThrow({
       accessToken: squareAccessToken,
       body: {
         sourceId: input.paymentSquareId,

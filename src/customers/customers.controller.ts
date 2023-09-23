@@ -83,16 +83,43 @@ export class CustomersController {
     operationId: 'postCustomerMe',
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
+  @ApiQuery({ name: 'user', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchant', required: false, type: Boolean })
+  @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
   async post(
     @Req() request: UsersGuardedRequest,
     @Query('merchantIdOrPath') merchantIdOrPath: string,
+    @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
+    userRelation?: boolean,
+    @Query('merchant', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantRelation?: boolean,
+    @Query('currentOrder', new DefaultValuePipe(false), ParseBoolPipe)
+    currentOrderRelation?: boolean,
+    @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredLocationRelation?: boolean,
   ) {
     this.logger.verbose(this.post.name);
 
-    return this.service.createOne({
+    const customer = await this.service.createOne({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       userId: request.user.id!,
       merchantIdOrPath: merchantIdOrPath,
+    });
+
+    return this.service.findOne({
+      where: { id: customer.id },
+      relations: {
+        user: userRelation,
+        merchant: merchantRelation,
+        currentOrder: currentOrderRelation,
+        preferredLocation: preferredLocationRelation
+          ? {
+              businessHours: preferredLocationRelation,
+              address: preferredLocationRelation,
+            }
+          : undefined,
+      },
     });
   }
 

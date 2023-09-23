@@ -63,7 +63,7 @@ export class MerchantsSquareService {
     const accessTokenResult = isTest
       ? this.squareConfigUtils.testTokenReponse()
       : (
-          await this.squareService.obtainToken({
+          await this.squareService.obtainTokenOrThrow({
             oauthAccessCode,
           })
         ).result;
@@ -258,7 +258,7 @@ export class MerchantsSquareService {
       try {
         const oauthRefreshToken = merchant.squareRefreshToken ?? '';
         const result = (
-          await this.squareService.refreshToken({
+          await this.squareService.refreshTokenOrThrow({
             oauthRefreshToken,
           })
         ).result;

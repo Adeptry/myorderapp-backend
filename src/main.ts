@@ -10,7 +10,6 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
-import { I18nValidationPipe } from 'nestjs-i18n';
 import { AdminModule } from './admin/admin.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
 import { AppModule } from './app.module.js';
@@ -44,7 +43,7 @@ async function bootstrap() {
   });
   const logger = await app.resolve(AppLogger);
   logger.setContext('MyOrderApp');
-  logger.log('Starting application...');
+  logger.log('Starting...');
 
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
@@ -74,7 +73,7 @@ async function bootstrap() {
   // app.useGlobalPipes(new ValidationPipe(validationOptions));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new BigIntInterceptor());
-  app.useGlobalPipes(new I18nValidationPipe());
+  // app.useGlobalPipes(new I18nValidationPipe());
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors: ValidationError[]) => {
@@ -206,6 +205,6 @@ async function bootstrap() {
   );
 
   await app.listen(configService.getOrThrow('app.port', { infer: true }));
-  logger.log('Application ready');
+  logger.log('Ready');
 }
 void bootstrap();

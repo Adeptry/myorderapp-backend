@@ -1,8 +1,13 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  HttpStatus,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { nanoid } from 'nanoid';
 import pRetry from 'p-retry';
 import {
+  ApiError,
   CalculateOrderRequest,
   CatalogObject,
   Client,
@@ -62,48 +67,6 @@ export class SquareService {
     )}&scope=${params.scope.join('+')}&state=${params.state}`;
   }
 
-  obtainToken(params: { oauthAccessCode: string }) {
-    this.logger.verbose(this.obtainToken.name);
-    return pRetry(
-      () =>
-        this.defaultClient.oAuthApi.obtainToken({
-          clientId: this.clientId,
-          clientSecret: this.clientSecret,
-          grantType: 'authorization_code',
-          code: params.oauthAccessCode,
-        }),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
-    );
-  }
-
-  async refreshToken(params: { oauthRefreshToken: string }) {
-    this.logger.verbose(this.refreshToken.name);
-    return pRetry(
-      () =>
-        this.defaultClient.oAuthApi.obtainToken({
-          clientId: this.clientId,
-          clientSecret: this.clientSecret,
-          grantType: 'refresh_token',
-          refreshToken: params.oauthRefreshToken,
-        }),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
-    );
-  }
-
   client(params: { accessToken: string }): Client {
     return new Client({
       accessToken: params.accessToken,
@@ -111,26 +74,42 @@ export class SquareService {
     });
   }
 
-  async accumulateCatalog(params: {
+  obtainTokenOrThrow(params: { oauthAccessCode: string }) {
+    this.logger.verbose(this.obtainTokenOrThrow.name);
+    return this.retryOrThrow(() =>
+      this.defaultClient.oAuthApi.obtainToken({
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        grantType: 'authorization_code',
+        code: params.oauthAccessCode,
+      }),
+    );
+  }
+
+  async refreshTokenOrThrow(params: { oauthRefreshToken: string }) {
+    this.logger.verbose(this.refreshTokenOrThrow.name);
+    return this.retryOrThrow(() =>
+      this.defaultClient.oAuthApi.obtainToken({
+        clientId: this.clientId,
+        clientSecret: this.clientSecret,
+        grantType: 'refresh_token',
+        refreshToken: params.oauthRefreshToken,
+      }),
+    );
+  }
+
+  async accumulateCatalogOrThrow(params: {
     accessToken: string;
     types: SquareCatalogObjectTypeEnum[];
   }): Promise<CatalogObject[]> {
-    this.logger.verbose(this.accumulateCatalog.name);
+    this.logger.verbose(this.accumulateCatalogOrThrow.name);
     const { accessToken, types } = params;
     const client = this.client({ accessToken });
     const catalogObjects: CatalogObject[] = [];
     const theTypes = types.join(',');
 
-    let listCatalogResponse = await pRetry(
-      () => client.catalogApi.listCatalog(undefined, theTypes),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    let listCatalogResponse = await this.retryOrThrow(() =>
+      client.catalogApi.listCatalog(undefined, theTypes),
     );
     this.logger.debug(
       `listCatalog undefined ${theTypes} result length ${
@@ -141,16 +120,8 @@ export class SquareService {
 
     let cursor = listCatalogResponse?.result.cursor;
     while (cursor !== undefined) {
-      listCatalogResponse = await pRetry(
-        () => client.catalogApi.listCatalog(cursor, theTypes),
-        {
-          onFailedAttempt: (error) => {
-            this.logger.error(error);
-            if (error.retriesLeft === 0) {
-              throw new InternalServerErrorException(error);
-            }
-          },
-        },
+      listCatalogResponse = await this.retryOrThrow(() =>
+        client.catalogApi.listCatalog(cursor, theTypes),
       );
       this.logger.debug(
         `listCatalog ${cursor} ${theTypes} result length ${
@@ -164,199 +135,121 @@ export class SquareService {
     return catalogObjects;
   }
 
-  listLocations(params: { accessToken: string }) {
-    this.logger.verbose(this.listLocations.name);
+  listLocationsOrThrow(params: { accessToken: string }) {
+    this.logger.verbose(this.listLocationsOrThrow.name);
     const { accessToken } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: accessToken,
-        }).locationsApi?.listLocations(),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).locationsApi?.listLocations(),
     );
   }
 
-  retrieveLocation(params: { accessToken: string; locationSquareId: string }) {
-    this.logger.verbose(this.retrieveLocation.name);
+  retrieveLocationOrThrow(params: {
+    accessToken: string;
+    locationSquareId: string;
+  }) {
+    this.logger.verbose(this.retrieveLocationOrThrow.name);
     const { accessToken, locationSquareId } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: accessToken,
-        }).locationsApi.retrieveLocation(locationSquareId),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).locationsApi.retrieveLocation(locationSquareId),
     );
   }
 
-  createCustomer(params: {
+  createCustomerOrThrow(params: {
     accessToken: string;
     request: CreateCustomerRequest;
   }) {
-    this.logger.verbose(this.createCustomer.name);
+    this.logger.verbose(this.createCustomerOrThrow.name);
     const { accessToken, request } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: accessToken,
-        }).customersApi.createCustomer(request),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).customersApi.createCustomer(request),
     );
   }
 
-  retrieveCustomer(params: { accessToken: string; squareId: string }) {
-    this.logger.verbose(this.retrieveCustomer.name);
+  retrieveCustomerOrThrow(params: { accessToken: string; squareId: string }) {
+    this.logger.verbose(this.retrieveCustomerOrThrow.name);
     const { accessToken, squareId } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: accessToken,
-        }).customersApi.retrieveCustomer(squareId),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).customersApi.retrieveCustomer(squareId),
     );
   }
 
-  createOrder(params: {
+  createOrderOrThrow(params: {
     accessToken: string;
     body: CreateOrderRequest;
     requestOptions?: RequestOptions;
   }) {
-    this.logger.verbose(this.createOrder.name);
+    this.logger.verbose(this.createOrderOrThrow.name);
     const { accessToken, body, requestOptions } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken,
-        }).ordersApi.createOrder(body, requestOptions),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.createOrder(body, requestOptions),
     );
   }
 
-  retrieveOrder(params: {
+  retrieveOrderOrThrow(params: {
     accessToken: string;
     orderId: string;
     requestOptions?: RequestOptions;
   }) {
-    this.logger.verbose(this.retrieveOrder.name);
+    this.logger.verbose(this.retrieveOrderOrThrow.name);
     const { accessToken, orderId, requestOptions } = params;
-    return pRetry(
-      () =>
-        this.client({ accessToken }).ordersApi.retrieveOrder(
-          orderId,
-          requestOptions,
-        ),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({ accessToken }).ordersApi.retrieveOrder(
+        orderId,
+        requestOptions,
+      ),
     );
   }
 
-  updateOrder(params: {
+  updateOrderOrThrow(params: {
     accessToken: string;
     orderId: string;
     body: UpdateOrderRequest;
     requestOptions?: RequestOptions;
   }) {
-    this.logger.verbose(this.updateOrder.name);
+    this.logger.verbose(this.updateOrderOrThrow.name);
     const { accessToken, orderId, requestOptions, body } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken,
-        }).ordersApi.updateOrder(orderId, body, requestOptions),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.updateOrder(orderId, body, requestOptions),
     );
   }
 
-  calculateOrder(params: {
+  calculateOrderOrThrow(params: {
     accessToken: string;
     body: CalculateOrderRequest;
     requestOptions?: RequestOptions;
   }) {
-    this.logger.verbose(this.calculateOrder.name);
+    this.logger.verbose(this.calculateOrderOrThrow.name);
     const { accessToken, body, requestOptions } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken,
-        }).ordersApi.calculateOrder(body, requestOptions),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken,
+      }).ordersApi.calculateOrder(body, requestOptions),
     );
   }
 
-  createPayment(params: {
+  createPaymentOrThrow(params: {
     accessToken: string;
     body: CreatePaymentRequest;
     requestOptions?: RequestOptions;
   }) {
-    this.logger.verbose(this.createPayment.name);
+    this.logger.verbose(this.createPaymentOrThrow.name);
     const { accessToken, body, requestOptions } = params;
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: accessToken,
-        }).paymentsApi.createPayment(body, requestOptions),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).paymentsApi.createPayment(body, requestOptions),
     );
   }
 
@@ -377,59 +270,32 @@ export class SquareService {
       referenceId,
       sortOrder,
     } = params;
-    return pRetry(
-      () =>
-        this.client({ accessToken }).cardsApi.listCards(
-          cursor,
-          customerId,
-          includeDisabled,
-          referenceId,
-          sortOrder,
-        ),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({ accessToken }).cardsApi.listCards(
+        cursor,
+        customerId,
+        includeDisabled,
+        referenceId,
+        sortOrder,
+      ),
     );
   }
 
   createCard(params: { accessToken: string; body: CreateCardRequest }) {
     this.logger.verbose(this.createCard.name);
-    return pRetry(
-      () =>
-        this.client({ accessToken: params.accessToken }).cardsApi.createCard(
-          params.body,
-        ),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({ accessToken: params.accessToken }).cardsApi.createCard(
+        params.body,
+      ),
     );
   }
 
   disableCard(params: { accessToken: string; cardId: string }) {
     this.logger.verbose(this.disableCard.name);
-    return pRetry(
-      () =>
-        this.client({
-          accessToken: params.accessToken,
-        }).cardsApi.disableCard(params.cardId),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
-        },
-      },
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: params.accessToken,
+      }).cardsApi.disableCard(params.cardId),
     );
   }
 
@@ -454,34 +320,44 @@ export class SquareService {
       contentType: file.mimetype,
     });
     const id = nanoid();
-    const response = await pRetry(
-      () =>
-        this.client({
-          accessToken: params.accessToken,
-        }).catalogApi.createCatalogImage(
-          {
-            idempotencyKey: idempotencyKey,
-            objectId: objectId,
-            image: {
-              type: 'IMAGE',
-              id: `#${id}`,
-              imageData: {
-                caption: caption,
-              },
+    const response = await this.retryOrThrow(() =>
+      this.client({
+        accessToken: params.accessToken,
+      }).catalogApi.createCatalogImage(
+        {
+          idempotencyKey: idempotencyKey,
+          objectId: objectId,
+          image: {
+            type: 'IMAGE',
+            id: `#${id}`,
+            imageData: {
+              caption: caption,
             },
           },
-          fileWrapper,
-        ),
-      {
-        onFailedAttempt: (error) => {
-          this.logger.error(error);
-          if (error.retriesLeft === 0) {
-            throw new InternalServerErrorException(error);
-          }
         },
-      },
+        fileWrapper,
+      ),
     );
 
     return response.result;
+  }
+
+  async retryOrThrow<T>(fn: () => Promise<T>): Promise<T> {
+    return pRetry(fn, {
+      onFailedAttempt: (error) => {
+        if (error instanceof ApiError) {
+          const isRetryable =
+            error.statusCode >= HttpStatus.INTERNAL_SERVER_ERROR ||
+            error.statusCode === HttpStatus.TOO_MANY_REQUESTS;
+
+          if (!isRetryable || error.retriesLeft === 0) {
+            this.logger.error(this.retryOrThrow.name, error);
+            throw new InternalServerErrorException(error);
+          }
+        } else {
+          throw error;
+        }
+      },
+    });
   }
 }

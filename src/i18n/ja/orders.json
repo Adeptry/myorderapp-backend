@@ -1,0 +1,15 @@
+{
+  "merchantNoSquareId": "この店舗はまだSquareのIDを設定していません。",
+  "locationNoSquareId": "この場所はまだSquareのIDを設定していません。",
+  "noMainLocation": "この店舗は主要な場所を指定していません。",
+  "customerNoSquareId": "あなたのアカウントにはSquareのIDがありません。情報を更新してください。",
+  "locationNoId": "おっと！この注文の場所が見つかりませんでした。",
+  "pickupInPast": "申し訳ありませんが、過去の時間をピックアップ時間として設定することはできません。",
+  "pickupTooFarInFuture": "ピックアップは次の7日間以内にしか予定できません。",
+  "pickupOutsideBusinessHours": "店舗の営業時間内でピックアップ時間を選んでください。",
+  "invalidResponseFromSquare": "Squareから無効な応答を受け取りました。もう一度お試しください。",
+  "merchantNoSquareAccessToken": "この店舗はまだSquareへのアクセスを設定していません。",
+  "orderNoSquareId": "あなたの注文にはSquareのIDがありません。サポートにお問い合わせください。",
+  "orderExists": "この注文は既に存在します。重複する必要はありません。",
+  "orderNotFound": "おっと！お探しの注文が見つかりませんでした。"
+}

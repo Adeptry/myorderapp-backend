@@ -67,7 +67,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
       // Variations
 
       const squareItemVariationCatalogObjects =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.itemVariation],
         })) ?? [];
@@ -86,7 +86,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
       // Modifiers lists
 
       const squareModifierListCatalogObjects =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.modifierList],
         })) ?? [];
@@ -120,7 +120,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
       // Modifiers
 
       const squareModifierCatalogObjects =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.modifier],
         })) ?? [];
@@ -152,7 +152,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
       // Categories
 
       const squareCategoryCatalogObjects =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.category],
         })) ?? [];
@@ -187,7 +187,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
       // Items
 
       const squareItemCatalogObjects =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.item],
         })) ?? [];
@@ -208,7 +208,7 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
 
       // Catalog images
       const squareImages =
-        (await this.squareService.accumulateCatalog({
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [SquareCatalogObjectTypeEnum.image],
         })) ?? [];

@@ -1,21 +1,23 @@
 import {
   BadRequestException,
   Injectable,
-  NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   addDays,
   addHours,
+  addMinutes,
   format,
   isAfter,
   isBefore,
   isWithinInterval,
 } from 'date-fns';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { OrderLineItem, Order as SquareOrder } from 'square';
 import { In } from 'typeorm';
 import { ModifiersService } from '../catalogs/services/modifiers.service.js';
 import { VariationsService } from '../catalogs/services/variations.service.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { VariationAddDto } from './dto/variation-add.dto.js';
@@ -25,20 +27,28 @@ import { LineItemService } from './services/line-item.service.js';
 @Injectable()
 export class OrdersUtils {
   constructor(
+    private readonly logger: AppLogger,
+    protected readonly i18n: I18nService<I18nTranslations>,
     private readonly lineItemsService: LineItemService,
     private readonly variationsService: VariationsService,
     private readonly modifiersService: ModifiersService,
-    private readonly logger: AppLogger,
   ) {
     this.logger.setContext(OrdersUtils.name);
   }
 
-  async updateForSquareOrder(params: {
+  currentLanguageTranslations() {
+    return this.i18n.t('orders', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
+  async saveFromSquareOrder(params: {
     order: Order;
     squareOrder: SquareOrder;
   }): Promise<Order> {
-    this.logger.verbose(this.updateForSquareOrder.name);
     const { order, squareOrder } = params;
+    this.logger.verbose(this.saveFromSquareOrder.name);
+
     order.squareId = squareOrder?.id;
     order.squareVersion =
       squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
@@ -54,15 +64,16 @@ export class OrdersUtils {
       squareOrder?.totalServiceChargeMoney?.amount,
     );
 
-    return this.updateForSquareLineItems(params);
+    return this.saveFromSquareLineItems(params);
   }
 
-  async updateForSquareLineItems(params: {
+  async saveFromSquareLineItems(params: {
     order: Order;
     squareOrder: SquareOrder;
   }) {
-    this.logger.verbose(this.updateForSquareLineItems.name);
     const { order, squareOrder } = params;
+    this.logger.verbose(this.saveFromSquareLineItems.name);
+
     const existingMoaLineItems = order.lineItems ?? [];
     this.logger.debug(
       `removing ${existingMoaLineItems.length} line items from ${order.id}`,
@@ -78,17 +89,25 @@ export class OrdersUtils {
     return await order.save();
   }
 
-  validatePickupTime(pickupAt: string, businessHours: BusinessHoursPeriod[]) {
-    this.logger.verbose(this.validatePickupTime.name);
-    const pickupDateTime = new Date(pickupAt);
+  validatePickupTimeOrThrow(params: {
+    businessHours: BusinessHoursPeriod[];
+    pickupAt?: string;
+  }) {
+    const { businessHours, pickupAt } = params;
+    this.logger.verbose(this.validatePickupTimeOrThrow.name);
+    const translations = this.currentLanguageTranslations();
+
+    const pickupDateTime = pickupAt
+      ? new Date(pickupAt)
+      : addMinutes(new Date(), 15);
     const now = new Date();
 
     if (isBefore(pickupDateTime, now)) {
-      throw new BadRequestException('Pickup time is in the past');
+      throw new BadRequestException(translations.pickupInPast);
     }
 
     if (isAfter(pickupDateTime, addDays(now, 7))) {
-      throw new BadRequestException('Pickup time is too far in the future');
+      throw new BadRequestException(translations.pickupTooFarInFuture);
     }
 
     const pickupTime = format(pickupDateTime, 'HH:mm:ss');
@@ -107,7 +126,7 @@ export class OrdersUtils {
         pickupTime <= matchingPeriod.endLocalTime
       )
     ) {
-      throw new BadRequestException('Pickup time is not within business hours');
+      throw new BadRequestException(translations.pickupOutsideBusinessHours);
     }
   }
 
@@ -131,7 +150,7 @@ export class OrdersUtils {
       }
       const squareOrderLineItem: OrderLineItem = {
         catalogObjectId: variation?.squareId,
-        quantity: `${dto.quantity}`,
+        quantity: `${dto.quantity ?? 1}`,
         modifiers: [],
         note: dto.note,
       };
@@ -141,7 +160,7 @@ export class OrdersUtils {
         });
 
         if (modifiers.length !== dto.modifierIds.length) {
-          throw new NotFoundException(`Invalid modifiers`);
+          throw new UnprocessableEntityException(`Invalid modifiers`);
         }
 
         for (const modifier of modifiers) {

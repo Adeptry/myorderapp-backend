@@ -35,12 +35,14 @@ import {
   ApiUnauthorizedResponse,
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
 import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { OrdersService } from '../orders/orders.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
@@ -64,8 +66,15 @@ export class OrdersController {
   constructor(
     private readonly service: OrdersService,
     private readonly logger: AppLogger,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.setContext(OrdersController.name);
+  }
+
+  currentLanguageTranslations() {
+    return this.i18n.t('orders', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -100,18 +109,22 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.post.name);
     const { customer, merchant } = { ...request };
     const { idempotencyKey, locationId, variations } = body;
 
+    this.logger.verbose(this.post.name);
+    const translations = this.currentLanguageTranslations();
+
     if (customer.currentOrderId) {
-      throw new BadRequestException(`Current order already exists`);
+      throw new BadRequestException(translations.orderExists);
     }
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Access Token`);
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
     }
     if (!customer.squareId) {
-      throw new UnprocessableEntityException(`No Square Customer ID`);
+      throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
     const savedOrder = await this.service.createOne({
@@ -162,11 +175,13 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ): Promise<Order> {
-    this.logger.verbose(this.getCurrent.name);
     const { customer, merchant } = { ...request };
 
+    this.logger.verbose(this.getCurrent.name);
+    const translations = this.currentLanguageTranslations();
+
     if (!customer.currentOrderId) {
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
     const entity = await this.service.findOne({
       where: {
@@ -192,11 +207,17 @@ export class OrdersController {
       customer.currentOrderId = undefined;
       await customer.save();
 
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
-    if (!entity.squareId || !merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Order ID`);
+    if (!entity.squareId) {
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
+    }
+
+    if (!merchant.squareAccessToken) {
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
     }
 
     return entity;
@@ -336,16 +357,19 @@ export class OrdersController {
 
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
-    this.logger.verbose(this.patchCurrent.name);
     const { merchant, customer } = { ...request };
+
+    this.logger.verbose(this.patchCurrent.name);
+    const translations = this.currentLanguageTranslations();
+
     const currentOrderId = customer.currentOrderId;
 
     if (!currentOrderId) {
-      throw new UnprocessableEntityException(`No current order`);
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(`Order not found`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     if (body.locationId) {
@@ -413,16 +437,18 @@ export class OrdersController {
 
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
-    this.logger.verbose(this.postCurrent.name);
     const { variations } = body;
     const { customer, merchant } = request;
-    const currentOrderId = customer.currentOrderId;
+    const { currentOrderId } = customer;
+
+    this.logger.verbose(this.postCurrent.name);
+    const translations = this.currentLanguageTranslations();
 
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Access Token`);
+      throw new UnprocessableEntityException(translations.merchantNoSquareId);
     }
     if (!customer.squareId) {
-      throw new UnprocessableEntityException(`No Square Customer ID`);
+      throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
     let returnOrderId: string | undefined = undefined;
@@ -439,7 +465,7 @@ export class OrdersController {
         } else {
           customer.currentOrderId = undefined;
           await customer.save();
-          throw new NotFoundException(`No current order`);
+          throw new NotFoundException(translations.orderNotFound);
         }
       } else {
         returnOrderId = (
@@ -454,7 +480,7 @@ export class OrdersController {
     }
 
     if (!returnOrderId) {
-      throw new Error(`No order ID`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     return await this.service.findOne({
@@ -498,21 +524,25 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.deleteCurrentLineItem.name);
     const { customer, merchant } = { ...request };
     const squareAccessToken = merchant.squareAccessToken;
     const currentOrderId = customer.currentOrderId;
 
+    this.logger.verbose(this.deleteCurrentLineItem.name);
+    const translations = this.currentLanguageTranslations();
+
     if (!currentOrderId) {
-      throw new BadRequestException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     if (!squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Access Token`);
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     await this.service.removeLineItems({
@@ -554,11 +584,13 @@ export class OrdersController {
   })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async deleteCurrent(@Req() request: CustomersGuardedRequest): Promise<void> {
-    this.logger.verbose(this.deleteCurrent.name);
     const { customer } = request;
 
+    this.logger.verbose(this.deleteCurrent.name);
+    const translations = this.currentLanguageTranslations();
+
     if (!customer.currentOrderId) {
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     const entity = await this.service.findOne({
@@ -568,7 +600,7 @@ export class OrdersController {
     if (!entity) {
       customer.currentOrderId = undefined;
       await customer.save();
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     await this.service.remove(entity);
@@ -604,50 +636,50 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(this.postCurrentPaymentSquare.name);
     const { customer, merchant } = { ...request };
-    const currentOrderId = customer.currentOrderId;
+    const { currentOrderId } = customer;
+
+    this.logger.verbose(this.postCurrentPaymentSquare.name);
+    const translations = this.currentLanguageTranslations();
 
     if (!currentOrderId) {
       customer.currentOrderId = undefined;
       await customer.save();
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(`No current order`);
+      throw new NotFoundException(translations.orderNotFound);
     }
 
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(`No Square Access Token`);
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
     }
 
-    try {
-      await this.service.createPayment({
-        orderId: currentOrderId,
-        customer,
-        input: body,
-        merchant,
-      });
-      return await this.service.findOne({
-        where: { id: currentOrderId },
-        relations: {
-          lineItems: lineItems
-            ? {
-                modifiers: lineItems,
-              }
-            : undefined,
-          location: location
-            ? {
-                address: true,
-                businessHours: true,
-              }
-            : undefined,
-        },
-      });
-    } catch (error: any) {
-      this.logger.error(error);
-      throw new BadRequestException(error);
-    }
+    await this.service.createPaymentOrThrow({
+      orderId: currentOrderId,
+      customer,
+      input: body,
+      merchant,
+    });
+
+    return await this.service.findOne({
+      where: { id: currentOrderId },
+      relations: {
+        lineItems: lineItems
+          ? {
+              modifiers: lineItems,
+            }
+          : undefined,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
+      },
+    });
   }
 }

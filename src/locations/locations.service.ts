@@ -63,13 +63,14 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
       relations: ['address', 'businessHours'],
     });
 
-    const squareLocationsResponse = await this.squareService.listLocations({
-      accessToken,
-    });
+    const squareLocationsResponse =
+      await this.squareService.listLocationsOrThrow({
+        accessToken,
+      });
     const squareLocations = squareLocationsResponse?.result.locations ?? [];
 
     const squareMainLocationResponse =
-      await this.squareService.retrieveLocation({
+      await this.squareService.retrieveLocationOrThrow({
         accessToken,
         locationSquareId: 'main',
       });
