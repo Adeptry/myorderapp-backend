@@ -277,7 +277,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
   }
