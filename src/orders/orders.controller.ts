@@ -134,7 +134,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
   }
@@ -175,7 +180,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
     if (!entity) {
@@ -236,7 +246,12 @@ export class OrdersController {
                 modifiers: lineItems,
               }
             : undefined,
-          location: location,
+          location: location
+            ? {
+                address: true,
+                businessHours: true,
+              }
+            : undefined,
         },
       }),
       pagination: { page, limit },
@@ -350,7 +365,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
   }
@@ -445,7 +465,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
   }
@@ -504,7 +529,12 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location,
+        location: location
+          ? {
+              address: true,
+              businessHours: true,
+            }
+          : undefined,
       },
     });
   }
@@ -607,7 +637,12 @@ export class OrdersController {
                 modifiers: lineItems,
               }
             : undefined,
-          location: location,
+          location: location
+            ? {
+                address: true,
+                businessHours: true,
+              }
+            : undefined,
         },
       });
     } catch (error: any) {
