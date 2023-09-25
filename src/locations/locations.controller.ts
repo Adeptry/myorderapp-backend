@@ -178,7 +178,7 @@ export class LocationsController {
   async patchOne(
     @Req() request: any,
     @Param('id') id: string,
-    @Body() input: LocationUpdateDto,
+    @Body() body: LocationUpdateDto,
   ): Promise<MoaLocation> {
     this.logger.verbose(this.patchOne.name);
     const entity = await this.service.findOne({
@@ -191,7 +191,7 @@ export class LocationsController {
 
     return this.service.updateOne({
       entity,
-      input,
+      input: body,
     });
   }
 
@@ -210,9 +210,9 @@ export class LocationsController {
     operationId: 'patchManyLocations',
   })
   async patchMany(
-    @Body() input: LocationUpdateAllDto[],
+    @Body() body: LocationUpdateAllDto[],
   ): Promise<MoaLocation[]> {
     this.logger.verbose(this.patchMany.name);
-    return await this.service.updateAll(input);
+    return await this.service.updateAll(body);
   }
 }

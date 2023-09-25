@@ -228,14 +228,14 @@ export class MerchantsController {
   @ApiOkResponse({ type: StripeCheckoutDto })
   async postMeStripeCheckout(
     @Req() request: MerchantsGuardedRequest,
-    @Body() input: StripeCheckoutCreateDto,
+    @Body() body: StripeCheckoutCreateDto,
   ): Promise<StripeCheckoutDto | null> {
     this.logger.verbose(this.postMeStripeCheckout.name);
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         merchantId: request.merchant.id!,
-        ...input,
+        ...body,
       });
 
     if (!checkoutSessionId) {

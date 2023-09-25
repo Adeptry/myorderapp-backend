@@ -239,12 +239,12 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Update a Category', operationId: 'patchCategory' })
   async patchCategory(
     @Param('id') id: string,
-    @Body() input: CategoryUpdateDto,
+    @Body() body: CategoryUpdateDto,
   ): Promise<Category> {
     this.logger.verbose(this.patchCategory.name);
     return this.service.updateOne({
       id,
-      input,
+      input: body,
     });
   }
 
@@ -263,9 +263,9 @@ export class CategoriesController {
     operationId: 'patchCategories',
   })
   async patchCategories(
-    @Body() input: CategoryUpdateAllDto[],
+    @Body() body: CategoryUpdateAllDto[],
   ): Promise<Category[]> {
     this.logger.verbose(this.patchCategories.name);
-    return await this.service.updateAll(input);
+    return await this.service.updateAll(body);
   }
 }

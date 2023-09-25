@@ -35,8 +35,11 @@ export abstract class RestfulEntityRepositoryService<
 
   async patchOne(
     where: FindOneOptions<Entity>,
-    patch: DeepPartial<Entity>,
+    params: {
+      patch: DeepPartial<Entity>;
+    },
   ): Promise<Entity | null> {
+    const { patch } = params;
     this.logger.verbose(this.patchOne.name);
     const result = await this.repository.findOne(where);
     await this.repository.save({ ...result, ...patch });

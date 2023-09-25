@@ -177,6 +177,11 @@ export class CustomersService extends EntityRepositoryService<Customer> {
       save = true;
     }
 
+    if (customerUpdateDto.preferredSquareCardId !== undefined) {
+      customer.preferredSquareCardId = customerUpdateDto.preferredSquareCardId;
+      save = true;
+    }
+
     if (save) {
       return await this.save(customer);
     } else {

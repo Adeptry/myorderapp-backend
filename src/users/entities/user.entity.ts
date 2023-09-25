@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import bcrypt from 'bcryptjs';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
@@ -16,7 +16,7 @@ import {
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { AuthProvidersEnum } from '../../auth/auth-providers.enum.js';
+import { AuthenticationsProvidersEnum } from '../../authentication/authentication-providers.enum.js';
 import { FileEntity } from '../../files/entities/file.entity.js';
 import { Role } from '../../roles/entities/role.entity.js';
 import { Status } from '../../statuses/entities/status.entity.js';
@@ -55,6 +55,10 @@ export class User extends EntityHelper {
   @Exclude({ toPlainOnly: true })
   password?: string;
 
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true, type: String })
+  phoneNumber?: string | null;
+
   @Exclude({ toPlainOnly: true })
   public previousPassword?: string;
 
@@ -75,12 +79,12 @@ export class User extends EntityHelper {
   @Column({
     type: 'simple-enum',
     nullable: true,
-    enum: AuthProvidersEnum,
-    default: AuthProvidersEnum.email,
+    enum: AuthenticationsProvidersEnum,
+    default: AuthenticationsProvidersEnum.email,
   })
   @ApiProperty({
     required: false,
-    enum: Object.values(AuthProvidersEnum),
+    enum: Object.values(AuthenticationsProvidersEnum),
     nullable: true,
   })
   provider?: string;
@@ -126,4 +130,13 @@ export class User extends EntityHelper {
   @Index()
   @Exclude({ toPlainOnly: true })
   hash?: string | null;
+
+  @Expose()
+  get fullName(): string | undefined {
+    if (!this.firstName && !this.lastName) {
+      return undefined;
+    } else {
+      return `${this.firstName} ${this.lastName}`;
+    }
+  }
 }

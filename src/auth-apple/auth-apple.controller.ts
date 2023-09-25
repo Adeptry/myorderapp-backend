@@ -12,8 +12,8 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from '../auth/auth.service.js';
-import { LoginResponseType } from '../auth/types/login-response.type.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
+import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { AuthAppleService } from './auth-apple.service.js';
@@ -28,7 +28,7 @@ import { AuthAppleLoginDto } from './dto/auth-apple-login.dto.js';
 })
 export class AuthAppleController {
   constructor(
-    private readonly authService: AuthService,
+    private readonly authService: AuthenticationService,
     private readonly authAppleService: AuthAppleService,
     private readonly logger: AppLogger,
   ) {
@@ -41,17 +41,13 @@ export class AuthAppleController {
     summary: 'Apple login',
     operationId: 'postLoginApple',
   })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: AuthenticationResponse })
   async postLogin(
-    @Body() loginDto: AuthAppleLoginDto,
-  ): Promise<LoginResponseType> {
+    @Body() body: AuthAppleLoginDto,
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.postLogin.name);
-    const socialData = await this.authAppleService.getProfileByToken(loginDto);
+    const socialData = await this.authAppleService.getProfileByToken(body);
 
-    return this.authService.validateSocialLogin(
-      'apple',
-      socialData,
-      loginDto.role,
-    );
+    return this.authService.validateSocialLogin('apple', socialData, body.role);
   }
 }

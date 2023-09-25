@@ -9,7 +9,7 @@ import {
   forwardRef,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthService } from '../auth/auth.service.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { AppLogger } from '../logger/app.logger.js';
@@ -26,8 +26,8 @@ export interface CustomersGuardedRequest extends Request {
 @Injectable()
 export class CustomersGuard implements CanActivate {
   constructor(
-    @Inject(forwardRef(() => AuthService))
-    private authService: AuthService,
+    @Inject(forwardRef(() => AuthenticationService))
+    private authService: AuthenticationService,
     @Inject(forwardRef(() => CustomersService))
     private customersService: CustomersService,
     @Inject(forwardRef(() => MerchantsService))

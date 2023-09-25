@@ -30,15 +30,15 @@ import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { NullableType } from '../utils/types/nullable.type.js';
-import { AuthService } from './auth.service.js';
-import { AuthConfirmEmailDto } from './dto/auth-confirm-email.dto.js';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto.js';
-import { AuthForgotPasswordDto } from './dto/auth-forgot-password.dto.js';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto.js';
-import { AuthResetPasswordDto } from './dto/auth-reset-password.dto.js';
-import { AuthUpdateDto } from './dto/auth-update.dto.js';
+import { AuthenticationService } from './authentication.service.js';
+import { AuthenticationEmailConfirmRequestBody } from './dto/authentication-email-confirm.dto.js';
+import { AuthenticationEmailLoginRequestBody } from './dto/authentication-email-login.dto.js';
+import { AuthenticationEmailRegisterRequestBody } from './dto/authentication-email-register.dto.js';
+import { AuthenticationPasswordForgotRequestBody } from './dto/authentication-password-forgot.dto.js';
+import { AuthenticationPasswordResetRequestBody } from './dto/authentication-password-reset.dto.js';
+import { AuthenticationUpdateRequestBody } from './dto/authentication-update.dto.js';
 import type { JwtGuardedRequest } from './strategies/jwt.strategy.js';
-import { LoginResponseType } from './types/login-response.type.js';
+import { AuthenticationResponse } from './types/authentication-response.type.js';
 
 @ApiTags('Authentication')
 @UseGuards(ApiKeyAuthGuard)
@@ -47,12 +47,12 @@ import { LoginResponseType } from './types/login-response.type.js';
   path: 'auth',
   version: '2',
 })
-export class AuthController {
+export class AuthenticationController {
   constructor(
-    private readonly service: AuthService,
+    private readonly service: AuthenticationService,
     private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(AuthController.name);
+    this.logger.setContext(AuthenticationController.name);
   }
 
   @Post('email/login')
@@ -61,7 +61,7 @@ export class AuthController {
     summary: 'Get access token',
     operationId: 'postEmailLogin',
   })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: AuthenticationResponse })
   @ApiUnauthorizedResponse({
     description: 'For invalid email/password',
     type: ErrorResponse,
@@ -71,10 +71,10 @@ export class AuthController {
     type: ErrorResponse,
   })
   async postEmailLogin(
-    @Body() loginDto: AuthEmailLoginDto,
-  ): Promise<LoginResponseType> {
+    @Body() body: AuthenticationEmailLoginRequestBody,
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.postEmailLogin.name);
-    const response = await this.service.loginOrThrow(loginDto, false);
+    const response = await this.service.loginOrThrow(body, false);
     return response;
   }
 
@@ -83,8 +83,8 @@ export class AuthController {
     summary: 'Create User and Authorize, note: tries to login first',
     operationId: 'postEmailRegister',
   })
-  @ApiCreatedResponse({ type: LoginResponseType })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiCreatedResponse({ type: AuthenticationResponse })
+  @ApiOkResponse({ type: AuthenticationResponse })
   @ApiUnauthorizedResponse({
     description: 'If email already exists & invalid password',
     type: ErrorResponse,
@@ -94,19 +94,19 @@ export class AuthController {
     type: ErrorResponse,
   })
   async postEmailRegister(
-    @Body() createUserDto: AuthRegisterLoginDto,
+    @Body() body: AuthenticationEmailRegisterRequestBody,
     @Res({ passthrough: true }) response: Response,
-  ): Promise<LoginResponseType> {
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.postEmailRegister.name);
 
     try {
       this.logger.verbose('Trying to login first');
-      const result = await this.service.loginOrThrow(createUserDto, false);
+      const result = await this.service.loginOrThrow(body, false);
       response.status(HttpStatus.OK);
       return result;
     } catch {
       this.logger.verbose('Failed, trying register');
-      const result = await this.service.registerOrThrow(createUserDto);
+      const result = await this.service.registerOrThrow(body);
       response.status(HttpStatus.CREATED);
       return result;
     }
@@ -120,10 +120,10 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   async postEmailConfirm(
-    @Body() confirmEmailDto: AuthConfirmEmailDto,
+    @Body() body: AuthenticationEmailConfirmRequestBody,
   ): Promise<void> {
     this.logger.verbose(this.postEmailConfirm.name);
-    return this.service.confirmEmail(confirmEmailDto.hash);
+    return this.service.confirmEmail(body.hash);
   }
 
   @Post('password/forgot')
@@ -134,10 +134,10 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   async postPasswordForgot(
-    @Body() forgotPasswordDto: AuthForgotPasswordDto,
+    @Body() body: AuthenticationPasswordForgotRequestBody,
   ): Promise<void> {
     this.logger.verbose(this.postPasswordForgot.name);
-    return this.service.createForgotPasswordOrThrow(forgotPasswordDto.email);
+    return this.service.createForgotPasswordOrThrow(body.email);
   }
 
   @Post('password/reset')
@@ -148,13 +148,10 @@ export class AuthController {
   })
   @ApiNoContentResponse()
   postPasswordReset(
-    @Body() resetPasswordDto: AuthResetPasswordDto,
+    @Body() body: AuthenticationPasswordResetRequestBody,
   ): Promise<void> {
     this.logger.verbose(this.postPasswordReset.name);
-    return this.service.resetPassword(
-      resetPasswordDto.hash,
-      resetPasswordDto.password,
-    );
+    return this.service.resetPassword(body.hash, body.password);
   }
 
   @ApiBearerAuth()
@@ -165,10 +162,10 @@ export class AuthController {
     summary: 'Refresh token',
     operationId: 'postRefresh',
   })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: AuthenticationResponse })
   public postRefresh(
     @Req() request: JwtGuardedRequest,
-  ): Promise<Omit<LoginResponseType, 'user'>> {
+  ): Promise<Omit<AuthenticationResponse, 'user'>> {
     this.logger.verbose(this.postRefresh.name);
     if (request.user.sessionId == undefined) {
       throw new UnauthorizedException();
@@ -201,12 +198,12 @@ export class AuthController {
     operationId: 'patchAuthMe',
   })
   @ApiOkResponse({ type: User })
-  @ApiBody({ type: AuthUpdateDto })
+  @ApiBody({ type: AuthenticationUpdateRequestBody })
   public patchMe(
     @Req() request: JwtGuardedRequest,
-    @Body() userDto: AuthUpdateDto,
+    @Body() body: AuthenticationUpdateRequestBody,
   ): Promise<NullableType<User>> {
     this.logger.verbose(this.patchMe.name);
-    return this.service.update(request.user, userDto);
+    return this.service.update(request.user, body);
   }
 }

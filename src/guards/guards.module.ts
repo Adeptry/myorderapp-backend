@@ -1,5 +1,5 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module.js';
+import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
@@ -12,7 +12,7 @@ import { UsersGuard } from './users.guard.js';
 @Module({
   imports: [
     LoggerModule,
-    AuthModule,
+    AuthenticationModule,
     UsersModule,
     forwardRef(() => MerchantsModule),
     forwardRef(() => CustomersModule),

@@ -5,7 +5,7 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { AppLogger } from '../../logger/app.logger.js';
-import { AuthService } from '../auth.service.js';
+import { AuthenticationService } from '../authentication.service.js';
 
 @Injectable()
 export class ApiKeyStrategy extends PassportStrategy(
@@ -15,7 +15,7 @@ export class ApiKeyStrategy extends PassportStrategy(
   constructor(
     protected logger: AppLogger,
     protected i18n: I18nService<I18nTranslations>,
-    private authService: AuthService,
+    private authService: AuthenticationService,
     protected configService: ConfigService,
   ) {
     super(

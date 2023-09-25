@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   DefaultValuePipe,
@@ -38,6 +39,8 @@ import { MerchantsGuard } from '../guards/merchants.guard.js';
 import type { UsersGuardedRequest } from '../guards/users.guard.js';
 import { UsersGuard } from '../guards/users.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
+import { SquareCard } from '../square/square.dto.js';
+import { SquareService } from '../square/square.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
 import { AppInstallUpdateDto } from './dto/app-install-update.dto.js';
@@ -61,6 +64,7 @@ export class CustomersController {
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,
     private readonly logger: AppLogger,
+    private readonly squareService: SquareService,
   ) {
     logger.setContext(CustomersController.name);
   }
@@ -101,14 +105,14 @@ export class CustomersController {
   ) {
     this.logger.verbose(this.post.name);
 
-    const customer = await this.service.createOne({
+    const created = await this.service.createOne({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       userId: request.user.id!,
       merchantIdOrPath: merchantIdOrPath,
     });
 
-    return this.service.findOne({
-      where: { id: customer.id },
+    const found = await this.service.findOne({
+      where: { id: created.id },
       relations: {
         user: userRelation,
         merchant: merchantRelation,
@@ -121,6 +125,8 @@ export class CustomersController {
           : undefined,
       },
     });
+
+    return found;
   }
 
   @ApiBearerAuth()
@@ -137,6 +143,7 @@ export class CustomersController {
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredSquareCard', required: false, type: Boolean })
   async getMe(
     @Req() request: CustomersGuardedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
@@ -147,11 +154,17 @@ export class CustomersController {
     currentOrderRelation?: boolean,
     @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
     preferredLocationRelation?: boolean,
+    @Query('preferredSquareCard', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredSquareCardRelation?: boolean,
   ): Promise<Customer> {
     this.logger.verbose(this.getMe.name);
     const { customer, merchant } = request;
 
-    return await this.service.findOneOrFail({
+    if (!customer.id || !merchant.id) {
+      throw new BadRequestException();
+    }
+
+    const found = await this.service.findOneOrFail({
       where: { id: customer.id, merchantId: merchant.id },
       relations: {
         user: userRelation,
@@ -165,6 +178,23 @@ export class CustomersController {
           : undefined,
       },
     });
+
+    if (preferredSquareCardRelation) {
+      if (!merchant.squareAccessToken || !customer.squareId) {
+        throw new BadRequestException();
+      }
+
+      if (customer.preferredSquareCardId) {
+        found.preferredSquareCard = (
+          await this.squareService.retrieveCard({
+            accessToken: merchant.squareAccessToken,
+            cardId: customer.preferredSquareCardId,
+          })
+        ).result.card as SquareCard;
+      }
+    }
+
+    return found;
   }
 
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
@@ -179,9 +209,24 @@ export class CustomersController {
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ErrorResponse })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiBody({ type: CustomerUpdateDto })
+  @ApiQuery({ name: 'user', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchant', required: false, type: Boolean })
+  @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredSquareCard', required: false, type: Boolean })
   async patchMe(
     @Req() request: CustomersGuardedRequest,
-    @Body() customerUpdateDto: CustomerUpdateDto,
+    @Body() body: CustomerUpdateDto,
+    @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
+    userRelation?: boolean,
+    @Query('merchant', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantRelation?: boolean,
+    @Query('currentOrder', new DefaultValuePipe(false), ParseBoolPipe)
+    currentOrderRelation?: boolean,
+    @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredLocationRelation?: boolean,
+    @Query('preferredSquareCard', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredSquareCardRelation?: boolean,
   ) {
     this.logger.verbose(this.patchMe.name);
     const { customer, merchant } = request;
@@ -192,11 +237,43 @@ export class CustomersController {
       );
     }
 
-    return this.service.updateOne({
+    await this.service.updateOne({
       id: customer.id,
       merchantId: merchant.id,
-      customerUpdateDto,
+      customerUpdateDto: body,
     });
+
+    const found = await this.service.findOneOrFail({
+      where: { id: customer.id, merchantId: merchant.id },
+      relations: {
+        user: userRelation,
+        merchant: merchantRelation,
+        currentOrder: currentOrderRelation,
+        preferredLocation: preferredLocationRelation
+          ? {
+              businessHours: preferredLocationRelation,
+              address: preferredLocationRelation,
+            }
+          : undefined,
+      },
+    });
+
+    if (preferredSquareCardRelation) {
+      if (!merchant.squareAccessToken || !customer.squareId) {
+        throw new BadRequestException();
+      }
+
+      if (customer.preferredSquareCardId) {
+        found.preferredSquareCard = (
+          await this.squareService.retrieveCard({
+            accessToken: merchant.squareAccessToken,
+            cardId: customer.preferredSquareCardId,
+          })
+        ).result.card as SquareCard;
+      }
+    }
+
+    return found;
   }
 
   @ApiBearerAuth()
@@ -210,17 +287,37 @@ export class CustomersController {
     summary: 'Get my Customers',
     operationId: 'getManyCustomers',
   })
+  @ApiQuery({ name: 'user', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchant', required: false, type: Boolean })
+  @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
+  @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
   async getMany(
     @Req() request: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
+    @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
+    userRelation?: boolean,
+    @Query('merchant', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantRelation?: boolean,
+    @Query('currentOrder', new DefaultValuePipe(false), ParseBoolPipe)
+    currentOrderRelation?: boolean,
+    @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
+    preferredLocationRelation?: boolean,
   ): Promise<CustomersPaginatedResponse> {
     this.logger.verbose(this.getMany.name);
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id },
         relations: {
-          user: true,
+          user: userRelation,
+          merchant: merchantRelation,
+          currentOrder: currentOrderRelation,
+          preferredLocation: preferredLocationRelation
+            ? {
+                businessHours: preferredLocationRelation,
+                address: preferredLocationRelation,
+              }
+            : undefined,
         },
       }),
       pagination: { page, limit },

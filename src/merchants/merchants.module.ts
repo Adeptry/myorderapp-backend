@@ -1,7 +1,7 @@
 import { forwardRef, Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '../auth/auth.module.js';
+import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { CatalogsModule } from '../catalogs/catalogs.module.js';
 import { FirebaseAdminModule } from '../firebase-admin/firebase-admin.module.js';
 import { GuardsModule } from '../guards/guards.module.js';
@@ -23,7 +23,7 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
     TypeOrmModule.forFeature([Merchant]),
     StripeModule,
     FirebaseAdminModule,
-    AuthModule,
+    AuthenticationModule,
     UsersModule,
     ConfigModule,
     forwardRef(() => SquareModule),

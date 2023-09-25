@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail, IsNotEmpty, MinLength, Validate } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsOptional,
+  MinLength,
+  Validate,
+} from 'class-validator';
 import { Role } from '../../roles/entities/role.entity.js';
 import { Status } from '../../statuses/entities/status.entity.js';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
@@ -32,6 +38,11 @@ export class UserCreateDto {
   @ApiProperty({ example: 'Doe' })
   @IsNotEmpty()
   lastName?: string | null;
+
+  @ApiProperty({ example: 'John' })
+  // @IsPhoneNumber()
+  @IsOptional()
+  phoneNumber?: string | null;
 
   // @ApiProperty({ type: () => FileEntity })
   // @IsOptional()

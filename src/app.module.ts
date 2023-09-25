@@ -21,8 +21,8 @@ import appleConfig from './auth-apple/apple.config.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
 import googleConfig from './auth-google/google.config.js';
-import authConfig from './auth/auth.config.js';
-import { AuthModule } from './auth/auth.module.js';
+import authConfig from './authentication/authentication.config.js';
+import { AuthenticationModule } from './authentication/authentication.module.js';
 import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { AllConfigType } from './config.type.js';
@@ -146,7 +146,7 @@ import { UsersModule } from './users/users.module.js';
     }),
     LoggerModule,
     UsersModule,
-    AuthModule,
+    AuthenticationModule,
     AuthGoogleModule,
     AuthAppleModule,
     ForgotModule,

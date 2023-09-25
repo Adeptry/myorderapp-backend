@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -26,7 +27,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { CustomersService } from '../customers/customers.service.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
+import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import {
@@ -49,6 +52,7 @@ export class CardsController {
   constructor(
     private readonly squareService: SquareService,
     private readonly logger: AppLogger,
+    private readonly customersService: CustomersService,
   ) {
     this.logger.setContext(CardsController.name);
   }
@@ -107,23 +111,39 @@ export class CardsController {
     },
   })
   @Post('me')
-  async postMe(@Body() createCardDto: CreateCardDto, @Req() request: any) {
+  async postMe(
+    @Body() body: CreateCardDto,
+    @Req() request: CustomersGuardedRequest,
+  ) {
+    const { merchant, customer } = request;
     this.logger.verbose(this.postMe.name);
+
+    if (
+      customer.squareId == undefined ||
+      merchant.squareAccessToken == undefined
+    ) {
+      throw new BadRequestException();
+    }
+
     const response = await this.squareService.createCard({
-      accessToken: request.merchant.squareAccessToken,
+      accessToken: merchant.squareAccessToken,
       body: {
         idempotencyKey: nanoid(),
-        sourceId: createCardDto.sourceId,
+        sourceId: body.sourceId,
         card: {
-          customerId: request.customer.squareId,
-          billingAddress: createCardDto.postalCode
+          customerId: customer.squareId,
+          billingAddress: body.postalCode
             ? {
-                postalCode: createCardDto.postalCode,
+                postalCode: body.postalCode,
               }
             : undefined,
         },
       },
     });
+
+    customer.preferredSquareCardId = response.result.card?.id;
+    await this.customersService.save(customer);
+
     return response.result.card;
   }
 
@@ -146,12 +166,27 @@ export class CardsController {
   })
   @ApiParam({ name: 'id', required: true, type: String })
   @Delete('me/:id')
-  async deleteMe(@Req() request: any, @Param('id') cardId: string) {
+  async deleteMe(
+    @Req() request: CustomersGuardedRequest,
+    @Param('id') cardId: string,
+  ) {
+    const { customer, merchant } = request;
     this.logger.verbose(this.deleteMe.name);
+
+    if (!merchant.squareAccessToken) {
+      throw new BadRequestException();
+    }
+
     await this.squareService.disableCard({
-      accessToken: request.merchant.squareAccessToken,
+      accessToken: merchant.squareAccessToken,
       cardId,
     });
+
+    if (customer.preferredSquareCardId == cardId) {
+      customer.preferredSquareCardId = null;
+      await this.customersService.save(customer);
+    }
+
     return;
   }
 }

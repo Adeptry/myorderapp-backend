@@ -15,7 +15,7 @@ import { AppConfigModule } from './app-config/app-config.module.js';
 import { AppModule } from './app.module.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
-import { AuthModule } from './auth/auth.module.js';
+import { AuthenticationModule } from './authentication/authentication.module.js';
 import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { AllConfigType } from './config.type.js';
@@ -121,7 +121,7 @@ async function bootstrap() {
           AuthGoogleModule,
           SquareModule,
           MerchantsModule,
-          AuthModule,
+          AuthenticationModule,
           UsersModule,
           OrdersModule,
           CustomersModule,
@@ -162,7 +162,7 @@ async function bootstrap() {
         include: [
           AuthAppleModule,
           AuthGoogleModule,
-          AuthModule,
+          AuthenticationModule,
           AppConfigModule,
           CustomersModule,
           UsersModule,

@@ -17,9 +17,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { AuthService } from '../auth/auth.service.js';
-import { AuthEmailLoginDto } from '../auth/dto/auth-email-login.dto.js';
-import { LoginResponseType } from '../auth/types/login-response.type.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
+import { AuthenticationEmailLoginRequestBody } from '../authentication/dto/authentication-email-login.dto.js';
+import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
 import { AdminsGuard } from '../guards/admins.guard.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
@@ -35,7 +35,7 @@ import { ErrorResponse } from '../utils/error-response.js';
 })
 export class AdminController {
   constructor(
-    private readonly authService: AuthService,
+    private readonly authenticationService: AuthenticationService,
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly logger: AppLogger,
   ) {
@@ -48,12 +48,12 @@ export class AdminController {
     summary: 'Get admin access token',
     operationId: 'postAdminEmailLogin',
   })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: AuthenticationResponse })
   public postEmailLogin(
-    @Body() loginDTO: AuthEmailLoginDto,
-  ): Promise<LoginResponseType> {
+    @Body() body: AuthenticationEmailLoginRequestBody,
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.postEmailLogin.name);
-    return this.authService.loginOrThrow(loginDTO, true);
+    return this.authenticationService.loginOrThrow(body, true);
   }
 
   @Post('/square/catalog/sync')

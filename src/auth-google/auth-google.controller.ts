@@ -12,8 +12,8 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
-import { AuthService } from '../auth/auth.service.js';
-import { LoginResponseType } from '../auth/types/login-response.type.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
+import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
 import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { AuthGoogleService } from './auth-google.service.js';
@@ -28,7 +28,7 @@ import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 })
 export class AuthGoogleController {
   constructor(
-    private readonly authService: AuthService,
+    private readonly authService: AuthenticationService,
     private readonly authGoogleService: AuthGoogleService,
     private readonly logger: AppLogger,
   ) {
@@ -41,17 +41,17 @@ export class AuthGoogleController {
     summary: 'Google login',
     operationId: 'postLoginGoogle',
   })
-  @ApiOkResponse({ type: LoginResponseType })
+  @ApiOkResponse({ type: AuthenticationResponse })
   async postLogin(
-    @Body() loginDto: AuthGoogleLoginDto,
-  ): Promise<LoginResponseType> {
+    @Body() body: AuthGoogleLoginDto,
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.postLogin.name);
-    const socialData = await this.authGoogleService.getProfileByToken(loginDto);
+    const socialData = await this.authGoogleService.getProfileByToken(body);
 
     return this.authService.validateSocialLogin(
       'google',
       socialData,
-      loginDto.role,
+      body.role,
     );
   }
 }

@@ -9,8 +9,8 @@ import { SessionModule } from '../session/session.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { IsExist } from '../utils/validators/is-exists.validator.js';
 import { IsNotExist } from '../utils/validators/is-not-exists.validator.js';
-import { AuthController } from './auth.controller.js';
-import { AuthService } from './auth.service.js';
+import { AuthenticationController } from './authentication.controller.js';
+import { AuthenticationService } from './authentication.service.js';
 import { AnonymousStrategy } from './strategies/anonymous.strategy.js';
 import { ApiKeyStrategy } from './strategies/apikey.strategy.js';
 import { JwtRefreshStrategy } from './strategies/jwt-refresh.strategy.js';
@@ -27,16 +27,16 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
     MailModule,
     JwtModule.register({}),
   ],
-  controllers: [AuthController],
+  controllers: [AuthenticationController],
   providers: [
     IsExist,
     IsNotExist,
-    AuthService,
+    AuthenticationService,
     JwtStrategy,
     ApiKeyStrategy,
     JwtRefreshStrategy,
     AnonymousStrategy,
   ],
-  exports: [AuthService],
+  exports: [AuthenticationService],
 })
-export class AuthModule {}
+export class AuthenticationModule {}

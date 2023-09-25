@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '../auth/auth.module.js';
+import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { CustomersController } from '../customers/customers.controller.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
@@ -19,7 +19,7 @@ import { AppInstallsService } from './services/app-installs.service.js';
     TypeOrmModule.forFeature([Customer, AppInstall]),
     SquareModule,
     GuardsModule,
-    AuthModule,
+    AuthenticationModule,
     LocationsModule,
     UsersModule,
     forwardRef(() => MerchantsModule),

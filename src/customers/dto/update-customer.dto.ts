@@ -7,4 +7,9 @@ export class CustomerUpdateDto extends PartialType(CustomerCreateDto) {
   @IsString()
   @IsOptional()
   preferredLocationId?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsString()
+  @IsOptional()
+  preferredSquareCardId?: string;
 }

@@ -18,6 +18,7 @@ import {
   CreatePaymentRequest,
   Environment,
   FileWrapper,
+  UpdateCustomerRequest,
   UpdateOrderRequest,
 } from 'square';
 import { RequestOptions } from 'square/dist/types/core.js';
@@ -171,6 +172,20 @@ export class SquareService {
     );
   }
 
+  updateCustomerOrThrow(params: {
+    accessToken: string;
+    customerId: string;
+    body: UpdateCustomerRequest;
+  }) {
+    this.logger.verbose(this.updateCustomerOrThrow.name);
+    const { accessToken, customerId, body } = params;
+    return this.retryOrThrow(() =>
+      this.client({
+        accessToken: accessToken,
+      }).customersApi.updateCustomer(customerId, body),
+    );
+  }
+
   retrieveCustomerOrThrow(params: { accessToken: string; squareId: string }) {
     this.logger.verbose(this.retrieveCustomerOrThrow.name);
     const { accessToken, squareId } = params;
@@ -277,6 +292,15 @@ export class SquareService {
         includeDisabled,
         referenceId,
         sortOrder,
+      ),
+    );
+  }
+
+  retrieveCard(params: { accessToken: string; cardId: string }) {
+    this.logger.verbose(this.retrieveCard.name);
+    return this.retryOrThrow(() =>
+      this.client({ accessToken: params.accessToken }).cardsApi.retrieveCard(
+        params.cardId,
       ),
     );
   }

@@ -186,12 +186,12 @@ export class ItemsController {
   @ApiOperation({ summary: 'Update an Item', operationId: 'patchItem' })
   async patchItem(
     @Param('id') itemId: string,
-    @Body() input: ItemUpdateDto,
+    @Body() body: ItemUpdateDto,
   ): Promise<Item> {
     this.logger.verbose(this.patchItem.name);
     return this.service.updateOne({
       id: itemId,
-      input,
+      input: body,
     });
   }
 
@@ -209,9 +209,9 @@ export class ItemsController {
     summary: 'Update multiple Items',
     operationId: 'patchItems',
   })
-  async patchItems(@Body() input: ItemUpdateAllDto[]): Promise<Item[]> {
+  async patchItems(@Body() body: ItemUpdateAllDto[]): Promise<Item[]> {
     this.logger.verbose(this.patchItems.name);
-    const items = await this.service.updateAll(input);
+    const items = await this.service.updateAll(body);
     await Promise.all(
       items.map(async (item) => {
         item.images = await this.service.loadManyRelation(item, 'images');

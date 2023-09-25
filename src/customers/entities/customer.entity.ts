@@ -19,6 +19,7 @@ import {
 import { Location } from '../../locations/entities/location.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
 import { Order } from '../../orders/entities/order.entity.js';
+import { SquareCard } from '../../square/square.dto.js';
 import { User } from '../../users/entities/user.entity.js';
 import { EntityHelper } from '../../utils/entity-helper.js';
 import { AppInstall } from './app-install.entity.js';
@@ -121,4 +122,15 @@ export class Customer extends EntityHelper {
   })
   @JoinColumn({ name: 'preferredLocationId' })
   preferredLocation?: Relation<Location> | null;
+
+  /*
+   * Preferred card
+   */
+
+  @ApiProperty({ required: false, nullable: true, type: String })
+  @Column({ nullable: true, type: String })
+  preferredSquareCardId?: string | null;
+
+  @ApiProperty({ required: false, type: SquareCard, nullable: true })
+  preferredSquareCard?: SquareCard;
 }

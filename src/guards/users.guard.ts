@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 
@@ -15,7 +15,7 @@ export interface UsersGuardedRequest extends Request {
 @Injectable()
 export class UsersGuard implements CanActivate {
   constructor(
-    private authService: AuthService,
+    private authService: AuthenticationService,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(UsersGuard.name);

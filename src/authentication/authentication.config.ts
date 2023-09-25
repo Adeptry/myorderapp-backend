@@ -2,7 +2,7 @@ import { registerAs } from '@nestjs/config';
 import { IsString } from 'class-validator';
 import validateConfig from '../utils/validate-config.js';
 
-export type AuthConfig = {
+export type AuthenticationConfig = {
   secret?: string;
   expires?: string;
   refreshSecret?: string;
@@ -23,7 +23,7 @@ class EnvironmentVariablesValidator {
   AUTH_REFRESH_TOKEN_EXPIRES_IN!: string;
 }
 
-export default registerAs<AuthConfig>('auth', () => {
+export default registerAs<AuthenticationConfig>('auth', () => {
   validateConfig(process.env, EnvironmentVariablesValidator);
 
   return {

@@ -1,6 +1,6 @@
 import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthModule } from '../auth/auth.module.js';
+import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
 import { Category } from '../catalogs/entities/category.entity.js';
@@ -48,7 +48,7 @@ import { VariationLocationOverridesService } from './services/variation-location
       ItemModifierList,
     ]),
     LocationsModule,
-    AuthModule,
+    AuthenticationModule,
     SquareModule,
     forwardRef(() => GuardsModule),
     forwardRef(() => MerchantsModule),

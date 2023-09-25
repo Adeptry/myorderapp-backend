@@ -206,7 +206,7 @@ export class AppConfigController {
   @ApiBody({ type: AppConfigUpdateDto })
   async patchMe(
     @Req() request: MerchantsGuardedRequest,
-    @Body() updateAppConfigDto: AppConfigUpdateDto,
+    @Body() body: AppConfigUpdateDto,
   ) {
     this.logger.verbose(this.patchMe.name);
     const translations = this.currentLanguageTranslations();
@@ -226,11 +226,11 @@ export class AppConfigController {
       });
     }
 
-    if (updateAppConfigDto.name != undefined) {
+    if (body.name != undefined) {
       if (
         await this.service.exist({
           where: {
-            name: updateAppConfigDto.name,
+            name: body.name,
             id: appConfig.id ? Not(appConfig.id) : undefined,
           },
         })
@@ -244,7 +244,7 @@ export class AppConfigController {
       }
     }
 
-    Object.assign(appConfig, updateAppConfigDto);
+    Object.assign(appConfig, body);
 
     return this.service.save(appConfig);
   }

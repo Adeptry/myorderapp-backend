@@ -4,13 +4,13 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 
 @Injectable()
 export class AdminsGuard implements CanActivate {
   constructor(
-    private authService: AuthService,
+    private authService: AuthenticationService,
     protected readonly logger: AppLogger,
   ) {
     logger.setContext(AdminsGuard.name);

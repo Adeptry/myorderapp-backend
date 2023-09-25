@@ -1,6 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsRFC3339, IsString } from 'class-validator';
 import { nanoid } from 'nanoid';
+import { FulfillmentRecipient } from './payment-create-recipient.dto.js';
 
 export class PaymentCreateDto {
   @ApiProperty({
@@ -10,11 +11,16 @@ export class PaymentCreateDto {
   })
   @IsOptional()
   @IsRFC3339()
-  pickupAt?: string;
+  pickupDateTime?: string;
 
   @ApiProperty()
   @IsString()
   paymentSquareId!: string;
+
+  @ApiProperty()
+  @IsOptional()
+  @IsString()
+  note?: string | null;
 
   @IsString()
   @ApiProperty({
@@ -29,4 +35,8 @@ export class PaymentCreateDto {
   @IsOptional()
   @IsNumber()
   orderTipMoney!: number;
+
+  @ApiProperty({ required: false, type: FulfillmentRecipient, nullable: true })
+  @IsOptional()
+  recipient?: FulfillmentRecipient;
 }

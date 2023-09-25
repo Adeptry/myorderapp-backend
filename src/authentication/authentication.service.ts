@@ -28,16 +28,15 @@ import { StatusEnum } from '../statuses/statuses.enum.js';
 import { User } from '../users/entities/user.entity.js';
 import { UsersService } from '../users/users.service.js';
 import { NullableType } from '../utils/types/nullable.type.js';
-import { AuthProvidersEnum } from './auth-providers.enum.js';
-import { AuthEmailLoginDto } from './dto/auth-email-login.dto.js';
-import { AuthRegisterLoginDto } from './dto/auth-register-login.dto.js';
-import { AuthUpdateDto } from './dto/auth-update.dto.js';
+import { AuthenticationsProvidersEnum } from './authentication-providers.enum.js';
+import { AuthenticationEmailRegisterRequestBody } from './dto/authentication-email-register.dto.js';
+import { AuthenticationUpdateRequestBody } from './dto/authentication-update.dto.js';
 import { JwtPayloadType } from './strategies/types/jwt-payload.type.js';
 import { JwtRefreshPayloadType } from './strategies/types/jwt-refresh-payload.type.js';
-import { LoginResponseType } from './types/login-response.type.js';
+import { AuthenticationResponse } from './types/authentication-response.type.js';
 
 @Injectable()
-export class AuthService {
+export class AuthenticationService {
   constructor(
     private readonly jwtService: JwtService,
     private readonly i18n: I18nService<I18nTranslations>,
@@ -48,7 +47,7 @@ export class AuthService {
     private readonly configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
   ) {
-    this.logger.setContext(AuthService.name);
+    this.logger.setContext(AuthenticationService.name);
   }
 
   currentLanguageTranslations() {
@@ -68,9 +67,9 @@ export class AuthService {
   }
 
   async loginOrThrow(
-    loginDto: AuthEmailLoginDto,
+    loginDto: AuthenticationEmailRegisterRequestBody,
     onlyAdmin: boolean,
-  ): Promise<LoginResponseType> {
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.loginOrThrow.name);
     const translations = this.currentLanguageTranslations();
 
@@ -90,7 +89,7 @@ export class AuthService {
       throw new UnauthorizedException(translations.invalidEmailOrPassword);
     }
 
-    if (user.provider !== AuthProvidersEnum.email) {
+    if (user.provider !== AuthenticationsProvidersEnum.email) {
       throw new UnprocessableEntityException(
         this.i18n.t('auth.loginViaProvider', {
           args: { provider: user.provider },
@@ -145,7 +144,7 @@ export class AuthService {
     authProvider: string,
     socialData: SocialInterface,
     roleEnum: RoleEnum,
-  ): Promise<LoginResponseType> {
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.validateSocialLogin.name);
     const translations = this.currentLanguageTranslations();
     let user: NullableType<User>;
@@ -166,7 +165,10 @@ export class AuthService {
       if (socialEmail && !userByEmail) {
         user.email = socialEmail;
       }
-      await this.usersService.patchOne({ where: { id: user.id } }, user);
+      await this.usersService.patchOne(
+        { where: { id: user.id } },
+        { patch: user },
+      );
     } else if (userByEmail) {
       user = userByEmail;
     } else {
@@ -224,7 +226,9 @@ export class AuthService {
     };
   }
 
-  async registerOrThrow(dto: AuthRegisterLoginDto): Promise<LoginResponseType> {
+  async registerOrThrow(
+    dto: AuthenticationEmailRegisterRequestBody,
+  ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.registerOrThrow.name);
     const translations = this.currentLanguageTranslations();
     const hash = crypto
@@ -375,7 +379,7 @@ export class AuthService {
 
   async update(
     userJwtPayload: JwtPayloadType,
-    userDto: AuthUpdateDto,
+    userDto: AuthenticationUpdateRequestBody,
   ): Promise<NullableType<User>> {
     this.logger.verbose(this.update.name);
     const translations = this.currentLanguageTranslations();
@@ -422,7 +426,7 @@ export class AuthService {
 
     await this.usersService.patchOne(
       { where: { id: userJwtPayload.id } },
-      userDto,
+      { patch: userDto },
     );
 
     return this.usersService.findOne({
@@ -434,7 +438,7 @@ export class AuthService {
 
   async refreshToken(
     data: Pick<JwtRefreshPayloadType, 'sessionId'>,
-  ): Promise<Omit<LoginResponseType, 'user'>> {
+  ): Promise<Omit<AuthenticationResponse, 'user'>> {
     this.logger.verbose(this.refreshToken.name);
     if (data.sessionId == undefined) {
       throw new UnauthorizedException();

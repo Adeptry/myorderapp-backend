@@ -63,13 +63,15 @@ export class UsersController {
   @ApiBody({ type: UserUpdateDto })
   async patchMe(
     @Req() request: UsersGuardedRequest,
-    @Body() updateUserDto: UserUpdateDto,
+    @Body() body: UserUpdateDto,
   ) {
+    const { user } = request;
+    const { id } = user;
     this.logger.verbose(this.patchMe.name);
     return await this.service.patchOne(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      { where: { id: request.user.id! } },
-      updateUserDto,
+      { where: { id: id! } },
+      { patch: body },
     );
   }
 

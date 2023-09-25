@@ -658,11 +658,15 @@ export class OrdersController {
       );
     }
 
+    if (!customer.id || !merchant.id) {
+      throw new UnprocessableEntityException();
+    }
+
     await this.service.createPaymentOrThrow({
       orderId: currentOrderId,
-      customer,
+      customerId: customer.id,
       input: body,
-      merchant,
+      merchantId: merchant.id,
     });
 
     return await this.service.findOne({

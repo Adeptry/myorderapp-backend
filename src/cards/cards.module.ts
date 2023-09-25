@@ -1,5 +1,5 @@
 import { Module } from '@nestjs/common';
-import { AuthModule } from '../auth/auth.module.js';
+import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { CustomersModule } from '../customers/customers.module.js';
 import { GuardsModule } from '../guards/guards.module.js';
 import { LoggerModule } from '../logger/logger.module.js';
@@ -11,7 +11,7 @@ import { CardsController } from './cards.controller.js';
   imports: [
     SquareModule,
     GuardsModule,
-    AuthModule,
+    AuthenticationModule,
     CustomersModule,
     MerchantsModule,
     LoggerModule,

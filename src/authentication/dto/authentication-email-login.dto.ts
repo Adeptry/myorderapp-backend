@@ -1,11 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsEmail } from 'class-validator';
+import { IsNotEmpty } from 'class-validator';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
 
-export class AuthForgotPasswordDto {
-  @ApiProperty()
+export class AuthenticationEmailLoginRequestBody {
+  @ApiProperty({ example: 'test1@example.com' })
   @Transform(lowerCaseTransformer)
-  @IsEmail()
   email!: string;
+
+  @ApiProperty({ example: '123456' })
+  @IsNotEmpty()
+  password!: string;
 }

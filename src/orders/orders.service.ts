@@ -19,9 +19,11 @@ import { LocationsService } from '../locations/locations.service.js';
 import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsFirebaseService } from '../merchants/merchants.firebase.service.js';
+import { MerchantsService } from '../merchants/merchants.service.js';
 import { Order } from '../orders/entities/order.entity.js';
 import { SquareOrderFulfillmentUpdatedPayload } from '../square/payloads/square-order-fulfillment-updated.payload.js';
 import { SquareService } from '../square/square.service.js';
+import { UsersService } from '../users/users.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
 import { PaymentCreateDto } from './dto/payment-create.dto.js';
 import { VariationAddDto } from './dto/variation-add.dto.js';
@@ -38,6 +40,8 @@ export class OrdersService extends EntityRepositoryService<Order> {
     private readonly lineItemsService: LineItemService,
     private readonly squareService: SquareService,
     private readonly locationsService: LocationsService,
+    private readonly merchantsService: MerchantsService,
+    private readonly usersService: UsersService,
     private readonly merchantsFirebaseService: MerchantsFirebaseService,
     private readonly customersService: CustomersService,
     private readonly firebaseAdminService: FirebaseAdminService,
@@ -399,13 +403,19 @@ export class OrdersService extends EntityRepositoryService<Order> {
 
   async createPaymentOrThrow(params: {
     orderId: string;
-    customer: Customer;
+    customerId: string;
     input: PaymentCreateDto;
-    merchant: Merchant;
+    merchantId: string;
   }) {
-    const { orderId, customer, input, merchant } = params;
-    const { squareAccessToken } = merchant;
-    const { pickupAt } = input;
+    const { orderId, customerId, input, merchantId } = params;
+    const {
+      pickupDateTime,
+      paymentSquareId,
+      note,
+      idempotencyKey,
+      orderTipMoney,
+      recipient,
+    } = input;
 
     this.logger.verbose(this.createPaymentOrThrow.name);
     const translations = this.currentLanguageTranslations();
@@ -422,6 +432,49 @@ export class OrdersService extends EntityRepositoryService<Order> {
       },
     });
 
+    const merchant = await this.merchantsService.findOneOrFail({
+      where: { id: merchantId },
+    });
+
+    const customer = await this.customersService.findOneOrFail({
+      where: { id: customerId },
+      relations: {
+        user: true,
+      },
+    });
+
+    // TODO: move this to users service and sync with square
+    const user = customer.user;
+    if (user != undefined) {
+      let saveUser = false;
+      if (user.firstName == undefined && recipient?.firstName != undefined) {
+        user.firstName = recipient.firstName;
+        saveUser = true;
+      }
+
+      if (user.lastName == undefined && recipient?.lastName != undefined) {
+        user.lastName = recipient.lastName;
+        saveUser = true;
+      }
+
+      if (
+        user.phoneNumber == undefined &&
+        recipient?.phoneNumber != undefined
+      ) {
+        user.phoneNumber = recipient.phoneNumber;
+        saveUser = true;
+      }
+
+      if (saveUser) {
+        await this.usersService.save(user);
+      }
+    }
+
+    let recipientDisplayName = user?.fullName;
+    if (recipient?.firstName && recipient?.lastName) {
+      recipientDisplayName = `${recipient.firstName} ${recipient.lastName}`;
+    }
+
     if (!order.location?.locationSquareId) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
@@ -430,7 +483,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new UnprocessableEntityException(translations.orderNoSquareId);
     }
 
-    if (!squareAccessToken) {
+    if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
         translations.merchantNoSquareAccessToken,
       );
@@ -440,16 +493,17 @@ export class OrdersService extends EntityRepositoryService<Order> {
       throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
-    const newPickupAt = pickupAt ?? addMinutes(new Date(), 15).toISOString();
+    const newPickupDateTime =
+      pickupDateTime ?? addMinutes(new Date(), 15).toISOString();
 
     this.utils.validatePickupTimeOrThrow({
-      pickupAt: newPickupAt,
+      pickupAt: newPickupDateTime,
       businessHours: order.location?.businessHours ?? [],
     });
 
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
       await this.squareService.updateOrderOrThrow({
-        accessToken: squareAccessToken,
+        accessToken: merchant.squareAccessToken,
         orderId: order.squareId,
         body: {
           order: {
@@ -460,10 +514,13 @@ export class OrdersService extends EntityRepositoryService<Order> {
               {
                 type: 'PICKUP',
                 pickupDetails: {
-                  scheduleType: pickupAt ? 'SCHEDULED' : 'ASAP',
-                  pickupAt: pickupAt ? pickupAt : newPickupAt,
+                  note,
+                  scheduleType: pickupDateTime ? 'SCHEDULED' : 'ASAP',
+                  pickupAt: pickupDateTime ? pickupDateTime : newPickupDateTime,
                   recipient: {
                     customerId: customer.squareId,
+                    displayName: recipientDisplayName ?? user?.fullName,
+                    phoneNumber: recipient?.phoneNumber ?? user?.phoneNumber,
                   },
                 },
               },
@@ -492,15 +549,15 @@ export class OrdersService extends EntityRepositoryService<Order> {
     }
 
     await this.squareService.createPaymentOrThrow({
-      accessToken: squareAccessToken,
+      accessToken: merchant.squareAccessToken,
       body: {
-        sourceId: input.paymentSquareId,
-        idempotencyKey: input.idempotencyKey,
+        sourceId: paymentSquareId,
+        idempotencyKey: idempotencyKey,
         customerId: customer.squareId,
         locationId: order.location.locationSquareId,
         amountMoney: orderTotalMoney,
         tipMoney: {
-          amount: BigInt(Math.floor(input.orderTipMoney ?? 0)),
+          amount: BigInt(Math.floor(orderTipMoney ?? 0)),
           currency: orderTotalMoney.currency,
         },
         orderId: squareOrderFromUpdate.id,
@@ -510,7 +567,7 @@ export class OrdersService extends EntityRepositoryService<Order> {
 
     updatedOrder.closedAt = new Date();
     updatedOrder.customerId = customer.id;
-    updatedOrder.totalMoneyTipAmount = Math.floor(input.orderTipMoney ?? 0);
+    updatedOrder.totalMoneyTipAmount = Math.floor(orderTipMoney ?? 0);
     customer.currentOrder = null;
     await customer.save();
 

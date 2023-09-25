@@ -7,7 +7,7 @@ import {
   UnauthorizedException,
   forwardRef,
 } from '@nestjs/common';
-import { AuthService } from '../auth/auth.service.js';
+import { AuthenticationService } from '../authentication/authentication.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
 import { AppLogger } from '../logger/app.logger.js';
@@ -25,7 +25,7 @@ export interface UserTypeGuardedRequest extends Request {
 @Injectable()
 export class UserTypeGuard implements CanActivate {
   constructor(
-    private readonly authService: AuthService,
+    private readonly authService: AuthenticationService,
     @Inject(forwardRef(() => CustomersService))
     private customersService: CustomersService,
     @Inject(forwardRef(() => MerchantsService))

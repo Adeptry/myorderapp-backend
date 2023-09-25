@@ -3,7 +3,7 @@ import { Transform } from 'class-transformer';
 import { IsEmail, IsOptional, IsString, Length } from 'class-validator';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
 
-export class AuthRegisterLoginDto {
+export class AuthenticationEmailRegisterRequestBody {
   @ApiProperty({ example: 'test1@example.com' })
   @Transform(lowerCaseTransformer)
   @IsEmail()

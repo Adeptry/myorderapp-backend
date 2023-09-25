@@ -39,6 +39,14 @@ export class UserUpdateDto {
 
   @ApiProperty({
     type: String,
+    required: false,
+    nullable: true,
+  })
+  @IsOptional()
+  phoneNumber?: string | null;
+
+  @ApiProperty({
+    type: String,
     example: 'en',
     required: false,
     nullable: true,
