@@ -82,8 +82,6 @@
     "stripe": "^12.12.0",
     "swagger-ui-express": "4.6.3",
     "tsconfig-paths": "^4.2.0",
-    "twilio": "^4.13.0",
-    "twitter": "1.7.1",
     "typeorm": "0.3.17"
   },
   "devDependencies": {
@@ -104,7 +102,6 @@
     "@types/passport-anonymous": "1.0.3",
     "@types/passport-jwt": "3.0.8",
     "@types/supertest": "2.0.12",
-    "@types/twitter": "1.7.1",
     "@typescript-eslint/eslint-plugin": "5.61.0",
     "@typescript-eslint/parser": "5.61.0",
     "eslint": "8.44.0",
