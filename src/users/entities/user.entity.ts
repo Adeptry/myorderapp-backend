@@ -18,7 +18,6 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthenticationsProvidersEnum } from '../../authentication/authentication-providers.enum.js';
-import { AwsS3FileEntity } from '../../aws-s3-files/entities/aws-s3-file.entity.js';
 import { Role } from '../../roles/entities/role.entity.js';
 import { Status } from '../../statuses/entities/status.entity.js';
 
@@ -107,12 +106,6 @@ export class User extends BaseEntity {
   @Column({ type: String, nullable: true })
   @ApiProperty({ required: false, type: String, nullable: true })
   language?: string | null;
-
-  @ManyToOne(() => AwsS3FileEntity, {
-    eager: true,
-  })
-  @Exclude({ toPlainOnly: true })
-  photo?: Relation<AwsS3FileEntity> | null;
 
   @ManyToOne(() => Role, {
     eager: true,

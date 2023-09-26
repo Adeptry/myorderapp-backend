@@ -11,20 +11,22 @@ import {
   I18nModule,
   I18nService,
 } from 'nestjs-i18n';
+import { S3Module } from 'nestjs-s3';
 import * as NodemailerMailgunTransport from 'nodemailer-mailgun-transport';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
 import { AdminModule } from './admin/admin.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
-import { NestAppConfig } from './app.config.js';
+import { RootConfigType } from './app.config.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
-import { AwsS3FilesModule } from './aws-s3-files/aws-s3-files.module.js';
 import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
-import { AllConfigType } from './config.type.js';
+import { NestAppConfig } from './configs/app.config.js';
+import { AwsS3Config } from './configs/aws-s3.config.js';
+import { MailerConfig } from './configs/mailer.config.js';
 import { CustomersModule } from './customers/customers.module.js';
 import { DatabaseConfig } from './database/database.config.js';
 import { TypeOrmConfigService } from './database/typeorm-config.service.js';
@@ -33,7 +35,6 @@ import { ForgotModule } from './forgot/forgot.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
 import { MailModule } from './mail/mail.module.js';
-import { MailerConfig } from './mailer.config.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SessionModule } from './session/session.module.js';
@@ -48,7 +49,7 @@ import { UsersModule } from './users/users.module.js';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [NestAppConfig, DatabaseConfig, MailerConfig],
+      load: [NestAppConfig, DatabaseConfig, MailerConfig, AwsS3Config],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -59,7 +60,7 @@ import { UsersModule } from './users/users.module.js';
       },
     }),
     I18nModule.forRootAsync({
-      useFactory: (configService: ConfigService<AllConfigType>) => ({
+      useFactory: (configService: ConfigService<RootConfigType>) => ({
         fallbackLanguage: configService.getOrThrow('app.fallbackLanguage', {
           infer: true,
         }),
@@ -79,7 +80,7 @@ import { UsersModule } from './users/users.module.js';
       resolvers: [
         {
           use: HeaderResolver,
-          useFactory: (configService: ConfigService<AllConfigType>) => {
+          useFactory: (configService: ConfigService<RootConfigType>) => {
             return [
               configService.get('app.headerLanguage', {
                 infer: true,
@@ -95,7 +96,7 @@ import { UsersModule } from './users/users.module.js';
     }),
     MailerModule.forRootAsync({
       useFactory: (
-        configService: ConfigService<AllConfigType>,
+        configService: ConfigService<RootConfigType>,
         i18n: I18nService,
       ) => {
         return {
@@ -129,6 +130,27 @@ import { UsersModule } from './users/users.module.js';
       imports: [ConfigModule],
       inject: [ConfigService, I18nService],
     }),
+    S3Module.forRootAsync({
+      useFactory: (configService: ConfigService<RootConfigType>) => ({
+        config: {
+          credentials: {
+            accessKeyId: configService.getOrThrow('awsS3.accessKeyId', {
+              infer: true,
+            }),
+            secretAccessKey: configService.getOrThrow('awsS3.secretAccessKey', {
+              infer: true,
+            }),
+          },
+          region: configService.getOrThrow('awsS3.region', {
+            infer: true,
+          }),
+          forcePathStyle: true,
+          signatureVersion: 'v4',
+        },
+      }),
+      imports: [ConfigModule],
+      inject: [ConfigService],
+    }),
 
     // Boilerplate
     UsersModule,
@@ -143,7 +165,6 @@ import { UsersModule } from './users/users.module.js';
     SquareModule,
     StripeModule,
     FirebaseAdminModule,
-    AwsS3FilesModule,
 
     // (add nest-twilio)
     MailModule,

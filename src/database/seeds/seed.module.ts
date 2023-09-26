@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { NestAppConfig } from 'src/app.config.js';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { NestAppConfig } from '../../configs/app.config.js';
 import { TypeOrmConfigService } from '../../database/typeorm-config.service.js';
 import { DatabaseConfig } from '../database.config.js';
 import { RoleSeedModule } from './role/role-seed.module.js';

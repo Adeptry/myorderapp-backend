@@ -3,7 +3,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { SentMessageInfo } from 'nodemailer';
-import { AllConfigType } from '../config.type.js';
+import { RootConfigType } from '../app.config.js';
 import { User } from '../users/entities/user.entity.js';
 
 @Injectable()
@@ -13,7 +13,7 @@ export class MailService {
   constructor(
     private readonly mailerService: MailerService,
     private readonly i18n: I18nService,
-    private readonly configService: ConfigService<AllConfigType>,
+    private readonly configService: ConfigService<RootConfigType>,
   ) {}
 
   async sendForgotPasswordOrThrow(params: {

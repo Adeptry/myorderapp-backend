@@ -8,7 +8,7 @@ import type { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
-import { NestAppConfig } from '../../app.config.js';
+import { NestAppConfig } from '../../configs/app.config.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { AuthenticationService } from '../authentication.service.js';
 

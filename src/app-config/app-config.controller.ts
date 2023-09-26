@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
   InternalServerErrorException,
   Logger,
   NotFoundException,
@@ -18,6 +19,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -35,10 +37,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { InjectS3, type S3 } from 'nestjs-s3';
 import { Not, QueryFailedError } from 'typeorm';
 import { AppConfigService } from '../app-config/app-config.service.js';
 import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
-import { AwsS3FilesService } from '../aws-s3-files/aws-s3-files.service.js';
+import { AwsS3Config } from '../configs/aws-s3.config.js';
 import type { UserTypeGuardedRequest } from '../customers/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../customers/customer-merchant.guard.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
@@ -62,7 +65,10 @@ export class AppConfigController {
   constructor(
     private readonly service: AppConfigService,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly filesService: AwsS3FilesService,
+    @InjectS3()
+    private readonly s3: S3,
+    @Inject(AwsS3Config.KEY)
+    protected awsS3Config: ConfigType<typeof AwsS3Config>,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -269,11 +275,11 @@ export class AppConfigController {
       },
     },
   })
-  @UseInterceptors(FileInterceptor('file')) // 1
+  @UseInterceptors(FileInterceptor('file'))
   @ApiOperation({ summary: 'Upload icon', operationId: 'postIconUploadMe' })
   async postIconUploadMe(
     @Req() request: MerchantsGuardedRequest,
-    @UploadedFile() file: Express.Multer.File | Express.MulterS3.File,
+    @UploadedFile() file: Express.Multer.File,
   ) {
     this.logger.verbose(this.postIconUploadMe.name);
     const translations = this.currentLanguageTranslations();
@@ -293,7 +299,24 @@ export class AppConfigController {
       });
     }
 
-    appConfig.iconFileUrl = (await this.filesService.upload(file)).Location;
+    const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
+      file.originalname,
+    )}`;
+
+    this.logger.verbose(`key: ${key}`);
+
+    try {
+      await this.s3.putObject({
+        Bucket: this.awsS3Config.defaultBucket,
+        Key: key,
+        Body: file.buffer,
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+
+    appConfig.iconFileUrl = key;
     return this.service.save(appConfig);
   }
 }
