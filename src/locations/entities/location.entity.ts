@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -20,12 +21,11 @@ import { ModifierLocationOverride } from '../../catalogs/entities/modifier-locat
 import { VariationLocationOverride } from '../../catalogs/entities/variation-location-override.entity.js';
 import { Customer } from '../../customers/entities/customer.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { Address } from './address.entity.js';
 import { BusinessHoursPeriod } from './business-hours-period.entity.js';
 
 @Entity('location')
-export class Location extends EntityHelper {
+export class Location extends BaseEntity {
   @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;

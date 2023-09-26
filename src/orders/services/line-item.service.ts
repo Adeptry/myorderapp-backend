@@ -1,22 +1,23 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderLineItem } from 'square';
 import { Repository } from 'typeorm';
-import { AppLogger } from '../../logger/app.logger.js';
 import { LineItem } from '../../orders/entities/line-item.entity.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { LineItemModifierService } from './line-item-modifier.service.js';
 
 @Injectable()
 export class LineItemService extends EntityRepositoryService<LineItem> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(LineItem)
     protected readonly repository: Repository<LineItem>,
     protected readonly lineItemModifierService: LineItemModifierService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(LineItemService.name);
+    const logger = new Logger(LineItemService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   fromSquareLineItem(params: { squareLineItem: OrderLineItem }) {

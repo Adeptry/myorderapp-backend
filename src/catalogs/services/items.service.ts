@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import {
@@ -6,18 +6,19 @@ import {
   ItemUpdateDto,
 } from '../../catalogs/dto/item-update.dto.js';
 import { Item } from '../../catalogs/entities/item.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
 export class ItemsService extends EntityRepositoryService<Item> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Item)
     protected readonly repository: Repository<Item>,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(ItemsService.name);
+    const logger = new Logger(ItemsService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   joinManyQuery(params: {

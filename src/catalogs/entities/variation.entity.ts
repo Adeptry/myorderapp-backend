@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -15,14 +16,13 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { CatalogImage } from './catalog-image.entity.js';
 import { Catalog } from './catalog.entity.js';
 import { Item } from './item.entity.js';
 import { VariationLocationOverride } from './variation-location-override.entity.js';
 
 @Entity('variation')
-export class Variation extends EntityHelper {
+export class Variation extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })

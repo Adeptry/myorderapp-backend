@@ -2,43 +2,43 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
-
 import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { ObtainTokenResponse } from 'square';
 import { LessThan } from 'typeorm';
 import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { CatalogsService } from '../catalogs/catalogs.service.js';
 import { Catalog } from '../catalogs/entities/catalog.entity.js';
-import { AllConfigType } from '../config.type.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { LocationsService } from '../locations/locations.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogVersionUpdatedEventPayload } from '../square/payloads/square-catalog-version-updated-payload.entity.js';
 import { SquareLocationCreatedEventPayload } from '../square/payloads/square-location-created-event-payload.entity.js';
 import { SquareLocationUpdatedEventPayload } from '../square/payloads/square-location-updated-event-payload.entity.js';
 import { SquareOauthAuthorizationRevokedEventPayload } from '../square/payloads/square-oauth-authorization-revoked.payload.js';
-import { SquareConfigUtils } from '../square/square.config.utils.js';
 import { SquareService } from '../square/square.service.js';
+import { MerchantsConfigType } from './merchants.config.js';
 import { MerchantsService } from './merchants.service.js';
 
 @Injectable()
 export class MerchantsSquareService {
+  private readonly logger = new Logger(MerchantsSquareService.name);
+
   constructor(
     protected readonly service: MerchantsService,
-    private readonly logger: AppLogger,
+
+    private readonly configService: ConfigService<MerchantsConfigType>,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly configService: ConfigService<AllConfigType>,
     private readonly squareService: SquareService,
     private readonly catalogsService: CatalogsService,
-    private readonly squareConfigUtils: SquareConfigUtils,
     private readonly locationsService: LocationsService,
   ) {
-    logger.setContext(MerchantsSquareService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentTranslations() {
@@ -56,17 +56,18 @@ export class MerchantsSquareService {
       where: { id: merchantId },
     });
 
-    const nodeEnv = this.configService.get('app.nodeEnv', { infer: true });
-    const testCode = this.configService.get('square.testCode', { infer: true });
-    const isTest = nodeEnv !== 'production' && oauthAccessCode === testCode;
+    const testCode = this.configService.get('merchants.squareTestCode', {
+      infer: true,
+    });
 
-    const accessTokenResult = isTest
-      ? this.squareConfigUtils.testTokenReponse()
-      : (
-          await this.squareService.obtainTokenOrThrow({
-            oauthAccessCode,
-          })
-        ).result;
+    const accessTokenResult =
+      oauthAccessCode === testCode
+        ? this.testTokenReponse()
+        : (
+            await this.squareService.obtainTokenOrThrow({
+              code: oauthAccessCode,
+            })
+          ).result;
 
     if (!accessTokenResult) {
       throw new InternalServerErrorException(
@@ -160,6 +161,23 @@ export class MerchantsSquareService {
     await this.locationsService.syncSquare({ merchantId, squareAccessToken });
   }
 
+  testTokenReponse(): ObtainTokenResponse {
+    return {
+      accessToken: this.configService.get('merchants.squareTestAccessToken', {
+        infer: true,
+      }),
+      expiresAt: this.configService.get('merchants.squareTestExpireAt', {
+        infer: true,
+      }),
+      merchantId: this.configService.get('merchants.squareTestId', {
+        infer: true,
+      }),
+      refreshToken: this.configService.get('merchants.squareTestRefreshToken', {
+        infer: true,
+      }),
+    };
+  }
+
   @OnEvent('square.location.created')
   async handleLocationCreated(payload: SquareLocationCreatedEventPayload) {
     this.logger.verbose(this.handleLocationCreated.name);
@@ -241,7 +259,7 @@ export class MerchantsSquareService {
 
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async refreshTokensCron() {
-    this.logger.verbose(this.handleCatalogVersionUpdated.name);
+    this.logger.verbose(this.refreshTokensCron.name);
     const seventyTwoHoursFromNow = new Date(
       new Date().getTime() + 72 * 60 * 60 * 1000,
     );
@@ -259,7 +277,7 @@ export class MerchantsSquareService {
         const oauthRefreshToken = merchant.squareRefreshToken ?? '';
         const result = (
           await this.squareService.refreshTokenOrThrow({
-            oauthRefreshToken,
+            refreshToken: oauthRefreshToken,
           })
         ).result;
         merchant.squareAccessToken = result.accessToken;

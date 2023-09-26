@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -17,14 +18,13 @@ import {
 } from 'typeorm';
 import { Category } from '../../catalogs/entities/category.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { Item } from './item.entity.js';
 import { ModifierList } from './modifier-list.entity.js';
 import { Modifier } from './modifier.entity.js';
 import { Variation } from './variation.entity.js';
 
 @Entity('catalog')
-export class Catalog extends EntityHelper {
+export class Catalog extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })

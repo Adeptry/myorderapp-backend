@@ -1,22 +1,20 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { SentMessageInfo } from 'nodemailer';
 import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class MailService {
+  private readonly logger = new Logger(MailService.name);
+
   constructor(
     private readonly mailerService: MailerService,
     private readonly i18n: I18nService,
     private readonly configService: ConfigService<AllConfigType>,
-    private readonly logger: AppLogger,
-  ) {
-    logger.setContext(MailService.name);
-  }
+  ) {}
 
   async sendForgotPasswordOrThrow(params: {
     to: string;

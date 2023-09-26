@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   Patch,
@@ -32,6 +33,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import {
   ItemUpdateAllDto,
   ItemUpdateDto,
@@ -42,10 +44,8 @@ import { Item } from '../../catalogs/entities/item.entity.js';
 import { CatalogImagesService } from '../../catalogs/services/catalog-images.service.js';
 import { CatalogSortService } from '../../catalogs/services/catalog-sort.service.js';
 import { ItemsService } from '../../catalogs/services/items.service.js';
-import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
-import type { MerchantsGuardedRequest } from '../../guards/merchants.guard.js';
-import { MerchantsGuard } from '../../guards/merchants.guard.js';
-import { AppLogger } from '../../logger/app.logger.js';
+import type { MerchantsGuardedRequest } from '../../merchants/merchants.guard.js';
+import { MerchantsGuard } from '../../merchants/merchants.guard.js';
 import { SquareService } from '../../square/square.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
@@ -58,14 +58,15 @@ import { paginatedResults } from '../../utils/paginated.js';
   version: '2',
 })
 export class ItemsController {
+  private readonly logger = new Logger(ItemsController.name);
+
   constructor(
     private readonly service: ItemsService,
     private readonly catalogSortService: CatalogSortService,
     private readonly catalogImagesService: CatalogImagesService,
     private readonly squareService: SquareService,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(ItemsController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiBearerAuth()
@@ -273,10 +274,11 @@ export class ItemsController {
       throw new NotFoundException(`Item with id ${id} not found`);
     }
 
-    const squareResponse = await this.squareService.uploadCatalogImage({
+    const squareResponse = await this.squareService.uploadCatalogImageOrThrow({
       accessToken: merchant.squareAccessToken,
       idempotencyKey,
       objectId: item.squareId,
+      id: nanoid(),
       file,
     });
 

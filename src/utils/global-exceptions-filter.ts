@@ -4,22 +4,21 @@ import {
   ExceptionFilter,
   HttpException,
   HttpStatus,
+  Logger,
 } from '@nestjs/common';
 import * as Sentry from '@sentry/node';
 import { Response } from 'express';
 import { I18nContext } from 'nestjs-i18n';
 import { EntityNotFoundError, QueryFailedError } from 'typeorm';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { ErrorResponse } from './error-response.js';
 
 @Catch()
 export class GlobalExceptionsFilter implements ExceptionFilter {
-  logger: AppLogger;
+  private readonly logger = new Logger(GlobalExceptionsFilter.name);
 
-  constructor(logger: AppLogger) {
-    this.logger = logger;
-    this.logger.setContext(GlobalExceptionsFilter.name);
+  constructor() {
+    this.logger.verbose(this.constructor.name);
   }
 
   catch(exception: any, host: ArgumentsHost): void {

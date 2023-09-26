@@ -4,6 +4,7 @@ import {
   Delete,
   HttpCode,
   HttpStatus,
+  Logger,
   Patch,
   Post,
   Req,
@@ -25,11 +26,10 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { NullableType } from '../utils/types/nullable.type.js';
+import { ApiKeyAuthGuard } from './apikey-auth.guard.js';
 import { AuthenticationService } from './authentication.service.js';
 import { AuthenticationEmailConfirmRequestBody } from './dto/authentication-email-confirm.dto.js';
 import { AuthenticationEmailLoginRequestBody } from './dto/authentication-email-login.dto.js';
@@ -48,11 +48,10 @@ import { AuthenticationResponse } from './types/authentication-response.type.js'
   version: '2',
 })
 export class AuthenticationController {
-  constructor(
-    private readonly service: AuthenticationService,
-    private readonly logger: AppLogger,
-  ) {
-    this.logger.setContext(AuthenticationController.name);
+  private readonly logger = new Logger(AuthenticationController.name);
+
+  constructor(private readonly service: AuthenticationService) {
+    this.logger.verbose(this.constructor.name);
   }
 
   @Post('email/login')

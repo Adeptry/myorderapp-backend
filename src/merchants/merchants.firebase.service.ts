@@ -1,8 +1,7 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 
 import firebaseAdminPkg from 'firebase-admin';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from './entities/merchant.entity.js';
 import { MerchantsService } from './merchants.service.js';
 
@@ -10,12 +9,13 @@ const { credential } = firebaseAdminPkg;
 
 @Injectable()
 export class MerchantsFirebaseService {
+  private readonly logger = new Logger(MerchantsFirebaseService.name);
+
   constructor(
     protected readonly service: MerchantsService,
     private readonly firebaseAdminService: FirebaseAdminService,
-    private readonly logger: AppLogger,
   ) {
-    logger.setContext(MerchantsFirebaseService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   /*

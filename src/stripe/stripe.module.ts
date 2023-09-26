@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from '../logger/logger.module.js';
-import { StripeConfigUtils } from './stripe.config.utils.js';
+import { ConfigModule } from '@nestjs/config';
+import { StripeConfig } from './stripe.config.js';
 import { StripeService } from './stripe.service.js';
 import { StripeWebhookController } from './stripe.webhooks.controller.js';
 
 @Module({
-  imports: [LoggerModule],
-  exports: [StripeService, StripeConfigUtils],
+  imports: [ConfigModule.forFeature(StripeConfig)],
+  exports: [StripeService],
   controllers: [StripeWebhookController],
-  providers: [StripeService, StripeConfigUtils],
+  providers: [StripeService],
 })
 export class StripeModule {}

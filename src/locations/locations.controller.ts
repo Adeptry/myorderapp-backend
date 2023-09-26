@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -26,10 +27,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { MerchantsGuard } from '../guards/merchants.guard.js';
-import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
-import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import type { UserTypeGuardedRequest } from '../customers/customer-merchant.guard.js';
+import { CustomerMerchantGuard } from '../customers/customer-merchant.guard.js';
 import {
   LocationUpdateAllDto,
   LocationUpdateDto,
@@ -37,7 +37,7 @@ import {
 import { LocationPaginatedResponse } from '../locations/dto/locations-paginated.output.js';
 import { Location as MoaLocation } from '../locations/entities/location.entity.js';
 import { LocationsService } from '../locations/locations.service.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { MerchantsGuard } from '../merchants/merchants.guard.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
@@ -47,11 +47,10 @@ import { paginatedResults } from '../utils/paginated.js';
 @ApiTags('Locations')
 @Controller('v2/locations')
 export class LocationsController {
-  constructor(
-    private readonly service: LocationsService,
-    protected readonly logger: AppLogger,
-  ) {
-    this.logger.setContext(LocationsController.name);
+  private readonly logger = new Logger(LocationsController.name);
+
+  constructor(private readonly service: LocationsService) {
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiBearerAuth()
@@ -95,7 +94,7 @@ export class LocationsController {
 
   @ApiBearerAuth()
   @Get('me')
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @UseGuards(AuthGuard('jwt'), CustomerMerchantGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: LocationPaginatedResponse })
   @ApiUnauthorizedResponse({

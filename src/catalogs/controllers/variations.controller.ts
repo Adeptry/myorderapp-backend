@@ -4,6 +4,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Param,
   Patch,
   Query,
@@ -21,9 +22,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
-import { MerchantsGuard } from '../../guards/merchants.guard.js';
-import { AppLogger } from '../../logger/app.logger.js';
+import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { MerchantsGuard } from '../../merchants/merchants.guard.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { VariationUpdateDto } from '../dto/variation-update.dto.js';
 import { Variation } from '../entities/variation.entity.js';
@@ -36,11 +36,10 @@ import { VariationsService } from '../services/variations.service.js';
   version: '2',
 })
 export class VariationsController {
-  constructor(
-    private readonly service: VariationsService,
-    private readonly logger: AppLogger,
-  ) {
-    this.logger.setContext(VariationsController.name);
+  private readonly logger = new Logger(VariationsController.name);
+
+  constructor(private readonly service: VariationsService) {
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiBearerAuth()
@@ -81,12 +80,12 @@ export class VariationsController {
   })
   async patch(
     @Param('id') variationId: string,
-    @Body() input: VariationUpdateDto,
+    @Body() body: VariationUpdateDto,
   ): Promise<Variation> {
     this.logger.verbose(this.patch.name);
     return this.service.updateOne({
       id: variationId,
-      input,
+      input: body,
     });
   }
 }

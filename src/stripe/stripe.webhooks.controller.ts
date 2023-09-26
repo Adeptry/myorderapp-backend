@@ -1,23 +1,32 @@
 import type { RawBodyRequest } from '@nestjs/common';
-import { Controller, Headers, Post, Req, Res } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  Controller,
+  Headers,
+  Inject,
+  InternalServerErrorException,
+  Logger,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
 import Stripe from 'stripe';
-import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { StripeConfig } from './stripe.config.js';
 import { StripeService } from './stripe.service.js';
 
 @Controller('v2/stripe/webhook')
 export class StripeWebhookController {
+  private readonly logger = new Logger(StripeWebhookController.name);
   constructor(
     private readonly service: StripeService,
-    private readonly configService: ConfigService<AllConfigType>,
+    @Inject(StripeConfig.KEY)
+    private config: ConfigType<typeof StripeConfig>,
     private readonly eventEmitter: EventEmitter2,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(StripeWebhookController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiExcludeEndpoint()
@@ -28,15 +37,13 @@ export class StripeWebhookController {
     @Res({ passthrough: true }) response: Response,
   ) {
     this.logger.verbose(this.post.name);
-    const webhookSecret = this.configService.getOrThrow(
-      'stripe.webhookSecret',
-      {
-        infer: true,
-      },
-    );
 
     if (!request.rawBody) {
       return;
+    }
+
+    if (!this.config.webhookSecret) {
+      throw new InternalServerErrorException();
     }
 
     let event: Stripe.Event | undefined;
@@ -45,7 +52,7 @@ export class StripeWebhookController {
       event = this.service.webhooksConstructEvent(
         request.rawBody,
         signature,
-        webhookSecret,
+        this.config.webhookSecret,
       );
     } catch (err: any) {
       this.logger.error(`Stripe webhook received: ${err.message}`);

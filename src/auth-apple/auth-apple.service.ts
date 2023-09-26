@@ -1,18 +1,19 @@
-import { Injectable } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Inject, Injectable, Logger } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import appleSigninAuth from 'apple-signin-auth';
-import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
+import { AuthAppleConfig } from './auth-apple.config.js';
 import { AuthAppleLoginDto } from './dto/auth-apple-login.dto.js';
 
 @Injectable()
 export class AuthAppleService {
+  private readonly logger = new Logger(AuthAppleService.name);
+
   constructor(
-    private readonly configService: ConfigService<AllConfigType>,
-    private readonly logger: AppLogger,
+    @Inject(AuthAppleConfig.KEY)
+    private readonly config: ConfigType<typeof AuthAppleConfig>,
   ) {
-    this.logger.setContext(AuthAppleService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   async getProfileByToken(
@@ -20,7 +21,7 @@ export class AuthAppleService {
   ): Promise<SocialInterface> {
     this.logger.verbose(this.getProfileByToken.name);
     const data = await appleSigninAuth.verifyIdToken(loginDto.idToken, {
-      audience: this.configService.get('apple.appAudience', { infer: true }),
+      audience: this.config.appAudience,
     });
 
     return {

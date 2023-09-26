@@ -1,22 +1,22 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util.js';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import bcrypt from 'bcryptjs';
 import { plainToClass } from 'class-transformer';
 import crypto from 'crypto';
 import ms from 'ms';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { AllConfigType } from '../config.type.js';
 import { ForgotService } from '../forgot/forgot.service.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { MailService } from '../mail/mail.service.js';
 import { Role } from '../roles/entities/role.entity.js';
 import { RoleEnum } from '../roles/roles.enum.js';
@@ -29,6 +29,7 @@ import { User } from '../users/entities/user.entity.js';
 import { UsersService } from '../users/users.service.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthenticationsProvidersEnum } from './authentication-providers.enum.js';
+import { AuthenticationConfig } from './authentication.config.js';
 import { AuthenticationEmailRegisterRequestBody } from './dto/authentication-email-register.dto.js';
 import { AuthenticationUpdateRequestBody } from './dto/authentication-update.dto.js';
 import { JwtPayloadType } from './strategies/types/jwt-payload.type.js';
@@ -37,17 +38,20 @@ import { AuthenticationResponse } from './types/authentication-response.type.js'
 
 @Injectable()
 export class AuthenticationService {
+  private readonly logger = new Logger(AuthenticationService.name);
+
   constructor(
     private readonly jwtService: JwtService,
+    @Inject(AuthenticationConfig.KEY)
+    private config: ConfigType<typeof AuthenticationConfig>,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly logger: AppLogger,
+
     private readonly usersService: UsersService,
     private readonly forgotService: ForgotService,
     private readonly sessionService: SessionService,
-    private readonly configService: ConfigService<AllConfigType>,
     private readonly mailService: MailService,
   ) {
-    this.logger.setContext(AuthenticationService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentLanguageTranslations() {
@@ -58,11 +62,9 @@ export class AuthenticationService {
 
   validateApiKey(apiKey: string): boolean {
     this.logger.verbose(this.validateApiKey.name);
-    const apiKeys: string[] =
-      this.configService.get<string>('API_KEYS', { infer: true })?.split(',') ||
-      [];
     return (
-      apiKeys.find((key) => apiKey == key) !== undefined || apiKeys.length === 0
+      this.config.apiKeys.find((key) => apiKey == key) !== undefined ||
+      this.config.apiKeys.length === 0
     );
   }
 
@@ -480,11 +482,8 @@ export class AuthenticationService {
     sessionId: Session['id'];
   }) {
     this.logger.verbose(this.getTokensData.name);
-    const tokenExpiresIn = this.configService.getOrThrow('auth.expires', {
-      infer: true,
-    });
 
-    const tokenExpires = Date.now() + ms(tokenExpiresIn);
+    const tokenExpires = Date.now() + ms(this.config.expires);
 
     const [token, refreshToken] = await Promise.all([
       await this.jwtService.signAsync(
@@ -494,8 +493,8 @@ export class AuthenticationService {
           sessionId: data.sessionId,
         },
         {
-          secret: this.configService.getOrThrow('auth.secret', { infer: true }),
-          expiresIn: tokenExpiresIn,
+          secret: this.config.secret,
+          expiresIn: this.config.expires,
         },
       ),
       await this.jwtService.signAsync(
@@ -503,12 +502,8 @@ export class AuthenticationService {
           sessionId: data.sessionId,
         },
         {
-          secret: this.configService.getOrThrow('auth.refreshSecret', {
-            infer: true,
-          }),
-          expiresIn: this.configService.getOrThrow('auth.refreshExpires', {
-            infer: true,
-          }),
+          secret: this.config.refreshSecret,
+          expiresIn: this.config.expires,
         },
       ),
     ]);

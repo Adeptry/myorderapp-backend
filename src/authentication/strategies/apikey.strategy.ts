@@ -1,10 +1,15 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnauthorizedException,
+} from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { PassportStrategy } from '@nestjs/passport';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { HeaderAPIKeyStrategy } from 'passport-headerapikey';
+import { NestAppConfig } from '../../app.config.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { AuthenticationService } from '../authentication.service.js';
 
 @Injectable()
@@ -12,17 +17,17 @@ export class ApiKeyStrategy extends PassportStrategy(
   HeaderAPIKeyStrategy,
   'api-key',
 ) {
+  private readonly logger = new Logger(ApiKeyStrategy.name);
+
   constructor(
-    protected logger: AppLogger,
     protected i18n: I18nService<I18nTranslations>,
-    private authService: AuthenticationService,
-    protected configService: ConfigService,
+    private service: AuthenticationService,
+    @Inject(NestAppConfig.KEY)
+    protected config: ConfigType<typeof NestAppConfig>,
   ) {
     super(
       {
-        header: configService.getOrThrow<string>('HEADER_KEY_API_KEY', {
-          infer: true,
-        }),
+        header: config.headerApiKey,
         prefix: '',
       },
       true,
@@ -32,13 +37,13 @@ export class ApiKeyStrategy extends PassportStrategy(
       ) => {
         this.logger.verbose('verify');
         const translations = this.currentLanguageTranslations();
-        if (this.authService.validateApiKey(apiKey)) {
+        if (this.service.validateApiKey(apiKey)) {
           done(null, true);
         }
         done(new UnauthorizedException(translations.unauthorized), null);
       },
     );
-    this.logger.setContext(ApiKeyStrategy.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentLanguageTranslations() {

@@ -5,6 +5,7 @@ import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
   AfterLoad,
+  BaseEntity,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -17,13 +18,12 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthenticationsProvidersEnum } from '../../authentication/authentication-providers.enum.js';
-import { FileEntity } from '../../files/entities/file.entity.js';
+import { AwsS3FileEntity } from '../../aws-s3-files/entities/aws-s3-file.entity.js';
 import { Role } from '../../roles/entities/role.entity.js';
 import { Status } from '../../statuses/entities/status.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
-export class User extends EntityHelper {
+export class User extends BaseEntity {
   @PrimaryColumn('varchar')
   @ApiProperty()
   id?: string;
@@ -108,11 +108,11 @@ export class User extends EntityHelper {
   @ApiProperty({ required: false, type: String, nullable: true })
   language?: string | null;
 
-  @ManyToOne(() => FileEntity, {
+  @ManyToOne(() => AwsS3FileEntity, {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  photo?: Relation<FileEntity> | null;
+  photo?: Relation<AwsS3FileEntity> | null;
 
   @ManyToOne(() => Role, {
     eager: true,

@@ -4,9 +4,9 @@ import {
   ObjectLiteral,
   Repository,
 } from 'typeorm';
-import { AppLogger } from '../logger/app.logger.js';
 import { EntityRepositoryService } from './entity-repository-service.js';
 import { paginatedResults } from './paginated.js';
+import { RepositoryServiceLogger } from './reposistory-service-logger';
 import { InfinityPaginationResultType } from './types/infinity-pagination-result.type.js';
 import { PaginationOptions } from './types/pagination-options.js';
 
@@ -15,7 +15,7 @@ export abstract class RestfulEntityRepositoryService<
 > extends EntityRepositoryService<Entity> {
   constructor(
     protected readonly repository: Repository<Entity>,
-    protected readonly logger: AppLogger,
+    protected readonly logger: RepositoryServiceLogger,
   ) {
     super(repository, logger);
   }

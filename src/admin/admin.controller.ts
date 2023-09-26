@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   Query,
   UseGuards,
@@ -17,14 +18,13 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AuthenticationEmailLoginRequestBody } from '../authentication/dto/authentication-email-login.dto.js';
 import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
-import { AdminsGuard } from '../guards/admins.guard.js';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsSquareService } from '../merchants/merchants.square.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
+import { AdministratorsGuard } from './administrators.guard.js';
 
 @ApiTags('Admin')
 @UseGuards(ApiKeyAuthGuard)
@@ -34,12 +34,12 @@ import { ErrorResponse } from '../utils/error-response.js';
   version: '2',
 })
 export class AdminController {
+  private readonly logger = new Logger(AdminController.name);
   constructor(
     private readonly authenticationService: AuthenticationService,
     private readonly merchantsSquareService: MerchantsSquareService,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(AdminController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @Post('email/login')
@@ -60,7 +60,7 @@ export class AdminController {
   @ApiQuery({ name: 'merchantId', required: true, type: String })
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AdminsGuard)
+  @UseGuards(AuthGuard('jwt'), AdministratorsGuard)
   @ApiOperation({
     summary: 'Sync a merchants Square Catalog',
     operationId: 'postAdminSquareCatalogSync',

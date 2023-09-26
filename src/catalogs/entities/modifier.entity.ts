@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -18,13 +19,12 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { Location } from '../../locations/entities/location.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { Catalog } from './catalog.entity.js';
 import { ModifierList } from './modifier-list.entity.js';
 import { ModifierLocationOverride } from './modifier-location-override.entity.js';
 
 @Entity('modifier')
-export class Modifier extends EntityHelper {
+export class Modifier extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })

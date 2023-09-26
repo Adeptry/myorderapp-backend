@@ -4,28 +4,31 @@ import { AuthenticationModule } from '../authentication/authentication.module.js
 import { CustomersController } from '../customers/customers.controller.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
-import { GuardsModule } from '../guards/guards.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
-import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { SquareModule } from '../square/square.module.js';
 import { UsersModule } from '../users/users.module.js';
+import { CustomerMerchantGuard } from './customer-merchant.guard.js';
+import { CustomersGuard } from './customers.guard.js';
 import { AppInstall } from './entities/app-install.entity.js';
 import { AppInstallsService } from './services/app-installs.service.js';
 
 @Module({
   imports: [
-    LoggerModule,
+    AuthenticationModule,
     TypeOrmModule.forFeature([Customer, AppInstall]),
     SquareModule,
-    GuardsModule,
-    AuthenticationModule,
     LocationsModule,
     UsersModule,
-    forwardRef(() => MerchantsModule),
+    forwardRef(() => MerchantsModule), // because of CustomerMerchantGuard
   ],
-  exports: [CustomersService],
   controllers: [CustomersController],
-  providers: [CustomersService, AppInstallsService],
+  providers: [
+    CustomersService,
+    AppInstallsService,
+    CustomersGuard,
+    CustomerMerchantGuard,
+  ],
+  exports: [CustomersService, CustomersGuard, CustomerMerchantGuard],
 })
 export class CustomersModule {}

@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -27,6 +28,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { CategoryPaginatedResponse } from '../../catalogs/dto/categories-paginated.output.js';
 import {
   CategoryUpdateAllDto,
@@ -34,11 +36,9 @@ import {
 } from '../../catalogs/dto/category-update.dto.js';
 import { Category } from '../../catalogs/entities/category.entity.js';
 import { CategoriesService } from '../../catalogs/services/categories.service.js';
-import { ApiKeyAuthGuard } from '../../guards/apikey-auth.guard.js';
-import { MerchantsGuard } from '../../guards/merchants.guard.js';
-import type { UserTypeGuardedRequest } from '../../guards/user-type.guard.js';
-import { UserTypeGuard } from '../../guards/user-type.guard.js';
-import { AppLogger } from '../../logger/app.logger.js';
+import type { UserTypeGuardedRequest } from '../../customers/customer-merchant.guard.js';
+import { CustomerMerchantGuard } from '../../customers/customer-merchant.guard.js';
+import { MerchantsGuard } from '../../merchants/merchants.guard.js';
 import { MerchantsService } from '../../merchants/merchants.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
@@ -50,12 +50,13 @@ import { ErrorResponse } from '../../utils/error-response.js';
   version: '2',
 })
 export class CategoriesController {
+  private readonly logger = new Logger(CategoriesController.name);
+
   constructor(
     private readonly service: CategoriesService,
     private readonly merchantsService: MerchantsService,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(CategoriesController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiBearerAuth()
@@ -142,7 +143,7 @@ export class CategoriesController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @UseGuards(AuthGuard('jwt'), CustomerMerchantGuard)
   @Get('categories/me')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: CategoryPaginatedResponse })

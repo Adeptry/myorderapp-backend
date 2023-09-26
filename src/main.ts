@@ -1,10 +1,11 @@
 import {
   ClassSerializerInterceptor,
+  Logger,
   UnprocessableEntityException,
   ValidationPipe,
   VersioningType,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
@@ -12,17 +13,16 @@ import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
 import { AdminModule } from './admin/admin.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
+import { NestAppConfig } from './app.config.js';
 import { AppModule } from './app.module.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
-import { AllConfigType } from './config.type.js';
 import { CustomersModule } from './customers/customers.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
-import { AppLogger } from './logger/app.logger.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SquareModule } from './square/square.module.js';
@@ -41,21 +41,16 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     rawBody: true,
   });
-  const logger = await app.resolve(AppLogger);
-  logger.setContext('MyOrderApp');
-  logger.log('Starting...');
+  const config: ConfigType<typeof NestAppConfig> = app.get(NestAppConfig.KEY);
+  const logger = new Logger(config.name);
+  logger.log(bootstrap.name);
 
   app.use(Sentry.Handlers.requestHandler());
   app.use(Sentry.Handlers.tracingHandler());
-  app.useGlobalFilters(
-    new GlobalExceptionsFilter(await app.resolve(AppLogger)),
-  );
+  app.useGlobalFilters(new GlobalExceptionsFilter());
 
-  const configService = app.get(ConfigService<AllConfigType>);
   app.enableCors({
-    origin: RegExp(
-      configService.getOrThrow('app.corsOriginRegExp', { infer: true }),
-    ),
+    origin: RegExp(config.corsOriginRegExp),
   });
   app.use(helmet());
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
@@ -91,9 +86,6 @@ async function bootstrap() {
     }),
   );
 
-  const headerKeyApiKey =
-    configService.get<string>('HEADER_KEY_API_KEY', { infer: true }) || '';
-
   SwaggerModule.setup(
     'merchants/docs',
     app,
@@ -104,16 +96,16 @@ async function bootstrap() {
         .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
-          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
-          headerKeyApiKey,
+          { type: 'apiKey', name: config.headerApiKey, in: 'header' },
+          config.headerApiKey,
         )
         .addGlobalParameters({
-          name: configService.getOrThrow('app.headerLanguage', { infer: true }),
+          name: config.headerLanguage,
           in: 'header',
           required: false,
           schema: { type: 'string' },
         })
-        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
+        .addServer(config.backendUrl)
         .build(),
       {
         include: [
@@ -147,16 +139,16 @@ async function bootstrap() {
         .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
-          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
-          headerKeyApiKey,
+          { type: 'apiKey', name: config.headerApiKey, in: 'header' },
+          config.headerApiKey,
         )
         .addGlobalParameters({
-          name: configService.getOrThrow('app.headerLanguage', { infer: true }),
+          name: config.headerLanguage,
           in: 'header',
           required: false,
           schema: { type: 'string' },
         })
-        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
+        .addServer(config.backendUrl)
         .build(),
       {
         include: [
@@ -189,10 +181,10 @@ async function bootstrap() {
         .setVersion('2.1.1')
         .addBearerAuth()
         .addApiKey(
-          { type: 'apiKey', name: headerKeyApiKey, in: 'header' },
-          headerKeyApiKey,
+          { type: 'apiKey', name: config.headerApiKey, in: 'header' },
+          config.headerApiKey,
         )
-        .addServer(configService.getOrThrow('app.backendUrl', { infer: true }))
+        .addServer(config.backendUrl)
         .build(),
       {
         include: [AdminModule, HealthModule],
@@ -204,7 +196,7 @@ async function bootstrap() {
     },
   );
 
-  await app.listen(configService.getOrThrow('app.port', { infer: true }));
+  await app.listen(config.port);
   logger.log('Ready');
 }
 void bootstrap();

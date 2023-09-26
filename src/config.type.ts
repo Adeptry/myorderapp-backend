@@ -1,23 +1,11 @@
-import { AppConfig } from './app.config.js';
-import { AppleConfig } from './auth-apple/apple.config.js';
-import { GoogleConfig } from './auth-google/google.config.js';
-import { AuthenticationConfig } from './authentication/authentication.config.js';
-import { DatabaseConfig } from './database/database.config.js';
-import { FileConfig } from './files/file.config.js';
-import { MailConfig } from './mail/mail.config.js';
-import { SquareConfig } from './square/square.config.js';
-import { StripeConfig } from './stripe/stripe.config.js';
-import { TwilioConfig } from './twilio/twilio.config.js';
+import { NestAppConfigType } from './app.config.js';
+import { AwsS3FilesConfigType } from './aws-s3-files/aws-s3-files.config.js';
+import { DatabaseConfigType } from './database/database.config.js';
+import { MailerConfigType } from './mailer.config.js';
 
 export type AllConfigType = {
-  app: AppConfig;
-  apple: AppleConfig;
-  auth: AuthenticationConfig;
-  database: DatabaseConfig;
-  file: FileConfig;
-  google: GoogleConfig;
-  mail: MailConfig;
-  twilio: TwilioConfig;
-  stripe: StripeConfig;
-  square: SquareConfig;
+  app: NestAppConfigType;
+  database: DatabaseConfigType;
+  awsS3: AwsS3FilesConfigType;
+  mailer: MailerConfigType;
 };

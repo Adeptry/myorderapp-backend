@@ -2,19 +2,17 @@ import {
   BadRequestException,
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
-  forwardRef,
 } from '@nestjs/common';
 import { AuthenticationService } from '../authentication/authentication.service.js';
-import { CustomersService } from '../customers/customers.service.js';
-import { Customer } from '../customers/entities/customer.entity.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { User } from '../users/entities/user.entity.js';
+import { CustomersService } from './customers.service.js';
+import { Customer } from './entities/customer.entity.js';
 
 export interface UserTypeGuardedRequest extends Request {
   user: User;
@@ -23,16 +21,15 @@ export interface UserTypeGuardedRequest extends Request {
 }
 
 @Injectable()
-export class UserTypeGuard implements CanActivate {
+export class CustomerMerchantGuard implements CanActivate {
+  private readonly logger = new Logger(CustomerMerchantGuard.name);
+
   constructor(
-    private readonly authService: AuthenticationService,
-    @Inject(forwardRef(() => CustomersService))
-    private customersService: CustomersService,
-    @Inject(forwardRef(() => MerchantsService))
-    private merchantsService: MerchantsService,
-    protected readonly logger: AppLogger,
+    private readonly service: CustomersService,
+    private readonly authenticationService: AuthenticationService,
+    private readonly merchantsService: MerchantsService,
   ) {
-    logger.setContext(UserTypeGuard.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -42,7 +39,7 @@ export class UserTypeGuard implements CanActivate {
     const queryMerchantIdOrPath: string | undefined =
       request.query.merchantIdOrPath;
 
-    const user = await this.authService.me(request.user);
+    const user = await this.authenticationService.me(request.user);
 
     if (!user) {
       throw new UnauthorizedException(
@@ -64,7 +61,7 @@ export class UserTypeGuard implements CanActivate {
       if (!queryMerchantIdOrPath) {
         throw new BadRequestException(`merchantId is required`);
       }
-      const customer = await this.customersService.findOne({
+      const customer = await this.service.findOne({
         where: { userId: user.id },
       });
       if (!customer) {

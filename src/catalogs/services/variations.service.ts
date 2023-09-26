@@ -1,10 +1,9 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { Variation } from '../../catalogs/entities/variation.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { VariationUpdateDto } from '../dto/variation-update.dto.js';
 import { VariationLocationOverride } from '../entities/variation-location-override.entity.js';
@@ -12,14 +11,16 @@ import { VariationLocationOverridesService } from './variation-location-override
 
 @Injectable()
 export class VariationsService extends EntityRepositoryService<Variation> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Variation)
     protected readonly repository: Repository<Variation>,
     protected readonly variationLocationOverridesService: VariationLocationOverridesService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(VariationsService.name);
+    const logger = new Logger(VariationsService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   /*

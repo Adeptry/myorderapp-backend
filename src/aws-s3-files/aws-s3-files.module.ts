@@ -3,17 +3,14 @@ import { Module, UnprocessableEntityException } from '@nestjs/common';
 import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util.js';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import multerS3 from 'multer-s3';
 import { AllConfigType } from '../config.type.js';
-import { LoggerModule } from '../logger/logger.module.js';
-import { FileEntity } from './entities/file.entity.js';
-import { FilesService } from './files.service.js';
+import { AwsS3FilesConfig } from './aws-s3-files.config.js';
+import { AwsS3FilesService } from './aws-s3-files.service.js';
 
 @Module({
   imports: [
-    LoggerModule,
-    TypeOrmModule.forFeature([FileEntity]),
+    ConfigModule.forFeature(AwsS3FilesConfig),
     MulterModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -31,13 +28,13 @@ import { FilesService } from './files.service.js';
           },
           storage: () => {
             const s3 = new S3Client({
-              region: configService.get('file.awsS3Region', { infer: true }),
+              region: configService.get('awsS3.region', { infer: true }),
               credentials: {
-                accessKeyId: configService.getOrThrow('file.accessKeyId', {
+                accessKeyId: configService.getOrThrow('awsS3.accessKeyId', {
                   infer: true,
                 }),
                 secretAccessKey: configService.getOrThrow(
-                  'file.secretAccessKey',
+                  'awsS3.secretAccessKey',
                   { infer: true },
                 ),
               },
@@ -45,7 +42,7 @@ import { FilesService } from './files.service.js';
 
             return multerS3({
               s3: s3,
-              bucket: configService.getOrThrow('file.awsDefaultS3Bucket', {
+              bucket: configService.getOrThrow('awsS3.defaultBucket', {
                 infer: true,
               }),
               acl: 'public-read',
@@ -62,14 +59,14 @@ import { FilesService } from './files.service.js';
             });
           },
           limits: {
-            fileSize: configService.get('file.maxFileSize', { infer: true }),
+            fileSize: configService.get('awsS3.maxFileSize', { infer: true }),
           },
         };
       },
     }),
   ],
   controllers: [],
-  providers: [ConfigModule, ConfigService, FilesService],
-  exports: [FilesService],
+  providers: [ConfigModule, ConfigService, AwsS3FilesService],
+  exports: [AwsS3FilesService],
 })
-export class FilesModule {}
+export class AwsS3FilesModule {}

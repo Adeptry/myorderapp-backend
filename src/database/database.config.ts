@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { plainToClass } from 'class-transformer';
 import {
   IsBoolean,
   IsInt,
@@ -7,10 +8,10 @@ import {
   Max,
   Min,
   ValidateIf,
+  validateSync,
 } from 'class-validator';
-import validateConfig from '../utils/validate-config.js';
 
-export type DatabaseConfig = {
+export type DatabaseConfigType = {
   url?: string;
   type?: string;
   host?: string;
@@ -28,7 +29,7 @@ export type DatabaseConfig = {
   logging?: boolean;
 };
 
-class EnvironmentVariablesValidator {
+class DatabaseConfigValidator {
   @ValidateIf((envValues) => envValues.DATABASE_URL)
   @IsString()
   DATABASE_URL!: string;
@@ -90,8 +91,19 @@ class EnvironmentVariablesValidator {
   DATABASE_LOGGING?: boolean;
 }
 
-export default registerAs<DatabaseConfig>('database', () => {
-  validateConfig(process.env, EnvironmentVariablesValidator);
+export const DatabaseConfig = registerAs<DatabaseConfigType>('database', () => {
+  const errors = validateSync(
+    plainToClass(DatabaseConfigValidator, process.env, {
+      enableImplicitConversion: true,
+    }),
+    {
+      skipMissingProperties: false,
+    },
+  );
+
+  if (errors.length > 0) {
+    throw new Error(errors.toString());
+  }
 
   return {
     url: process.env.DATABASE_URL,

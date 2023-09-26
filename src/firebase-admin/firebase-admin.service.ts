@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import {
   App,
   AppOptions,
@@ -12,12 +12,13 @@ import { getDatabase } from 'firebase-admin/database';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getMessaging } from 'firebase-admin/messaging';
 import { getStorage } from 'firebase-admin/storage';
-import { AppLogger } from '../logger/app.logger.js';
 
 @Injectable()
 export class FirebaseAdminService {
-  constructor(protected readonly logger: AppLogger) {
-    logger.setContext(FirebaseAdminService.name);
+  private readonly logger = new Logger(FirebaseAdminService.name);
+
+  constructor() {
+    this.logger.verbose(this.constructor.name);
   }
 
   initializeApp(options?: AppOptions, appName?: string): App {

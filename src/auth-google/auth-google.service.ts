@@ -1,24 +1,27 @@
-import { Injectable, UnprocessableEntityException } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  Inject,
+  Injectable,
+  Logger,
+  UnprocessableEntityException,
+} from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { OAuth2Client } from 'google-auth-library';
-import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
+import { AuthGoogleConfig } from './auth-google.config.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
 @Injectable()
 export class AuthGoogleService {
+  private readonly logger = new Logger(AuthGoogleService.name);
+
   private google: OAuth2Client;
 
   constructor(
-    private readonly configService: ConfigService<AllConfigType>,
-    private readonly logger: AppLogger,
+    @Inject(AuthGoogleConfig.KEY)
+    private readonly config: ConfigType<typeof AuthGoogleConfig>,
   ) {
-    this.logger.setContext(AuthGoogleService.name);
-    this.google = new OAuth2Client(
-      configService.get('google.clientId', { infer: true }),
-      configService.get('google.clientSecret', { infer: true }),
-    );
+    this.logger.verbose(this.constructor.name);
+    this.google = new OAuth2Client(config.clientId, config.clientSecret);
   }
 
   async getProfileByToken(
@@ -27,9 +30,8 @@ export class AuthGoogleService {
     this.logger.verbose(this.getProfileByToken.name);
     const ticket = await this.google.verifyIdToken({
       idToken: loginDto.idToken,
-      audience: [
-        this.configService.getOrThrow('google.clientId', { infer: true }),
-      ],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      audience: [this.config.clientId!],
     });
 
     const data = ticket.getPayload();

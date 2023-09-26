@@ -1,8 +1,7 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { LocationsService } from '../locations/locations.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { SquareCatalogObjectTypeEnum } from '../square/square-catalog-object-type.enum.js';
 import { SquareService } from '../square/square.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
@@ -24,6 +23,8 @@ import { VariationsService } from './services/variations.service.js';
 
 @Injectable()
 export class CatalogsService extends EntityRepositoryService<Catalog> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Catalog)
     protected readonly repository: Repository<Catalog>,
@@ -36,14 +37,12 @@ export class CatalogsService extends EntityRepositoryService<Catalog> {
     private readonly categoriesService: CategoriesService,
     private readonly catalogImagesService: CatalogImagesService,
     private readonly itemModifierListService: ItemModifierListService,
-    @Inject(SquareService)
     private readonly squareService: SquareService,
-    @Inject(LocationsService)
     private readonly locationsService: LocationsService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(CatalogImagesService.name);
+    const logger = new Logger(CatalogsService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async squareSync(params: {

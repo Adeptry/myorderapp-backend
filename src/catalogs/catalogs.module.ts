@@ -14,9 +14,7 @@ import { ModifierListsService } from '../catalogs/services/modifier-lists.servic
 import { ModifiersService } from '../catalogs/services/modifiers.service.js';
 import { VariationsService } from '../catalogs/services/variations.service.js';
 import { CustomersModule } from '../customers/customers.module.js';
-import { GuardsModule } from '../guards/guards.module.js';
 import { LocationsModule } from '../locations/locations.module.js';
-import { LoggerModule } from '../logger/logger.module.js';
 import { MerchantsModule } from '../merchants/merchants.module.js';
 import { SquareModule } from '../square/square.module.js';
 import { CategoriesController } from './controllers/categories.controller.js';
@@ -34,7 +32,7 @@ import { VariationLocationOverridesService } from './services/variation-location
 
 @Module({
   imports: [
-    LoggerModule,
+    AuthenticationModule,
     TypeOrmModule.forFeature([
       Item,
       Category,
@@ -47,12 +45,10 @@ import { VariationLocationOverridesService } from './services/variation-location
       VariationLocationOverride,
       ItemModifierList,
     ]),
-    LocationsModule,
-    AuthenticationModule,
     SquareModule,
-    forwardRef(() => GuardsModule),
+    CustomersModule,
+    LocationsModule,
     forwardRef(() => MerchantsModule),
-    forwardRef(() => CustomersModule),
   ],
   exports: [
     CatalogsService,

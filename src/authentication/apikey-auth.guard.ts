@@ -1,12 +1,13 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, Logger } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
-import { AppLogger } from '../logger/app.logger.js';
 
 @Injectable()
 export class ApiKeyAuthGuard extends AuthGuard('api-key') {
-  constructor(private readonly logger: AppLogger) {
-    logger.setContext(ApiKeyAuthGuard.name);
+  private readonly logger = new Logger(ApiKeyAuthGuard.name);
+
+  constructor() {
     super();
+    this.logger.verbose(this.constructor.name);
   }
 
   async canActivate(context: ExecutionContext): Promise<any> {

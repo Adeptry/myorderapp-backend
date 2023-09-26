@@ -7,6 +7,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   NotFoundException,
   Param,
   ParseBoolPipe,
@@ -37,13 +38,12 @@ import {
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { IsNull, Not } from 'typeorm';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
-import { CustomersGuard } from '../guards/customers.guard.js';
-import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
-import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import type { UserTypeGuardedRequest } from '../customers/customer-merchant.guard.js';
+import { CustomerMerchantGuard } from '../customers/customer-merchant.guard.js';
+import type { CustomersGuardedRequest } from '../customers/customers.guard.js';
+import { CustomersGuard } from '../customers/customers.guard.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { OrdersService } from '../orders/orders.service.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../utils/error-response.js';
@@ -63,12 +63,13 @@ import { Order } from './entities/order.entity.js';
   type: ErrorResponse,
 })
 export class OrdersController {
+  private readonly logger = new Logger(OrdersController.name);
+
   constructor(
     private readonly service: OrdersService,
-    private readonly logger: AppLogger,
     private readonly i18n: I18nService<I18nTranslations>,
   ) {
-    this.logger.setContext(OrdersController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentLanguageTranslations() {
@@ -224,7 +225,7 @@ export class OrdersController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @UseGuards(AuthGuard('jwt'), CustomerMerchantGuard)
   @Get('me')
   @ApiOperation({
     summary: 'Get my Orders',
@@ -280,7 +281,7 @@ export class OrdersController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @UseGuards(AuthGuard('jwt'), CustomerMerchantGuard)
   @Get(':id')
   @ApiOperation({
     summary: 'Get Order',

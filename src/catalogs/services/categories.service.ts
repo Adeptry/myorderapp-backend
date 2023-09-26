@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
@@ -7,7 +7,6 @@ import {
   CategoryUpdateDto,
 } from '../../catalogs/dto/category-update.dto.js';
 import { Category } from '../../catalogs/entities/category.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { paginatedResults } from '../../utils/paginated.js';
 import { CatalogSortService } from './catalog-sort.service.js';
@@ -15,15 +14,17 @@ import { ItemsService } from './items.service.js';
 
 @Injectable()
 export class CategoriesService extends EntityRepositoryService<Category> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Category)
     protected readonly repository: Repository<Category>,
     private readonly itemsService: ItemsService,
     private readonly catalogSortService: CatalogSortService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(CategoriesService.name);
+    const logger = new Logger(CategoriesService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async findPaginatedResults(params: {

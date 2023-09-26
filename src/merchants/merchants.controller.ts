@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
   ParseBoolPipe,
   Post,
   Query,
@@ -28,13 +29,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
-import { MerchantsGuard } from '../guards/merchants.guard.js';
-import type { UsersGuardedRequest } from '../guards/users.guard.js';
-import { UsersGuard } from '../guards/users.guard.js';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import type { AuthenticatedRequest } from '../authentication/authentication.guard.js';
+import { AuthenticationGuard } from '../authentication/authentication.guard.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { StripeCheckoutCreateDto } from '../merchants/dto/stripe-checkout-create.input.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
@@ -42,6 +40,8 @@ import { SquareConfirmOauthDto } from './dto/square-confirm-oauth.input.js';
 import { StripeCheckoutDto } from './dto/stripe-checkout.dto.js';
 import { StripeBillingPortalCreateOutput } from './dto/stripe-portal.dto.js';
 import { Merchant } from './entities/merchant.entity.js';
+import type { MerchantsGuardedRequest } from './merchants.guard.js';
+import { MerchantsGuard } from './merchants.guard.js';
 import { MerchantsService } from './merchants.service.js';
 import { MerchantsSquareService } from './merchants.square.service.js';
 import { MerchantsStripeService } from './merchants.stripe.service.js';
@@ -54,15 +54,17 @@ import { MerchantsStripeService } from './merchants.stripe.service.js';
   version: '2',
 })
 export class MerchantsController {
+  private readonly logger = new Logger(MerchantsController.name);
+
   constructor(
     private readonly service: MerchantsService,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly logger: AppLogger,
+
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly merchantsStripeService: MerchantsStripeService,
     private readonly stripeService: StripeService,
   ) {
-    logger.setContext(MerchantsController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentTranslations() {
@@ -72,7 +74,7 @@ export class MerchantsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant already exists',
@@ -102,11 +104,14 @@ export class MerchantsController {
     const merchant = this.service.create({
       userId: request.user.id,
     });
-    const stripeCustomer = await this.stripeService.createCustomer({
-      email: request.user.email ?? '',
-      phone: request.user.phoneNumber ?? '',
-      name: request.user.firstName ?? '',
-    });
+    const stripeCustomer = await this.stripeService.responseOrThrow((stripe) =>
+      stripe.customers.create({
+        email: request.user.email ?? '',
+        phone: request.user.phoneNumber ?? '',
+        name: request.user.firstName ?? '',
+      }),
+    );
+
     merchant.stripeId = stripeCustomer?.id;
 
     return await this.service.save(merchant);
@@ -114,7 +119,7 @@ export class MerchantsController {
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
@@ -130,7 +135,7 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: Merchant })
   async getMe(
-    @Req() request: UsersGuardedRequest,
+    @Req() request: AuthenticatedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
     @Query('appConfig', new DefaultValuePipe(false), ParseBoolPipe)

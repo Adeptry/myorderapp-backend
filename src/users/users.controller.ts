@@ -5,6 +5,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   Patch,
   Req,
   UseGuards,
@@ -19,9 +20,8 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import type { UsersGuardedRequest } from '../guards/users.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import type { AuthenticatedRequest } from '../authentication/authentication.guard.js';
 import { SessionService } from '../session/session.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { UserUpdateDto } from './dto/user-update.dto.js';
@@ -37,12 +37,13 @@ import { UsersService } from './users.service.js';
   version: '2',
 })
 export class UsersController {
+  private readonly logger = new Logger(UsersController.name);
+
   constructor(
     private readonly service: UsersService,
     private readonly sessionService: SessionService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(UsersController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @Get('me')
@@ -50,7 +51,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({ operationId: 'getUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  getMe(@Req() request: UsersGuardedRequest) {
+  getMe(@Req() request: AuthenticatedRequest) {
     this.logger.verbose(this.getMe.name);
     return this.service.findOne({ where: { id: request.user.id } });
   }
@@ -62,7 +63,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   @ApiBody({ type: UserUpdateDto })
   async patchMe(
-    @Req() request: UsersGuardedRequest,
+    @Req() request: AuthenticatedRequest,
     @Body() body: UserUpdateDto,
   ) {
     const { user } = request;
@@ -80,7 +81,7 @@ export class UsersController {
   @ApiOkResponse({ type: User })
   @ApiOperation({ operationId: 'deleteUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  async deleteMe(@Req() request: UsersGuardedRequest) {
+  async deleteMe(@Req() request: AuthenticatedRequest) {
     this.logger.verbose(this.deleteMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await this.service.delete(request.user.id!);

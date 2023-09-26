@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   Patch,
   Post,
@@ -36,14 +37,13 @@ import {
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { Not, QueryFailedError } from 'typeorm';
 import { AppConfigService } from '../app-config/app-config.service.js';
-import { FilesService } from '../files/files.service.js';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
-import { MerchantsGuard } from '../guards/merchants.guard.js';
-import type { UserTypeGuardedRequest } from '../guards/user-type.guard.js';
-import { UserTypeGuard } from '../guards/user-type.guard.js';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import { AwsS3FilesService } from '../aws-s3-files/aws-s3-files.service.js';
+import type { UserTypeGuardedRequest } from '../customers/customer-merchant.guard.js';
+import { CustomerMerchantGuard } from '../customers/customer-merchant.guard.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
+import type { MerchantsGuardedRequest } from '../merchants/merchants.guard.js';
+import { MerchantsGuard } from '../merchants/merchants.guard.js';
 import { UserTypeEnum } from '../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { AppConfigUpdateDto } from './dto/app-config-update.input.js';
@@ -57,13 +57,14 @@ import { AppConfig } from './entities/app-config.entity.js';
   version: '2',
 })
 export class AppConfigController {
+  private readonly logger = new Logger(AppConfigController.name);
+
   constructor(
     private readonly service: AppConfigService,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly logger: AppLogger,
-    private readonly filesService: FilesService,
+    private readonly filesService: AwsS3FilesService,
   ) {
-    this.logger.setContext(AppConfigController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentLanguageTranslations() {
@@ -73,7 +74,7 @@ export class AppConfigController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UserTypeGuard)
+  @UseGuards(AuthGuard('jwt'), CustomerMerchantGuard)
   @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiUnauthorizedResponse({
@@ -292,7 +293,7 @@ export class AppConfigController {
       });
     }
 
-    appConfig.iconFile = await this.filesService.upload(file);
+    appConfig.iconFileUrl = (await this.filesService.upload(file)).Location;
     return this.service.save(appConfig);
   }
 }

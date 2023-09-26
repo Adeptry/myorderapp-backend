@@ -1,25 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { Modifier } from '../../catalogs/entities/modifier.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
 @Injectable()
 export class ModifiersService extends EntityRepositoryService<Modifier> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Modifier)
     protected readonly repository: Repository<Modifier>,
     protected readonly modifierListsService: ModifierListsService,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(ModifiersService.name);
+    const logger = new Logger(ModifiersService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   /*

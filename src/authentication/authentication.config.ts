@@ -1,15 +1,19 @@
 import { registerAs } from '@nestjs/config';
-import { IsString } from 'class-validator';
-import validateConfig from '../utils/validate-config.js';
+import { plainToClass } from 'class-transformer';
+import { IsString, validateSync } from 'class-validator';
 
-export type AuthenticationConfig = {
-  secret?: string;
-  expires?: string;
-  refreshSecret?: string;
-  refreshExpires?: string;
+export type AuthenticationConfigType = {
+  apiKeys: string[];
+  secret: string;
+  expires: string;
+  refreshSecret: string;
+  refreshExpires: string;
 };
 
-class EnvironmentVariablesValidator {
+class AuthenticationConfigValidator {
+  @IsString()
+  AUTH_API_KEYS!: string;
+
   @IsString()
   AUTH_JWT_SECRET!: string;
 
@@ -23,13 +27,32 @@ class EnvironmentVariablesValidator {
   AUTH_REFRESH_TOKEN_EXPIRES_IN!: string;
 }
 
-export default registerAs<AuthenticationConfig>('auth', () => {
-  validateConfig(process.env, EnvironmentVariablesValidator);
+export const AuthenticationConfig = registerAs<AuthenticationConfigType>(
+  'auth',
+  () => {
+    const errors = validateSync(
+      plainToClass(AuthenticationConfigValidator, process.env, {
+        enableImplicitConversion: true,
+      }),
+      {
+        skipMissingProperties: false,
+      },
+    );
 
-  return {
-    secret: process.env.AUTH_JWT_SECRET,
-    expires: process.env.AUTH_JWT_TOKEN_EXPIRES_IN,
-    refreshSecret: process.env.AUTH_REFRESH_SECRET,
-    refreshExpires: process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN,
-  };
-});
+    if (errors.length > 0) {
+      throw new Error(errors.toString());
+    }
+
+    return {
+      apiKeys: process.env.AUTH_API_KEYS?.split(',') || [],
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      secret: process.env.AUTH_JWT_SECRET!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      expires: process.env.AUTH_JWT_TOKEN_EXPIRES_IN!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      refreshSecret: process.env.AUTH_REFRESH_SECRET!,
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      refreshExpires: process.env.AUTH_REFRESH_TOKEN_EXPIRES_IN!,
+    };
+  },
+);

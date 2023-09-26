@@ -1,21 +1,28 @@
-import { Body, Controller, Headers, Post, Req } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import {
+  Body,
+  Controller,
+  Headers,
+  Inject,
+  Logger,
+  Post,
+  Req,
+} from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import type { Request } from 'express';
 import { WebhooksHelper } from 'square';
-import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { SquareConfig } from './square.config.js';
 
 @Controller('v2/square/webhook')
 export class SquareWebhookController {
+  private readonly logger = new Logger(SquareWebhookController.name);
+
   constructor(
-    private configService: ConfigService<AllConfigType>,
+    @Inject(SquareConfig.KEY)
+    private config: ConfigType<typeof SquareConfig>,
     private eventEmitter: EventEmitter2,
-    private logger: AppLogger,
-  ) {
-    this.logger.setContext(SquareWebhookController.name);
-  }
+  ) {}
 
   @ApiExcludeEndpoint()
   @Post()
@@ -26,12 +33,11 @@ export class SquareWebhookController {
   ) {
     this.logger.verbose(this.post.name);
     if (
+      !this.config.webhookSignatureKey ||
       !WebhooksHelper.isValidWebhookEventSignature(
         body,
         signature,
-        this.configService.getOrThrow('square.webhookSignatureKey', {
-          infer: true,
-        }),
+        this.config.webhookSignatureKey,
         request.url,
       )
     ) {

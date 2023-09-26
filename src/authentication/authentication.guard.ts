@@ -2,29 +2,28 @@ import {
   CanActivate,
   ExecutionContext,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { AuthenticationService } from '../authentication/authentication.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { User } from '../users/entities/user.entity.js';
+import { AuthenticationService } from './authentication.service.js';
 
-export interface UsersGuardedRequest extends Request {
+export interface AuthenticatedRequest extends Request {
   user: User;
 }
 
 @Injectable()
-export class UsersGuard implements CanActivate {
-  constructor(
-    private authService: AuthenticationService,
-    protected readonly logger: AppLogger,
-  ) {
-    logger.setContext(UsersGuard.name);
+export class AuthenticationGuard implements CanActivate {
+  private readonly logger = new Logger(AuthenticationGuard.name);
+
+  constructor(private readonly service: AuthenticationService) {
+    this.logger.verbose(this.constructor.name);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     this.logger.verbose(this.canActivate.name);
     const request = context.switchToHttp().getRequest();
-    const user = await this.authService.me(request.user);
+    const user = await this.service.me(request.user);
 
     if (!user) {
       throw new UnauthorizedException(

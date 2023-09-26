@@ -1,23 +1,24 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { ModifierList } from '../../catalogs/entities/modifier-list.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { MoaSelectionType } from '../dto/catalogs.types.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
 @Injectable()
 export class ModifierListsService extends EntityRepositoryService<ModifierList> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(ModifierList)
     protected readonly repository: Repository<ModifierList>,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(ModifierListsService.name);
+    const logger = new Logger(ModifierListsService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async process(params: {

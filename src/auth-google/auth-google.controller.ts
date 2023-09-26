@@ -3,6 +3,7 @@ import {
   Controller,
   HttpCode,
   HttpStatus,
+  Logger,
   Post,
   UseGuards,
 } from '@nestjs/common';
@@ -12,10 +13,9 @@ import {
   ApiSecurity,
   ApiTags,
 } from '@nestjs/swagger';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { AuthGoogleService } from './auth-google.service.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
@@ -27,12 +27,13 @@ import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
   version: '2',
 })
 export class AuthGoogleController {
+  private readonly logger = new Logger(AuthGoogleController.name);
+
   constructor(
     private readonly authService: AuthenticationService,
     private readonly authGoogleService: AuthGoogleService,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(AuthGoogleController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @Post('login')

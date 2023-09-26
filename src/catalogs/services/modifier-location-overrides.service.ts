@@ -1,21 +1,22 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ModifierLocationOverrides } from 'square';
 import { Repository } from 'typeorm';
 import { ModifierLocationOverride } from '../../catalogs/entities/modifier-location-override.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
-import { AppLogger } from '../../logger/app.logger.js';
 import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 
 @Injectable()
 export class ModifierLocationOverridesService extends EntityRepositoryService<ModifierLocationOverride> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(ModifierLocationOverride)
     protected readonly repository: Repository<ModifierLocationOverride>,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(ModifierLocationOverridesService.name);
+    const logger = new Logger(ModifierLocationOverridesService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async process(params: {

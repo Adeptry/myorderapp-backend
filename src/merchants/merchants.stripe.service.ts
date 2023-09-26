@@ -1,6 +1,7 @@
 import {
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
@@ -8,27 +9,26 @@ import { ConfigService } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import Stripe from 'stripe';
-import { AllConfigType } from '../config.type.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { AppLogger } from '../logger/app.logger.js';
-import { StripeConfigUtils } from '../stripe/stripe.config.utils.js';
 import { StripeService } from '../stripe/stripe.service.js';
 import { User } from '../users/entities/user.entity.js';
+import { MerchantsConfigType } from './merchants.config.js';
 import { MerchantsService } from './merchants.service.js';
 
 @Injectable()
 export class MerchantsStripeService {
+  private readonly logger = new Logger(MerchantsStripeService.name);
+
   constructor(
     protected readonly service: MerchantsService,
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     //@ts-ignore
-    private readonly configService: ConfigService<AllConfigType>,
-    private readonly logger: AppLogger,
+    private readonly configService: ConfigService<MerchantsConfigType>,
+
     private readonly i18n: I18nService<I18nTranslations>,
     private readonly stripeService: StripeService,
-    private readonly stripeConfigUtils: StripeConfigUtils,
   ) {
-    this.logger.setContext(MerchantsStripeService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentTranslations() {
@@ -58,10 +58,12 @@ export class MerchantsStripeService {
       throw new UnauthorizedException(translations.needsStripeId);
     }
 
-    const session = await this.stripeService.createBillingPortalSession({
-      customer: stripeId,
-      return_url: returnUrl,
-    });
+    const session = await this.stripeService.responseOrThrow((stripe) =>
+      stripe.billingPortal.sessions.create({
+        customer: stripeId,
+        return_url: returnUrl,
+      }),
+    );
 
     if (!session) {
       throw new InternalServerErrorException(
@@ -95,28 +97,30 @@ export class MerchantsStripeService {
       throw new UnauthorizedException(translations.needsStripeId);
     }
 
-    const session = await this.stripeService.createCheckoutSession({
-      mode: 'subscription',
-      line_items: [
-        {
-          price: stripePriceId,
-          quantity: 1,
-        },
-      ],
-      allow_promotion_codes: true,
-      customer: merchant.stripeId,
-      client_reference_id: merchant.id,
-      success_url: `${params.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: params.cancelUrl,
-    });
+    const response = await this.stripeService.responseOrThrow((stripe) =>
+      stripe.checkout.sessions.create({
+        mode: 'subscription',
+        line_items: [
+          {
+            price: stripePriceId,
+            quantity: 1,
+          },
+        ],
+        allow_promotion_codes: true,
+        customer: merchant.stripeId,
+        client_reference_id: merchant.id,
+        success_url: `${params.successUrl}?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: params.cancelUrl,
+      }),
+    );
 
-    if (!session) {
+    if (!response) {
       throw new InternalServerErrorException(
         translations.invalidStripeResponse,
       );
     }
 
-    return session.id;
+    return response.id;
   }
 
   // Sent when a customer’s subscription ends.
@@ -190,9 +194,7 @@ export class MerchantsStripeService {
         stripeSubscription.items?.data[0]?.price?.id;
 
       if (updateSubscriptionPriceId) {
-        const tier = this.stripeConfigUtils.tierForStripePriceId(
-          updateSubscriptionPriceId,
-        );
+        const tier = this.tierForStripePriceId(updateSubscriptionPriceId);
 
         if (tier != null) {
           merchant.tier = tier;
@@ -246,7 +248,7 @@ export class MerchantsStripeService {
       }
 
       const priceId = stripeSubscription.items?.data[0]?.price?.id;
-      const tier = this.stripeConfigUtils.tierForStripePriceId(priceId);
+      const tier = this.tierForStripePriceId(priceId);
 
       if (priceId) {
         merchant.tier = tier;
@@ -257,5 +259,152 @@ export class MerchantsStripeService {
     } else {
       this.logger.error("Missing 'customer' in stripeSubscription");
     }
+  }
+
+  tierForStripePriceId(priceId: string): number | null {
+    if (this.isStripePriceIdTier0(priceId)) {
+      return 0;
+    } else if (this.isStripePriceIdTier1(priceId)) {
+      return 1;
+    } else if (this.isStripePriceIdTier2(priceId)) {
+      return 2;
+    } else {
+      return null;
+    }
+  }
+
+  isStripePriceIdTier2(priceId: string) {
+    return Object.values(this.stripePriceIdsTier2()).includes(priceId);
+  }
+
+  stripePriceIdsTier2() {
+    return {
+      priceIdTier2USD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2USD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier2EUR: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2EUR',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier2GBP: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2GBP',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier2JPY: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2JPY',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier2CAD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2CAD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier2AUD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier2AUD',
+        {
+          infer: true,
+        },
+      ),
+    };
+  }
+
+  isStripePriceIdTier1(priceId: string) {
+    return Object.values(this.stripePriceIdsTier1()).includes(priceId);
+  }
+
+  stripePriceIdsTier1() {
+    return {
+      priceIdTier1USD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1USD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier1EUR: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1EUR',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier1GBP: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1GBP',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier1JPY: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1JPY',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier1CAD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1CAD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier1AUD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier1AUD',
+        {
+          infer: true,
+        },
+      ),
+    };
+  }
+
+  isStripePriceIdTier0(priceId: string) {
+    return Object.values(this.stripePriceIdsTier0()).includes(priceId);
+  }
+
+  stripePriceIdsTier0() {
+    return {
+      priceIdTier0USD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0USD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier0EUR: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0EUR',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier0GBP: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0GBP',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier0JPY: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0JPY',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier0CAD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0CAD',
+        {
+          infer: true,
+        },
+      ),
+      priceIdTier0AUD: this.configService.getOrThrow(
+        'merchants.stripePriceIdTier0AUD',
+        {
+          infer: true,
+        },
+      ),
+    };
   }
 }

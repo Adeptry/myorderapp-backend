@@ -3,12 +3,12 @@ import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { ForgotModule } from '../forgot/forgot.module.js';
-import { LoggerModule } from '../logger/logger.module.js';
 import { MailModule } from '../mail/mail.module.js';
 import { SessionModule } from '../session/session.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { IsExist } from '../utils/validators/is-exists.validator.js';
 import { IsNotExist } from '../utils/validators/is-not-exists.validator.js';
+import { AuthenticationConfig } from './authentication.config.js';
 import { AuthenticationController } from './authentication.controller.js';
 import { AuthenticationService } from './authentication.service.js';
 import { AnonymousStrategy } from './strategies/anonymous.strategy.js';
@@ -18,8 +18,7 @@ import { JwtStrategy } from './strategies/jwt.strategy.js';
 
 @Module({
   imports: [
-    LoggerModule,
-    ConfigModule,
+    ConfigModule.forFeature(AuthenticationConfig),
     UsersModule,
     ForgotModule,
     SessionModule,

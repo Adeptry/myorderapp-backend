@@ -1,80 +1,43 @@
 import {
   HttpStatus,
+  Inject,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import type { ConfigType } from '@nestjs/config';
 import pRetry from 'p-retry';
 import Stripe from 'stripe';
-import { AllConfigType } from '../config.type.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { StripeConfig } from './stripe.config.js';
 
 @Injectable()
 export class StripeService {
-  private client: Stripe;
+  private readonly logger = new Logger(StripeService.name);
+  private readonly stripe: Stripe;
 
   constructor(
-    private configService: ConfigService<AllConfigType>,
-    private logger: AppLogger,
+    @Inject(StripeConfig.KEY)
+    private config: ConfigType<typeof StripeConfig>,
   ) {
-    logger.setContext(StripeService.name);
-    const apiKey = this.configService.getOrThrow('stripe.apiKey', {
-      infer: true,
+    this.logger.verbose(this.constructor.name);
+
+    this.stripe = new Stripe(this.config.apiKey, {
+      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+      //@ts-ignore
+      apiVersion: null,
     });
-    if (apiKey) {
-      this.client = new Stripe(apiKey, {
-        apiVersion: '2022-11-15',
-      });
-    } else {
-      this.logger.error('Missing Stripe API key');
-      throw new InternalServerErrorException('Missing Stripe API key');
-    }
   }
 
-  async createCustomer(
-    params?: Stripe.CustomerCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Customer> {
-    this.logger.verbose(this.createCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.client.customers.create(params, options),
-    );
-  }
-
-  async createCheckoutSession(
-    params: Stripe.Checkout.SessionCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    this.logger.verbose(this.createCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.client.checkout.sessions.create(params, options),
-    );
-  }
-
-  async retrieveCheckoutSession(
-    id: string,
-    params?: Stripe.Checkout.SessionRetrieveParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    this.logger.verbose(this.retrieveCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.client.checkout.sessions.retrieve(id, params, options),
-    );
-  }
-
-  async createBillingPortalSession(
-    params: Stripe.BillingPortal.SessionCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
-    this.logger.verbose(this.createBillingPortalSession.name);
-    return this.retryOrThrow(() =>
-      this.client.billingPortal.sessions.create(params, options),
-    );
+  responseOrThrow<T>(stripeFn: (stripe: Stripe) => Promise<T>): Promise<T> {
+    this.logger.verbose(this.responseOrThrow.name);
+    return this.retryOrThrow(() => stripeFn(this.stripe));
   }
 
   async retryOrThrow<T>(fn: () => Promise<T>): Promise<T> {
+    this.logger.verbose(this.retryOrThrow.name);
     return pRetry(fn, {
       onFailedAttempt: (error) => {
+        this.logger.error(error);
         if (error instanceof Stripe.errors.StripeAPIError) {
           const statusCode = error.statusCode ?? 0;
           const isRetryable =
@@ -101,7 +64,7 @@ export class StripeService {
     receivedAt?: number | undefined,
   ) {
     this.logger.verbose(this.webhooksConstructEvent.name);
-    return this.client.webhooks.constructEvent(
+    return this.stripe.webhooks.constructEvent(
       payload,
       header,
       secret,

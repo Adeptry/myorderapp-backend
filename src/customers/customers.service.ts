@@ -2,12 +2,12 @@ import {
   BadRequestException,
   Injectable,
   InternalServerErrorException,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { LocationsService } from '../locations/locations.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { SquareService } from '../square/square.service.js';
 import { UsersService } from '../users/users.service.js';
@@ -17,6 +17,8 @@ import { Customer } from './entities/customer.entity.js';
 
 @Injectable()
 export class CustomersService extends EntityRepositoryService<Customer> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(Customer)
     protected readonly repository: Repository<Customer>,
@@ -24,10 +26,10 @@ export class CustomersService extends EntityRepositoryService<Customer> {
     private readonly squareService: SquareService,
     private readonly merchantsService: MerchantsService,
     private readonly locationsService: LocationsService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(CustomersService.name);
+    const logger = new Logger(CustomersService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async findOneWithUserIdAndMerchantIdOrPath(params: {
@@ -121,15 +123,16 @@ export class CustomersService extends EntityRepositoryService<Customer> {
       where: { isMain: true, merchantId: merchant.id },
     });
 
-    const response = await this.squareService.createCustomerOrThrow({
-      accessToken: merchant.squareAccessToken,
-      request: {
-        emailAddress: user.email ?? undefined,
-        givenName: user.firstName ?? undefined,
-        familyName: user.lastName ?? undefined,
-        idempotencyKey: customer.id,
-      },
-    });
+    const response = await this.squareService.apiResponseOrThrow(
+      merchant.squareAccessToken,
+      (client) =>
+        client.customersApi.createCustomer({
+          emailAddress: user.email ?? undefined,
+          givenName: user.firstName ?? undefined,
+          familyName: user.lastName ?? undefined,
+          idempotencyKey: customer.id,
+        }),
+    );
 
     if (!response.result.customer?.id) {
       throw new InternalServerErrorException(

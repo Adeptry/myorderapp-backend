@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -13,12 +14,11 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { Item } from './item.entity.js';
 import { ModifierList } from './modifier-list.entity.js';
 
 @Entity('item_modifier_list')
-export class ItemModifierList extends EntityHelper {
+export class ItemModifierList extends BaseEntity {
   @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;

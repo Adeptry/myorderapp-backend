@@ -1,7 +1,5 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { AuthenticationModule } from '../authentication/authentication.module.js';
-import { LoggerModule } from '../logger/logger.module.js';
 import { SessionModule } from '../session/session.module.js';
 import { IsExist } from '../utils/validators/is-exists.validator.js';
 import { IsNotExist } from '../utils/validators/is-not-exists.validator.js';
@@ -10,12 +8,7 @@ import { UsersController } from './users.controller.js';
 import { UsersService } from './users.service.js';
 
 @Module({
-  imports: [
-    LoggerModule,
-    TypeOrmModule.forFeature([User]),
-    forwardRef(() => AuthenticationModule),
-    SessionModule,
-  ],
+  imports: [TypeOrmModule.forFeature([User]), SessionModule],
   controllers: [UsersController],
   providers: [IsExist, IsNotExist, UsersService],
   exports: [UsersService],

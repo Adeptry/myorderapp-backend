@@ -17,13 +17,14 @@ import {
 import { PickKeysByType } from 'typeorm/common/PickKeysByType.js';
 import { QueryDeepPartialEntity } from 'typeorm/query-builder/QueryPartialEntity.js';
 import { UpsertOptions } from 'typeorm/repository/UpsertOptions.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { RepositoryServiceLogger } from './reposistory-service-logger';
 
 // Be sure to mark your service as injectable
 export abstract class EntityRepositoryService<Entity extends ObjectLiteral> {
   constructor(
+    // And be sure to inject your repository
     protected readonly repository: Repository<Entity>,
-    protected readonly logger: AppLogger,
+    protected readonly logger: RepositoryServiceLogger,
   ) {}
 
   createQueryBuilder(

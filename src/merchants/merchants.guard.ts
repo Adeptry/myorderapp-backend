@@ -1,13 +1,11 @@
 import {
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
+  Logger,
   UnauthorizedException,
-  forwardRef,
 } from '@nestjs/common';
 import { AuthenticationService } from '../authentication/authentication.service.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { User } from '../users/entities/user.entity.js';
@@ -19,14 +17,13 @@ export interface MerchantsGuardedRequest extends Request {
 
 @Injectable()
 export class MerchantsGuard implements CanActivate {
+  private readonly logger = new Logger(MerchantsGuard.name);
+
   constructor(
-    @Inject(forwardRef(() => AuthenticationService))
-    private authService: AuthenticationService,
-    @Inject(forwardRef(() => MerchantsService))
-    private merchantsService: MerchantsService,
-    private readonly logger: AppLogger,
+    private readonly service: MerchantsService,
+    private readonly authService: AuthenticationService,
   ) {
-    logger.setContext(MerchantsGuard.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -39,7 +36,7 @@ export class MerchantsGuard implements CanActivate {
       );
     }
 
-    const merchant = await this.merchantsService.findOne({
+    const merchant = await this.service.findOne({
       where: { userId: user.id },
     });
     if (!merchant) {

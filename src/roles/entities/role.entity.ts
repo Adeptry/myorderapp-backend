@@ -1,9 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Entity, PrimaryColumn } from 'typeorm';
-import { EntityHelper } from '../../utils/entity-helper.js';
+import { BaseEntity, Entity, PrimaryColumn } from 'typeorm';
 
 @Entity()
-export class Role extends EntityHelper {
+export class Role extends BaseEntity {
   @ApiProperty({ example: 'admin' })
   @PrimaryColumn({ type: 'varchar' })
   id?: string;

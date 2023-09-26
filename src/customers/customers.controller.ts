@@ -6,6 +6,7 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Logger,
   ParseBoolPipe,
   ParseIntPipe,
   Patch,
@@ -30,19 +31,18 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
+import type { AuthenticatedRequest } from '../authentication/authentication.guard.js';
+import { AuthenticationGuard } from '../authentication/authentication.guard.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
-import { ApiKeyAuthGuard } from '../guards/apikey-auth.guard.js';
-import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
-import { CustomersGuard } from '../guards/customers.guard.js';
-import { MerchantsGuard } from '../guards/merchants.guard.js';
-import type { UsersGuardedRequest } from '../guards/users.guard.js';
-import { UsersGuard } from '../guards/users.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
+import { MerchantsGuard } from '../merchants/merchants.guard.js';
 import { SquareCard } from '../square/square.dto.js';
 import { SquareService } from '../square/square.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { paginatedResults } from '../utils/paginated.js';
+import type { CustomersGuardedRequest } from './customers.guard.js';
+import { CustomersGuard } from './customers.guard.js';
 import { AppInstallUpdateDto } from './dto/app-install-update.dto.js';
 import { CustomersPaginatedResponse } from './dto/customers-paginated.output.js';
 import { CustomerUpdateDto } from './dto/update-customer.dto.js';
@@ -60,17 +60,19 @@ import { AppInstallsService } from './services/app-installs.service.js';
   version: '2',
 })
 export class CustomersController {
+  private readonly logger = new Logger(CustomersController.name);
+
   constructor(
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,
-    private readonly logger: AppLogger,
+
     private readonly squareService: SquareService,
   ) {
-    logger.setContext(CustomersController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), UsersGuard)
+  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant does not have Square access token',
@@ -92,7 +94,7 @@ export class CustomersController {
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
   async post(
-    @Req() request: UsersGuardedRequest,
+    @Req() request: AuthenticatedRequest,
     @Query('merchantIdOrPath') merchantIdOrPath: string,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
@@ -184,13 +186,16 @@ export class CustomersController {
         throw new BadRequestException();
       }
 
-      if (customer.preferredSquareCardId) {
-        found.preferredSquareCard = (
-          await this.squareService.retrieveCard({
-            accessToken: merchant.squareAccessToken,
-            cardId: customer.preferredSquareCardId,
-          })
-        ).result.card as SquareCard;
+      const { preferredSquareCardId } = customer;
+      if (
+        preferredSquareCardId !== null &&
+        preferredSquareCardId !== undefined
+      ) {
+        const squareResponse = await this.squareService.apiResponseOrThrow(
+          merchant.squareAccessToken,
+          (client) => client.cardsApi.retrieveCard(preferredSquareCardId),
+        );
+        found.preferredSquareCard = squareResponse.result.card as SquareCard;
       }
     }
 
@@ -263,13 +268,16 @@ export class CustomersController {
         throw new BadRequestException();
       }
 
-      if (customer.preferredSquareCardId) {
-        found.preferredSquareCard = (
-          await this.squareService.retrieveCard({
-            accessToken: merchant.squareAccessToken,
-            cardId: customer.preferredSquareCardId,
-          })
-        ).result.card as SquareCard;
+      const { preferredSquareCardId } = customer;
+      if (
+        preferredSquareCardId !== null &&
+        preferredSquareCardId !== undefined
+      ) {
+        const squareResponse = await this.squareService.apiResponseOrThrow(
+          merchant.squareAccessToken,
+          (client) => client.cardsApi.retrieveCard(preferredSquareCardId),
+        );
+        found.preferredSquareCard = squareResponse.result.card as SquareCard;
       }
     }
 

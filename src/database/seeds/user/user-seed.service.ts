@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { AppLogger } from '../../../logger/app.logger.js';
 import { RoleEnum } from '../../../roles/roles.enum.js';
 import { StatusEnum } from '../../../statuses/statuses.enum.js';
 import { User } from '../../../users/entities/user.entity.js';
 
 @Injectable()
 export class UserSeedService {
+  private readonly logger = new Logger(UserSeedService.name);
+
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    private logger: AppLogger,
   ) {
-    this.logger.setContext(UserSeedService.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   async run() {

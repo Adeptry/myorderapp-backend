@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -18,11 +19,10 @@ import {
 import { Customer } from '../../customers/entities/customer.entity.js';
 import { Location } from '../../locations/entities/location.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { LineItem } from './line-item.entity.js';
 
 @Entity('order')
-export class Order extends EntityHelper {
+export class Order extends BaseEntity {
   @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
   id?: string;

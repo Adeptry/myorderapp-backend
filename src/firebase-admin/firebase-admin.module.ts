@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
-import { LoggerModule } from '../logger/logger.module.js';
 import { FirebaseAdminService } from './firebase-admin.service.js';
 
 @Module({
-  imports: [LoggerModule],
+  imports: [],
   exports: [FirebaseAdminService],
   providers: [FirebaseAdminService],
 })

@@ -3,6 +3,7 @@ import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handleba
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
+import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import {
   AcceptLanguageResolver,
@@ -16,56 +17,38 @@ import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
 import { AdminModule } from './admin/admin.module.js';
 import { AppConfigModule } from './app-config/app-config.module.js';
-import appConfig from './app.config.js';
-import appleConfig from './auth-apple/apple.config.js';
+import { NestAppConfig } from './app.config.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
-import googleConfig from './auth-google/google.config.js';
-import authConfig from './authentication/authentication.config.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
+import { AwsS3FilesModule } from './aws-s3-files/aws-s3-files.module.js';
 import { CardsModule } from './cards/cards.module.js';
 import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { AllConfigType } from './config.type.js';
 import { CustomersModule } from './customers/customers.module.js';
-import databaseConfig from './database/database.config.js';
+import { DatabaseConfig } from './database/database.config.js';
 import { TypeOrmConfigService } from './database/typeorm-config.service.js';
-import fileConfig from './files/file.config.js';
-import { FilesModule } from './files/files.module.js';
 import { FirebaseAdminModule } from './firebase-admin/firebase-admin.module.js';
 import { ForgotModule } from './forgot/forgot.module.js';
-import { GuardsModule } from './guards/guards.module.js';
 import { HealthModule } from './health/health.module.js';
 import { LocationsModule } from './locations/locations.module.js';
-import { LoggerModule } from './logger/logger.module.js';
-import mailConfig from './mail/mail.config.js';
 import { MailModule } from './mail/mail.module.js';
+import { MailerConfig } from './mailer.config.js';
 import { MerchantsModule } from './merchants/merchants.module.js';
 import { OrdersModule } from './orders/orders.module.js';
 import { SessionModule } from './session/session.module.js';
-import squareConfig from './square/square.config.js';
-import stripeConfig from './stripe/stripe.config.js';
+import { SquareModule } from './square/square.module.js';
 import { StripeModule } from './stripe/stripe.module.js';
-import twilioConfig from './twilio/twilio.config.js';
-import { TwilioModule } from './twilio/twilio.module.js';
 import { UsersModule } from './users/users.module.js';
 
 @Module({
   imports: [
+    HealthModule,
     EventEmitterModule.forRoot(),
+    ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [
-        databaseConfig,
-        authConfig,
-        appConfig,
-        mailConfig,
-        fileConfig,
-        googleConfig,
-        appleConfig,
-        squareConfig,
-        stripeConfig,
-        twilioConfig,
-      ],
+      load: [NestAppConfig, DatabaseConfig, MailerConfig],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -114,58 +97,65 @@ import { UsersModule } from './users/users.module.js';
       useFactory: (
         configService: ConfigService<AllConfigType>,
         i18n: I18nService,
-      ) => ({
-        transport: NodemailerMailgunTransport.default({
-          auth: {
-            api_key: configService.getOrThrow('mail.authApiKey', {
-              infer: true,
-            }),
-            domain: configService.getOrThrow('mail.authDomain', {
-              infer: true,
-            }),
-          },
-        }),
-        defaults: {
-          from: configService.getOrThrow('mail.defaultsFrom', {
-            infer: true,
+      ) => {
+        return {
+          transport: NodemailerMailgunTransport.default({
+            auth: {
+              api_key: configService.getOrThrow('mailer.authApiKey', {
+                infer: true,
+              }),
+              domain: configService.getOrThrow('mailer.authDomain', {
+                infer: true,
+              }),
+            },
           }),
-        },
-        template: {
-          dir: path.join(
-            dirname(fileURLToPath(import.meta.url)),
-            '../src/mail/templates/',
-          ),
-          adapter: new HandlebarsAdapter({ t: i18n.hbsHelper }),
-          options: {
-            strict: true,
+          defaults: {
+            from: configService.getOrThrow('mailer.defaultsFrom', {
+              infer: true,
+            }),
           },
-        },
-      }),
+          template: {
+            dir: path.join(
+              dirname(fileURLToPath(import.meta.url)),
+              '../src/mail/templates/',
+            ),
+            adapter: new HandlebarsAdapter({ t: i18n.hbsHelper }),
+            options: {
+              strict: true,
+            },
+          },
+        };
+      },
       imports: [ConfigModule],
       inject: [ConfigService, I18nService],
     }),
-    LoggerModule,
+
+    // Boilerplate
     UsersModule,
+    AdminModule,
     AuthenticationModule,
     AuthGoogleModule,
     AuthAppleModule,
     ForgotModule,
     SessionModule,
-    MailModule,
-    TwilioModule,
+
+    // Vendors
+    SquareModule,
     StripeModule,
+    FirebaseAdminModule,
+    AwsS3FilesModule,
+
+    // (add nest-twilio)
+    MailModule,
+
+    // Make these one module:
+    AppConfigModule,
     MerchantsModule,
     CustomersModule,
     LocationsModule,
     CatalogsModule,
-    FirebaseAdminModule,
-    AppConfigModule,
-    FilesModule,
     OrdersModule,
-    GuardsModule,
     CardsModule,
-    HealthModule,
-    AdminModule,
   ],
   controllers: [],
 })

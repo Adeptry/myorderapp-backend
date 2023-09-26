@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
@@ -19,21 +20,21 @@ import { ModifiersService } from '../catalogs/services/modifiers.service.js';
 import { VariationsService } from '../catalogs/services/variations.service.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { BusinessHoursPeriod } from '../locations/entities/business-hours-period.entity.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { VariationAddDto } from './dto/variation-add.dto.js';
 import { Order } from './entities/order.entity.js';
 import { LineItemService } from './services/line-item.service.js';
 
 @Injectable()
 export class OrdersUtils {
+  private readonly logger = new Logger(OrdersUtils.name);
+
   constructor(
-    private readonly logger: AppLogger,
     protected readonly i18n: I18nService<I18nTranslations>,
     private readonly lineItemsService: LineItemService,
     private readonly variationsService: VariationsService,
     private readonly modifiersService: ModifiersService,
   ) {
-    this.logger.setContext(OrdersUtils.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   currentLanguageTranslations() {

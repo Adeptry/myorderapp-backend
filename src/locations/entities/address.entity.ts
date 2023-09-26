@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -13,11 +14,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { Location } from './location.entity.js';
 
 @Entity('address')
-export class Address extends EntityHelper {
+export class Address extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })

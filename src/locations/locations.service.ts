@@ -1,8 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { BusinessHoursPeriod } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
-import { AppLogger } from '../logger/app.logger.js';
 import { SquareService } from '../square/square.service.js';
 import { EntityRepositoryService } from '../utils/entity-repository-service.js';
 import {
@@ -15,16 +14,18 @@ import { BusinessHoursPeriodsService } from './services/business-hours-period.se
 
 @Injectable()
 export class LocationsService extends EntityRepositoryService<MoaLocation> {
+  protected readonly logger: Logger;
+
   constructor(
     @InjectRepository(MoaLocation)
     protected readonly repository: Repository<MoaLocation>,
     private readonly addressService: AddressService,
     private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
     private readonly squareService: SquareService,
-    protected readonly logger: AppLogger,
   ) {
-    logger.setContext(LocationsService.name);
+    const logger = new Logger(LocationsService.name);
     super(repository, logger);
+    this.logger = logger;
   }
 
   async findAndCountWithMerchantIdOrPath(params: {
@@ -63,17 +64,18 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
       relations: ['address', 'businessHours'],
     });
 
-    const squareLocationsResponse =
-      await this.squareService.listLocationsOrThrow({
-        accessToken,
-      });
+    const squareLocationsResponse = await this.squareService.apiResponseOrThrow(
+      accessToken,
+      (client) => client.locationsApi.listLocations(),
+    );
+
     const squareLocations = squareLocationsResponse?.result.locations ?? [];
 
     const squareMainLocationResponse =
-      await this.squareService.retrieveLocationOrThrow({
-        accessToken,
-        locationSquareId: 'main',
+      await this.squareService.apiResponseOrThrow(accessToken, (client) => {
+        return client.locationsApi.retrieveLocation('main');
       });
+
     const squareMainLocation = squareMainLocationResponse.result.location;
     if (!squareMainLocation) {
       this.logger.error('Failed to retrieve main location');

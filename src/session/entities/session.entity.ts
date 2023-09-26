@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -14,10 +15,9 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
-export class Session extends EntityHelper {
+export class Session extends BaseEntity {
   @PrimaryColumn('varchar')
   id?: string;
 

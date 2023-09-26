@@ -2,6 +2,7 @@ import { Exclude } from 'class-transformer';
 import { Allow } from 'class-validator';
 import { nanoid } from 'nanoid';
 import {
+  BaseEntity,
   BeforeInsert,
   Column,
   CreateDateColumn,
@@ -14,10 +15,9 @@ import {
   VersionColumn,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 
 @Entity()
-export class Forgot extends EntityHelper {
+export class Forgot extends BaseEntity {
   @PrimaryColumn('varchar')
   id?: string;
 

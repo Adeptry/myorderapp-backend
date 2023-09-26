@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import { plainToClass } from 'class-transformer';
 import {
   IsEnum,
   IsInt,
@@ -7,8 +8,8 @@ import {
   IsUrl,
   Max,
   Min,
+  validateSync,
 } from 'class-validator';
-import validateConfig from './utils/validate-config.js';
 
 enum Environment {
   Development = 'development',
@@ -16,20 +17,21 @@ enum Environment {
   Production = 'production',
 }
 
-export type AppConfig = {
+export type NestAppConfigType = {
   nodeEnv: string;
   name: string;
   workingDirectory: string;
-  frontendUrl?: string;
+  frontendUrl: string;
   backendUrl: string;
   corsOriginRegExp: string;
   port: number;
   apiPrefix?: string;
   fallbackLanguage: string;
   headerLanguage: string;
+  headerApiKey: string;
 };
 
-class EnvironmentVariablesValidator {
+class NestAppConfigValidator {
   @IsEnum(Environment)
   @IsOptional()
   NODE_ENV?: Environment;
@@ -41,56 +43,63 @@ class EnvironmentVariablesValidator {
   PORT?: number;
 
   @IsUrl({ require_tld: false })
-  @IsOptional()
-  FRONTEND_URL?: string;
+  APP_FRONTEND_URL!: string;
 
   @IsUrl({ require_tld: false })
-  @IsOptional()
-  BACKEND_URL?: string;
+  APP_BACKEND_URL!: string;
 
   @IsString()
-  CORS_ORIGIN_REG_EXP?: string;
-
-  @IsString()
-  @IsOptional()
-  API_PREFIX?: string;
+  APP_CORS_ORIGIN_REG_EXP!: string;
 
   @IsString()
   @IsOptional()
-  APP_FALLBACK_LANGUAGE?: string;
+  APP_API_PREFIX?: string;
 
   @IsString()
   @IsOptional()
-  APP_HEADER_LANGUAGE?: string;
+  APP_FALLBACK_LANGUAGE!: string;
 
   @IsString()
   @IsOptional()
-  HEADER_KEY_API_KEY?: string;
+  APP_HEADER_LANGUAGE!: string;
 
   @IsString()
   @IsOptional()
-  API_KEYS?: string;
+  APP_HEADER_API_KEY!: string;
 }
 
-export default registerAs<AppConfig>('app', () => {
-  validateConfig(process.env, EnvironmentVariablesValidator);
+export const NestAppConfig = registerAs<NestAppConfigType>('app', () => {
+  const errors = validateSync(
+    plainToClass(NestAppConfigValidator, process.env, {
+      enableImplicitConversion: true,
+    }),
+    {
+      skipMissingProperties: false,
+    },
+  );
+
+  if (errors.length > 0) {
+    throw new Error(errors.toString());
+  }
 
   return {
     nodeEnv: process.env.NODE_ENV || 'development',
     name: process.env.APP_NAME || 'app',
     workingDirectory: process.env.PWD || process.cwd(),
-    frontendUrl: process.env.FRONTEND_URL,
-    backendUrl: process.env.BACKEND_URL ?? 'http://localhost',
-    corsOriginRegExp: process.env.CORS_ORIGIN_REG_EXP ?? '(localhost)',
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    frontendUrl: process.env.APP_FRONTEND_URL!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    backendUrl: process.env.APP_BACKEND_URL!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    corsOriginRegExp: process.env.APP_CORS_ORIGIN_REG_EXP!,
     port: process.env.PORT
       ? parseInt(process.env.PORT, 10)
       : process.env.PORT
       ? parseInt(process.env.PORT, 10)
       : 3000,
-    apiPrefix: process.env.API_PREFIX,
+    apiPrefix: process.env.APP_API_PREFIX,
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
-    apiKeys: process.env.API_KEYS,
-    headerKeyApiKey: process.env.HEADER_KEY_API_KEY,
+    headerApiKey: process.env.APP_HEADER_API_KEY || 'Api-Key',
   };
 });

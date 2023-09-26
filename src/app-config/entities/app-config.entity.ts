@@ -3,6 +3,7 @@ import { Exclude } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
+  BaseEntity,
   BeforeInsert,
   BeforeUpdate,
   Column,
@@ -11,18 +12,15 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryColumn,
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { FileEntity } from '../../files/entities/file.entity.js';
 import { Merchant } from '../../merchants/entities/merchant.entity.js';
-import { EntityHelper } from '../../utils/entity-helper.js';
 import { ThemeModeEnum } from './theme-mode.enum.js';
 
 @Entity('app_config')
-export class AppConfig extends EntityHelper {
+export class AppConfig extends BaseEntity {
   /* Base entity */
   @Exclude({ toPlainOnly: true })
   @PrimaryColumn('varchar')
@@ -127,20 +125,7 @@ export class AppConfig extends EntityHelper {
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
-  iconFileId?: string;
-
-  @ApiProperty({
-    type: () => FileEntity,
-    required: false,
-    nullable: true,
-  })
-  @OneToOne(() => FileEntity, {
-    onDelete: 'SET NULL',
-    nullable: true,
-    eager: true,
-  })
-  @JoinColumn({ name: 'iconFileId' })
-  iconFile?: Relation<FileEntity> | null;
+  iconFileUrl?: string;
 
   // @ApiProperty({ required: false, nullable: true })
   // @Column({ nullable: true })

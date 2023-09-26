@@ -2,17 +2,15 @@ import {
   BadRequestException,
   CanActivate,
   ExecutionContext,
-  Inject,
   Injectable,
+  Logger,
   NotFoundException,
   UnauthorizedException,
-  forwardRef,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { Customer } from '../customers/entities/customer.entity.js';
-import { AppLogger } from '../logger/app.logger.js';
 import { Merchant } from '../merchants/entities/merchant.entity.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { User } from '../users/entities/user.entity.js';
@@ -25,16 +23,14 @@ export interface CustomersGuardedRequest extends Request {
 
 @Injectable()
 export class CustomersGuard implements CanActivate {
+  private readonly logger = new Logger(CustomersGuard.name);
+
   constructor(
-    @Inject(forwardRef(() => AuthenticationService))
-    private authService: AuthenticationService,
-    @Inject(forwardRef(() => CustomersService))
-    private customersService: CustomersService,
-    @Inject(forwardRef(() => MerchantsService))
-    private merchantsService: MerchantsService,
-    private readonly logger: AppLogger,
+    private readonly service: CustomersService,
+    private readonly merchantsService: MerchantsService,
+    private readonly authenticationService: AuthenticationService,
   ) {
-    logger.setContext(CustomersGuard.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -48,20 +44,19 @@ export class CustomersGuard implements CanActivate {
       );
     }
 
-    const user = await this.authService.me(request.user);
+    const user = await this.authenticationService.me(request.user);
     if (!user?.id) {
       throw new UnauthorizedException(
         'User object does not exist after successful authentication',
       );
     }
 
-    const customer =
-      await this.customersService.findOneWithUserIdAndMerchantIdOrPath({
-        where: {
-          userId: user.id,
-          merchantIdOrPath,
-        },
-      });
+    const customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+      where: {
+        userId: user.id,
+        merchantIdOrPath,
+      },
+    });
 
     if (!customer) {
       throw new NotFoundException(

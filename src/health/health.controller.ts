@@ -2,26 +2,15 @@ import {
   Controller,
   Get,
   InternalServerErrorException,
-  UseGuards,
+  Logger,
 } from '@nestjs/common';
-import { AuthGuard } from '@nestjs/passport';
-import {
-  ApiBearerAuth,
-  ApiOperation,
-  ApiResponse,
-  ApiSecurity,
-  ApiTags,
-} from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import {
   HealthCheck,
   HealthCheckService,
   HttpHealthIndicator,
   TypeOrmHealthIndicator,
 } from '@nestjs/terminus';
-import * as Sentry from '@sentry/node';
-import { nanoid } from 'nanoid';
-import { AdminsGuard } from '../guards/admins.guard.js';
-import { AppLogger } from '../logger/app.logger.js';
 
 @ApiTags('Health')
 @Controller({
@@ -29,13 +18,14 @@ import { AppLogger } from '../logger/app.logger.js';
   version: '2',
 })
 export class HealthController {
+  private readonly logger = new Logger(HealthController.name);
+
   constructor(
     private readonly service: HealthCheckService,
     private readonly dbHealthIndicator: TypeOrmHealthIndicator,
     private readonly httpHealthIndicator: HttpHealthIndicator,
-    private readonly logger: AppLogger,
   ) {
-    this.logger.setContext(HealthController.name);
+    this.logger.verbose(this.constructor.name);
   }
 
   @Get('database')
@@ -50,44 +40,14 @@ export class HealthController {
     ]);
   }
 
-  @ApiSecurity('Api-Key')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('error')
   @ApiOperation({ summary: 'Trigger an internal server error' })
   @ApiResponse({ status: 500, description: 'Internal Server Error triggered' })
   error() {
     this.logger.verbose(this.error.name);
-    throw new InternalServerErrorException(nanoid());
+    throw new InternalServerErrorException(new Date().toISOString());
   }
 
-  @ApiSecurity('Api-Key')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AdminsGuard)
-  @Get('sentry/error')
-  @ApiOperation({ summary: 'Trigger an internal server error' })
-  @ApiResponse({ status: 500, description: 'Internal Server Error triggered' })
-  sentryError() {
-    this.logger.verbose(this.sentryError.name);
-    const transaction = Sentry.startTransaction({
-      op: 'test',
-      name: 'test-transaction',
-    });
-
-    setTimeout(() => {
-      try {
-        throw new InternalServerErrorException(nanoid());
-      } catch (e) {
-        Sentry.captureException(e);
-      } finally {
-        transaction.finish();
-      }
-    }, 99);
-  }
-
-  @ApiSecurity('Api-Key')
-  @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AdminsGuard)
   @Get('http')
   @HealthCheck()
   @ApiOperation({ summary: 'Check HTTP health by pinging NestJS docs' })
