@@ -54,7 +54,6 @@
     "class-validator": "0.14.0",
     "date-fns": "^2.30.0",
     "env-cmd": "^10.1.0",
-    "fb": "2.0.0",
     "firebase-admin": "^11.9.0",
     "google-auth-library": "8.9.0",
     "hbs": "^4.2.0",
