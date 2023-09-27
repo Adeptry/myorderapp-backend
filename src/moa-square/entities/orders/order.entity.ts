@@ -88,7 +88,7 @@ export class OrderEntity extends BaseEntity {
 
   @ApiProperty({
     required: false,
-    type: 'Location',
+    type: () => LocationEntity,
     nullable: true,
   })
   @ManyToOne(() => LocationEntity, { onDelete: 'SET NULL' })

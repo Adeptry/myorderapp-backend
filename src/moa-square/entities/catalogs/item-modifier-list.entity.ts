@@ -61,7 +61,7 @@ export class ItemModifierListEntity extends BaseEntity {
   itemId?: string;
 
   @ApiProperty({
-    type: 'Item',
+    type: () => ItemEntity,
     required: false,
     nullable: true,
   })
