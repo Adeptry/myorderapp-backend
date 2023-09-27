@@ -16,31 +16,16 @@ import * as NodemailerMailgunTransport from 'nodemailer-mailgun-transport';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
-import { AdminModule } from './admin/admin.module.js';
-import { AppConfigModule } from './app-config/app-config.module.js';
 import { RootConfigType } from './app.config.js';
-import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
-import { AuthGoogleModule } from './auth-google/auth-google.module.js';
-import { AuthenticationModule } from './authentication/authentication.module.js';
-import { CardsModule } from './cards/cards.module.js';
-import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { NestAppConfig } from './configs/app.config.js';
 import { AwsS3Config } from './configs/aws-s3.config.js';
 import { MailerConfig } from './configs/mailer.config.js';
-import { CustomersModule } from './customers/customers.module.js';
 import { DatabaseConfig } from './database/database.config.js';
 import { TypeOrmConfigService } from './database/typeorm-config.service.js';
-import { FirebaseAdminModule } from './firebase-admin/firebase-admin.module.js';
-import { ForgotModule } from './forgot/forgot.module.js';
 import { HealthModule } from './health/health.module.js';
-import { LocationsModule } from './locations/locations.module.js';
-import { MailModule } from './mail/mail.module.js';
-import { MerchantsModule } from './merchants/merchants.module.js';
-import { OrdersModule } from './orders/orders.module.js';
-import { SessionModule } from './session/session.module.js';
-import { SquareModule } from './square/square.module.js';
-import { StripeModule } from './stripe/stripe.module.js';
-import { UsersModule } from './users/users.module.js';
+import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
+import { NestSquareConfigType } from './square/nest-square.config.js';
+import { NestSquareModule } from './square/nest-square.module.js';
 
 @Module({
   imports: [
@@ -151,32 +136,32 @@ import { UsersModule } from './users/users.module.js';
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
-
-    // Boilerplate
-    UsersModule,
-    AdminModule,
-    AuthenticationModule,
-    AuthGoogleModule,
-    AuthAppleModule,
-    ForgotModule,
-    SessionModule,
-
-    // Vendors
-    SquareModule,
-    StripeModule,
-    FirebaseAdminModule,
-
-    // (add nest-twilio)
-    MailModule,
-
-    // Make these one module:
-    AppConfigModule,
-    MerchantsModule,
-    CustomersModule,
-    LocationsModule,
-    CatalogsModule,
-    OrdersModule,
-    CardsModule,
+    NestSquareModule.forRootAsync({
+      useFactory: function (
+        configService: ConfigService<RootConfigType>,
+      ): NestSquareConfigType {
+        return {
+          clientEnvironment: configService.getOrThrow(
+            'square.clientEnvironment',
+            {
+              infer: true,
+            },
+          ),
+          oauthClientId: configService.getOrThrow('square.oauthClientId', {
+            infer: true,
+          }),
+          oauthClientSecret: configService.getOrThrow(
+            'square.oauthClientSecret',
+            {
+              infer: true,
+            },
+          ),
+        };
+      },
+      imports: [ConfigModule],
+      inject: [ConfigService],
+    }),
+    MyOrderAppSquareModule,
   ],
   controllers: [],
 })

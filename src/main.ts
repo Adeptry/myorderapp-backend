@@ -11,21 +11,15 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { ValidationError, useContainer } from 'class-validator';
 import helmet from 'helmet';
+// import { SpelunkerModule } from 'nestjs-spelunker';
 import { AdminModule } from './admin/admin.module.js';
-import { AppConfigModule } from './app-config/app-config.module.js';
 import { AppModule } from './app.module.js';
 import { AuthAppleModule } from './auth-apple/auth-apple.module.js';
 import { AuthGoogleModule } from './auth-google/auth-google.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
-import { CardsModule } from './cards/cards.module.js';
-import { CatalogsModule } from './catalogs/catalogs.module.js';
 import { NestAppConfig } from './configs/app.config.js';
-import { CustomersModule } from './customers/customers.module.js';
 import { HealthModule } from './health/health.module.js';
-import { LocationsModule } from './locations/locations.module.js';
-import { MerchantsModule } from './merchants/merchants.module.js';
-import { OrdersModule } from './orders/orders.module.js';
-import { SquareModule } from './square/square.module.js';
+import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
 import { UsersModule } from './users/users.module.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
 import { GlobalExceptionsFilter } from './utils/global-exceptions-filter.js';
@@ -87,55 +81,12 @@ async function bootstrap() {
   );
 
   SwaggerModule.setup(
-    'merchants/docs',
+    'docs',
     app,
     SwaggerModule.createDocument(
       app,
       new DocumentBuilder()
-        .setTitle('MyOrderApp Merchants API')
-        .setVersion('2.2.0')
-        .addBearerAuth()
-        .addApiKey(
-          { type: 'apiKey', name: config.headerApiKey, in: 'header' },
-          config.headerApiKey,
-        )
-        .addGlobalParameters({
-          name: config.headerLanguage,
-          in: 'header',
-          required: false,
-          schema: { type: 'string' },
-        })
-        .addServer(config.backendUrl)
-        .build(),
-      {
-        include: [
-          AuthAppleModule,
-          AuthGoogleModule,
-          SquareModule,
-          MerchantsModule,
-          AuthenticationModule,
-          UsersModule,
-          OrdersModule,
-          CustomersModule,
-          AppConfigModule,
-          LocationsModule,
-          CatalogsModule,
-        ],
-      },
-    ),
-    {
-      jsonDocumentUrl: 'merchants/docs.json',
-      yamlDocumentUrl: 'merchants/docs.yaml',
-    },
-  );
-
-  SwaggerModule.setup(
-    'customers/docs',
-    app,
-    SwaggerModule.createDocument(
-      app,
-      new DocumentBuilder()
-        .setTitle('MyOrderApp Customers API')
+        .setTitle('MyOrderApp Square API')
         .setVersion('2.2.0')
         .addBearerAuth()
         .addApiKey(
@@ -155,19 +106,14 @@ async function bootstrap() {
           AuthAppleModule,
           AuthGoogleModule,
           AuthenticationModule,
-          AppConfigModule,
-          CustomersModule,
           UsersModule,
-          CardsModule,
-          OrdersModule,
-          LocationsModule,
-          CatalogsModule,
+          MyOrderAppSquareModule,
         ],
       },
     ),
     {
-      jsonDocumentUrl: 'customers/docs.json',
-      yamlDocumentUrl: 'customers/docs.yaml',
+      jsonDocumentUrl: 'docs.json',
+      yamlDocumentUrl: 'docs.yaml',
     },
   );
 
@@ -198,5 +144,14 @@ async function bootstrap() {
 
   await app.listen(config.port);
   logger.log('Ready');
+
+  // const tree = SpelunkerModule.explore(app);
+  // const root = SpelunkerModule.graph(tree);
+  // const edges = SpelunkerModule.findGraphEdges(root);
+  // console.log('graph LR');
+  // const mermaidEdges = edges.map(
+  //   ({ from, to }) => `  ${from.module.name}-->${to.module.name}`,
+  // );
+  // console.log(mermaidEdges.join('\n'));
 }
 void bootstrap();

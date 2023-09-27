@@ -22,7 +22,7 @@ import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AuthenticationEmailLoginRequestBody } from '../authentication/dto/authentication-email-login.dto.js';
 import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
-import { MerchantsSquareService } from '../merchants/merchants.square.service.js';
+import { MerchantsSquareService } from '../moa-square/services/merchants/merchants.square.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { AdministratorsGuard } from './administrators.guard.js';
 
