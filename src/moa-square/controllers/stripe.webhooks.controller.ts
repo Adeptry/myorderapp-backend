@@ -49,7 +49,7 @@ export class StripeWebhookController {
     let event: Stripe.Event | undefined;
 
     try {
-      event = this.service.stripe.webhooks.constructEvent(
+      event = this.service.client.webhooks.constructEvent(
         request.rawBody,
         signature,
         this.config.stripeWebhookSecret,

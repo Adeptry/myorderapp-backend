@@ -15,6 +15,7 @@
     "outDir": "./dist",
     "removeComments": true,
     "sourceMap": true,
+    "skipLibCheck": true,
     "strict": true,
     "target": "es6",
     "typeRoots": ["./node_modules/@types", "./types"]
