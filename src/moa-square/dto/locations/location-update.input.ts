@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class LocationUpdateDto {
+export class LocationPatchBody {
   @IsNumber()
   @IsOptional()
   @ApiProperty({ required: false, nullable: true })
@@ -13,7 +13,7 @@ export class LocationUpdateDto {
   moaEnabled?: boolean;
 }
 
-export class LocationUpdateAllDto {
+export class LocationsPatchBody {
   @IsString()
   @IsOptional()
   @ApiProperty()

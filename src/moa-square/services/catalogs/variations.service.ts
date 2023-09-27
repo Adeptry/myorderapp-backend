@@ -3,19 +3,19 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
-import { VariationUpdateDto } from '../../dto/catalogs/variation-update.dto.js';
+import { VariationPatchBody } from '../../dto/catalogs/variation-patch.dto.js';
 import { VariationLocationOverride } from '../../entities/catalogs/variation-location-override.entity.js';
-import { Variation } from '../../entities/catalogs/variation.entity.js';
+import { VariationEntity } from '../../entities/catalogs/variation.entity.js';
 import { LocationEntity } from '../../entities/locations/location.entity.js';
 import { VariationLocationOverridesService } from './variation-location-overrides.service.js';
 
 @Injectable()
-export class VariationsService extends EntityRepositoryService<Variation> {
+export class VariationsService extends EntityRepositoryService<VariationEntity> {
   protected readonly logger: Logger;
 
   constructor(
-    @InjectRepository(Variation)
-    protected readonly repository: Repository<Variation>,
+    @InjectRepository(VariationEntity)
+    protected readonly repository: Repository<VariationEntity>,
     protected readonly variationLocationOverridesService: VariationLocationOverridesService,
   ) {
     const logger = new Logger(VariationsService.name);
@@ -166,7 +166,7 @@ export class VariationsService extends EntityRepositoryService<Variation> {
     return query;
   }
 
-  async updateOne(params: { id: string; input: VariationUpdateDto }) {
+  async updateOne(params: { id: string; input: VariationPatchBody }) {
     this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({ where: { id: params.id } });
     if (params.input.moaEnabled !== undefined) {

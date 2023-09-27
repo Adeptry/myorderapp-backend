@@ -10,11 +10,11 @@ import {
 import type { ConfigType } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { Cron, CronExpression } from '@nestjs/schedule';
+import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { LessThan } from 'typeorm';
 import { DateUtils } from 'typeorm/util/DateUtils.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { SquareCatalogVersionUpdatedEventPayload } from '../../dto/square/square-catalog-version-updated-payload.entity.js';
 import { SquareLocationCreatedEventPayload } from '../../dto/square/square-location-created-event-payload.entity.js';
 import { SquareLocationUpdatedEventPayload } from '../../dto/square/square-location-updated-event-payload.entity.js';

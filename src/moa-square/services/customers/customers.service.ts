@@ -6,22 +6,22 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NestSquareService } from 'nest-square';
 import { FindOptionsRelations, Repository } from 'typeorm';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
-import { CustomerUpdateDto } from '../../dto/customers/update-customer.dto.js';
-import { Customer } from '../../entities/customers/customer.entity.js';
+import { CustomerPatchBody } from '../../dto/customers/update-customer.dto.js';
+import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 
 @Injectable()
-export class CustomersService extends EntityRepositoryService<Customer> {
+export class CustomersService extends EntityRepositoryService<CustomerEntity> {
   protected readonly logger: Logger;
 
   constructor(
-    @InjectRepository(Customer)
-    protected readonly repository: Repository<Customer>,
+    @InjectRepository(CustomerEntity)
+    protected readonly repository: Repository<CustomerEntity>,
     private readonly usersService: UsersService,
     private readonly squareService: NestSquareService,
     private readonly merchantsService: MerchantsService,
@@ -37,7 +37,7 @@ export class CustomersService extends EntityRepositoryService<Customer> {
       userId: string;
       merchantIdOrPath: string;
     };
-    relations?: FindOptionsRelations<Customer>;
+    relations?: FindOptionsRelations<CustomerEntity>;
   }) {
     return await this.findOne({
       where: [
@@ -63,7 +63,7 @@ export class CustomersService extends EntityRepositoryService<Customer> {
       id: string;
       merchantIdOrPath: string;
     };
-    relations?: FindOptionsRelations<Customer>;
+    relations?: FindOptionsRelations<CustomerEntity>;
   }) {
     return await this.findOne({
       where: [
@@ -148,7 +148,7 @@ export class CustomersService extends EntityRepositoryService<Customer> {
   async updateOne(params: {
     id: string;
     merchantId: string;
-    customerUpdateDto: CustomerUpdateDto;
+    customerUpdateDto: CustomerPatchBody;
   }) {
     this.logger.verbose(this.updateOne.name);
     const { id, merchantId, customerUpdateDto } = params;

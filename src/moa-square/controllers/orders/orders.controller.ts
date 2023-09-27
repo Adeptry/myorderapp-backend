@@ -43,13 +43,13 @@ import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
-import { OrderPatchDto } from '../../dto/orders/order-patch.dto.js';
+import { OrderPatchBody } from '../../dto/orders/order-patch.dto.js';
 import {
-  OrderCreateDto,
-  OrderPostDto,
+  OrderPostBody,
+  OrderPostCurrentBody,
 } from '../../dto/orders/order-post.dto.js';
 import { OrdersPaginatedReponse } from '../../dto/orders/orders-paginated.dto.js';
-import { PaymentCreateDto } from '../../dto/orders/payment-create.dto.js';
+import { OrdersPostPaymentBody } from '../../dto/orders/payment-create.dto.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
 import type { UserTypeGuardedRequest } from '../../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../../guards/customer-merchant.guard.js';
@@ -101,13 +101,13 @@ export class OrdersController {
     type: ErrorResponse,
   })
   @ApiCreatedResponse({ type: OrderEntity })
-  @ApiBody({ required: true, type: OrderCreateDto })
+  @ApiBody({ required: true, type: OrderPostBody })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async post(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: OrderCreateDto,
+    @Body() body: OrderPostBody,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
@@ -353,7 +353,7 @@ export class OrdersController {
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async patchCurrent(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: OrderPatchDto,
+    @Body() body: OrderPatchBody,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
@@ -433,7 +433,7 @@ export class OrdersController {
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async postCurrent(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: OrderPostDto,
+    @Body() body: OrderPostCurrentBody,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
@@ -634,7 +634,7 @@ export class OrdersController {
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   async postCurrentPaymentSquare(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: PaymentCreateDto,
+    @Body() body: OrdersPostPaymentBody,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)

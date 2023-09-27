@@ -17,7 +17,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../../../users/entities/user.entity.js';
+import { UserEntity } from '../../../users/entities/user.entity.js';
 import { SquareCard } from '../../dto/square/square.dto.js';
 import { LocationEntity } from '../locations/location.entity.js';
 import { MerchantEntity } from '../merchants/merchant.entity.js';
@@ -25,7 +25,7 @@ import { OrderEntity } from '../orders/order.entity.js';
 import { AppInstall } from './app-install.entity.js';
 
 @Entity('customer')
-export class Customer extends BaseEntity {
+export class CustomerEntity extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })
@@ -60,8 +60,8 @@ export class Customer extends BaseEntity {
   userId?: string;
 
   @ApiProperty({ required: false, nullable: true })
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  user?: Relation<User>;
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  user?: Relation<UserEntity>;
 
   /* Merchant */
 

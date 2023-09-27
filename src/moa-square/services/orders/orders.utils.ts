@@ -17,7 +17,7 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { OrderLineItem, Order as SquareOrder } from 'square';
 import { In } from 'typeorm';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
-import { VariationAddDto } from '../../dto/orders/variation-add.dto.js';
+import { OrdersVariationLineItemInput } from '../../dto/orders/variation-add.dto.js';
 import { BusinessHoursPeriodEntity } from '../../entities/locations/business-hours-period.entity.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
 import { ModifiersService } from '../catalogs/modifiers.service.js';
@@ -138,7 +138,9 @@ export class OrdersUtils {
     });
   }
 
-  async squareOrderLineItemsFor(params: { variations: VariationAddDto[] }) {
+  async squareOrderLineItemsFor(params: {
+    variations: OrdersVariationLineItemInput[];
+  }) {
     this.logger.verbose(this.squareOrderLineItemsFor.name);
 
     const orderLineItems: OrderLineItem[] = [];

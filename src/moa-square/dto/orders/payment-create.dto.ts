@@ -1,9 +1,9 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsOptional, IsRFC3339, IsString } from 'class-validator';
 import { nanoid } from 'nanoid';
-import { FulfillmentRecipient } from './payment-create-recipient.dto.js';
+import { FulfillmentRecipientInput } from './payment-create-recipient.dto.js';
 
-export class PaymentCreateDto {
+export class OrdersPostPaymentBody {
   @ApiProperty({
     example: new Date().toISOString(),
     description:
@@ -17,7 +17,7 @@ export class PaymentCreateDto {
   @IsString()
   paymentSquareId!: string;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, required: false, nullable: true })
   @IsOptional()
   @IsString()
   note?: string | null;
@@ -36,7 +36,11 @@ export class PaymentCreateDto {
   @IsNumber()
   orderTipMoney!: number;
 
-  @ApiProperty({ required: false, type: FulfillmentRecipient, nullable: true })
+  @ApiProperty({
+    required: false,
+    type: FulfillmentRecipientInput,
+    nullable: true,
+  })
   @IsOptional()
-  recipient?: FulfillmentRecipient;
+  recipient?: FulfillmentRecipientInput;
 }

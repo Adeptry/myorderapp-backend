@@ -2,7 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { IsString } from 'class-validator';
 import { nanoid } from 'nanoid';
 
-export class AppInstallUpdateDto {
+export class AppInstallPostBody {
   @ApiProperty({
     type: String,
     required: false,

@@ -5,11 +5,11 @@ import {
   Logger,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User } from '../users/entities/user.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 import { AuthenticationService } from './authentication.service.js';
 
 export interface AuthenticatedRequest extends Request {
-  user: User;
+  user: UserEntity;
 }
 
 @Injectable()

@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsBoolean, IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class ItemUpdateDto {
+export class ItemPatchBody {
   @IsNumber()
   @IsOptional()
   @ApiProperty({ required: false, nullable: true })
@@ -13,7 +13,7 @@ export class ItemUpdateDto {
   moaEnabled?: boolean;
 }
 
-export class ItemUpdateAllDto {
+export class ItemsPatchBody {
   @IsString()
   @IsOptional()
   @ApiProperty()

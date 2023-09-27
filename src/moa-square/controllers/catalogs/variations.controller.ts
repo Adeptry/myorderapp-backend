@@ -24,8 +24,8 @@ import {
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
-import { VariationUpdateDto } from '../../dto/catalogs/variation-update.dto.js';
-import { Variation } from '../../entities/catalogs/variation.entity.js';
+import { VariationPatchBody } from '../../dto/catalogs/variation-patch.dto.js';
+import { VariationEntity } from '../../entities/catalogs/variation.entity.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
 import { VariationsService } from '../../services/catalogs/variations.service.js';
 
@@ -45,7 +45,7 @@ export class VariationsController {
   @ApiBearerAuth()
   @Get('items/:id/variations')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: Variation, isArray: true })
+  @ApiOkResponse({ type: VariationEntity, isArray: true })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
@@ -59,7 +59,7 @@ export class VariationsController {
   async get(
     @Param('id') itemId: string,
     @Query('locationId') locationId?: string,
-  ): Promise<Variation[]> {
+  ): Promise<VariationEntity[]> {
     this.logger.verbose(this.get.name);
     return await this.service.joinManyQuery({ itemId, locationId }).getMany();
   }
@@ -67,7 +67,7 @@ export class VariationsController {
   @ApiBearerAuth()
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)
   @Patch('variations/:id')
-  @ApiOkResponse({ type: Variation })
+  @ApiOkResponse({ type: VariationEntity })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
@@ -80,8 +80,8 @@ export class VariationsController {
   })
   async patch(
     @Param('id') variationId: string,
-    @Body() body: VariationUpdateDto,
-  ): Promise<Variation> {
+    @Body() body: VariationPatchBody,
+  ): Promise<VariationEntity> {
     this.logger.verbose(this.patch.name);
     return this.service.updateOne({
       id: variationId,

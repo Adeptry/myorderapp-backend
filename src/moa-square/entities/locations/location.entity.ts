@@ -19,7 +19,7 @@ import {
 } from 'typeorm';
 import { ModifierLocationOverrideEntity } from '../catalogs/modifier-location-override.entity.js';
 import { VariationLocationOverride } from '../catalogs/variation-location-override.entity.js';
-import { Customer } from '../customers/customer.entity.js';
+import { CustomerEntity } from '../customers/customer.entity.js';
 import { MerchantEntity } from '../merchants/merchant.entity.js';
 import { AddressEntity } from './address.entity.js';
 import { BusinessHoursPeriodEntity } from './business-hours-period.entity.js';
@@ -171,12 +171,12 @@ export class LocationEntity extends BaseEntity {
    * Merchant
    */
 
-  @OneToMany(() => Customer, (entity) => entity.preferredLocation, {
+  @OneToMany(() => CustomerEntity, (entity) => entity.preferredLocation, {
     nullable: true,
   })
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  preferredByCustomers?: Customer[];
+  preferredByCustomers?: CustomerEntity[];
 
   /*
    * Business Hours

@@ -19,7 +19,7 @@ import { CatalogEntity } from './catalog.entity.js';
 import { CategoryEntity } from './category.entity.js';
 import { ItemEntity } from './item.entity.js';
 import { ModifierListEntity } from './modifier-list.entity.js';
-import { Variation } from './variation.entity.js';
+import { VariationEntity } from './variation.entity.js';
 
 @Entity('catalog_image')
 export class CatalogImageEntity extends BaseEntity {
@@ -86,12 +86,12 @@ export class CatalogImageEntity extends BaseEntity {
   @Column({ nullable: true })
   variationId?: string;
 
-  @ManyToOne(() => Variation, (entity) => entity.images, {
+  @ManyToOne(() => VariationEntity, (entity) => entity.images, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'variationId' })
-  variation?: Relation<Variation>;
+  variation?: Relation<VariationEntity>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

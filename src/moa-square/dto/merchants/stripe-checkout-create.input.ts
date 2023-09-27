@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsOptional } from 'class-validator';
 
-export class StripeCheckoutCreateDto {
+export class StripePostCheckoutBody {
   @ApiProperty({ example: 'http://localhost:3000/stripe/checkout/success' })
   @IsNotEmpty()
   successUrl!: string;

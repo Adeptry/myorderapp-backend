@@ -28,17 +28,17 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { NestStripeService } from 'nest-stripe2';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../../authentication/authentication.guard.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
-import { StripeService } from '../../../stripe/stripe.service.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
-import { SquareConfirmOauthDto } from '../../dto/merchants/square-confirm-oauth.input.js';
-import { StripeCheckoutCreateDto } from '../../dto/merchants/stripe-checkout-create.input.js';
-import { StripeCheckoutDto } from '../../dto/merchants/stripe-checkout.dto.js';
-import { StripeBillingPortalCreateOutput } from '../../dto/merchants/stripe-portal.dto.js';
+import { SquarePostOauthBody } from '../../dto/merchants/square-confirm-oauth.input.js';
+import { StripePostCheckoutBody } from '../../dto/merchants/stripe-checkout-create.input.js';
+import { StripePostCheckoutResponse } from '../../dto/merchants/stripe-checkout.dto.js';
+import { StripeBillingSessionResponse } from '../../dto/merchants/stripe-portal.dto.js';
 import { MerchantEntity } from '../../entities/merchants/merchant.entity.js';
 import type { MerchantsGuardedRequest } from '../../guards/merchants.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
@@ -61,7 +61,7 @@ export class MerchantsController {
     private readonly i18n: I18nService<I18nTranslations>,
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly merchantsStripeService: MerchantsStripeService,
-    private readonly stripeService: StripeService,
+    private readonly stripeService: NestStripeService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -103,7 +103,7 @@ export class MerchantsController {
     const merchant = this.service.create({
       userId: request.user.id,
     });
-    const stripeCustomer = await this.stripeService.responseOrThrow((stripe) =>
+    const stripeCustomer = await this.stripeService.retryOrThrow((stripe) =>
       stripe.customers.create({
         email: request.user.email ?? '',
         phone: request.user.phoneNumber ?? '',
@@ -175,7 +175,7 @@ export class MerchantsController {
     summary: 'Confirm Square Oauth',
     operationId: 'postSquareOauthMe',
   })
-  @ApiBody({ type: SquareConfirmOauthDto })
+  @ApiBody({ type: SquarePostOauthBody })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
@@ -184,7 +184,7 @@ export class MerchantsController {
   async postMeSquareOauth(
     @Req() request: any,
     @Body()
-    input: SquareConfirmOauthDto,
+    input: SquarePostOauthBody,
   ): Promise<void> {
     this.logger.verbose(this.postMeSquareOauth.name);
 
@@ -224,16 +224,16 @@ export class MerchantsController {
     summary: 'Start Stripe checkout',
     operationId: 'postStripeCheckoutMe',
   })
-  @ApiBody({ type: StripeCheckoutCreateDto })
+  @ApiBody({ type: StripePostCheckoutBody })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
   })
-  @ApiOkResponse({ type: StripeCheckoutDto })
+  @ApiOkResponse({ type: StripePostCheckoutResponse })
   async postMeStripeCheckout(
     @Req() request: MerchantsGuardedRequest,
-    @Body() body: StripeCheckoutCreateDto,
-  ): Promise<StripeCheckoutDto | null> {
+    @Body() body: StripePostCheckoutBody,
+  ): Promise<StripePostCheckoutResponse | null> {
     this.logger.verbose(this.postMeStripeCheckout.name);
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
@@ -263,12 +263,12 @@ export class MerchantsController {
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
   })
-  @ApiOkResponse({ type: StripeBillingPortalCreateOutput })
+  @ApiOkResponse({ type: StripeBillingSessionResponse })
   @ApiQuery({ name: 'returnUrl', required: true, type: String })
   async getMeStripeBillingSession(
     @Req() request: MerchantsGuardedRequest,
     @Query('returnUrl') returnUrl: string,
-  ): Promise<StripeBillingPortalCreateOutput | null> {
+  ): Promise<StripeBillingSessionResponse | null> {
     this.logger.verbose(this.getMeStripeBillingSession.name);
     const url = await this.merchantsStripeService.createBillingPortalSession({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

@@ -33,15 +33,15 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
 import {
-  ItemUpdateAllDto,
-  ItemUpdateDto,
-} from '../../dto/catalogs/item-update.dto.js';
+  ItemPatchBody,
+  ItemsPatchBody,
+} from '../../dto/catalogs/item-patch.dto.js';
 import { ItemPaginatedResponse } from '../../dto/catalogs/items-paginated.output.js';
 import { CatalogImageEntity } from '../../entities/catalogs/catalog-image.entity.js';
 import { ItemEntity } from '../../entities/catalogs/item.entity.js';
@@ -187,7 +187,7 @@ export class ItemsController {
   @ApiOperation({ summary: 'Update an Item', operationId: 'patchItem' })
   async patchItem(
     @Param('id') itemId: string,
-    @Body() body: ItemUpdateDto,
+    @Body() body: ItemPatchBody,
   ): Promise<ItemEntity> {
     this.logger.verbose(this.patchItem.name);
     return this.service.updateOne({
@@ -205,12 +205,12 @@ export class ItemsController {
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
   })
-  @ApiBody({ type: [ItemUpdateAllDto] })
+  @ApiBody({ type: [ItemsPatchBody] })
   @ApiOperation({
     summary: 'Update multiple Items',
     operationId: 'patchItems',
   })
-  async patchItems(@Body() body: ItemUpdateAllDto[]): Promise<ItemEntity[]> {
+  async patchItems(@Body() body: ItemsPatchBody[]): Promise<ItemEntity[]> {
     this.logger.verbose(this.patchItems.name);
     const items = await this.service.updateAll(body);
     await Promise.all(

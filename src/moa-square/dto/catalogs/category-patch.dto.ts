@@ -7,7 +7,7 @@ import {
   IsString,
 } from 'class-validator';
 
-export class CategoryUpdateDto {
+export class CategoryPatchBody {
   @ApiProperty({ nullable: true, required: false })
   @IsNumber()
   @IsOptional()
@@ -19,7 +19,7 @@ export class CategoryUpdateDto {
   moaEnabled?: boolean;
 }
 
-export class CategoryUpdateAllDto {
+export class CategoriesPatchBody {
   @ApiProperty()
   @IsString()
   @IsNotEmpty()

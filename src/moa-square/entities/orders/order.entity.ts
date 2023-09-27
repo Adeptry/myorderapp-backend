@@ -16,7 +16,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Customer } from '../customers/customer.entity.js';
+import { CustomerEntity } from '../customers/customer.entity.js';
 import { LocationEntity } from '../locations/location.entity.js';
 import { MerchantEntity } from '../merchants/merchant.entity.js';
 import { LineItemEntity } from './line-item.entity.js';
@@ -61,12 +61,12 @@ export class OrderEntity extends BaseEntity {
     type: 'Customer',
     nullable: true,
   })
-  @ManyToOne(() => Customer, (entity) => entity.orders, {
+  @ManyToOne(() => CustomerEntity, (entity) => entity.orders, {
     nullable: true,
     onDelete: 'SET NULL',
   })
   @JoinColumn()
-  customer?: Relation<Customer>;
+  customer?: Relation<CustomerEntity>;
 
   /*
    * Merchant

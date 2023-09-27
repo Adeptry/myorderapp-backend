@@ -16,10 +16,10 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../../../users/entities/user.entity.js';
+import { UserEntity } from '../../../users/entities/user.entity.js';
 import { AppConfigEntity } from '../app-config/app-config.entity.js';
 import { CatalogEntity } from '../catalogs/catalog.entity.js';
-import { Customer } from '../customers/customer.entity.js';
+import { CustomerEntity } from '../customers/customer.entity.js';
 import { LocationEntity } from '../locations/location.entity.js';
 
 @Entity('merchant')
@@ -63,9 +63,9 @@ export class MerchantEntity extends BaseEntity {
   @Column({ nullable: true })
   userId?: string;
 
-  @ApiProperty({ type: () => User, required: false, nullable: true })
-  @ManyToOne(() => User, { onDelete: 'CASCADE' })
-  user?: Relation<User>;
+  @ApiProperty({ type: () => UserEntity, required: false, nullable: true })
+  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  user?: Relation<UserEntity>;
 
   /*
    * App config
@@ -135,12 +135,12 @@ export class MerchantEntity extends BaseEntity {
    * Customers
    */
 
-  @OneToMany(() => Customer, (entity) => entity.merchant, {
+  @OneToMany(() => CustomerEntity, (entity) => entity.merchant, {
     nullable: true,
   })
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  customers?: Customer[];
+  customers?: CustomerEntity[];
 
   /*
    * Firebase

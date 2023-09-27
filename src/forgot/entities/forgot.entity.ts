@@ -14,7 +14,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
 
 @Entity()
 export class Forgot extends BaseEntity {
@@ -48,8 +48,8 @@ export class Forgot extends BaseEntity {
   hash?: string;
 
   @Allow()
-  @ManyToOne(() => User, {
+  @ManyToOne(() => UserEntity, {
     eager: true,
   })
-  user?: User;
+  user?: UserEntity;
 }

@@ -14,7 +14,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { User } from '../../users/entities/user.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
 
 @Entity()
 export class Session extends BaseEntity {
@@ -46,10 +46,10 @@ export class Session extends BaseEntity {
   @Column({ nullable: true })
   userId?: string;
 
-  @ManyToOne(() => User, {
+  @ManyToOne(() => UserEntity, {
     eager: true,
     onDelete: 'CASCADE',
   })
   @Index()
-  user?: Relation<User>;
+  user?: Relation<UserEntity>;
 }

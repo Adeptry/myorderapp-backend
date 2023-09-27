@@ -4,7 +4,7 @@ import { IsEmail, IsOptional, Validate } from 'class-validator';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
 import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
 
-export class UserUpdateDto {
+export class UserPatchBody {
   @ApiProperty({
     type: String,
     example: 'test1@example.com',

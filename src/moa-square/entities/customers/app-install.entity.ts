@@ -15,7 +15,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { Customer } from './customer.entity.js';
+import { CustomerEntity } from './customer.entity.js';
 
 @Entity('app_install')
 export class AppInstall extends BaseEntity {
@@ -72,9 +72,9 @@ export class AppInstall extends BaseEntity {
   @Column({ nullable: true })
   customerId?: string;
 
-  @ManyToOne(() => Customer, (entity) => entity.appInstalls, {
+  @ManyToOne(() => CustomerEntity, (entity) => entity.appInstalls, {
     onDelete: 'CASCADE',
   })
   @JoinColumn({ name: 'customerId' })
-  customer?: Relation<Customer>;
+  customer?: Relation<CustomerEntity>;
 }

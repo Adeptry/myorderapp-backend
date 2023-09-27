@@ -8,19 +8,19 @@ import {
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { addMinutes } from 'date-fns';
+import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
 import { In, Repository } from 'typeorm';
 import { FirebaseAdminService } from '../../../firebase-admin/firebase-admin.service.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
-import { PaymentCreateDto } from '../../dto/orders/payment-create.dto.js';
-import { VariationAddDto } from '../../dto/orders/variation-add.dto.js';
+import { OrdersPostPaymentBody } from '../../dto/orders/payment-create.dto.js';
+import { OrdersVariationLineItemInput } from '../../dto/orders/variation-add.dto.js';
 import { SquareOrderFulfillmentUpdatedPayload } from '../../dto/square/square-order-fulfillment-updated.payload.js';
 import { AppInstall } from '../../entities/customers/app-install.entity.js';
-import { Customer } from '../../entities/customers/customer.entity.js';
+import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import { MerchantEntity } from '../../entities/merchants/merchant.entity.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
 import { CustomersService } from '../customers/customers.service.js';
@@ -60,9 +60,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }
 
   async createOne(params: {
-    variations?: VariationAddDto[];
+    variations?: OrdersVariationLineItemInput[];
     idempotencyKey?: string;
-    customer: Customer;
+    customer: CustomerEntity;
     locationId?: string;
     merchant: MerchantEntity;
   }): Promise<OrderEntity> {
@@ -277,7 +277,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }
 
   async updateMany(params: {
-    variations: VariationAddDto[];
+    variations: OrdersVariationLineItemInput[];
     orderId: string;
     squareAccessToken: string;
     idempotencyKey?: string;
@@ -418,7 +418,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   async createPaymentOrThrow(params: {
     orderId: string;
     customerId: string;
-    input: PaymentCreateDto;
+    input: OrdersPostPaymentBody;
     merchantId: string;
   }) {
     const { orderId, customerId, input, merchantId } = params;
@@ -632,7 +632,10 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       return;
     }
 
-    const customer = await this.loadOneRelation<Customer>(order, 'customer');
+    const customer = await this.loadOneRelation<CustomerEntity>(
+      order,
+      'customer',
+    );
     if (!customer) {
       this.logger.error(`Customer not found for order ${order.id}`);
       return;

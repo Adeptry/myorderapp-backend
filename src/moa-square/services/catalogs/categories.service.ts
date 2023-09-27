@@ -5,9 +5,9 @@ import { Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import { paginatedResults } from '../../../utils/paginated.js';
 import {
-  CategoryUpdateAllDto,
-  CategoryUpdateDto,
-} from '../../dto/catalogs/category-update.dto.js';
+  CategoriesPatchBody,
+  CategoryPatchBody,
+} from '../../dto/catalogs/category-patch.dto.js';
 import { CategoryEntity } from '../../entities/catalogs/category.entity.js';
 import { CatalogSortService } from './catalog-sort.service.js';
 import { ItemsService } from './items.service.js';
@@ -138,7 +138,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
     return await this.save(moaCategory);
   }
 
-  async updateOne(params: { id: string; input: CategoryUpdateDto }) {
+  async updateOne(params: { id: string; input: CategoryPatchBody }) {
     this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({
       where: { id: params.id },
@@ -155,7 +155,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
     return await this.save(entity);
   }
 
-  async updateAll(inputs: CategoryUpdateAllDto[]) {
+  async updateAll(inputs: CategoriesPatchBody[]) {
     this.logger.verbose(this.updateAll.name);
     const entities: CategoryEntity[] = [];
 

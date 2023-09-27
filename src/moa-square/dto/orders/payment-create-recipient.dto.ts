@@ -1,7 +1,7 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 
-export class FulfillmentRecipient {
+export class FulfillmentRecipientInput {
   @ApiProperty({ required: false, nullable: true })
   @IsString()
   @IsOptional()

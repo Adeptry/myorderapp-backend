@@ -1,28 +1,28 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsArray, IsOptional, IsString } from 'class-validator';
-import { VariationAddDto } from './variation-add.dto.js';
+import { OrdersVariationLineItemInput } from './variation-add.dto.js';
 
-export class OrderPostDto {
+export class OrderPostCurrentBody {
   @ApiProperty({
     required: false,
-    type: VariationAddDto,
+    type: OrdersVariationLineItemInput,
     isArray: true,
     nullable: true,
   })
   @IsArray({})
-  variations?: VariationAddDto[];
+  variations?: OrdersVariationLineItemInput[];
 }
 
-export class OrderCreateDto {
+export class OrderPostBody {
   @ApiProperty({
     required: false,
-    type: VariationAddDto,
+    type: OrdersVariationLineItemInput,
     isArray: true,
     nullable: true,
   })
   @IsArray({})
   @IsOptional()
-  variations?: VariationAddDto[];
+  variations?: OrdersVariationLineItemInput[];
 
   @ApiProperty({ required: false, nullable: true })
   @IsString()

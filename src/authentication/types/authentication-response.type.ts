@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { User } from '../../users/entities/user.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
 
 export class AuthenticationResponse {
   @ApiProperty()
@@ -11,6 +11,6 @@ export class AuthenticationResponse {
   @ApiProperty()
   tokenExpires!: number;
 
-  @ApiProperty({ type: User, required: false, nullable: true })
-  user!: User;
+  @ApiProperty({ type: UserEntity, required: false, nullable: true })
+  user!: UserEntity;
 }

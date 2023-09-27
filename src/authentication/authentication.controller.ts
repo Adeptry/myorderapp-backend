@@ -26,7 +26,7 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
-import { User } from '../users/entities/user.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { ApiKeyAuthGuard } from './apikey-auth.guard.js';
@@ -196,12 +196,12 @@ export class AuthenticationController {
     summary: 'Update password',
     operationId: 'patchAuthMe',
   })
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse({ type: UserEntity })
   @ApiBody({ type: AuthenticationUpdateRequestBody })
   public patchMe(
     @Req() request: JwtGuardedRequest,
     @Body() body: AuthenticationUpdateRequestBody,
-  ): Promise<NullableType<User>> {
+  ): Promise<NullableType<UserEntity>> {
     this.logger.verbose(this.patchMe.name);
     return this.service.update(request.user, body);
   }

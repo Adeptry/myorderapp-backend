@@ -36,7 +36,7 @@ export class SquareWebhookController {
       !WebhooksHelper.isValidWebhookEventSignature(
         body,
         signature,
-        this.config.webhookSignatureKey,
+        this.config.squareWebhookSignatureKey,
         request.url,
       )
     ) {

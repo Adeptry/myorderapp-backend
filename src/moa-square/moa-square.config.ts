@@ -3,13 +3,18 @@ import { plainToClass } from 'class-transformer';
 import { IsOptional, IsString, validateSync } from 'class-validator';
 
 export type MyOrderAppSquareConfigType = {
-  webhookSignatureKey: string;
+  squareClientEnvironment: string;
+  squareOauthClientId: string;
+  squareOauthClientSecret: string;
+  squareWebhookSignatureKey: string;
 
   squareTestCode?: string;
   squareTestAccessToken?: string;
   squareTestRefreshToken?: string;
   squareTestExpireAt?: string;
   squareTestId?: string;
+
+  stripeWebhookSecret?: string;
 
   stripePriceIdTier2USD: string;
   stripePriceIdTier2EUR: string;
@@ -33,7 +38,19 @@ export type MyOrderAppSquareConfigType = {
   stripePriceIdTier0AUD: string;
 };
 
-class MerchantsConfigsValidator {
+class MyOrderAppSquareConfigValidator {
+  @IsString()
+  SQUARE_OAUTH_CLIENT_ID!: string;
+
+  @IsString()
+  SQUARE_OAUTH_CLIENT_SECRET!: string;
+
+  @IsString()
+  SQUARE_CLIENT_ENVIRONMENT!: string;
+
+  @IsString()
+  SQUARE_BASE_URL!: string;
+
   @IsString()
   SQUARE_WEBHOOK_SIGNATURE_KEY!: string;
 
@@ -130,9 +147,9 @@ class MerchantsConfigsValidator {
   STRIPE_PRICE_ID_TIER_2_AUD?: string;
 }
 
-export const MyOrderAppSquareConfig = registerAs('moa-square', () => {
+export const MyOrderAppSquareConfig = registerAs('moaSquare', () => {
   const errors = validateSync(
-    plainToClass(MerchantsConfigsValidator, process.env, {
+    plainToClass(MyOrderAppSquareConfigValidator, process.env, {
       enableImplicitConversion: true,
     }),
     {
@@ -146,12 +163,20 @@ export const MyOrderAppSquareConfig = registerAs('moa-square', () => {
 
   return {
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    webhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY!,
+    squareClientEnvironment: process.env.SQUARE_CLIENT_ENVIRONMENT!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    squareOauthClientId: process.env.SQUARE_OAUTH_CLIENT_ID!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    squareOauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    squareWebhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY!,
     squareTestCode: process.env.SQUARE_TEST_CODE,
     squareTestAccessToken: process.env.SQUARE_TEST_ACCESS_TOKEN,
     squareTestRefreshToken: process.env.SQUARE_TEST_REFRESH_TOKEN,
     squareTestExpireAt: process.env.SQUARE_TEST_EXPIRE_AT,
     squareTestId: process.env.SQUARE_TEST_ID,
+
+    stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 
     stripePriceIdTier0USD: process.env.STRIPE_PRICE_ID_TIER_0_USD,
     stripePriceIdTier0EUR: process.env.STRIPE_PRICE_ID_TIER_0_EUR,

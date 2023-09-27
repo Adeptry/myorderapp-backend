@@ -44,7 +44,7 @@ import { AwsS3Config } from '../../../configs/aws-s3.config.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
-import { AppConfigUpdateDto } from '../../dto/app-config/app-config-update.input.js';
+import { AppConfigUpdateBody } from '../../dto/app-config/app-config-update.input.js';
 import { AppConfigEntity } from '../../entities/app-config/app-config.entity.js';
 import type { UserTypeGuardedRequest } from '../../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../../guards/customer-merchant.guard.js';
@@ -162,12 +162,12 @@ export class AppConfigController {
     summary: 'Create your Config',
     operationId: 'postAppConfigMe',
   })
-  @ApiBody({ type: AppConfigUpdateDto })
+  @ApiBody({ type: AppConfigUpdateBody })
   @UseInterceptors(FileInterceptor('file'))
   async postMe(
     @Req() request: MerchantsGuardedRequest,
     @Body()
-    createAppConfigDto: AppConfigUpdateDto,
+    createAppConfigDto: AppConfigUpdateBody,
   ) {
     this.logger.verbose(this.postMe.name);
     const translations = this.currentLanguageTranslations();
@@ -210,10 +210,10 @@ export class AppConfigController {
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ErrorResponse })
   @ApiConflictResponse({ description: 'Conflict', type: ErrorResponse })
-  @ApiBody({ type: AppConfigUpdateDto })
+  @ApiBody({ type: AppConfigUpdateBody })
   async patchMe(
     @Req() request: MerchantsGuardedRequest,
-    @Body() body: AppConfigUpdateDto,
+    @Body() body: AppConfigUpdateBody,
   ) {
     this.logger.verbose(this.patchMe.name);
     const translations = this.currentLanguageTranslations();

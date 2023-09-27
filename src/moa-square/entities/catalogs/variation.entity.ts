@@ -22,7 +22,7 @@ import { ItemEntity } from './item.entity.js';
 import { VariationLocationOverride } from './variation-location-override.entity.js';
 
 @Entity('variation')
-export class Variation extends BaseEntity {
+export class VariationEntity extends BaseEntity {
   /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })

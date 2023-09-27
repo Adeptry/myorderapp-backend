@@ -4,15 +4,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { RoleEnum } from '../../../roles/roles.enum.js';
 import { StatusEnum } from '../../../statuses/statuses.enum.js';
-import { User } from '../../../users/entities/user.entity.js';
+import { UserEntity } from '../../../users/entities/user.entity.js';
 
 @Injectable()
 export class UserSeedService {
   private readonly logger = new Logger(UserSeedService.name);
 
   constructor(
-    @InjectRepository(User)
-    private userRepository: Repository<User>,
+    @InjectRepository(UserEntity)
+    private userRepository: Repository<UserEntity>,
   ) {
     this.logger.verbose(this.constructor.name);
   }

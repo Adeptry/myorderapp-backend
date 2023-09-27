@@ -24,8 +24,8 @@ import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../authentication/authentication.guard.js';
 import { SessionService } from '../session/session.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
-import { UserUpdateDto } from './dto/user-update.dto.js';
-import { User } from './entities/user.entity.js';
+import { UserPatchBody } from './dto/user-update.dto.js';
+import { UserEntity } from './entities/user.entity.js';
 import { UsersService } from './users.service.js';
 
 @ApiBearerAuth()
@@ -48,7 +48,7 @@ export class UsersController {
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'getUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   getMe(@Req() request: AuthenticatedRequest) {
@@ -58,13 +58,13 @@ export class UsersController {
 
   @Patch('me')
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'patchUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  @ApiBody({ type: UserUpdateDto })
+  @ApiBody({ type: UserPatchBody })
   async patchMe(
     @Req() request: AuthenticatedRequest,
-    @Body() body: UserUpdateDto,
+    @Body() body: UserPatchBody,
   ) {
     const { user } = request;
     const { id } = user;
@@ -78,7 +78,7 @@ export class UsersController {
 
   @Delete('me')
   @HttpCode(HttpStatus.NO_CONTENT)
-  @ApiOkResponse({ type: User })
+  @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'deleteUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   async deleteMe(@Req() request: AuthenticatedRequest) {

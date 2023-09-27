@@ -1,8 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectDataSource, InjectRepository } from '@nestjs/typeorm';
+import {
+  NestSquareCatalogObjectTypeEnum,
+  NestSquareService,
+} from 'nest-square';
 import { DataSource, Repository } from 'typeorm';
-import { NestSquareCatalogObjectTypeEnum } from '../../../square/nest-square-catalog-object-type.enum.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import { CatalogImageEntity } from '../../entities/catalogs/catalog-image.entity.js';
 import { CatalogEntity } from '../../entities/catalogs/catalog.entity.js';
@@ -11,7 +13,7 @@ import { ItemModifierListEntity } from '../../entities/catalogs/item-modifier-li
 import { ItemEntity } from '../../entities/catalogs/item.entity.js';
 import { ModifierListEntity } from '../../entities/catalogs/modifier-list.entity.js';
 import { ModifierEntity } from '../../entities/catalogs/modifier.entity.js';
-import { Variation } from '../../entities/catalogs/variation.entity.js';
+import { VariationEntity } from '../../entities/catalogs/variation.entity.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { CatalogImagesService } from './catalog-images.service.js';
 import { CategoriesService } from './categories.service.js';
@@ -70,7 +72,7 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
           accessToken,
           types: [NestSquareCatalogObjectTypeEnum.itemVariation],
         })) ?? [];
-      const moaVariations = await this.loadManyRelation<Variation>(
+      const moaVariations = await this.loadManyRelation<VariationEntity>(
         moaCatalog,
         'variations',
       );

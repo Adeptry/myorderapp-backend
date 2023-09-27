@@ -1,12 +1,12 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { NestSquareService } from 'nest-square';
 import { BusinessHoursPeriod } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import {
-  LocationUpdateAllDto,
-  LocationUpdateDto,
+  LocationPatchBody,
+  LocationsPatchBody,
 } from '../../dto/locations/location-update.input.js';
 import { LocationEntity as MoaLocation } from '../../entities/locations/location.entity.js';
 import { AddressService } from './address.service.js';
@@ -207,7 +207,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
 
   async updateOne(params: {
     entity: MoaLocation;
-    input: LocationUpdateDto;
+    input: LocationPatchBody;
   }): Promise<MoaLocation> {
     this.logger.verbose(this.updateOne.name);
     if (params.input.moaOrdinal !== undefined) {
@@ -219,7 +219,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
     return this.save(params.entity);
   }
 
-  async updateAll(inputs: LocationUpdateAllDto[]) {
+  async updateAll(inputs: LocationsPatchBody[]) {
     this.logger.verbose(this.updateAll.name);
     const entities: MoaLocation[] = [];
 

@@ -9,15 +9,15 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthenticationService } from '../../authentication/authentication.service.js';
-import { User } from '../../users/entities/user.entity.js';
-import { Customer } from '../entities/customers/customer.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
+import { CustomerEntity } from '../entities/customers/customer.entity.js';
 import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
 import { CustomersService } from '../services/customers/customers.service.js';
 import { MerchantsService } from '../services/merchants/merchants.service.js';
 
 export interface CustomersGuardedRequest extends Request {
-  user: User;
-  customer: Customer;
+  user: UserEntity;
+  customer: CustomerEntity;
   merchant: MerchantEntity;
 }
 

@@ -9,7 +9,7 @@ import {
 } from 'class-validator';
 import { ThemeModeEnum } from '../../entities/app-config/theme-mode.enum.js';
 
-export class AppConfigUpdateDto {
+export class AppConfigUpdateBody {
   @ApiProperty({ required: false, nullable: true })
   @IsString()
   @IsOptional()

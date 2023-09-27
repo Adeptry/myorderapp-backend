@@ -3,9 +3,9 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import {
-  ItemUpdateAllDto,
-  ItemUpdateDto,
-} from '../../dto/catalogs/item-update.dto.js';
+  ItemPatchBody,
+  ItemsPatchBody,
+} from '../../dto/catalogs/item-patch.dto.js';
 import { ItemEntity } from '../../entities/catalogs/item.entity.js';
 
 @Injectable()
@@ -199,7 +199,7 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
     return query.orderBy('item.moaOrdinal', 'ASC');
   }
 
-  async updateOne(params: { id: string; input: ItemUpdateDto }) {
+  async updateOne(params: { id: string; input: ItemPatchBody }) {
     this.logger.verbose(this.updateOne.name);
     const entity = await this.findOneOrFail({ where: { id: params.id } });
     if (params.input.moaOrdinal !== undefined) {
@@ -211,7 +211,7 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
     return await this.save(entity);
   }
 
-  async updateAll(inputs: ItemUpdateAllDto[]) {
+  async updateAll(inputs: ItemsPatchBody[]) {
     this.logger.verbose(this.updateAll.name);
     const entities: ItemEntity[] = [];
 

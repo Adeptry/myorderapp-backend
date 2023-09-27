@@ -17,7 +17,7 @@ import {
 } from 'typeorm';
 import { LocationEntity } from '../locations/location.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
-import { Variation } from './variation.entity.js';
+import { VariationEntity } from './variation.entity.js';
 
 @Entity('variation_location_override')
 export class VariationLocationOverride extends BaseEntity {
@@ -66,12 +66,12 @@ export class VariationLocationOverride extends BaseEntity {
   @Column({ nullable: true })
   variationId?: string;
 
-  @ManyToOne(() => Variation, (entity) => entity.locationOverrides, {
+  @ManyToOne(() => VariationEntity, (entity) => entity.locationOverrides, {
     onDelete: 'CASCADE',
     nullable: false,
   })
   @JoinColumn({ name: 'variationId' })
-  variation?: Relation<Variation>;
+  variation?: Relation<VariationEntity>;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })

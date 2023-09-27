@@ -4,7 +4,7 @@ import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { SentMessageInfo } from 'nodemailer';
 import { RootConfigType } from '../app.config.js';
-import { User } from '../users/entities/user.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class MailService {
@@ -18,7 +18,7 @@ export class MailService {
 
   async sendForgotPasswordOrThrow(params: {
     to: string;
-    args: { user: User; hash: string };
+    args: { user: UserEntity; hash: string };
   }): Promise<SentMessageInfo> {
     const { to, args } = params;
     this.logger.verbose(this.sendForgotPasswordOrThrow.name);

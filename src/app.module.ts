@@ -5,6 +5,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { ScheduleModule } from '@nestjs/schedule';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { NestSquareModule } from 'nest-square';
+import { NestStripeModule } from 'nest-stripe2';
 import {
   AcceptLanguageResolver,
   HeaderResolver,
@@ -22,10 +24,10 @@ import { AwsS3Config } from './configs/aws-s3.config.js';
 import { MailerConfig } from './configs/mailer.config.js';
 import { DatabaseConfig } from './database/database.config.js';
 import { TypeOrmConfigService } from './database/typeorm-config.service.js';
+import { FirebaseAdminModule } from './firebase-admin/firebase-admin.module.js';
 import { HealthModule } from './health/health.module.js';
+import { MyOrderAppSquareConfig } from './moa-square/moa-square.config.js';
 import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
-import { NestSquareConfigType } from './square/nest-square.config.js';
-import { NestSquareModule } from './square/nest-square.module.js';
 
 @Module({
   imports: [
@@ -34,7 +36,13 @@ import { NestSquareModule } from './square/nest-square.module.js';
     ScheduleModule.forRoot(),
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [NestAppConfig, DatabaseConfig, MailerConfig, AwsS3Config],
+      load: [
+        NestAppConfig,
+        DatabaseConfig,
+        MailerConfig,
+        AwsS3Config,
+        MyOrderAppSquareConfig,
+      ],
       envFilePath: ['.env'],
     }),
     TypeOrmModule.forRootAsync({
@@ -136,31 +144,9 @@ import { NestSquareModule } from './square/nest-square.module.js';
       imports: [ConfigModule],
       inject: [ConfigService],
     }),
-    NestSquareModule.forRootAsync({
-      useFactory: function (
-        configService: ConfigService<RootConfigType>,
-      ): NestSquareConfigType {
-        return {
-          clientEnvironment: configService.getOrThrow(
-            'square.clientEnvironment',
-            {
-              infer: true,
-            },
-          ),
-          oauthClientId: configService.getOrThrow('square.oauthClientId', {
-            infer: true,
-          }),
-          oauthClientSecret: configService.getOrThrow(
-            'square.oauthClientSecret',
-            {
-              infer: true,
-            },
-          ),
-        };
-      },
-      imports: [ConfigModule],
-      inject: [ConfigService],
-    }),
+    NestSquareModule.fromEnv(),
+    NestStripeModule.fromEnv(),
+    FirebaseAdminModule,
     MyOrderAppSquareModule,
   ],
   controllers: [],

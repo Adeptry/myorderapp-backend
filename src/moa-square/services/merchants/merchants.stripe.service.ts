@@ -8,11 +8,11 @@ import {
 } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
+import { NestStripeService } from 'nest-stripe2';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import Stripe from 'stripe';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
-import { StripeService } from '../../../stripe/stripe.service.js';
-import { User } from '../../../users/entities/user.entity.js';
+import { UserEntity } from '../../../users/entities/user.entity.js';
 import { MyOrderAppSquareConfig } from '../../moa-square.config.js';
 import { MerchantsService } from './merchants.service.js';
 
@@ -25,7 +25,7 @@ export class MerchantsStripeService {
     @Inject(MyOrderAppSquareConfig.KEY)
     private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly stripeService: StripeService,
+    private readonly stripeService: NestStripeService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -57,7 +57,7 @@ export class MerchantsStripeService {
       throw new UnauthorizedException(translations.needsStripeId);
     }
 
-    const session = await this.stripeService.responseOrThrow((stripe) =>
+    const session = await this.stripeService.retryOrThrow((stripe) =>
       stripe.billingPortal.sessions.create({
         customer: stripeId,
         return_url: returnUrl,
@@ -87,7 +87,10 @@ export class MerchantsStripeService {
       where: { id: merchantId },
     });
 
-    const user = await this.service.loadOneRelation<User>(merchant, 'user');
+    const user = await this.service.loadOneRelation<UserEntity>(
+      merchant,
+      'user',
+    );
     if (!user) {
       throw new NotFoundException(translations.doesNotExist);
     }
@@ -96,7 +99,7 @@ export class MerchantsStripeService {
       throw new UnauthorizedException(translations.needsStripeId);
     }
 
-    const response = await this.stripeService.responseOrThrow((stripe) =>
+    const response = await this.stripeService.retryOrThrow((stripe) =>
       stripe.checkout.sessions.create({
         mode: 'subscription',
         line_items: [

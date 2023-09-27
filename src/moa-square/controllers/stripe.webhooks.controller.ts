@@ -13,17 +13,18 @@ import type { ConfigType } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
 import type { Request, Response } from 'express';
+import { NestStripeService } from 'nest-stripe2';
 import Stripe from 'stripe';
-import { StripeConfig } from './stripe.config.js';
-import { StripeService } from './stripe.service.js';
+import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 
 @Controller('v2/stripe/webhook')
 export class StripeWebhookController {
   private readonly logger = new Logger(StripeWebhookController.name);
   constructor(
-    private readonly service: StripeService,
-    @Inject(StripeConfig.KEY)
-    private config: ConfigType<typeof StripeConfig>,
+    private readonly service: NestStripeService,
+    @Inject(MyOrderAppSquareConfig.KEY)
+    private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
+
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger.verbose(this.constructor.name);
@@ -42,17 +43,17 @@ export class StripeWebhookController {
       return;
     }
 
-    if (!this.config.webhookSecret) {
+    if (!this.config.stripeWebhookSecret) {
       throw new InternalServerErrorException();
     }
 
     let event: Stripe.Event | undefined;
 
     try {
-      event = this.service.webhooksConstructEvent(
+      event = this.service.stripe.webhooks.constructEvent(
         request.rawBody,
         signature,
-        this.config.webhookSecret,
+        this.config.stripeWebhookSecret,
       );
     } catch (err: any) {
       this.logger.error(`Stripe webhook received: ${err.message}`);

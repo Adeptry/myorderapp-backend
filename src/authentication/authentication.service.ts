@@ -25,7 +25,7 @@ import { SessionService } from '../session/session.service.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
 import { Status } from '../statuses/entities/status.entity.js';
 import { StatusEnum } from '../statuses/statuses.enum.js';
-import { User } from '../users/entities/user.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 import { UsersService } from '../users/users.service.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthenticationsProvidersEnum } from './authentication-providers.enum.js';
@@ -149,7 +149,7 @@ export class AuthenticationService {
   ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.validateSocialLogin.name);
     const translations = this.currentLanguageTranslations();
-    let user: NullableType<User>;
+    let user: NullableType<UserEntity>;
     const socialEmail = socialData.email?.toLowerCase();
 
     const userByEmail = await this.usersService.findOne({
@@ -370,7 +370,7 @@ export class AuthenticationService {
     }
   }
 
-  async me(userJwtPayload: JwtPayloadType): Promise<NullableType<User>> {
+  async me(userJwtPayload: JwtPayloadType): Promise<NullableType<UserEntity>> {
     this.logger.verbose(this.me.name);
     return this.usersService.findOne({
       where: {
@@ -382,7 +382,7 @@ export class AuthenticationService {
   async update(
     userJwtPayload: JwtPayloadType,
     userDto: AuthenticationUpdateRequestBody,
-  ): Promise<NullableType<User>> {
+  ): Promise<NullableType<UserEntity>> {
     this.logger.verbose(this.update.name);
     const translations = this.currentLanguageTranslations();
     if (userDto.password) {
@@ -477,8 +477,8 @@ export class AuthenticationService {
   }
 
   private async getTokensData(data: {
-    id: User['id'];
-    role: User['role'];
+    id: UserEntity['id'];
+    role: UserEntity['role'];
     sessionId: Session['id'];
   }) {
     this.logger.verbose(this.getTokensData.name);

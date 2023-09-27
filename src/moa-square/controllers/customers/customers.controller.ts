@@ -31,17 +31,17 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../../authentication/authentication.guard.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
-import { AppInstallUpdateDto } from '../../dto/customers/app-install-update.dto.js';
+import { AppInstallPostBody } from '../../dto/customers/app-install-update.dto.js';
 import { CustomersPaginatedResponse } from '../../dto/customers/customers-paginated.output.js';
-import { CustomerUpdateDto } from '../../dto/customers/update-customer.dto.js';
+import { CustomerPatchBody } from '../../dto/customers/update-customer.dto.js';
 import { SquareCard } from '../../dto/square/square.dto.js';
-import { Customer } from '../../entities/customers/customer.entity.js';
+import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import type { CustomersGuardedRequest } from '../../guards/customers.guard.js';
 import { CustomersGuard } from '../../guards/customers.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';
@@ -83,7 +83,7 @@ export class CustomersController {
     type: ErrorResponse,
   })
   @HttpCode(HttpStatus.CREATED)
-  @ApiCreatedResponse({ type: Customer })
+  @ApiCreatedResponse({ type: CustomerEntity })
   @ApiOperation({
     summary: 'Create Customer for current User',
     operationId: 'postCustomerMe',
@@ -136,7 +136,7 @@ export class CustomersController {
   @UseGuards(AuthGuard('jwt'), CustomersGuard)
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   @HttpCode(HttpStatus.OK)
-  @ApiOkResponse({ type: Customer })
+  @ApiOkResponse({ type: CustomerEntity })
   @ApiOperation({
     summary: 'Get current Customer',
     operationId: 'getCustomerMe',
@@ -158,7 +158,7 @@ export class CustomersController {
     preferredLocationRelation?: boolean,
     @Query('preferredSquareCard', new DefaultValuePipe(false), ParseBoolPipe)
     preferredSquareCardRelation?: boolean,
-  ): Promise<Customer> {
+  ): Promise<CustomerEntity> {
     this.logger.verbose(this.getMe.name);
     const { customer, merchant } = request;
 
@@ -206,14 +206,14 @@ export class CustomersController {
   @Patch('me')
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOkResponse({ type: Customer })
+  @ApiOkResponse({ type: CustomerEntity })
   @ApiOperation({
     summary: 'Update your Customer',
     operationId: 'patchCustomerMe',
   })
   @ApiUnauthorizedResponse({ description: 'Unauthorized', type: ErrorResponse })
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
-  @ApiBody({ type: CustomerUpdateDto })
+  @ApiBody({ type: CustomerPatchBody })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
@@ -221,7 +221,7 @@ export class CustomersController {
   @ApiQuery({ name: 'preferredSquareCard', required: false, type: Boolean })
   async patchMe(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: CustomerUpdateDto,
+    @Body() body: CustomerPatchBody,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
     @Query('merchant', new DefaultValuePipe(false), ParseBoolPipe)
@@ -339,7 +339,7 @@ export class CustomersController {
     summary: 'Create or update Customer App Install',
     operationId: 'updateAppInstallMe',
   })
-  @ApiBody({ type: AppInstallUpdateDto })
+  @ApiBody({ type: AppInstallPostBody })
   @ApiCreatedResponse({
     description: 'The record has been successfully created.',
   })
@@ -349,7 +349,7 @@ export class CustomersController {
   @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
   async updateMyAppInstall(
     @Req() request: CustomersGuardedRequest,
-    @Body() body: AppInstallUpdateDto,
+    @Body() body: AppInstallPostBody,
     @Res({ passthrough: true }) res: Response,
   ) {
     this.logger.verbose(this.updateMyAppInstall.name);

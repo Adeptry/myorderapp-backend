@@ -28,10 +28,10 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
+import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
-import { NestSquareService } from '../../../square/nest-square.service.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
-import { CreateCardDto } from '../../dto/cards/card-create.dto.js';
+import { CardsPostBody } from '../../dto/cards/card-create.dto.js';
 import {
   SquareCard,
   SquareDisableCardResponse,
@@ -102,7 +102,7 @@ export class CardsController {
     summary: 'Create my Square Card',
   })
   @ApiBody({
-    type: CreateCardDto,
+    type: CardsPostBody,
     examples: {
       success: {
         value: {
@@ -113,7 +113,7 @@ export class CardsController {
   })
   @Post('me')
   async postMe(
-    @Body() body: CreateCardDto,
+    @Body() body: CardsPostBody,
     @Req() request: CustomersGuardedRequest,
   ) {
     const { merchant, customer } = request;

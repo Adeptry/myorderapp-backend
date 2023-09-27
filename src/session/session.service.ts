@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
-import { User } from '../users/entities/user.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 import { RestfulEntityRepositoryService } from '../utils/restful-entity-repository-service.js';
 import { Session } from './entities/session.entity.js';
 
@@ -23,7 +23,7 @@ export class SessionService extends RestfulEntityRepositoryService<Session> {
     ...criteria
   }: {
     id?: Session['id'];
-    user?: Pick<User, 'id'>;
+    user?: Pick<UserEntity, 'id'>;
     excludeId?: Session['id'];
   }): Promise<void> {
     await this.repository.delete({

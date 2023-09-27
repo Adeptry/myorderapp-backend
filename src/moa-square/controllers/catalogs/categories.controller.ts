@@ -33,9 +33,9 @@ import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { CategoryPaginatedResponse } from '../../dto/catalogs/categories-paginated.output.js';
 import {
-  CategoryUpdateAllDto,
-  CategoryUpdateDto,
-} from '../../dto/catalogs/category-update.dto.js';
+  CategoriesPatchBody,
+  CategoryPatchBody,
+} from '../../dto/catalogs/category-patch.dto.js';
 import { CategoryEntity } from '../../entities/catalogs/category.entity.js';
 import type { UserTypeGuardedRequest } from '../../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../../guards/customer-merchant.guard.js';
@@ -240,7 +240,7 @@ export class CategoriesController {
   @ApiOperation({ summary: 'Update a Category', operationId: 'patchCategory' })
   async patchCategory(
     @Param('id') id: string,
-    @Body() body: CategoryUpdateDto,
+    @Body() body: CategoryPatchBody,
   ): Promise<CategoryEntity> {
     this.logger.verbose(this.patchCategory.name);
     return this.service.updateOne({
@@ -258,13 +258,13 @@ export class CategoriesController {
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
   })
-  @ApiBody({ type: [CategoryUpdateAllDto] })
+  @ApiBody({ type: [CategoriesPatchBody] })
   @ApiOperation({
     summary: 'Update multiple Categories',
     operationId: 'patchCategories',
   })
   async patchCategories(
-    @Body() body: CategoryUpdateAllDto[],
+    @Body() body: CategoriesPatchBody[],
   ): Promise<CategoryEntity[]> {
     this.logger.verbose(this.patchCategories.name);
     return await this.service.updateAll(body);

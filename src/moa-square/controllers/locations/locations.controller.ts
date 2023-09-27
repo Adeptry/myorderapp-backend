@@ -32,8 +32,8 @@ import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
 import {
-  LocationUpdateAllDto,
-  LocationUpdateDto,
+  LocationPatchBody,
+  LocationsPatchBody,
 } from '../../dto/locations/location-update.input.js';
 import { LocationPaginatedResponse } from '../../dto/locations/locations-paginated.output.js';
 import { LocationEntity as MoaLocation } from '../../entities/locations/location.entity.js';
@@ -177,7 +177,7 @@ export class LocationsController {
   async patchOne(
     @Req() request: any,
     @Param('id') id: string,
-    @Body() body: LocationUpdateDto,
+    @Body() body: LocationPatchBody,
   ): Promise<MoaLocation> {
     this.logger.verbose(this.patchOne.name);
     const entity = await this.service.findOne({
@@ -199,7 +199,7 @@ export class LocationsController {
   @Patch()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: [MoaLocation] }) // Array of Location
-  @ApiBody({ type: [LocationUpdateAllDto] })
+  @ApiBody({ type: [LocationsPatchBody] })
   @ApiUnauthorizedResponse({
     description: 'You need to be authenticated to access this endpoint.',
     type: ErrorResponse,
@@ -208,9 +208,7 @@ export class LocationsController {
     summary: 'Update Locations',
     operationId: 'patchManyLocations',
   })
-  async patchMany(
-    @Body() body: LocationUpdateAllDto[],
-  ): Promise<MoaLocation[]> {
+  async patchMany(@Body() body: LocationsPatchBody[]): Promise<MoaLocation[]> {
     this.logger.verbose(this.patchMany.name);
     return await this.service.updateAll(body);
   }

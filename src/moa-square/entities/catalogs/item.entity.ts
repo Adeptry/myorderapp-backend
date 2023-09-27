@@ -23,7 +23,7 @@ import { CatalogImageEntity } from './catalog-image.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
 import { CategoryEntity } from './category.entity.js';
 import { ItemModifierListEntity } from './item-modifier-list.entity.js';
-import { Variation } from './variation.entity.js';
+import { VariationEntity } from './variation.entity.js';
 
 @Entity('item')
 export class ItemEntity extends BaseEntity {
@@ -131,15 +131,15 @@ export class ItemEntity extends BaseEntity {
    */
 
   @ApiProperty({
-    type: () => Variation,
+    type: () => VariationEntity,
     isArray: true,
     required: false,
     nullable: true,
   })
-  @OneToMany(() => Variation, (entity) => entity.item, {
+  @OneToMany(() => VariationEntity, (entity) => entity.item, {
     nullable: true,
   })
-  variations?: Variation[];
+  variations?: VariationEntity[];
 
   /*
    * Catalog
