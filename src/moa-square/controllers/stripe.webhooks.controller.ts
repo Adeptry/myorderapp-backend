@@ -24,7 +24,6 @@ export class StripeWebhookController {
     private readonly service: NestStripeService,
     @Inject(MyOrderAppSquareConfig.KEY)
     private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
-
     private readonly eventEmitter: EventEmitter2,
   ) {
     this.logger.verbose(this.constructor.name);
