@@ -1,37 +1,5 @@
 {
-  "name": "moa-backend3",
-  "type": "module",
-  "version": "2.2.0",
-  "description": "",
   "author": "",
-  "private": true,
-  "license": "UNLICENSED",
-  "scripts": {
-    "typeorm": "node --loader ts-node/esm -r tsconfig-paths/register ./node_modules/typeorm/cli.js",
-    "migration:generate": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:generate",
-    "migration:create": "npm run typeorm -- migration:create",
-    "migration:run": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
-    "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
-    "schema:drop": "npm run typeorm -- --dataSource=src/database/data-source.ts schema:drop",
-    "seed:create": "hygen seeds create",
-    "seed:run": "node --loader ts-node/esm -r tsconfig-paths/register ./src/database/seeds/run-seed.ts",
-    "clean": "rimraf dist",
-    "prebuild": "rimraf dist",
-    "build": "nest build",
-    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
-    "start": "nest start",
-    "dev": "nest start --watch",
-    "start:dev": "nest start --watch",
-    "start:debug": "nest start --debug --watch",
-    "start:prod": "node -r newrelic dist/main",
-    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
-    "test": "jest",
-    "test:watch": "jest --watch",
-    "test:cov": "jest --coverage",
-    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
-    "test:e2e": "env-cmd jest --config ./test/jest-e2e.json",
-    "prepare": "is-ci || husky install"
-  },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.420.0",
     "@nestjs-modules/mailer": "^1.9.1",
@@ -69,7 +37,6 @@
     "newrelic": "^11.1.0",
     "nodemailer": "6.9.3",
     "nodemailer-mailgun-transport": "^2.1.5",
-    "p-retry": "^6.0.0",
     "passport": "0.6.0",
     "passport-anonymous": "1.0.1",
     "passport-headerapikey": "^1.2.2",
@@ -79,13 +46,13 @@
     "rimraf": "5.0.1",
     "rxjs": "7.8.1",
     "source-map-support": "0.5.21",
-    "sqlite3": "^5.1.6",
     "square": "^31.0.0",
     "stripe": "^13.7.0",
     "swagger-ui-express": "4.6.3",
     "tsconfig-paths": "^4.2.0",
     "typeorm": "0.3.17"
   },
+  "description": "",
   "devDependencies": {
     "@nestjs/cli": "10.1.7",
     "@nestjs/schematics": "10.0.1",
@@ -115,6 +82,7 @@
     "is-ci": "3.0.1",
     "jest": "29.6.0",
     "prettier": "2.8.8",
+    "sqlite3": "^5.1.6",
     "supertest": "6.3.3",
     "ts-jest": "29.1.1",
     "ts-loader": "9.4.4",
@@ -123,18 +91,23 @@
     "typescript": "5.1.6"
   },
   "jest": {
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
+    "coverageDirectory": "../coverage",
     "extensionsToTreatAsEsm": [
       ".ts"
     ],
-    "moduleNameMapper": {
-      "^(\\.{1,2}/.*)\\.js$": "$1"
-    },
     "moduleFileExtensions": [
       "js",
       "json",
       "ts"
     ],
+    "moduleNameMapper": {
+      "^(\\.{1,2}/.*)\\.js$": "$1"
+    },
     "rootDir": "src",
+    "testEnvironment": "node",
     "testRegex": ".*\\.spec\\.ts$",
     "transform": {
       "^.+\\.tsx?$": [
@@ -143,11 +116,37 @@
           "useESM": true
         }
       ]
-    },
-    "collectCoverageFrom": [
-      "**/*.(t|j)s"
-    ],
-    "coverageDirectory": "../coverage",
-    "testEnvironment": "node"
-  }
+    }
+  },
+  "license": "UNLICENSED",
+  "name": "moa-backend3",
+  "private": true,
+  "scripts": {
+    "build": "nest build",
+    "clean": "rimraf dist",
+    "dev": "nest start --watch",
+    "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
+    "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
+    "migration:create": "npm run typeorm -- migration:create",
+    "migration:generate": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:generate",
+    "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
+    "migration:run": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
+    "prebuild": "rimraf dist",
+    "prepare": "is-ci || husky install",
+    "schema:drop": "npm run typeorm -- --dataSource=src/database/data-source.ts schema:drop",
+    "seed:create": "hygen seeds create",
+    "seed:run": "node --loader ts-node/esm -r tsconfig-paths/register ./src/database/seeds/run-seed.ts",
+    "start": "nest start",
+    "start:debug": "nest start --debug --watch",
+    "start:dev": "nest start --watch",
+    "start:prod": "node -r newrelic dist/main",
+    "test": "jest",
+    "test:cov": "jest --coverage",
+    "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "test:e2e": "env-cmd jest --config ./test/jest-e2e.json",
+    "test:watch": "jest --watch",
+    "typeorm": "node --loader ts-node/esm -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
+  },
+  "type": "module",
+  "version": "2.2.0"
 }

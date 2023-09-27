@@ -58,7 +58,7 @@ export class OrderEntity extends BaseEntity {
 
   @ApiProperty({
     required: false,
-    type: 'Customer',
+    type: () => CustomerEntity,
     nullable: true,
   })
   @ManyToOne(() => CustomerEntity, (entity) => entity.orders, {

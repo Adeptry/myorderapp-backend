@@ -39,9 +39,10 @@ export class AppConfigUpdateBody {
   useMaterial3?: boolean;
 
   @ApiProperty({
-    enum: Object.values(ThemeModeEnum),
     required: false,
     nullable: true,
+    enum: Object.values(ThemeModeEnum),
+    enumName: 'ThemeModeEnum',
   })
   @IsString()
   @IsOptional()
