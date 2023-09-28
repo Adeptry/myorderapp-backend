@@ -28,8 +28,16 @@ export class SquareWebhookController {
     const { squareWebhookSignatureKey } = this.config;
 
     if (signature && request.rawBody) {
+      const rawBodyString = request.rawBody.toString();
+      this.logger.log(`signature: ${signature}`);
+      this.logger.log(`rawBodyString: ${rawBodyString}`);
+      this.logger.log(
+        `squareWebhookSignatureKey: ${squareWebhookSignatureKey}`,
+      );
+      this.logger.log(`url: ${url}`);
+
       const isValid = WebhooksHelper.isValidWebhookEventSignature(
-        request.rawBody.toString(),
+        rawBodyString,
         signature,
         squareWebhookSignatureKey,
         url,
@@ -42,10 +50,5 @@ export class SquareWebhookController {
     }
 
     this.logger.error('Invalid Square webhook signature');
-    this.logger.log(`Body: ${JSON.stringify(body)}`);
-    this.logger.log(`Signature: ${signature}`);
-    this.logger.log(`Has Signature Key: ${squareWebhookSignatureKey != null}`);
-    this.logger.log(`URL: ${url}`);
-    this.logger.log(`Headers: ${JSON.stringify(request.headers)}`);
   }
 }
