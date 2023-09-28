@@ -24,8 +24,9 @@ export class SquareWebhookController {
     @Headers('x-square-hmacsha256-signature') signature?: string,
   ) {
     this.logger.verbose(this.post.name);
-    const { body, url } = request;
+    const { body, protocol, hostname, originalUrl } = request;
     const { squareWebhookSignatureKey } = this.config;
+    const notificationUrl = `${protocol}://${hostname}${originalUrl}`;
 
     if (signature && request.rawBody) {
       const rawBodyString = request.rawBody.toString();
@@ -34,13 +35,13 @@ export class SquareWebhookController {
       this.logger.log(
         `squareWebhookSignatureKey: ${squareWebhookSignatureKey}`,
       );
-      this.logger.log(`url: ${url}`);
+      this.logger.log(`notificationUrl: ${notificationUrl}`);
 
       const isValid = WebhooksHelper.isValidWebhookEventSignature(
         rawBodyString,
         signature,
         squareWebhookSignatureKey,
-        url,
+        notificationUrl,
       );
 
       if (isValid) {
