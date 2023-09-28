@@ -27,7 +27,7 @@ export class SquareWebhookController {
   @ApiExcludeEndpoint()
   @Post()
   post(
-    @Headers('x-square-signature') signature: string,
+    @Headers('x-square-hmacsha256-signature') signature: string,
     @Body() body: any,
     @Req() request: Request,
   ) {
