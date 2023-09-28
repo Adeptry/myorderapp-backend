@@ -120,12 +120,19 @@ export class OrdersUtils {
       'eee',
     ).toUpperCase();
 
+    this.logger.log(`pickupInLocalTimeDate: ${pickupInLocalTimeDate}`);
+    this.logger.log(`pickupLocalTime: ${pickupLocalTime}`);
+    this.logger.log(`pickupLocalDayOfWeek: ${pickupLocalDayOfWeek}`);
+
     const matchingPeriod = businessHours.find(
       (period) => period.dayOfWeek === pickupLocalDayOfWeek,
     );
-
     const startLocalTime = matchingPeriod?.startLocalTime;
     const endLocalTime = matchingPeriod?.endLocalTime;
+
+    this.logger.log(`matchingPeriod: ${JSON.stringify(matchingPeriod)}`);
+    this.logger.log(`startLocalTime: ${startLocalTime}`);
+    this.logger.log(`endLocalTime: ${endLocalTime}`);
 
     if (!matchingPeriod || !startLocalTime || !endLocalTime) {
       throw new BadRequestException(translations.pickupOutsideBusinessHours);
