@@ -1,12 +1,4 @@
-import {
-  Body,
-  Controller,
-  Headers,
-  Inject,
-  Logger,
-  Post,
-  Req,
-} from '@nestjs/common';
+import { Controller, Headers, Inject, Logger, Post, Req } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 import { ApiExcludeEndpoint } from '@nestjs/swagger';
@@ -27,24 +19,32 @@ export class SquareWebhookController {
   @ApiExcludeEndpoint()
   @Post()
   post(
-    @Headers('x-square-hmacsha256-signature') signature: string,
-    @Body() body: any,
     @Req() request: Request,
+    @Headers('x-square-hmacsha256-signature') signature?: string,
   ) {
     this.logger.verbose(this.post.name);
-    if (
-      !WebhooksHelper.isValidWebhookEventSignature(
+    const { body, url } = request;
+    const { squareWebhookSignatureKey } = this.config;
+
+    if (signature) {
+      const isValid = WebhooksHelper.isValidWebhookEventSignature(
         body,
         signature,
-        this.config.squareWebhookSignatureKey,
-        request.url,
-      )
-    ) {
-      this.logger.error('Invalid Square webhook signature');
-      return;
+        squareWebhookSignatureKey,
+        url,
+      );
+
+      if (isValid) {
+        this.eventEmitter.emit(`square.${body.type}`, body);
+        return;
+      }
     }
 
-    this.logger.log(body.type);
-    this.eventEmitter.emit(`square.${body.type}`, body);
+    this.logger.error('Invalid Square webhook signature');
+    this.logger.log(`Body: ${JSON.stringify(body)}`);
+    this.logger.log(`Signature: ${signature}`);
+    this.logger.log(`Has Signature Key: ${squareWebhookSignatureKey != null}`);
+    this.logger.log(`URL: ${url}`);
+    this.logger.log(`Headers: ${JSON.stringify(request.headers)}`);
   }
 }
