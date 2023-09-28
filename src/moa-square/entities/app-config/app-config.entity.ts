@@ -123,7 +123,7 @@ export class AppConfigEntity extends BaseEntity {
 
   /* App Icon */
 
-  @Exclude({ toPlainOnly: true })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   iconFileUrl?: string;
 

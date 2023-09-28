@@ -42,8 +42,9 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
         if (typeof response === 'string') {
           message = response;
         } else if (typeof response === 'object' && response !== null) {
-          message = (response as any).message ?? ''; // Fallback to an empty string or some default
-          fields = (response as any).fields ?? {}; // Fallback to an empty object or some default
+          fields = (response as any).fields ?? {};
+          const fallback = Object.values(fields).join(', ') + '.';
+          message = (response as any).message ?? fallback;
         }
       } else if (exception instanceof QueryFailedError) {
         statusCode = HttpStatus.UNPROCESSABLE_ENTITY;

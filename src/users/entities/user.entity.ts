@@ -125,6 +125,7 @@ export class UserEntity extends BaseEntity {
   hash?: string | null;
 
   @Expose()
+  @ApiProperty({ required: false, type: String, nullable: true })
   get fullName(): string | undefined {
     if (!this.firstName && !this.lastName) {
       return undefined;
