@@ -40,6 +40,7 @@ export class SquareWebhookController {
         request.url,
       )
     ) {
+      this.logger.error('Invalid Square webhook signature');
       return;
     }
 
