@@ -1,3 +1,4 @@
+import type { RawBodyRequest } from '@nestjs/common';
 import { Controller, Headers, Inject, Logger, Post, Req } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { EventEmitter2 } from '@nestjs/event-emitter';
@@ -19,16 +20,16 @@ export class SquareWebhookController {
   @ApiExcludeEndpoint()
   @Post()
   post(
-    @Req() request: Request,
+    @Req() request: RawBodyRequest<Request>,
     @Headers('x-square-hmacsha256-signature') signature?: string,
   ) {
     this.logger.verbose(this.post.name);
     const { body, url } = request;
     const { squareWebhookSignatureKey } = this.config;
 
-    if (signature) {
+    if (signature && request.rawBody) {
       const isValid = WebhooksHelper.isValidWebhookEventSignature(
-        body,
+        request.rawBody.toString(),
         signature,
         squareWebhookSignatureKey,
         url,
