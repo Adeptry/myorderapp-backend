@@ -487,8 +487,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       recipientDisplayName = `${recipient.firstName} ${recipient.lastName}`;
     }
 
-    const locationSquareId = order.location?.locationSquareId;
-    if (!locationSquareId) {
+    const location = order.location;
+    const locationSquareId = location?.locationSquareId;
+    if (!locationSquareId || !location) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
@@ -507,12 +508,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
-    const pickupOrAsapDate =
-      pickupDate ?? addMinutes(new Date(), 15).toISOString();
+    const pickupOrAsapDate = pickupDate
+      ? pickupDate
+      : addMinutes(new Date(), 15);
 
     this.utils.validatePickupTimeOrThrow({
       pickupDate: pickupOrAsapDate,
-      businessHours: order.location?.businessHours ?? [],
+      location: location,
     });
 
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
@@ -530,7 +532,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                   pickupDetails: {
                     note,
                     scheduleType: pickupDate ? 'SCHEDULED' : 'ASAP',
-                    pickupAt: pickupOrAsapDate,
+                    pickupAt: pickupDate?.toISOString(),
                     recipient: {
                       customerId: customer.squareId,
                       displayName: recipientDisplayName ?? user?.fullName,

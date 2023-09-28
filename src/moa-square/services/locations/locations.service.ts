@@ -8,17 +8,17 @@ import {
   LocationPatchBody,
   LocationsPatchBody,
 } from '../../dto/locations/location-update.input.js';
-import { LocationEntity as MoaLocation } from '../../entities/locations/location.entity.js';
+import { LocationEntity } from '../../entities/locations/location.entity.js';
 import { AddressService } from './address.service.js';
 import { BusinessHoursPeriodsService } from './business-hours-period.service.js';
 
 @Injectable()
-export class LocationsService extends EntityRepositoryService<MoaLocation> {
+export class LocationsService extends EntityRepositoryService<LocationEntity> {
   protected readonly logger: Logger;
 
   constructor(
-    @InjectRepository(MoaLocation)
-    protected readonly repository: Repository<MoaLocation>,
+    @InjectRepository(LocationEntity)
+    protected readonly repository: Repository<LocationEntity>,
     private readonly addressService: AddressService,
     private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
     private readonly squareService: NestSquareService,
@@ -33,7 +33,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
       merchantIdOrPath: string;
       status?: string;
     };
-    relations?: FindOptionsRelations<MoaLocation>;
+    relations?: FindOptionsRelations<LocationEntity>;
   }) {
     this.logger.verbose(this.findAndCountWithMerchantIdOrPath.name);
     return await this.findAndCount({
@@ -56,7 +56,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
   async syncSquare(params: {
     merchantId: string;
     squareAccessToken: string;
-  }): Promise<MoaLocation[]> {
+  }): Promise<LocationEntity[]> {
     this.logger.verbose(this.syncSquare.name);
     const { merchantId, squareAccessToken: accessToken } = params;
     const locations = await this.find({
@@ -206,9 +206,9 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
   }
 
   async updateOne(params: {
-    entity: MoaLocation;
+    entity: LocationEntity;
     input: LocationPatchBody;
-  }): Promise<MoaLocation> {
+  }): Promise<LocationEntity> {
     this.logger.verbose(this.updateOne.name);
     if (params.input.moaOrdinal !== undefined) {
       params.entity.moaOrdinal = params.input.moaOrdinal;
@@ -221,7 +221,7 @@ export class LocationsService extends EntityRepositoryService<MoaLocation> {
 
   async updateAll(inputs: LocationsPatchBody[]) {
     this.logger.verbose(this.updateAll.name);
-    const entities: MoaLocation[] = [];
+    const entities: LocationEntity[] = [];
 
     for (const input of inputs) {
       const entity = await this.findOneOrFail({

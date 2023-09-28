@@ -1,23 +1,24 @@
 import {
   BadRequestException,
   Injectable,
+  InternalServerErrorException,
   Logger,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import {
   addDays,
   addHours,
-  format,
   isAfter,
   isBefore,
   isWithinInterval,
 } from 'date-fns';
+import { format, utcToZonedTime } from 'date-fns-tz';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { OrderLineItem, Order as SquareOrder } from 'square';
 import { In } from 'typeorm';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { OrdersVariationLineItemInput } from '../../dto/orders/variation-add.dto.js';
-import { BusinessHoursPeriodEntity } from '../../entities/locations/business-hours-period.entity.js';
+import { LocationEntity } from '../../entities/locations/location.entity.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
 import { ModifiersService } from '../catalogs/modifiers.service.js';
 import { VariationsService } from '../catalogs/variations.service.js';
@@ -90,40 +91,47 @@ export class OrdersUtils {
   }
 
   validatePickupTimeOrThrow(params: {
-    businessHours: BusinessHoursPeriodEntity[];
-    pickupDate: string;
+    location: LocationEntity;
+    pickupDate: Date;
   }) {
-    const { businessHours, pickupDate } = params;
-    this.logger.verbose(this.validatePickupTimeOrThrow.name);
+    const { location, pickupDate } = params;
     const translations = this.currentLanguageTranslations();
 
-    const pickupDateOrAsap = new Date(pickupDate);
+    const { timezone, businessHours } = location;
+
+    if (!timezone || !businessHours) {
+      throw new InternalServerErrorException(); // todo: translations.locationMissingTimezone
+    }
+
     const now = new Date();
 
-    if (isBefore(pickupDateOrAsap, now)) {
+    if (isBefore(pickupDate, now)) {
       throw new BadRequestException(translations.pickupInPast);
     }
 
-    if (isAfter(pickupDateOrAsap, addDays(now, 7))) {
+    if (isAfter(pickupDate, addDays(now, 7))) {
       throw new BadRequestException(translations.pickupTooFarInFuture);
     }
 
-    const pickupTime = format(pickupDateOrAsap, 'HH:mm:ss');
-    const pickupDayOfWeek = format(pickupDateOrAsap, 'eee').toUpperCase();
+    const pickupInLocalTimeDate = utcToZonedTime(pickupDate, timezone);
+    const pickupLocalTime = format(pickupInLocalTimeDate, 'HH:mm:ss');
+    const pickupLocalDayOfWeek = format(
+      pickupInLocalTimeDate,
+      'eee',
+    ).toUpperCase();
 
     const matchingPeriod = businessHours.find(
-      (period) => period.dayOfWeek === pickupDayOfWeek,
+      (period) => period.dayOfWeek === pickupLocalDayOfWeek,
     );
 
-    if (
-      !matchingPeriod ||
-      !matchingPeriod.startLocalTime ||
-      !matchingPeriod.endLocalTime ||
-      !(
-        pickupTime >= matchingPeriod.startLocalTime &&
-        pickupTime <= matchingPeriod.endLocalTime
-      )
-    ) {
+    const startLocalTime = matchingPeriod?.startLocalTime;
+    const endLocalTime = matchingPeriod?.endLocalTime;
+
+    if (!matchingPeriod || !startLocalTime || !endLocalTime) {
+      throw new BadRequestException(translations.pickupOutsideBusinessHours);
+    }
+
+    if (pickupLocalTime < startLocalTime || pickupLocalTime > endLocalTime) {
       throw new BadRequestException(translations.pickupOutsideBusinessHours);
     }
   }

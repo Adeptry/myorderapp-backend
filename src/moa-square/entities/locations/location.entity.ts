@@ -94,6 +94,10 @@ export class LocationEntity extends BaseEntity {
   @Column({ type: String, nullable: true })
   status?: string | null;
 
+  /**
+   * The [IANA time zone](https://www.iana.org/time-zones) identifier for
+   * the time zone of the location. For example, `America/Los_Angeles`.
+   */
   @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ type: String, nullable: true })
   timezone?: string | null;
