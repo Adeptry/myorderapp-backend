@@ -11,7 +11,7 @@ export class OrdersPostPaymentBody {
   })
   @IsOptional()
   @IsRFC3339()
-  pickupDateTime?: string;
+  pickupDate?: string;
 
   @ApiProperty()
   @IsString()

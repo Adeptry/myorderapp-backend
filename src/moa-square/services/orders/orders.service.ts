@@ -423,7 +423,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }) {
     const { orderId, customerId, input, merchantId } = params;
     const {
-      pickupDateTime,
+      pickupDate,
       paymentSquareId,
       note,
       idempotencyKey,
@@ -509,11 +509,11 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
-    const newPickupDateTime =
-      pickupDateTime ?? addMinutes(new Date(), 15).toISOString();
+    const pickupOrAsapDate =
+      pickupDate ?? addMinutes(new Date(), 15).toISOString();
 
     this.utils.validatePickupTimeOrThrow({
-      pickupAt: newPickupDateTime,
+      pickupDate: pickupOrAsapDate,
       businessHours: order.location?.businessHours ?? [],
     });
 
@@ -531,10 +531,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                   type: 'PICKUP',
                   pickupDetails: {
                     note,
-                    scheduleType: pickupDateTime ? 'SCHEDULED' : 'ASAP',
-                    pickupAt: pickupDateTime
-                      ? pickupDateTime
-                      : newPickupDateTime,
+                    scheduleType: pickupDate ? 'SCHEDULED' : 'ASAP',
+                    pickupAt: pickupOrAsapDate,
                     recipient: {
                       customerId: customer.squareId,
                       displayName: recipientDisplayName ?? user?.fullName,
@@ -584,7 +582,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }),
     );
 
-    updatedOrder.closedAt = new Date();
+    updatedOrder.closedDate = new Date();
+    updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customer.id;
     updatedOrder.totalMoneyTipAmount = Math.floor(orderTipMoney ?? 0);
     customer.currentOrder = null;

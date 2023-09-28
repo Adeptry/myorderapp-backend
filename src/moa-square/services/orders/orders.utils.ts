@@ -7,7 +7,6 @@ import {
 import {
   addDays,
   addHours,
-  addMinutes,
   format,
   isAfter,
   isBefore,
@@ -92,27 +91,25 @@ export class OrdersUtils {
 
   validatePickupTimeOrThrow(params: {
     businessHours: BusinessHoursPeriodEntity[];
-    pickupAt?: string;
+    pickupDate: string;
   }) {
-    const { businessHours, pickupAt } = params;
+    const { businessHours, pickupDate } = params;
     this.logger.verbose(this.validatePickupTimeOrThrow.name);
     const translations = this.currentLanguageTranslations();
 
-    const pickupDateTime = pickupAt
-      ? new Date(pickupAt)
-      : addMinutes(new Date(), 15);
+    const pickupDateOrAsap = new Date(pickupDate);
     const now = new Date();
 
-    if (isBefore(pickupDateTime, now)) {
+    if (isBefore(pickupDateOrAsap, now)) {
       throw new BadRequestException(translations.pickupInPast);
     }
 
-    if (isAfter(pickupDateTime, addDays(now, 7))) {
+    if (isAfter(pickupDateOrAsap, addDays(now, 7))) {
       throw new BadRequestException(translations.pickupTooFarInFuture);
     }
 
-    const pickupTime = format(pickupDateTime, 'HH:mm:ss');
-    const pickupDayOfWeek = format(pickupDateTime, 'eee').toUpperCase();
+    const pickupTime = format(pickupDateOrAsap, 'HH:mm:ss');
+    const pickupDayOfWeek = format(pickupDateOrAsap, 'eee').toUpperCase();
 
     const matchingPeriod = businessHours.find(
       (period) => period.dayOfWeek === pickupDayOfWeek,

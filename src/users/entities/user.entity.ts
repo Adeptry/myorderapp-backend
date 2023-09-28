@@ -21,7 +21,7 @@ import { AuthenticationsProvidersEnum } from '../../authentication/authenticatio
 import { Role } from '../../roles/entities/role.entity.js';
 import { Status } from '../../statuses/entities/status.entity.js';
 
-@Entity()
+@Entity('user')
 export class UserEntity extends BaseEntity {
   @PrimaryColumn('varchar')
   @ApiProperty()

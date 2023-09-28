@@ -126,7 +126,14 @@ export class OrderEntity extends BaseEntity {
     nullable: true,
   })
   @Column({ type: Date, nullable: true })
-  closedAt?: Date;
+  closedDate?: Date;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ type: Date, nullable: true })
+  pickupDate?: Date;
 
   @ApiProperty({
     type: String,

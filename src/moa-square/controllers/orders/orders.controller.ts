@@ -260,7 +260,7 @@ export class OrdersController {
         where: {
           customerId: request.customer?.id,
           merchantId: request.merchant?.id,
-          closedAt: closed ? Not(IsNull()) : undefined,
+          closedDate: closed ? Not(IsNull()) : undefined,
         },
         order: { createDate: 'DESC' },
         take: limit,
