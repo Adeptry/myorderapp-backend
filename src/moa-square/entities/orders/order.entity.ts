@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
@@ -16,6 +16,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { FulfillmentStatusEnum } from '../../dto/square/square-order-fulfillment-updated.payload.js';
 import { CustomerEntity } from '../customers/customer.entity.js';
 import { LocationEntity } from '../locations/location.entity.js';
 import { MerchantEntity } from '../merchants/merchant.entity.js';
@@ -95,10 +96,6 @@ export class OrderEntity extends BaseEntity {
   @JoinColumn()
   location?: Relation<LocationEntity>;
 
-  /*
-   * Square
-   */
-
   @ApiProperty({
     required: false,
     type: () => LineItemEntity,
@@ -110,6 +107,20 @@ export class OrderEntity extends BaseEntity {
     cascade: true,
   })
   lineItems?: LineItemEntity[];
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    enum: Object.values(FulfillmentStatusEnum),
+    enumName: 'FulfillmentStatusEnum',
+  })
+  @Column({
+    type: 'simple-enum',
+    nullable: true,
+    enum: FulfillmentStatusEnum,
+    default: FulfillmentStatusEnum.proposed,
+  })
+  squareFulfillmentStatus?: FulfillmentStatusEnum;
 
   @ApiHideProperty()
   @Exclude()
@@ -177,4 +188,14 @@ export class OrderEntity extends BaseEntity {
   })
   @Column({ nullable: true })
   totalMoneyServiceChargeAmount?: number;
+
+  @Expose()
+  @ApiProperty({ required: false, type: String, nullable: true })
+  get displayId(): string | undefined {
+    return (this.squareId?.length ?? 0) > 8
+      ? this.squareId?.slice(0, 8).toUpperCase()
+      : (this.id?.length ?? 0) > 8
+      ? this.id?.slice(0, 8).toUpperCase()
+      : undefined;
+  }
 }

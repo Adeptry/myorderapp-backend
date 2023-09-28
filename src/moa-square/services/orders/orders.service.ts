@@ -12,20 +12,20 @@ import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
 import { In, Repository } from 'typeorm';
-import { FirebaseAdminService } from '../../../firebase-admin/firebase-admin.service.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import { OrdersPostPaymentBody } from '../../dto/orders/payment-create.dto.js';
 import { OrdersVariationLineItemInput } from '../../dto/orders/variation-add.dto.js';
-import { SquareOrderFulfillmentUpdatedPayload } from '../../dto/square/square-order-fulfillment-updated.payload.js';
-import { AppInstall } from '../../entities/customers/app-install.entity.js';
+import {
+  SquareOrderFulfillmentUpdatedPayload,
+  isValidFulfillmentStatus,
+} from '../../dto/square/square-order-fulfillment-updated.payload.js';
 import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import { MerchantEntity } from '../../entities/merchants/merchant.entity.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { LocationsService } from '../locations/locations.service.js';
-import { MerchantsFirebaseService } from '../merchants/merchants.firebase.service.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { LineItemService } from './line-item.service.js';
 import { OrdersUtils } from './orders.utils.js';
@@ -43,9 +43,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     private readonly locationsService: LocationsService,
     private readonly merchantsService: MerchantsService,
     private readonly usersService: UsersService,
-    private readonly merchantsFirebaseService: MerchantsFirebaseService,
     private readonly customersService: CustomersService,
-    private readonly firebaseAdminService: FirebaseAdminService,
     private readonly utils: OrdersUtils,
   ) {
     const logger = new Logger(OrdersService.name);
@@ -597,73 +595,34 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     payload: SquareOrderFulfillmentUpdatedPayload,
   ) {
     this.logger.verbose(this.handleSquareOrderFulfillmentUpdate.name);
+
     const squareOrderId =
       payload.data?.object?.order_fulfillment_updated?.order_id;
     if (!squareOrderId) {
       this.logger.error(
         `Missing order_id in SquareOrderFulfillmentUpdatedPayload`,
       );
+      return; // Exit if no order_id
     }
+
     const order = await this.findOne({ where: { squareId: squareOrderId } });
     if (!order) {
       this.logger.error(`Order with id ${squareOrderId} not found`);
-      return;
+      return; // Exit if order not found
     }
 
-    if (!payload.merchant_id) {
-      this.logger.error(
-        'Missing merchant_id in SquareLocationCreatedEventPayload',
-      );
-      return;
-    }
-
-    const merchant = await this.findOne({
-      where: { squareId: payload.merchant_id },
-    });
-    if (!merchant) {
-      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
-      return;
-    }
-
-    const app = this.merchantsFirebaseService.firebaseAdminApp({ merchant });
-    if (!app) {
-      this.logger.error(`Firebase app not found for merchant ${merchant.id}`);
-      return;
-    }
-
-    const customer = await this.loadOneRelation<CustomerEntity>(
-      order,
-      'customer',
-    );
-    if (!customer) {
-      this.logger.error(`Customer not found for order ${order.id}`);
-      return;
-    }
-
-    const appInstalls =
-      await this.customersService.loadManyRelation<AppInstall>(
-        customer,
-        'appInstalls',
-      );
-
-    const messaging = this.firebaseAdminService.messaging(app);
     const orderFulfillment = payload?.data?.object?.order_fulfillment_updated;
-    const latestUpdate = (orderFulfillment?.fulfillment_update ?? [])[
-      (orderFulfillment?.fulfillment_update?.length ?? 0) - 1
-    ];
-    const body = `Your order with ID ${order.id} has been updated from ${latestUpdate.old_state} to ${latestUpdate.new_state}.`;
+    const lastFulfillmentUpdate = (
+      orderFulfillment?.fulfillment_update ?? []
+    ).pop();
 
-    for (const appInstall of appInstalls) {
-      if (!appInstall.firebaseCloudMessagingToken) {
-        continue;
+    if (lastFulfillmentUpdate) {
+      const fulfillmentStatus = lastFulfillmentUpdate.new_state;
+      if (fulfillmentStatus && isValidFulfillmentStatus(fulfillmentStatus)) {
+        order.squareFulfillmentStatus = fulfillmentStatus;
+        await this.save(order);
+        this.logger.log("Order's fulfillment status updated");
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title: 'Order Update',
-          body,
-        },
-      });
     }
   }
 }

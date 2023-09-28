@@ -6,256 +6,61 @@ remote: NODE_VERBOSE=false
 remote: NODE_ENV=staging
 remote: NODE_MODULES_CACHE=true
 
-```
-listLocationsOrThrow(params: { accessToken: string }) {
-    this.logger.verbose(this.listLocationsOrThrow.name);
-    const { accessToken } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).locationsApi?.listLocations(),
+if (!payload.merchant_id) {
+this.logger.error(
+'Missing merchant_id in SquareLocationCreatedEventPayload',
+);
+return;
+}
+
+    const merchant = await this.findOne({
+      where: { squareId: payload.merchant_id },
+    });
+    if (!merchant) {
+      this.logger.error(`Merchant with id ${payload.merchant_id} not found`);
+      return;
+    }
+
+    const app = this.merchantsFirebaseService.firebaseAdminApp({ merchant });
+    if (!app) {
+      this.logger.error(`Firebase app not found for merchant ${merchant.id}`);
+      return;
+    }
+
+    const customer = await this.loadOneRelation<CustomerEntity>(
+      order,
+      'customer',
     );
-  }
+    if (!customer) {
+      this.logger.error(`Customer not found for order ${order.id}`);
+      return;
+    }
 
-  retrieveLocationOrThrow(params: {
-    accessToken: string;
-    locationSquareId: string;
-  }) {
-    this.logger.verbose(this.retrieveLocationOrThrow.name);
-    const { accessToken, locationSquareId } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).locationsApi.retrieveLocation(locationSquareId),
-    );
-  }
+    const appInstalls =
+      await this.customersService.loadManyRelation<AppInstall>(
+        customer,
+        'appInstalls',
+      );
 
-  createCustomerOrThrow(params: {
-    accessToken: string;
-    request: CreateCustomerRequest;
-  }) {
-    this.logger.verbose(this.createCustomerOrThrow.name);
-    const { accessToken, request } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).customersApi.createCustomer(request),
-    );
-  }
+    const messaging = this.firebaseAdminService.messaging(app);
+    const orderFulfillment = payload?.data?.object?.order_fulfillment_updated;
+    const latestUpdate = (orderFulfillment?.fulfillment_update ?? [])[
+      (orderFulfillment?.fulfillment_update?.length ?? 0) - 1
+    ];
+    const body = `Your order with ID ${order.id} has been updated from ${latestUpdate.old_state} to ${latestUpdate.new_state}.`;
 
-  updateCustomerOrThrow(params: {
-    accessToken: string;
-    customerId: string;
-    body: UpdateCustomerRequest;
-  }) {
-    this.logger.verbose(this.updateCustomerOrThrow.name);
-    const { accessToken, customerId, body } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).customersApi.updateCustomer(customerId, body),
-    );
-  }
-
-  retrieveCustomerOrThrow(params: { accessToken: string; squareId: string }) {
-    this.logger.verbose(this.retrieveCustomerOrThrow.name);
-    const { accessToken, squareId } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).customersApi.retrieveCustomer(squareId),
-    );
-  }
-
-  createOrderOrThrow(params: {
-    accessToken: string;
-    body: CreateOrderRequest;
-    requestOptions?: RequestOptions;
-  }) {
-    this.logger.verbose(this.createOrderOrThrow.name);
-    const { accessToken, body, requestOptions } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken,
-      }).ordersApi.createOrder(body, requestOptions),
-    );
-  }
-
-  retrieveOrderOrThrow(params: {
-    accessToken: string;
-    orderId: string;
-    requestOptions?: RequestOptions;
-  }) {
-    this.logger.verbose(this.retrieveOrderOrThrow.name);
-    const { accessToken, orderId, requestOptions } = params;
-    return this.retryOrThrow(() =>
-      this.client({ accessToken }).ordersApi.retrieveOrder(
-        orderId,
-        requestOptions,
-      ),
-    );
-  }
-
-  updateOrderOrThrow(params: {
-    accessToken: string;
-    orderId: string;
-    body: UpdateOrderRequest;
-    requestOptions?: RequestOptions;
-  }) {
-    this.logger.verbose(this.updateOrderOrThrow.name);
-    const { accessToken, orderId, requestOptions, body } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken,
-      }).ordersApi.updateOrder(orderId, body, requestOptions),
-    );
-  }
-
-  calculateOrderOrThrow(params: {
-    accessToken: string;
-    body: CalculateOrderRequest;
-    requestOptions?: RequestOptions;
-  }) {
-    this.logger.verbose(this.calculateOrderOrThrow.name);
-    const { accessToken, body, requestOptions } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken,
-      }).ordersApi.calculateOrder(body, requestOptions),
-    );
-  }
-
-  createPaymentOrThrow(params: {
-    accessToken: string;
-    body: CreatePaymentRequest;
-    requestOptions?: RequestOptions;
-  }) {
-    this.logger.verbose(this.createPaymentOrThrow.name);
-    const { accessToken, body, requestOptions } = params;
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: accessToken,
-      }).paymentsApi.createPayment(body, requestOptions),
-    );
-  }
-
-  listCards(params: {
-    accessToken: string;
-    cursor?: string;
-    customerId?: string;
-    includeDisabled?: boolean;
-    referenceId?: string;
-    sortOrder?: string;
-  }) {
-    this.logger.verbose(this.listCards.name);
-    const {
-      accessToken,
-      cursor,
-      customerId,
-      includeDisabled,
-      referenceId,
-      sortOrder,
-    } = params;
-    return this.retryOrThrow(() =>
-      this.client({ accessToken }).cardsApi.listCards(
-        cursor,
-        customerId,
-        includeDisabled,
-        referenceId,
-        sortOrder,
-      ),
-    );
-  }
-
-  retrieveCard(params: { accessToken: string; cardId: string }) {
-    this.logger.verbose(this.retrieveCard.name);
-    return this.retryOrThrow(() =>
-      this.client({ accessToken: params.accessToken }).cardsApi.retrieveCard(
-        params.cardId,
-      ),
-    );
-  }
-
-  createCard(params: { accessToken: string; body: CreateCardRequest }) {
-    this.logger.verbose(this.createCard.name);
-    return this.retryOrThrow(() =>
-      this.client({ accessToken: params.accessToken }).cardsApi.createCard(
-        params.body,
-      ),
-    );
-  }
-
-  disableCard(params: { accessToken: string; cardId: string }) {
-    this.logger.verbose(this.disableCard.name);
-    return this.retryOrThrow(() =>
-      this.client({
-        accessToken: params.accessToken,
-      }).cardsApi.disableCard(params.cardId),
-    );
-  }
-```
-
-```
-  async createCustomer(
-    params?: Stripe.CustomerCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Customer> {
-    this.logger.verbose(this.createCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.stripe.customers.create(params, options),
-    );
-  }
-
-  async createCheckoutSession(
-    params: Stripe.Checkout.SessionCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    this.logger.verbose(this.createCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.stripe.checkout.sessions.create(params, options),
-    );
-  }
-
-  async retrieveCheckoutSession(
-    id: string,
-    params?: Stripe.Checkout.SessionRetrieveParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.Checkout.Session>> {
-    this.logger.verbose(this.retrieveCheckoutSession.name);
-    return this.retryOrThrow(() =>
-      this.stripe.checkout.sessions.retrieve(id, params, options),
-    );
-  }
-
-  async createBillingPortalSession(
-    params: Stripe.BillingPortal.SessionCreateParams,
-    options?: Stripe.RequestOptions,
-  ): Promise<Stripe.Response<Stripe.BillingPortal.Session>> {
-    this.logger.verbose(this.createBillingPortalSession.name);
-    return this.retryOrThrow(() =>
-      this.stripe.billingPortal.sessions.create(params, options),
-    );
-  }
-```
-
-```
-  oauthUrl(params: { scope: string[]; state?: string }) {
-    return `${this.configService.getOrThrow('baseUrl', {
-      infer: true,
-    })}/oauth2/authorize?client_id=${this.configService.getOrThrow(
-      'oauthClientId',
-      {
-        infer: true,
-      },
-    )}&scope=${params.scope.join('+')}&state=${params.state}`;
-  }
-```
-
-Merchants
-Locations
-Customers
-Catalogs
-Cards
+    for (const appInstall of appInstalls) {
+      if (!appInstall.firebaseCloudMessagingToken) {
+        continue;
+      }
+      await messaging.send({
+        token: appInstall.firebaseCloudMessagingToken,
+        notification: {
+          title: 'Order Update',
+          body,
+        },
+      });
+    }
 
 // import { SpelunkerModule } from 'nestjs-spelunker';
 // const tree = SpelunkerModule.explore(app);

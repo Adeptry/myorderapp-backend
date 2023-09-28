@@ -26,6 +26,37 @@ class OrderFulfillmentUpdated {
   version?: number;
 }
 
+/**
+ * Enum for tracking the status of a fulfillment.
+ */
+export enum FulfillmentStatusEnum {
+  /** Indicates that the fulfillment has been proposed. */
+  proposed = 'PROPOSED',
+
+  /** Indicates that the fulfillment has been reserved. */
+  reserved = 'RESERVED',
+
+  /** Indicates that the fulfillment has been prepared. */
+  prepared = 'PREPARED',
+
+  /** Indicates that the fulfillment was successfully completed. */
+  completed = 'COMPLETED',
+
+  /** Indicates that the fulfillment was canceled. */
+  canceled = 'CANCELED',
+
+  /** Indicates that the fulfillment failed to be completed, but was not explicitly canceled. */
+  failed = 'FAILED',
+}
+
+export function isValidFulfillmentStatus(
+  value: string,
+): value is FulfillmentStatusEnum {
+  return Object.values(FulfillmentStatusEnum).includes(
+    value as FulfillmentStatusEnum,
+  );
+}
+
 class FulfillmentUpdate {
   fulfillment_uid?: string;
   new_state?: string;
