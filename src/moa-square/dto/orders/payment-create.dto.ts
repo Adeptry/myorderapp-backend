@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber, IsOptional, IsString } from 'class-validator';
+import { IsNumber, IsOptional, IsRFC3339, IsString } from 'class-validator';
 import { nanoid } from 'nanoid';
 import { FulfillmentRecipientInput } from './payment-create-recipient.dto.js';
 
@@ -11,7 +11,8 @@ export class OrdersPostPaymentBody {
       'If not provided, prepare ASAP, else will validate it\'s within business hours and schedule. Represents the start of the pickup window. Must be in RFC 3339 timestamp format, e.g., "2016-09-04T23:59:33.123Z".',
   })
   @IsOptional()
-  pickupDate?: Date;
+  @IsRFC3339()
+  pickupDateString?: string;
 
   @ApiProperty()
   @IsString()

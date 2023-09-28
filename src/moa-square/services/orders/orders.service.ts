@@ -421,7 +421,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }) {
     const { orderId, customerId, input, merchantId } = params;
     const {
-      pickupDate,
+      pickupDateString,
       paymentSquareId,
       note,
       idempotencyKey,
@@ -508,8 +508,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       throw new UnprocessableEntityException(translations.customerNoSquareId);
     }
 
-    const pickupOrAsapDate = pickupDate
-      ? pickupDate
+    const pickupOrAsapDate = pickupDateString
+      ? new Date(pickupDateString)
       : addMinutes(new Date(), 15);
 
     this.utils.validatePickupTimeOrThrow({
@@ -531,8 +531,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                   type: 'PICKUP',
                   pickupDetails: {
                     note,
-                    scheduleType: pickupDate ? 'SCHEDULED' : 'ASAP',
-                    pickupAt: pickupDate?.toISOString(),
+                    scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
+                    pickupAt: pickupDateString,
                     recipient: {
                       customerId: customer.squareId,
                       displayName: recipientDisplayName ?? user?.fullName,
