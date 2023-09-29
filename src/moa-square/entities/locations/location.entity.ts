@@ -54,7 +54,6 @@ export class LocationEntity extends BaseEntity {
   /*
    * Moa
    */
-
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;
