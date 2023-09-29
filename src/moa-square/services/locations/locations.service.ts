@@ -14,7 +14,7 @@ import {
   isBefore,
   roundToNearestMinutes,
 } from 'date-fns';
-import { utcToZonedTime } from 'date-fns-tz';
+import { utcToZonedTime, zonedTimeToUtc } from 'date-fns-tz';
 import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { BusinessHoursPeriod } from 'square';
@@ -139,11 +139,12 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
       { nearestTo: 5 },
     );
 
-    const result =
+    const firstPickupDateWithin =
       BusinessHoursUtils.firstPickupDateWithin({
         businessHours,
         date: localDateAfterDuration,
       }) ?? localDateAfterDuration;
+    const result = zonedTimeToUtc(firstPickupDateWithin, timezone);
 
     this.logger.verbose(result?.toISOString());
     return result;
