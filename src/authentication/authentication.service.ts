@@ -450,10 +450,21 @@ export class AuthenticationService {
       where: {
         id: data.sessionId,
       },
+      relations: {
+        user: true,
+      },
     });
 
-    if (!session || !session.user) {
-      throw new UnauthorizedException();
+    if (!session) {
+      throw new UnauthorizedException(
+        `Unable to find session with ID ${data.sessionId}`,
+      );
+    }
+
+    if (!session.user) {
+      throw new UnauthorizedException(
+        `Unable to find user for session with ID ${data.sessionId}`,
+      );
     }
 
     const { token, refreshToken, tokenExpires } = await this.getTokensData({
