@@ -1,19 +1,20 @@
-import { Logger } from '@nestjs/common';
-import { addDays, setHours, setMinutes } from 'date-fns';
+import { Logger, NotFoundException } from '@nestjs/common';
+import { addDays, addMinutes, setHours, setMinutes } from 'date-fns';
 import { BusinessHoursPeriodEntity } from '../../entities/locations/business-hours-period.entity';
 
 export class BusinessHoursUtils {
   private static readonly logger = new Logger(BusinessHoursUtils.name);
 
-  static firstPickupDateWithin(params: {
+  static firstPickupDateAfter(params: {
     date: Date;
     businessHours: BusinessHoursPeriodEntity[];
-  }): Date | undefined {
-    const { date, businessHours } = params;
+    durationMinutes: number;
+  }): Date {
+    const { date, businessHours, durationMinutes } = params;
 
-    this.logger.verbose(this.firstPickupDateWithin.name);
+    this.logger.verbose(this.firstPickupDateAfter.name);
 
-    const firstBusinessHours = this.firstBusinessHoursFromDate({
+    const firstBusinessHours = this.firstBusinessHoursAfterDate({
       businessHours,
       date,
     });
@@ -29,37 +30,54 @@ export class BusinessHoursUtils {
     ) {
       result = date;
     } else {
-      const nextDate = addDays(date, 1);
-      const nextBusinessHours = this.firstBusinessHoursFromDate({
-        date: nextDate,
+      const businessHoursAfterToday = this.businessHoursOnDayOfWeek({
+        dayOfWeek: date.getDay() + 1,
         businessHours,
       });
-      if (nextBusinessHours == undefined) {
-        return undefined;
-      }
-
-      const { startLocalTimeMinutes, startLocalTimeHours } = nextBusinessHours;
+      const startLocalTimeHours = businessHoursAfterToday?.startLocalTimeHours;
+      const startLocalTimeMinutes =
+        businessHoursAfterToday?.startLocalTimeMinutes;
+      const dayOfWeekNumber = businessHoursAfterToday?.dayOfWeekNumber;
 
       if (
-        startLocalTimeMinutes == undefined ||
-        startLocalTimeHours == undefined
+        startLocalTimeHours == null ||
+        startLocalTimeMinutes == null ||
+        dayOfWeekNumber == null
       ) {
-        return undefined;
+        throw new NotFoundException('No business hours found');
       }
 
-      const setNextDate = setHours(
-        setMinutes(nextDate, startLocalTimeMinutes),
-        startLocalTimeHours,
-      );
-
-      result = setNextDate;
+      const daysUntilNextBusinessDay =
+        (dayOfWeekNumber - date.getDay() + 7) % 7;
+      result = addDays(date, daysUntilNextBusinessDay);
+      result = setHours(result, startLocalTimeHours);
+      result = setMinutes(result, startLocalTimeMinutes);
+      result = addMinutes(result, durationMinutes);
     }
 
-    this.logger.verbose(result.toISOString());
+    this.logger.verbose(result?.toISOString());
     return result;
   }
 
-  static firstBusinessHoursFromDate(params: {
+  static businessHoursOnDayOfWeek(params: {
+    dayOfWeek?: number;
+    businessHours: BusinessHoursPeriodEntity[];
+  }) {
+    const { dayOfWeek, businessHours } = params;
+
+    this.logger.verbose(this.businessHoursOnDayOfWeek.name);
+
+    if (dayOfWeek == null) {
+      return null;
+    }
+    const result = businessHours.find(
+      (period) => period.dayOfWeekNumber === dayOfWeek,
+    );
+    this.logger.verbose(result);
+    return result;
+  }
+
+  static firstBusinessHoursAfterDate(params: {
     businessHours: BusinessHoursPeriodEntity[];
     date: Date;
   }): BusinessHoursPeriodEntity | undefined {
@@ -67,7 +85,7 @@ export class BusinessHoursUtils {
 
     let result: BusinessHoursPeriodEntity | undefined = undefined;
 
-    this.logger.verbose(this.firstBusinessHoursFromDate.name);
+    this.logger.verbose(this.firstBusinessHoursAfterDate.name);
 
     for (let i = 0; i < Math.max(businessHours.length, 7); i++) {
       const dateAfterDays = addDays(date, i);
@@ -94,6 +112,7 @@ export class BusinessHoursUtils {
 
     const found = businessHours.find((businessHoursPeriod) => {
       const dayOfWeekNumber = businessHoursPeriod.dayOfWeekNumber;
+      this.logger.debug(dayOfWeekNumber);
       if (dayOfWeekNumber != undefined && dayOfWeekNumber === date.getDay()) {
         return businessHoursPeriod;
       } else {

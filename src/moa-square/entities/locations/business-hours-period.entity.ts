@@ -61,8 +61,25 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
   @Column({ type: String, nullable: true })
   dayOfWeek?: string | null;
 
-  get dayOfWeekNumber(): number | undefined {
-    return this.dayOfWeek ? Number(this.dayOfWeek) : undefined;
+  get dayOfWeekNumber(): number | null {
+    switch (this.dayOfWeek?.toUpperCase()) {
+      case 'MON':
+        return 1;
+      case 'TUE':
+        return 2;
+      case 'WED':
+        return 3;
+      case 'THU':
+        return 4;
+      case 'FRI':
+        return 5;
+      case 'SAT':
+        return 6;
+      case 'SUN':
+        return 7; // or 0, depending on your numbering system
+      default:
+        return null;
+    }
   }
 
   @ApiProperty({

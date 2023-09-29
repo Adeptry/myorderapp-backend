@@ -139,11 +139,11 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
       { nearestTo: 5 },
     );
 
-    const firstPickupDateWithin =
-      BusinessHoursUtils.firstPickupDateWithin({
-        businessHours,
-        date: localDateAfterDuration,
-      }) ?? localDateAfterDuration;
+    const firstPickupDateWithin = BusinessHoursUtils.firstPickupDateAfter({
+      businessHours,
+      date: localDateAfterDuration,
+      durationMinutes,
+    });
     const result = zonedTimeToUtc(firstPickupDateWithin, timezone);
 
     this.logger.verbose(result?.toISOString());
