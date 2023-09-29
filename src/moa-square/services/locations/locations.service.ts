@@ -1,14 +1,32 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  UnprocessableEntityException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import {
+  addDays,
+  addMinutes,
+  format,
+  isAfter,
+  isBefore,
+  roundToNearestMinutes,
+} from 'date-fns';
+import { utcToZonedTime } from 'date-fns-tz';
 import { NestSquareService } from 'nest-square';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { BusinessHoursPeriod } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
+import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import {
   LocationPatchBody,
   LocationsPatchBody,
 } from '../../dto/locations/location-update.input.js';
 import { LocationEntity } from '../../entities/locations/location.entity.js';
+import { BusinessHoursUtils } from '../../utils/locations/business-hours-period.utils.js';
 import { AddressService } from './address.service.js';
 import { BusinessHoursPeriodsService } from './business-hours-period.service.js';
 
@@ -22,10 +40,113 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     private readonly addressService: AddressService,
     private readonly businessHoursPeriodsService: BusinessHoursPeriodsService,
     private readonly squareService: NestSquareService,
+    protected readonly i18n: I18nService<I18nTranslations>,
   ) {
     const logger = new Logger(LocationsService.name);
     super(repository, logger);
     this.logger = logger;
+  }
+
+  currentLanguageTranslations() {
+    return this.i18n.t('locations', {
+      lang: I18nContext.current()?.lang,
+    });
+  }
+
+  async validatePickupDateTimeOrThrow(params: {
+    id: string;
+    pickupDate: Date;
+  }) {
+    this.logger.verbose(this.validatePickupDateTimeOrThrow.name);
+    const { id, pickupDate } = params;
+    const translations = this.currentLanguageTranslations();
+
+    const location = await this.findOneOrFail({
+      where: { id },
+      relations: {
+        businessHours: true,
+      },
+    });
+    const { timezone, businessHours } = location;
+
+    if (!timezone || !businessHours) {
+      throw new NotFoundException(translations.locationMissingTimezone);
+    }
+
+    const now = new Date();
+
+    if (isBefore(pickupDate, now)) {
+      throw new BadRequestException(translations.pickupInPast);
+    }
+
+    if (isAfter(pickupDate, addDays(now, 7))) {
+      throw new BadRequestException(translations.pickupTooFarInFuture);
+    }
+
+    const pickupInLocalTimeDate = utcToZonedTime(pickupDate, timezone);
+    const pickupLocalTime = format(pickupInLocalTimeDate, 'HH:mm:ss');
+    const pickupLocalDayOfWeek = format(
+      pickupInLocalTimeDate,
+      'eee',
+    ).toUpperCase();
+
+    const matchingPeriod = businessHours.find(
+      (period) => period.dayOfWeek === pickupLocalDayOfWeek,
+    );
+    const startLocalTime = matchingPeriod?.startLocalTime;
+    const endLocalTime = matchingPeriod?.endLocalTime;
+
+    if (!matchingPeriod || !startLocalTime || !endLocalTime) {
+      throw new BadRequestException(translations.pickupOutsideBusinessHours);
+    }
+
+    if (pickupLocalTime < startLocalTime || pickupLocalTime > endLocalTime) {
+      throw new BadRequestException(translations.pickupOutsideBusinessHours);
+    }
+  }
+
+  async firstPickupDateAtLocationWithinDuration(params: {
+    locationId: string;
+    durationMinutes: number;
+  }): Promise<Date> {
+    const { locationId, durationMinutes } = params;
+
+    this.logger.verbose(this.firstPickupDateAtLocationWithinDuration.name);
+    this.logger.verbose(JSON.stringify(params));
+
+    const translations = this.currentLanguageTranslations();
+
+    const location = await this.findOneOrFail({
+      where: { id: locationId },
+      relations: {
+        businessHours: true,
+      },
+    });
+    const { timezone, businessHours } = location;
+
+    this.logger.debug(timezone);
+
+    if (!timezone || !businessHours) {
+      throw new UnprocessableEntityException(
+        translations.locationMissingTimezone,
+      );
+    }
+
+    const utcNowDate = new Date();
+    const localNowDate = utcToZonedTime(utcNowDate, timezone);
+    const localDateAfterDuration = roundToNearestMinutes(
+      addMinutes(localNowDate, durationMinutes),
+      { nearestTo: 5 },
+    );
+
+    const result =
+      BusinessHoursUtils.firstPickupDateWithin({
+        businessHours,
+        date: localDateAfterDuration,
+      }) ?? localDateAfterDuration;
+
+    this.logger.verbose(result?.toISOString());
+    return result;
   }
 
   async findAndCountWithMerchantIdOrPath(params: {

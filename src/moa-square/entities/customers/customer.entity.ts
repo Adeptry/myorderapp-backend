@@ -103,7 +103,7 @@ export class CustomerEntity extends BaseEntity {
 
   /* Square */
 
-  @ApiProperty({ type: String, required: false, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @Column('text', { nullable: true })
   squareId?: string | null;
 
@@ -111,7 +111,7 @@ export class CustomerEntity extends BaseEntity {
    * Preferred location
    */
 
-  @ApiProperty({ required: false, nullable: true })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   preferredLocationId?: string;
 

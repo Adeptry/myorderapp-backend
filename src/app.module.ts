@@ -18,6 +18,7 @@ import * as NodemailerMailgunTransport from 'nodemailer-mailgun-transport';
 import path, { dirname } from 'path';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
+import { AdminModule } from './admin/admin.module.js';
 import { RootConfigType } from './app.config.js';
 import { NestAppConfig } from './configs/app.config.js';
 import { AwsS3Config } from './configs/aws-s3.config.js';
@@ -147,6 +148,7 @@ import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
     NestSquareModule.fromEnv(),
     NestStripeModule.fromEnv(),
     FirebaseAdminModule,
+    AdminModule,
     MyOrderAppSquareModule,
   ],
   controllers: [],

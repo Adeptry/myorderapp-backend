@@ -40,6 +40,12 @@ export type I18nTranslations = {
         "html": string;
         "action": string;
     };
+    "locations": {
+        "locationMissingTimezone": string;
+        "pickupInPast": string;
+        "pickupTooFarInFuture": string;
+        "pickupOutsideBusinessHours": string;
+    };
     "merchants": {
         "alreadyExists": string;
         "doesNotExist": string;
@@ -55,9 +61,6 @@ export type I18nTranslations = {
         "noMainLocation": string;
         "customerNoSquareId": string;
         "locationNoId": string;
-        "pickupInPast": string;
-        "pickupTooFarInFuture": string;
-        "pickupOutsideBusinessHours": string;
         "invalidResponseFromSquare": string;
         "merchantNoSquareAccessToken": string;
         "orderNoSquareId": string;

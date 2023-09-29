@@ -9,7 +9,7 @@ export const paginated = <T>(params: {
   return {
     data: params.data,
     count: params.count,
-    pages: Math.floor(params.count / (params.pagination.limit ?? 1)),
+    pages: Math.ceil(params.count / (params.pagination.limit ?? 1)),
   };
 };
 
@@ -20,7 +20,7 @@ export const paginatedResults = <T>(params: {
   return {
     data: params.results[0],
     count: params.results[1],
-    pages: Math.floor(
+    pages: Math.ceil(
       params.results[1] /
         (params.pagination.limit == 0
           ? params.results[1]

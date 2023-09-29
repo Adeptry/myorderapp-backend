@@ -26,14 +26,13 @@ export class SquareWebhookController {
     this.logger.verbose(this.post.name);
     const { body, hostname, originalUrl, rawBody } = request;
     const { squareWebhookSignatureKey } = this.config;
-    const notificationUrl = `https://${hostname}${originalUrl}`;
 
     if (signature && rawBody) {
       const isValid = WebhooksHelper.isValidWebhookEventSignature(
         rawBody.toString(),
         signature,
         squareWebhookSignatureKey,
-        notificationUrl,
+        `https://${hostname}${originalUrl}`,
       );
 
       if (isValid) {

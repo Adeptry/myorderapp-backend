@@ -63,7 +63,6 @@ import { MerchantsStripeService } from './services/merchants/merchants.stripe.se
 import { LineItemModifierService } from './services/orders/line-item-modifier.service.js';
 import { LineItemService } from './services/orders/line-item.service.js';
 import { OrdersService } from './services/orders/orders.service.js';
-import { OrdersUtils } from './services/orders/orders.utils.js';
 
 @Module({
   imports: [
@@ -123,7 +122,6 @@ import { OrdersUtils } from './services/orders/orders.utils.js';
     OrdersService,
     LineItemService,
     LineItemModifierService,
-    OrdersUtils,
   ],
   controllers: [
     CategoriesController,

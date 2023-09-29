@@ -61,6 +61,10 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
   @Column({ type: String, nullable: true })
   dayOfWeek?: string | null;
 
+  get dayOfWeekNumber(): number | undefined {
+    return this.dayOfWeek ? Number(this.dayOfWeek) : undefined;
+  }
+
   @ApiProperty({
     type: String,
     required: false,
@@ -71,6 +75,33 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
   @Column({ type: String, nullable: true })
   startLocalTime?: string | null;
 
+  get startLocalTimeHours(): number | undefined {
+    const timeSplit = this.startLocalTime?.split(':');
+    if (timeSplit != undefined && timeSplit.length >= 2) {
+      return Number(timeSplit[0]);
+    }
+    return undefined;
+  }
+
+  get startLocalTimeMinutes(): number | undefined {
+    const timeSplit = this.startLocalTime?.split(':');
+    if (timeSplit != undefined && timeSplit.length >= 2) {
+      return Number(timeSplit[1]);
+    }
+    return undefined;
+  }
+
+  get parsedStartLocalTimeNumberOfMinutes(): number | undefined {
+    if (
+      this.startLocalTimeHours != undefined &&
+      this.startLocalTimeMinutes != undefined
+    ) {
+      return this.startLocalTimeHours * 60 + this.startLocalTimeMinutes;
+    }
+
+    return undefined;
+  }
+
   @ApiProperty({
     type: String,
     required: false,
@@ -80,6 +111,33 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
   })
   @Column({ type: String, nullable: true })
   endLocalTime?: string | null;
+
+  get endLocalTimeHours(): number | undefined {
+    const timeSplit = this.endLocalTime?.split(':');
+    if (timeSplit != undefined && timeSplit.length >= 2) {
+      return Number(timeSplit[0]);
+    }
+    return undefined;
+  }
+
+  get endLocalTimeMinutes(): number | undefined {
+    const timeSplit = this.endLocalTime?.split(':');
+    if (timeSplit != undefined && timeSplit.length >= 2) {
+      return Number(timeSplit[1]);
+    }
+    return undefined;
+  }
+
+  get parsedEndLocalTimeNumberOfMinutes(): number | undefined {
+    if (
+      this.endLocalTimeHours != undefined &&
+      this.endLocalTimeMinutes != undefined
+    ) {
+      return this.endLocalTimeHours * 60 + this.endLocalTimeMinutes;
+    }
+
+    return undefined;
+  }
 
   /* Relations */
 

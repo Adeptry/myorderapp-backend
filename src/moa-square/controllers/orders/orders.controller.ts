@@ -11,6 +11,7 @@ import {
   NotFoundException,
   Param,
   ParseBoolPipe,
+  ParseEnumPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -40,6 +41,8 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
+import { OrdersOrderFieldEnum } from '../../../moa-square/dto/orders/orders-order-field.enum.js';
+import { OrderSort } from '../../../moa-square/dto/orders/orders-sort.enum.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
@@ -151,12 +154,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }
@@ -199,12 +197,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
     if (!entity) {
@@ -242,6 +235,8 @@ export class OrdersController {
   @ApiQuery({ name: 'closed', required: false, type: Boolean })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
+  @ApiQuery({ name: 'orderField', required: false, enum: OrdersOrderFieldEnum })
+  @ApiQuery({ name: 'orderSort', required: false, enum: ['ASC', 'DESC'] })
   async getMany(
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -251,10 +246,23 @@ export class OrdersController {
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
+    @Query(
+      'orderField',
+      new DefaultValuePipe('pickupDate'),
+      new ParseEnumPipe(OrdersOrderFieldEnum),
+    )
+    orderField?: OrdersOrderFieldEnum,
+    @Query(
+      'orderSort',
+      new DefaultValuePipe('DESC'),
+      new ParseEnumPipe(OrderSort),
+    )
+    orderSort?: OrderSort,
   ) {
     this.logger.verbose(
       `${this.getMany.name} merchantId:${request.merchant?.id} customerId: ${request.customer?.id}`,
     );
+
     return paginatedResults({
       results: await this.service.findAndCount({
         where: {
@@ -262,7 +270,7 @@ export class OrdersController {
           merchantId: request.merchant?.id,
           closedDate: closed ? Not(IsNull()) : undefined,
         },
-        order: { createDate: 'DESC' },
+        order: { [orderField as keyof OrderEntity]: orderSort },
         take: limit,
         skip: (page - 1) * limit,
         relations: {
@@ -271,12 +279,7 @@ export class OrdersController {
                 modifiers: lineItems,
               }
             : undefined,
-          location: location
-            ? {
-                address: true,
-                businessHours: true,
-              }
-            : undefined,
+          location: location,
         },
       }),
       pagination: { page, limit },
@@ -317,12 +320,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }
@@ -393,12 +391,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }
@@ -495,12 +488,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }
@@ -563,12 +551,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }
@@ -681,12 +664,7 @@ export class OrdersController {
               modifiers: lineItems,
             }
           : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
+        location: location,
       },
     });
   }

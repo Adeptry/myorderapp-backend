@@ -7,10 +7,15 @@ import {
 } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
-import { addMinutes } from 'date-fns';
 import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { ApiResponse, UpdateOrderRequest, UpdateOrderResponse } from 'square';
+import {
+  ApiResponse,
+  OrderLineItem,
+  Order as SquareOrder,
+  UpdateOrderRequest,
+  UpdateOrderResponse,
+} from 'square';
 import { In, Repository } from 'typeorm';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { UsersService } from '../../../users/users.service.js';
@@ -24,11 +29,12 @@ import {
 import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import { MerchantEntity } from '../../entities/merchants/merchant.entity.js';
 import { OrderEntity } from '../../entities/orders/order.entity.js';
+import { ModifiersService } from '../catalogs/modifiers.service.js';
+import { VariationsService } from '../catalogs/variations.service.js';
 import { CustomersService } from '../customers/customers.service.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
 import { LineItemService } from './line-item.service.js';
-import { OrdersUtils } from './orders.utils.js';
 
 @Injectable()
 export class OrdersService extends EntityRepositoryService<OrderEntity> {
@@ -44,7 +50,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     private readonly merchantsService: MerchantsService,
     private readonly usersService: UsersService,
     private readonly customersService: CustomersService,
-    private readonly utils: OrdersUtils,
+    private readonly variationsService: VariationsService,
+    private readonly modifiersService: ModifiersService,
   ) {
     const logger = new Logger(OrdersService.name);
     super(repository, logger);
@@ -123,7 +130,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
 
     const squareOrderLineItems = variations
-      ? await this.utils.squareOrderLineItemsFor({
+      ? await this.squareOrderLineItemsFor({
           variations,
         })
       : [];
@@ -166,7 +173,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         moaOrder.location = location;
       }
 
-      await this.utils.saveFromSquareOrder({
+      await this.saveFromSquareOrder({
         order: moaOrder,
         squareOrder,
       });
@@ -223,7 +230,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
 
     if (!location.id) {
-      throw new InternalServerErrorException(translations.locationNoId);
+      throw new NotFoundException(translations.locationNoId);
     }
 
     const existingOrderResponse = await this.squareService.retryOrThrow(
@@ -263,7 +270,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     if (newSquareOrder) {
       order.locationId = location.id;
       order.location = location;
-      return await this.utils.saveFromSquareOrder({
+      return await this.saveFromSquareOrder({
         order: order,
         squareOrder: newSquareOrder,
       });
@@ -313,7 +320,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
 
     const newLineItems =
-      (await this.utils.squareOrderLineItemsFor({
+      (await this.squareOrderLineItemsFor({
         variations: variationDtos,
       })) ?? [];
     const squareUpdateBody: UpdateOrderRequest = {
@@ -336,7 +343,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
       const squareOrder = response.result.order;
       if (squareOrder) {
-        return await this.utils.saveFromSquareOrder({
+        return await this.saveFromSquareOrder({
           order,
           squareOrder,
         });
@@ -402,7 +409,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const squareOrder = response.result.order;
     if (squareOrder) {
-      return await this.utils.saveFromSquareOrder({
+      return await this.saveFromSquareOrder({
         order,
         squareOrder,
       });
@@ -489,7 +496,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const location = order.location;
     const locationSquareId = location?.locationSquareId;
-    if (!locationSquareId || !location) {
+    const locationMoaId = location?.id;
+    if (!locationSquareId || !location || !locationMoaId) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
 
@@ -510,11 +518,14 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const pickupOrAsapDate = pickupDateString
       ? new Date(pickupDateString)
-      : addMinutes(new Date(), 15);
+      : await this.locationsService.firstPickupDateAtLocationWithinDuration({
+          locationId: locationMoaId,
+          durationMinutes: merchant.pickupLeadDurationMinutes ?? 10,
+        });
 
-    this.utils.validatePickupTimeOrThrow({
+    await this.locationsService.validatePickupDateTimeOrThrow({
       pickupDate: pickupOrAsapDate,
-      location: location,
+      id: locationMoaId,
     });
 
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
@@ -532,7 +543,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                   pickupDetails: {
                     note,
                     scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
-                    pickupAt: pickupDateString,
+                    pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {
                       customerId: customer.squareId,
                       displayName: recipientDisplayName ?? user?.fullName,
@@ -552,7 +563,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       );
     }
 
-    const updatedOrder = await this.utils.saveFromSquareOrder({
+    const updatedOrder = await this.saveFromSquareOrder({
       order,
       squareOrder: squareOrderFromUpdate,
     });
@@ -626,5 +637,91 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         this.logger.log("Order's fulfillment status updated");
       }
     }
+  }
+
+  async saveFromSquareOrder(params: {
+    order: OrderEntity;
+    squareOrder: SquareOrder;
+  }): Promise<OrderEntity> {
+    const { order, squareOrder } = params;
+    this.logger.verbose(this.saveFromSquareOrder.name);
+
+    order.squareId = squareOrder?.id;
+    order.squareVersion =
+      squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
+
+    order.currency = squareOrder?.totalMoney?.currency;
+    order.totalMoneyAmount = Number(squareOrder?.totalMoney?.amount);
+    order.totalMoneyTaxAmount = Number(squareOrder?.totalTaxMoney?.amount);
+    order.totalMoneyDiscountAmount = Number(
+      squareOrder?.totalDiscountMoney?.amount,
+    );
+    order.totalMoneyTipAmount = Number(squareOrder?.totalTipMoney?.amount);
+    order.totalMoneyServiceChargeAmount = Number(
+      squareOrder?.totalServiceChargeMoney?.amount,
+    );
+
+    return this.saveFromSquareLineItems(params);
+  }
+
+  async saveFromSquareLineItems(params: {
+    order: OrderEntity;
+    squareOrder: SquareOrder;
+  }) {
+    const { order, squareOrder } = params;
+    this.logger.verbose(this.saveFromSquareLineItems.name);
+
+    const existingMoaLineItems = order.lineItems ?? [];
+    await this.lineItemsService.removeAll(existingMoaLineItems);
+    order.lineItems = [];
+    const newSquareLineItems = squareOrder?.lineItems ?? [];
+    order.lineItems?.push(
+      ...newSquareLineItems.map((squareLineItem) => {
+        return this.lineItemsService.fromSquareLineItem({ squareLineItem });
+      }),
+    );
+    return await order.save();
+  }
+
+  async squareOrderLineItemsFor(params: {
+    variations: OrdersVariationLineItemInput[];
+  }) {
+    this.logger.verbose(this.squareOrderLineItemsFor.name);
+
+    const orderLineItems: OrderLineItem[] = [];
+    for (const dto of params.variations) {
+      const variation = await this.variationsService.findOne({
+        where: { id: dto.id },
+      });
+      if (!variation?.squareId) {
+        throw new UnprocessableEntityException(`Invalid variation`);
+      }
+      const squareOrderLineItem: OrderLineItem = {
+        catalogObjectId: variation?.squareId,
+        quantity: `${dto.quantity ?? 1}`,
+        modifiers: [],
+        note: dto.note,
+      };
+      if (dto.modifierIds && dto.modifierIds.length > 0) {
+        const modifiers = await this.modifiersService.findBy({
+          id: In(dto.modifierIds),
+        });
+
+        if (modifiers.length !== dto.modifierIds.length) {
+          throw new UnprocessableEntityException(`Invalid modifiers`);
+        }
+
+        for (const modifier of modifiers) {
+          if (!modifier.squareId) {
+            throw new UnprocessableEntityException(`Invalid modifier`);
+          }
+          squareOrderLineItem.modifiers?.push({
+            catalogObjectId: modifier.squareId,
+          });
+        }
+      }
+      orderLineItems.push(squareOrderLineItem);
+    }
+    return orderLineItems;
   }
 }

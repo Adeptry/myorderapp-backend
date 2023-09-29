@@ -8,11 +8,12 @@ import {
   HttpStatus,
   InternalServerErrorException,
   Logger,
+  NotFoundException,
+  Param,
   ParseBoolPipe,
   Post,
   Query,
   Req,
-  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -157,11 +158,37 @@ export class MerchantsController {
     });
 
     if (!merchant) {
-      throw new UnauthorizedException(translations.doesNotExist);
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     if (userRelation) {
       merchant.user = user;
+    }
+
+    return merchant;
+  }
+
+  @Get(':idOrPath')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Get Merchant',
+    operationId: 'getMerchant',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @ApiOkResponse({ type: MerchantEntity })
+  async get(@Param('idOrPath') idOrPath: string): Promise<MerchantEntity> {
+    this.logger.verbose(this.get.name);
+    const translations = this.currentTranslations();
+    const merchant = await this.service.findOneByIdOrPath({
+      where: { idOrPath },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException(translations.doesNotExist);
     }
 
     return merchant;

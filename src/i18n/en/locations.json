@@ -1,0 +1,6 @@
+{
+  "locationMissingTimezone": "Sorry, we can't find the timezone for this location. Please contact the store directly.",
+  "pickupInPast": "Sorry, you can't set a pickup time in the past.",
+  "pickupTooFarInFuture": "You can only schedule pickups within the next 7 days.",
+  "pickupOutsideBusinessHours": "Please choose a pickup time during the store's business hours."
+}

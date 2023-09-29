@@ -55,6 +55,10 @@ export class MerchantEntity extends BaseEntity {
   @Column({ type: Number, nullable: true })
   tier?: number | null;
 
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true, default: 15 })
+  pickupLeadDurationMinutes?: number | null;
+
   /*
    * User
    */
