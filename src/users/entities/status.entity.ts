@@ -2,8 +2,8 @@ import { ApiProperty } from '@nestjs/swagger';
 import { Allow } from 'class-validator';
 import { BaseEntity, Column, Entity, PrimaryColumn } from 'typeorm';
 
-@Entity()
-export class Status extends BaseEntity {
+@Entity('status')
+export class StatusEntity extends BaseEntity {
   @ApiProperty({ example: 1 })
   @PrimaryColumn()
   id?: number;

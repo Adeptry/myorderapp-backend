@@ -23,8 +23,16 @@ export type I18nTranslations = {
         "registrationFailed": string;
         "userNotFound": string;
     };
-    "common": {
-        "emailFooter": string;
+    "emailForgotPassword": {
+        "subject": string;
+        "text": string;
+        "html": string;
+        "action": string;
+    };
+    "emailSupportRequest": {
+        "html": string;
+        "subject": string;
+        "text": string;
     };
     "errors": {
         "unauthorized": string;
@@ -34,17 +42,15 @@ export type I18nTranslations = {
         "badRequest": string;
         "unprocessableEntity": string;
     };
-    "forgotPasswordEmail": {
-        "subject": string;
-        "text": string;
-        "html": string;
-        "action": string;
-    };
     "locations": {
         "locationMissingTimezone": string;
         "pickupInPast": string;
         "pickupTooFarInFuture": string;
         "pickupOutsideBusinessHours": string;
+    };
+    "mail": {
+        "footer": string;
+        "defaultName": string;
     };
     "merchants": {
         "alreadyExists": string;

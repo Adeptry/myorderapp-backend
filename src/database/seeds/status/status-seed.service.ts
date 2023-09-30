@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Status } from '../../../statuses/entities/status.entity.js';
-import { StatusEnum } from '../../../statuses/statuses.enum.js';
+import { StatusEntity } from '../../../users/entities/status.entity.js';
+import { StatusEnum } from '../../../users/statuses.enum.js';
 
 @Injectable()
 export class StatusSeedService {
   private readonly logger = new Logger(StatusSeedService.name);
 
   constructor(
-    @InjectRepository(Status)
-    private repository: Repository<Status>,
+    @InjectRepository(StatusEntity)
+    private repository: Repository<StatusEntity>,
   ) {
     this.logger.verbose(this.constructor.name);
   }

@@ -18,14 +18,14 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ForgotService } from '../forgot/forgot.service.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { MailService } from '../mail/mail.service.js';
-import { Role } from '../roles/entities/role.entity.js';
-import { RoleEnum } from '../roles/roles.enum.js';
 import { Session } from '../session/entities/session.entity.js';
 import { SessionService } from '../session/session.service.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
-import { Status } from '../statuses/entities/status.entity.js';
-import { StatusEnum } from '../statuses/statuses.enum.js';
+import { RoleEntity } from '../users/entities/role.entity.js';
+import { StatusEntity } from '../users/entities/status.entity.js';
 import { UserEntity } from '../users/entities/user.entity.js';
+import { RoleEnum } from '../users/roles.enum.js';
+import { StatusEnum } from '../users/statuses.enum.js';
 import { UsersService } from '../users/users.service.js';
 import { NullableType } from '../utils/types/nullable.type.js';
 import { AuthenticationsProvidersEnum } from './authentication-providers.enum.js';
@@ -174,10 +174,10 @@ export class AuthenticationService {
     } else if (userByEmail) {
       user = userByEmail;
     } else {
-      const role = plainToClass(Role, {
+      const role = plainToClass(RoleEntity, {
         id: roleEnum,
       });
-      const status = plainToClass(Status, {
+      const status = plainToClass(StatusEntity, {
         id: StatusEnum.active,
       });
 
@@ -253,10 +253,10 @@ export class AuthenticationService {
         email: dto.email,
         role: {
           id: RoleEnum.user,
-        } as Role,
+        } as RoleEntity,
         status: {
           id: StatusEnum.inactive,
-        } as Status,
+        } as StatusEntity,
         hash,
       }),
     );
@@ -302,7 +302,7 @@ export class AuthenticationService {
     }
 
     user.hash = null;
-    user.status = plainToClass(Status, {
+    user.status = plainToClass(StatusEntity, {
       id: StatusEnum.active,
     });
     await user.save();
@@ -332,11 +332,11 @@ export class AuthenticationService {
       }),
     );
     await this.mailService.sendForgotPasswordOrThrow({
-      to: user.email,
-      args: {
-        user,
-        hash,
+      to: {
+        name: user.fullName,
+        address: user.email,
       },
+      hash,
     });
   }
 

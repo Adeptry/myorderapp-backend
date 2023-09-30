@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty } from 'class-validator';
-import { RoleEnum } from '../../roles/roles.enum.js';
+import { RoleEnum } from '../../users/roles.enum.js';
 
 export class AuthGoogleLoginDto {
   @ApiProperty({ example: 'abc' })

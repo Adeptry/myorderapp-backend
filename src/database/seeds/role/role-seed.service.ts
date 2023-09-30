@@ -1,16 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Role } from '../../../roles/entities/role.entity.js';
-import { RoleEnum } from '../../../roles/roles.enum.js';
+import { RoleEntity } from '../../../users/entities/role.entity.js';
+import { RoleEnum } from '../../../users/roles.enum.js';
 
 @Injectable()
 export class RoleSeedService {
   private readonly logger = new Logger(RoleSeedService.name);
 
   constructor(
-    @InjectRepository(Role)
-    private repository: Repository<Role>,
+    @InjectRepository(RoleEntity)
+    private repository: Repository<RoleEntity>,
   ) {
     this.logger.verbose(this.constructor.name);
   }

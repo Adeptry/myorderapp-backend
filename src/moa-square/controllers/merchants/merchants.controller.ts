@@ -36,10 +36,10 @@ import type { AuthenticatedRequest } from '../../../authentication/authenticatio
 import { AuthenticationGuard } from '../../../authentication/authentication.guard.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
-import { SquarePostOauthBody } from '../../dto/merchants/square-confirm-oauth.input.js';
-import { StripePostCheckoutBody } from '../../dto/merchants/stripe-checkout-create.input.js';
-import { StripePostCheckoutResponse } from '../../dto/merchants/stripe-checkout.dto.js';
-import { StripeBillingSessionResponse } from '../../dto/merchants/stripe-portal.dto.js';
+import { StripePostCheckoutBody } from '../../dto/merchants/square-post-checkout-body.dto.js';
+import { SquarePostOauthBody } from '../../dto/merchants/square-post-oauth-body.dto.js';
+import { StripeBillingSessionResponse } from '../../dto/merchants/stripe-billing-session-response.dto.js';
+import { StripePostCheckoutResponse } from '../../dto/merchants/stripe-post-checkout-response.dto.js';
 import { MerchantEntity } from '../../entities/merchants/merchant.entity.js';
 import type { MerchantsGuardedRequest } from '../../guards/merchants.guard.js';
 import { MerchantsGuard } from '../../guards/merchants.guard.js';

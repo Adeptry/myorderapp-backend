@@ -18,8 +18,8 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthenticationsProvidersEnum } from '../../authentication/authentication-providers.enum.js';
-import { Role } from '../../roles/entities/role.entity.js';
-import { Status } from '../../statuses/entities/status.entity.js';
+import { RoleEntity } from './role.entity.js';
+import { StatusEntity } from './status.entity.js';
 
 @Entity('user')
 export class UserEntity extends BaseEntity {
@@ -107,17 +107,17 @@ export class UserEntity extends BaseEntity {
   @ApiProperty({ required: false, type: String, nullable: true })
   language?: string | null;
 
-  @ManyToOne(() => Role, {
+  @ManyToOne(() => RoleEntity, {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  role?: Relation<Role> | null;
+  role?: Relation<RoleEntity> | null;
 
-  @ManyToOne(() => Status, {
+  @ManyToOne(() => StatusEntity, {
     eager: true,
   })
   @Exclude({ toPlainOnly: true })
-  status?: Relation<Status>;
+  status?: Relation<StatusEntity>;
 
   @Column({ type: String, nullable: true })
   @Index()

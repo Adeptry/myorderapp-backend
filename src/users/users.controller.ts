@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -7,7 +8,9 @@ import {
   HttpStatus,
   Logger,
   Patch,
+  Post,
   Req,
+  UnprocessableEntityException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -21,9 +24,11 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
-import type { AuthenticatedRequest } from '../authentication/authentication.guard.js';
+import type { JwtGuardedRequest } from '../authentication/strategies/jwt.strategy.js';
+import { MailService } from '../mail/mail.service.js';
 import { SessionService } from '../session/session.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
+import { SupportRequestPostBody } from './dto/support-request-post-body.dto.js';
 import { UserPatchBody } from './dto/user-update.dto.js';
 import { UserEntity } from './entities/user.entity.js';
 import { UsersService } from './users.service.js';
@@ -42,6 +47,7 @@ export class UsersController {
   constructor(
     private readonly service: UsersService,
     private readonly sessionService: SessionService,
+    private readonly mailService: MailService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -51,7 +57,7 @@ export class UsersController {
   @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'getUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  getMe(@Req() request: AuthenticatedRequest) {
+  getMe(@Req() request: JwtGuardedRequest) {
     this.logger.verbose(this.getMe.name);
     return this.service.findOne({ where: { id: request.user.id } });
   }
@@ -63,7 +69,7 @@ export class UsersController {
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   @ApiBody({ type: UserPatchBody })
   async patchMe(
-    @Req() request: AuthenticatedRequest,
+    @Req() request: JwtGuardedRequest,
     @Body() body: UserPatchBody,
   ) {
     const { user } = request;
@@ -81,12 +87,64 @@ export class UsersController {
   @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'deleteUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  async deleteMe(@Req() request: AuthenticatedRequest) {
+  async deleteMe(@Req() request: JwtGuardedRequest) {
     this.logger.verbose(this.deleteMe.name);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await this.service.delete(request.user.id!);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     await this.sessionService.delete({ userId: request.user.id! });
+    return;
+  }
+
+  @Post('support')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Send support request',
+    operationId: 'postSupport',
+  })
+  @ApiBody({ type: SupportRequestPostBody })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @ApiOkResponse({})
+  async postSupport(
+    @Req() request: JwtGuardedRequest,
+    @Body() body: SupportRequestPostBody,
+  ): Promise<void> {
+    this.logger.verbose(this.postSupport.name);
+
+    const { user: jwtUser } = request;
+    const { id: userId } = jwtUser;
+    const { subject, text } = body;
+
+    if (!userId) {
+      throw new UnprocessableEntityException();
+    }
+
+    const user = await this.service.findOneOrFail({ where: { id: userId } });
+
+    if (!user.email) {
+      throw new UnprocessableEntityException();
+    }
+
+    if (!subject || !text) {
+      throw new BadRequestException();
+    }
+
+    const admins = await this.service.findAdmins();
+
+    await this.mailService.sendSupportRequestOrThrow({
+      to: {
+        address: user.email,
+        name: user.fullName,
+      },
+      bcc: admins.map((admin) => admin.email!),
+      subject,
+      text,
+    });
+
     return;
   }
 }

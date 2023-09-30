@@ -7,11 +7,11 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { Role } from '../../roles/entities/role.entity.js';
-import { Status } from '../../statuses/entities/status.entity.js';
 import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
 import { IsExist } from '../../utils/validators/is-exists.validator.js';
 import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
+import { RoleEntity } from '../entities/role.entity.js';
+import { StatusEntity } from '../entities/status.entity.js';
 
 export class UserCreateDto {
   @ApiProperty({ example: 'test1@example.com' })
@@ -51,17 +51,17 @@ export class UserCreateDto {
   // })
   // photo?: FileEntity | null;
 
-  @ApiProperty({ type: Role })
+  @ApiProperty({ type: RoleEntity })
   @Validate(IsExist, ['Role', 'id'], {
     message: 'roleNotExists',
   })
-  role?: Role | null;
+  role?: RoleEntity | null;
 
-  @ApiProperty({ type: Status })
+  @ApiProperty({ type: StatusEntity })
   @Validate(IsExist, ['Status', 'id'], {
     message: 'statusNotExists',
   })
-  status?: Status;
+  status?: StatusEntity;
 
   hash?: string | null;
 }

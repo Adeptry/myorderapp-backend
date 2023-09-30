@@ -3,56 +3,80 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { SentMessageInfo } from 'nodemailer';
+import { I18nTranslations } from 'src/i18n/i18n.generated.js';
 import { RootConfigType } from '../app.config.js';
-import { UserEntity } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class MailService {
   private readonly logger = new Logger(MailService.name);
 
   constructor(
-    private readonly mailerService: MailerService,
-    private readonly i18n: I18nService,
+    private readonly service: MailerService,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly configService: ConfigService<RootConfigType>,
   ) {}
 
-  async sendForgotPasswordOrThrow(params: {
-    to: string;
-    args: { user: UserEntity; hash: string };
-  }): Promise<SentMessageInfo> {
-    const { to, args } = params;
-    this.logger.verbose(this.sendForgotPasswordOrThrow.name);
-
-    const translationOptions: TranslateOptions = {
+  defaultTranslationOptions(): TranslateOptions {
+    return {
       lang: I18nContext.current()?.lang,
       defaultValue: this.configService.get('app.fallbackLanguage', {
         infer: true,
       }),
-      args: args,
-      debug: true,
+    };
+  }
+
+  async sendForgotPasswordOrThrow(params: {
+    to: {
+      name?: string;
+      address: string;
+    };
+    hash: string;
+  }): Promise<SentMessageInfo> {
+    const { to, hash } = params;
+    const { name: toName, address } = to;
+
+    this.logger.verbose(this.sendForgotPasswordOrThrow.name);
+
+    const name =
+      toName ??
+      this.i18n.t('mail.defaultName', this.defaultTranslationOptions())!;
+
+    const translationOptions: TranslateOptions = {
+      ...this.defaultTranslationOptions(),
+      args: {
+        ...params,
+        to: {
+          name,
+          address,
+        },
+      },
     };
     const frontendUrl = this.configService.getOrThrow('app.frontendUrl', {
       infer: true,
     });
 
     const subject = this.i18n.t(
-      'forgotPasswordEmail.subject',
+      'emailForgotPassword.subject',
       translationOptions,
     );
-    const text = this.i18n.t('forgotPasswordEmail.text', translationOptions);
-    const html = this.i18n.t('forgotPasswordEmail.html', translationOptions);
+    const text = this.i18n.t('emailForgotPassword.text', translationOptions);
+    const html = this.i18n.t('emailForgotPassword.html', translationOptions);
     const action = this.i18n.t(
-      'forgotPasswordEmail.action',
+      'emailForgotPassword.action',
       translationOptions,
     );
-    const footer = this.i18n.t('common.emailFooter', translationOptions);
-    const href = `${frontendUrl}/reset-password/confirm?hash=${args.hash}`;
+
+    const footer = this.i18n.t('mail.footer', translationOptions);
+    const href = `${frontendUrl}/reset-password/confirm?hash=${hash}`;
 
     try {
-      return await this.mailerService.sendMail({
-        to: to,
-        subject: subject,
-        text: text,
+      return await this.service.sendMail({
+        to: {
+          name: name,
+          address,
+        },
+        subject,
+        text,
         template: 'button',
         context: {
           title: subject,
@@ -61,6 +85,68 @@ export class MailService {
           text,
           href,
           action,
+          footer,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async sendSupportRequestOrThrow(params: {
+    to: {
+      name?: string;
+      address: string;
+    };
+    subject: string;
+    text: string;
+    bcc: string[];
+  }): Promise<SentMessageInfo> {
+    const { to, bcc } = params;
+    const { name: toName, address } = to;
+    this.logger.verbose(this.sendSupportRequestOrThrow.name);
+
+    const name =
+      toName ??
+      this.i18n.t('mail.defaultName', this.defaultTranslationOptions())!;
+
+    const translationOptions: TranslateOptions = {
+      ...this.defaultTranslationOptions(),
+      args: {
+        ...params,
+        to: {
+          name,
+          address,
+        },
+      },
+    };
+    const sendSubject = this.i18n.t(
+      'emailSupportRequest.subject',
+      translationOptions,
+    );
+    const sendText = this.i18n.t(
+      'emailSupportRequest.text',
+      translationOptions,
+    );
+    const html = this.i18n.t('emailSupportRequest.html', translationOptions);
+    const footer = this.i18n.t('mail.footer', translationOptions);
+
+    try {
+      return await this.service.sendMail({
+        to: {
+          name,
+          address,
+        },
+        bcc,
+        subject: sendSubject,
+        text: sendText,
+        template: 'base',
+        context: {
+          title: sendSubject,
+          preheader: sendText,
+          html,
+          text: sendText,
           footer,
         },
       });
