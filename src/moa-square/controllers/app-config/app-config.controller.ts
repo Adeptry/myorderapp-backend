@@ -305,9 +305,11 @@ export class AppConfigController {
 
     this.logger.verbose(`key: ${key}`);
 
+    const { defaultBucket, region } = this.awsS3Config;
+
     try {
       await this.s3.putObject({
-        Bucket: this.awsS3Config.defaultBucket,
+        Bucket: defaultBucket,
         Key: key,
         Body: file.buffer,
       });
@@ -316,7 +318,10 @@ export class AppConfigController {
       throw new InternalServerErrorException(error);
     }
 
-    appConfig.iconFileUrl = key;
+    appConfig.iconFileKey = key;
+    appConfig.iconFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
+    appConfig.iconFileDisplayName = file.originalname;
+
     return this.service.save(appConfig);
   }
 }

@@ -8,6 +8,7 @@ import {
   HttpStatus,
   Logger,
   ParseBoolPipe,
+  ParseEnumPipe,
   ParseIntPipe,
   Patch,
   Post,
@@ -35,6 +36,8 @@ import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../../authentication/authentication.guard.js';
+import { CustomersFieldEnum } from '../../../moa-square/dto/customers/customers-field.js';
+import { OrderSortEnum } from '../../../moa-square/dto/orders-sort.enum.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
 import { AppInstallPostBody } from '../../dto/customers/app-install-update.dto.js';
@@ -293,12 +296,14 @@ export class CustomersController {
   @ApiOkResponse({ type: CustomersPaginatedResponse })
   @ApiOperation({
     summary: 'Get my Customers',
-    operationId: 'getManyCustomers',
+    operationId: 'getCustomers',
   })
   @ApiQuery({ name: 'user', required: false, type: Boolean })
   @ApiQuery({ name: 'merchant', required: false, type: Boolean })
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
+  @ApiQuery({ name: 'orderField', required: false, enum: CustomersFieldEnum })
+  @ApiQuery({ name: 'orderSort', required: false, enum: OrderSortEnum })
   async getMany(
     @Req() request: any,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -311,11 +316,24 @@ export class CustomersController {
     currentOrderRelation?: boolean,
     @Query('preferredLocation', new DefaultValuePipe(false), ParseBoolPipe)
     preferredLocationRelation?: boolean,
+    @Query(
+      'orderField',
+      new DefaultValuePipe('createDate'),
+      new ParseEnumPipe(CustomersFieldEnum),
+    )
+    orderField?: CustomersFieldEnum,
+    @Query(
+      'orderSort',
+      new DefaultValuePipe('DESC'),
+      new ParseEnumPipe(OrderSortEnum),
+    )
+    orderSort?: OrderSortEnum,
   ): Promise<CustomersPaginatedResponse> {
     this.logger.verbose(this.getMany.name);
     return paginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id },
+        order: { [orderField as keyof CustomerEntity]: orderSort },
         relations: {
           user: userRelation,
           merchant: merchantRelation,

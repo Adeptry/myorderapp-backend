@@ -68,7 +68,7 @@ export class MerchantEntity extends BaseEntity {
   userId?: string;
 
   @ApiProperty({ type: () => UserEntity, required: false, nullable: true })
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity)
   user?: Relation<UserEntity>;
 
   /*

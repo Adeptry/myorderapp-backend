@@ -37,7 +37,7 @@ export class CustomerEntity extends BaseEntity {
     this.id = nanoid();
   }
 
-  @Exclude({ toPlainOnly: true })
+  @ApiProperty({ type: () => Date, nullable: true, required: false })
   @CreateDateColumn({ nullable: true })
   createDate?: Date;
 
@@ -131,7 +131,7 @@ export class CustomerEntity extends BaseEntity {
    * Preferred card
    */
 
-  @ApiProperty({ required: false, nullable: true, type: String })
+  @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, type: String })
   preferredSquareCardId?: string | null;
 

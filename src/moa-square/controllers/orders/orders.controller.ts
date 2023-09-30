@@ -42,10 +42,10 @@ import { IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
 import { OrdersOrderFieldEnum } from '../../../moa-square/dto/orders/orders-order-field.enum.js';
-import { OrderSort } from '../../../moa-square/dto/orders/orders-sort.enum.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
+import { OrderSortEnum } from '../../dto/orders-sort.enum.js';
 import { OrderPatchBody } from '../../dto/orders/order-patch.dto.js';
 import {
   OrderPostBody,
@@ -246,7 +246,7 @@ export class OrdersController {
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   @ApiQuery({ name: 'orderField', required: false, enum: OrdersOrderFieldEnum })
-  @ApiQuery({ name: 'orderSort', required: false, enum: ['ASC', 'DESC'] })
+  @ApiQuery({ name: 'orderSort', required: false, enum: OrderSortEnum })
   async getMany(
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
@@ -265,9 +265,9 @@ export class OrdersController {
     @Query(
       'orderSort',
       new DefaultValuePipe('DESC'),
-      new ParseEnumPipe(OrderSort),
+      new ParseEnumPipe(OrderSortEnum),
     )
-    orderSort?: OrderSort,
+    orderSort?: OrderSortEnum,
   ) {
     this.logger.verbose(
       `${this.getMany.name} merchantId:${request.merchant?.id} customerId: ${request.customer?.id}`,
