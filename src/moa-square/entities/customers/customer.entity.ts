@@ -59,7 +59,7 @@ export class CustomerEntity extends BaseEntity {
   @Column({ nullable: true })
   userId?: string;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ type: () => UserEntity, required: false, nullable: true })
   @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
   user?: Relation<UserEntity>;
 

@@ -245,6 +245,7 @@ export class OrdersController {
   @ApiQuery({ name: 'closed', required: false, type: Boolean })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
+  @ApiQuery({ name: 'customer', required: false, type: Boolean })
   @ApiQuery({ name: 'orderField', required: false, enum: OrdersOrderFieldEnum })
   @ApiQuery({ name: 'orderSort', required: false, enum: OrderSortEnum })
   async getMany(
@@ -256,6 +257,8 @@ export class OrdersController {
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
+    @Query('customer', new DefaultValuePipe(false), ParseBoolPipe)
+    customer?: boolean,
     @Query(
       'orderField',
       new DefaultValuePipe('pickupDate'),
@@ -293,6 +296,11 @@ export class OrdersController {
             ? {
                 address: true,
                 businessHours: true,
+              }
+            : undefined,
+          customer: customer
+            ? {
+                user: customer,
               }
             : undefined,
         },
