@@ -38,13 +38,16 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { IsNull, Not } from 'typeorm';
+import { Between, IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../../authentication/apikey-auth.guard.js';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
+import { OrdersStatisticsResponse } from '../../../moa-square/dto/orders/order-statistics-reponse.dto.js';
 import { OrdersOrderFieldEnum } from '../../../moa-square/dto/orders/orders-order-field.enum.js';
+import { MerchantsGuard } from '../../../moa-square/guards/merchants.guard.js';
 import { UserTypeEnum } from '../../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
+import { ParseISODatePipe } from '../../../utils/parse-iso-date-pipe.js';
 import { OrderSortEnum } from '../../dto/orders-sort.enum.js';
 import { OrderPatchBody } from '../../dto/orders/order-patch.dto.js';
 import {
@@ -350,6 +353,38 @@ export class OrdersController {
             }
           : undefined,
       },
+    });
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @Get('statistics/me')
+  @ApiOperation({
+    summary: 'Get your statistics',
+    operationId: 'getOrderStatisticsMe',
+  })
+  @ApiOkResponse({ type: OrdersStatisticsResponse })
+  @ApiQuery({ name: 'startDate', required: true, type: String })
+  @ApiQuery({ name: 'endDate', required: true, type: String })
+  async getStatisticsMe(
+    @Req() request: UserTypeGuardedRequest,
+    @Query('startDate', ParseISODatePipe)
+    startDate: Date,
+    @Query('endDate', ParseISODatePipe)
+    endDate: Date,
+  ): Promise<OrdersStatisticsResponse> {
+    this.logger.verbose(this.getStatisticsMe.name);
+    const translations = this.currentLanguageTranslations();
+    const {
+      merchant: { id },
+    } = { ...request };
+    if (!id) {
+      throw new NotFoundException(translations.merchantNotFound);
+    }
+
+    return await this.service.sums({
+      merchantId: id,
+      closedDate: Between(startDate, endDate),
     });
   }
 

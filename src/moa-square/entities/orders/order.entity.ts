@@ -158,36 +158,43 @@ export class OrderEntity extends BaseEntity {
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true })
-  totalMoneyAmount?: number;
+  @Column({ default: 0 })
+  totalMoneyAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true })
-  totalMoneyTaxAmount?: number;
+  @Column({ default: 0 })
+  totalMoneyTaxAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true })
-  totalMoneyDiscountAmount?: number;
+  @Column({ default: 0 })
+  totalMoneyDiscountAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true })
-  totalMoneyTipAmount?: number;
+  @Column({ default: 0 })
+  totalMoneyTipAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true })
-  totalMoneyServiceChargeAmount?: number;
+  @Column({ default: 0 })
+  totalMoneyServiceChargeAmount!: number;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ default: 0 })
+  appFeeMoneyAmount!: number;
 
   @Expose()
   @ApiProperty({ required: false, type: String, nullable: true })

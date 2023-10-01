@@ -6,6 +6,10 @@ remote: NODE_VERBOSE=false
 remote: NODE_ENV=staging
 remote: NODE_MODULES_CACHE=true
 
+Your Square account and seller Square account need to be in the same country where application fees are collected. In addition, the seller location where the application fee is taken must use the same currency as your Square account in that country. For example, if your application is used in Canada and the United States, you must have a Square account in each country. Your Canadian sellers would have a Square account in Canada and take payments in the same currency as your Canadian Square account. Your US sellers would have a Square account in the United States and take payments in the same currency as your US Square account.
+
+https://developer.squareup.com/docs/payments-api/take-payments-and-collect-fees#transfer-your-application-fee-money
+
 if (!payload.merchant_id) {
 this.logger.error(
 'Missing merchant_id in SquareLocationCreatedEventPayload',

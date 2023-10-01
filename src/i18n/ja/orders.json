@@ -8,5 +8,6 @@
   "merchantNoSquareAccessToken": "この店舗はまだSquareへのアクセスを設定していません。",
   "orderNoSquareId": "あなたの注文にはSquareのIDがありません。サポートにお問い合わせください。",
   "orderExists": "この注文は既に存在します。重複する必要はありません。",
-  "orderNotFound": "おっと！お探しの注文が見つかりませんでした。"
+  "orderNotFound": "おっと！お探しの注文が見つかりませんでした。",
+  "merchantNotFound": "探していた店舗が見つかりませんでした、後でもう一度お試しください。"
 }

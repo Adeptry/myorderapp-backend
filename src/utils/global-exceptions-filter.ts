@@ -9,7 +9,7 @@ import {
 import * as Sentry from '@sentry/node';
 import { Response } from 'express';
 import { I18nContext } from 'nestjs-i18n';
-import { EntityNotFoundError, QueryFailedError } from 'typeorm';
+import { EntityNotFoundError, QueryFailedError, TypeORMError } from 'typeorm';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { ErrorResponse } from './error-response.js';
 
@@ -23,6 +23,7 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
 
   catch(exception: any, host: ArgumentsHost): void {
     this.logger.error(JSON.stringify(exception));
+    this.logger.error(typeof exception);
     const i18n = I18nContext.current<I18nTranslations>(host);
     const translations = i18n?.t('errors', { lang: i18n?.lang });
     const httpArgumentsHost = host.switchToHttp();
@@ -51,7 +52,10 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
         message = translations?.unprocessableEntity ?? exception.message;
       } else if (exception instanceof EntityNotFoundError) {
         statusCode = HttpStatus.NOT_FOUND;
-        message = translations?.notFound ?? exception.message;
+        message = exception.name ?? translations?.notFound ?? exception.message;
+      } else if (exception instanceof TypeORMError) {
+        message = exception.name;
+        statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       }
     }
 

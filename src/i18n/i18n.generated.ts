@@ -62,6 +62,7 @@ export type I18nTranslations = {
         "invalidStripeResponse": string;
     };
     "orders": {
+        "merchantNotFound": string;
         "merchantNoSquareId": string;
         "locationNoSquareId": string;
         "noMainLocation": string;

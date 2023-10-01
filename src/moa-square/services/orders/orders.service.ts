@@ -1,10 +1,12 @@
 import {
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
   NotFoundException,
   UnprocessableEntityException,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { OnEvent } from '@nestjs/event-emitter';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NestSquareService } from 'nest-square';
@@ -16,8 +18,10 @@ import {
   UpdateOrderRequest,
   UpdateOrderResponse,
 } from 'square';
-import { In, Repository } from 'typeorm';
+import { OrdersStatisticsResponse } from 'src/moa-square/dto/orders/order-statistics-reponse.dto.js';
+import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
+import { MyOrderAppSquareConfig } from '../../../moa-square/moa-square.config.js';
 import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import { OrdersPostPaymentBody } from '../../dto/orders/payment-create.dto.js';
@@ -43,7 +47,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   constructor(
     @InjectRepository(OrderEntity)
     protected readonly repository: Repository<OrderEntity>,
-    protected readonly i18n: I18nService<I18nTranslations>,
+    @Inject(MyOrderAppSquareConfig.KEY)
+    private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
+    private readonly i18n: I18nService<I18nTranslations>,
     private readonly lineItemsService: LineItemService,
     private readonly squareService: NestSquareService,
     private readonly locationsService: LocationsService,
@@ -58,10 +64,28 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     this.logger = logger;
   }
 
-  currentLanguageTranslations() {
+  private currentLanguageTranslations() {
     return this.i18n.t('orders', {
       lang: I18nContext.current()?.lang,
     });
+  }
+
+  async sums(
+    where?: FindOptionsWhere<OrderEntity> | FindOptionsWhere<OrderEntity>[],
+  ): Promise<OrdersStatisticsResponse> {
+    return {
+      moneyAmountSum:
+        (await this.repository.sum('totalMoneyAmount', where)) ?? 0,
+      moneyTaxAmountSum:
+        (await this.repository.sum('totalMoneyTaxAmount', where)) ?? 0,
+      moneyTipAmountSum:
+        (await this.repository.sum('totalMoneyTipAmount', where)) ?? 0,
+      moneyServiceChargeAmountSum:
+        (await this.repository.sum('totalMoneyServiceChargeAmount', where)) ??
+        0,
+      moneyAppFeeAmountSum:
+        (await this.repository.sum('appFeeMoneyAmount', where)) ?? 0,
+    };
   }
 
   async createOne(params: {
@@ -432,7 +456,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       paymentSquareId,
       note,
       idempotencyKey,
-      orderTipMoney,
+      tipMoneyAmount,
       recipient,
     } = input;
 
@@ -460,6 +484,57 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       relations: {
         user: true,
       },
+    });
+
+    /* Order */
+
+    const { squareId: orderSquareId, location } = order;
+    if (!orderSquareId) {
+      throw new UnprocessableEntityException(translations.orderNoSquareId);
+    }
+    if (!location) {
+      throw new UnprocessableEntityException(translations.locationNoId);
+    }
+    const { locationSquareId, id: locationMoaId } = location;
+    if (!locationSquareId || !locationMoaId) {
+      throw new UnprocessableEntityException(translations.locationNoSquareId);
+    }
+
+    /* Merchant */
+
+    const {
+      tier: merchantTier,
+      pickupLeadDurationMinutes,
+      squareAccessToken: merchantSquareAccessToken,
+    } = merchant;
+    if (
+      !merchantSquareAccessToken ||
+      merchantTier == undefined ||
+      merchantTier > 2 ||
+      merchantTier < 0
+    ) {
+      throw new UnprocessableEntityException(
+        translations.merchantNoSquareAccessToken,
+      );
+    }
+
+    /* Customer */
+
+    const { squareId: customerSquareId, id: customerMoaId } = customer;
+    if (!customerSquareId || !customerMoaId) {
+      throw new UnprocessableEntityException(translations.customerNoSquareId);
+    }
+
+    const pickupOrAsapDate = pickupDateString
+      ? new Date(pickupDateString)
+      : await this.locationsService.firstPickupDateAtLocationWithinDuration({
+          locationId: locationMoaId,
+          durationMinutes: pickupLeadDurationMinutes ?? 10,
+        });
+
+    await this.locationsService.validatePickupDateTimeOrThrow({
+      pickupDate: pickupOrAsapDate,
+      id: locationMoaId,
     });
 
     // TODO: move this to users service and sync with square
@@ -494,49 +569,34 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       recipientDisplayName = `${recipient.firstName} ${recipient.lastName}`;
     }
 
-    const location = order.location;
-    const locationSquareId = location?.locationSquareId;
-    const locationMoaId = location?.id;
-    if (!locationSquareId || !location || !locationMoaId) {
-      throw new UnprocessableEntityException(translations.locationNoSquareId);
-    }
+    const existingOrderResponse = await this.squareService.retryOrThrow(
+      merchantSquareAccessToken,
+      (client) => client.ordersApi.retrieveOrder(orderSquareId),
+    );
 
-    const orderSquareId = order.squareId;
-    if (!orderSquareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
-    }
-
-    if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
-      );
-    }
-
-    if (!customer.squareId) {
-      throw new UnprocessableEntityException(translations.customerNoSquareId);
-    }
-
-    const pickupOrAsapDate = pickupDateString
-      ? new Date(pickupDateString)
-      : await this.locationsService.firstPickupDateAtLocationWithinDuration({
-          locationId: locationMoaId,
-          durationMinutes: merchant.pickupLeadDurationMinutes ?? 10,
-        });
-
-    await this.locationsService.validatePickupDateTimeOrThrow({
-      pickupDate: pickupOrAsapDate,
-      id: locationMoaId,
-    });
+    const existingSquareOrder = existingOrderResponse.result.order;
+    const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
+      (lineItem) => {
+        return {
+          catalogObjectId: lineItem.catalogObjectId,
+          quantity: lineItem.quantity,
+          note: lineItem.note,
+          modifiers: lineItem.modifiers?.map((modifier) => {
+            return { catalogObjectId: modifier.catalogObjectId };
+          }),
+        };
+      },
+    );
 
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
       await this.squareService.retryOrThrow(
-        merchant.squareAccessToken,
+        merchantSquareAccessToken,
         (client) =>
-          client.ordersApi.updateOrder(orderSquareId, {
+          client.ordersApi.createOrder({
             order: {
               locationId: locationSquareId,
-              version: order.squareVersion,
               state: 'OPEN',
+              lineItems: existingSquareOrderLineItems,
               fulfillments: [
                 {
                   type: 'PICKUP',
@@ -545,7 +605,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                     scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
                     pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {
-                      customerId: customer.squareId,
+                      customerId: customerSquareId,
                       displayName: recipientDisplayName ?? user?.fullName,
                       phoneNumber: recipient?.phoneNumber ?? user?.phoneNumber,
                     },
@@ -556,55 +616,112 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
           }),
       );
 
-    const squareOrderFromUpdate = squareUpdateOrderResponse.result.order;
-    if (!squareOrderFromUpdate) {
+    const squareUpdateOrderResult = squareUpdateOrderResponse.result.order;
+    if (!squareUpdateOrderResult) {
       throw new InternalServerErrorException(
+        translations.invalidResponseFromSquare,
+      );
+    }
+    const { totalMoney: orderTotalAmountMoney } = squareUpdateOrderResult;
+    if (!orderTotalAmountMoney) {
+      throw new UnprocessableEntityException(
+        translations.invalidResponseFromSquare,
+      );
+    }
+    const { amount: orderTotalMoneyAmount, currency } = orderTotalAmountMoney;
+    if (!orderTotalMoneyAmount || !currency) {
+      throw new UnprocessableEntityException(
         translations.invalidResponseFromSquare,
       );
     }
 
     const updatedOrder = await this.saveFromSquareOrder({
       order,
-      squareOrder: squareOrderFromUpdate,
+      squareOrder: (
+        await this.squareService.retryOrThrow(
+          merchantSquareAccessToken,
+          (client) => client.ordersApi.retrieveOrder(orderSquareId),
+        )
+      ).result.order!,
     });
 
-    const orderTotalMoney = squareOrderFromUpdate?.totalMoney;
-    if (!orderTotalMoney) {
-      throw new UnprocessableEntityException(
-        translations.invalidResponseFromSquare,
-      );
-    }
+    const appFeeMoneyAmount = this.calculateAppFee({
+      orderTotalMoneyAmount,
+      merchantTier,
+    });
 
-    await this.squareService.retryOrThrow(
-      merchant.squareAccessToken,
-      (client) =>
-        client.paymentsApi.createPayment({
-          sourceId: paymentSquareId,
-          idempotencyKey: idempotencyKey,
-          customerId: customer.squareId ?? undefined,
-          locationId: order.location?.locationSquareId,
-          amountMoney: orderTotalMoney,
-          tipMoney: {
-            amount: BigInt(Math.floor(orderTipMoney ?? 0)),
-            currency: orderTotalMoney.currency,
-          },
-          orderId: squareOrderFromUpdate.id,
-          referenceId: order.id,
-        }),
+    await this.squareService.retryOrThrow(merchantSquareAccessToken, (client) =>
+      client.paymentsApi.createPayment({
+        sourceId: paymentSquareId,
+        idempotencyKey: idempotencyKey,
+        customerId: customerSquareId,
+        locationId: locationSquareId,
+        amountMoney: orderTotalAmountMoney,
+        tipMoney: {
+          amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
+          currency,
+        },
+        appFeeMoney: {
+          amount: appFeeMoneyAmount,
+          currency,
+        },
+        orderId: squareUpdateOrderResult.id,
+        referenceId: order.id,
+      }),
     );
 
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
-    updatedOrder.customerId = customer.id;
-    updatedOrder.totalMoneyTipAmount = Math.floor(orderTipMoney ?? 0);
+    updatedOrder.customerId = customerMoaId;
+    updatedOrder.appFeeMoneyAmount = Number(appFeeMoneyAmount);
+    updatedOrder.totalMoneyTipAmount = tipMoneyAmount;
+
     customer.currentOrder = null;
     await customer.save();
 
     return this.save(updatedOrder);
   }
 
+  private calculateAppFee(params: {
+    orderTotalMoneyAmount: bigint;
+    merchantTier: number;
+  }): bigint {
+    const { orderTotalMoneyAmount, merchantTier } = params;
+
+    this.logger.verbose(this.calculateAppFee.name);
+
+    let appFeeBigIntNumerator: bigint;
+
+    switch (merchantTier) {
+      case 0:
+        appFeeBigIntNumerator = this.config.squareTier0AppFeeBigIntNumerator;
+        break;
+      case 1:
+        appFeeBigIntNumerator = this.config.squareTier1AppFeeBigIntNumerator;
+        break;
+      case 2:
+        appFeeBigIntNumerator = this.config.squareTier2AppFeeBigIntNumerator;
+        break;
+      default:
+        throw new UnprocessableEntityException("Merchant doesn't have a tier");
+    }
+
+    if (appFeeBigIntNumerator === BigInt(0)) {
+      throw new Error('Denominator cannot be zero');
+    }
+
+    this.logger.debug(
+      `(${orderTotalMoneyAmount} * ${appFeeBigIntNumerator}) / ${this.config.squareAppFeeBigIntDenominator}`,
+    );
+
+    return (
+      (orderTotalMoneyAmount * appFeeBigIntNumerator) /
+      this.config.squareAppFeeBigIntDenominator
+    );
+  }
+
   @OnEvent('square.order.fulfillment.updated')
-  async handleSquareOrderFulfillmentUpdate(
+  protected async handleSquareOrderFulfillmentUpdate(
     payload: SquareOrderFulfillmentUpdatedPayload,
   ) {
     this.logger.verbose(this.handleSquareOrderFulfillmentUpdate.name);
@@ -639,7 +756,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
   }
 
-  async saveFromSquareOrder(params: {
+  private async saveFromSquareOrder(params: {
     order: OrderEntity;
     squareOrder: SquareOrder;
   }): Promise<OrderEntity> {
@@ -664,7 +781,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     return this.saveFromSquareLineItems(params);
   }
 
-  async saveFromSquareLineItems(params: {
+  private async saveFromSquareLineItems(params: {
     order: OrderEntity;
     squareOrder: SquareOrder;
   }) {
@@ -683,7 +800,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     return await order.save();
   }
 
-  async squareOrderLineItemsFor(params: {
+  private async squareOrderLineItemsFor(params: {
     variations: OrdersVariationLineItemInput[];
   }) {
     this.logger.verbose(this.squareOrderLineItemsFor.name);

@@ -35,7 +35,7 @@ export class OrdersPostPaymentBody {
   @ApiProperty()
   @IsOptional()
   @IsNumber()
-  orderTipMoney!: number;
+  tipMoneyAmount!: number;
 
   @ApiProperty({
     required: false,

@@ -14,7 +14,7 @@ export class BusinessHoursUtils {
 
     this.logger.verbose(this.firstPickupDateAfter.name);
 
-    const firstBusinessHours = this.firstBusinessHoursAfterDate({
+    const firstBusinessHours = this.firstBusinessHoursFromDate({
       businessHours,
       date,
     });
@@ -30,9 +30,9 @@ export class BusinessHoursUtils {
     ) {
       result = date;
     } else {
-      const businessHoursAfterToday = this.businessHoursOnDayOfWeek({
-        dayOfWeek: date.getDay() + 1,
+      const businessHoursAfterToday = this.firstBusinessHoursFromDate({
         businessHours,
+        date: addDays(date, 1),
       });
       const startLocalTimeHours = businessHoursAfterToday?.startLocalTimeHours;
       const startLocalTimeMinutes =
@@ -44,11 +44,16 @@ export class BusinessHoursUtils {
         startLocalTimeMinutes == null ||
         dayOfWeekNumber == null
       ) {
-        throw new NotFoundException('No business hours found');
+        throw new NotFoundException(
+          `No business hours found for ${startLocalTimeHours}:${startLocalTimeMinutes} ${dayOfWeekNumber}`,
+        );
       }
 
       const daysUntilNextBusinessDay =
         (dayOfWeekNumber - date.getDay() + 7) % 7;
+      this.logger.debug(
+        `daysUntilNextBusinessDay: ${daysUntilNextBusinessDay}`,
+      );
       result = addDays(date, daysUntilNextBusinessDay);
       result = setHours(result, startLocalTimeHours);
       result = setMinutes(result, startLocalTimeMinutes);
@@ -60,16 +65,11 @@ export class BusinessHoursUtils {
   }
 
   static businessHoursOnDayOfWeek(params: {
-    dayOfWeek?: number;
+    dayOfWeek: number;
     businessHours: BusinessHoursPeriodEntity[];
   }) {
     const { dayOfWeek, businessHours } = params;
-
-    this.logger.verbose(this.businessHoursOnDayOfWeek.name);
-
-    if (dayOfWeek == null) {
-      return null;
-    }
+    this.logger.verbose(`${this.businessHoursOnDayOfWeek.name} ${dayOfWeek}`);
     const result = businessHours.find(
       (period) => period.dayOfWeekNumber === dayOfWeek,
     );
@@ -77,7 +77,7 @@ export class BusinessHoursUtils {
     return result;
   }
 
-  static firstBusinessHoursAfterDate(params: {
+  static firstBusinessHoursFromDate(params: {
     businessHours: BusinessHoursPeriodEntity[];
     date: Date;
   }): BusinessHoursPeriodEntity | undefined {
@@ -85,7 +85,7 @@ export class BusinessHoursUtils {
 
     let result: BusinessHoursPeriodEntity | undefined = undefined;
 
-    this.logger.verbose(this.firstBusinessHoursAfterDate.name);
+    this.logger.verbose(this.firstBusinessHoursFromDate.name);
 
     for (let i = 0; i < Math.max(businessHours.length, 7); i++) {
       const dateAfterDays = addDays(date, i);

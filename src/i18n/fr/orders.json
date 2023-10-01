@@ -1,4 +1,5 @@
 {
+  "merchantNotFound": "Nous n'avons pas pu trouver le magasin que vous cherchiez, veuillez réessayer plus tard.",
   "merchantNoSquareId": "La boutique n'a pas encore configuré son identifiant Square.",
   "locationNoSquareId": "Cet emplacement n'a pas encore configuré son identifiant Square.",
   "noMainLocation": "Cette boutique n'a pas désigné d'emplacement principal.",

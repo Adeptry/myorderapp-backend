@@ -1,12 +1,18 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { IsOptional, IsString, validateSync } from 'class-validator';
+import { IsString, validateSync } from 'class-validator';
+import { toBigIntOrThrow } from '../utils/to-big-int-or-throw.js';
 
 export type MyOrderAppSquareConfigType = {
   squareClientEnvironment: string;
   squareOauthClientId: string;
   squareOauthClientSecret: string;
   squareWebhookSignatureKey: string;
+
+  squareAppFeeBigIntDenominator: bigint;
+  squareTier0AppFeeBigIntNumerator: bigint;
+  squareTier1AppFeeBigIntNumerator: bigint;
+  squareTier2AppFeeBigIntNumerator: bigint;
 
   squareTestCode?: string;
   squareTestAccessToken?: string;
@@ -49,101 +55,83 @@ class MyOrderAppSquareConfigValidator {
   SQUARE_CLIENT_ENVIRONMENT!: string;
 
   @IsString()
-  SQUARE_BASE_URL!: string;
-
-  @IsString()
   SQUARE_WEBHOOK_SIGNATURE_KEY!: string;
 
+  SQUARE_TIER_APP_FEE_BIG_INT_DENOMINATOR!: number;
+
+  SQUARE_TIER_0_APP_FEE_BIG_INT_NUMERATOR!: number;
+
+  SQUARE_TIER_1_APP_FEE_BIG_INT_NUMERATOR!: number;
+
+  SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!: number;
+
   @IsString()
-  @IsOptional()
   SQUARE_TEST_CODE?: string;
 
   @IsString()
-  @IsOptional()
   SQUARE_TEST_ACCESS_TOKEN?: string;
 
   @IsString()
-  @IsOptional()
   SQUARE_TEST_REFRESH_TOKEN?: string;
 
   @IsString()
-  @IsOptional()
   SQUARE_TEST_EXPIRE_AT?: string;
 
   @IsString()
-  @IsOptional()
   SQUARE_TEST_ID?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_USD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_EUR?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_GBP?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_JPY?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_CAD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_AUD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_USD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_EUR?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_GBP?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_JPY?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_CAD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_AUD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_USD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_EUR?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_GBP?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_JPY?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_CAD?: string;
 
   @IsString()
-  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_AUD?: string;
 }
 
@@ -170,6 +158,20 @@ export const MyOrderAppSquareConfig = registerAs('moaSquare', () => {
     squareOauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET!,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     squareWebhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY!,
+
+    squareAppFeeBigIntDenominator: toBigIntOrThrow(
+      process.env.SQUARE_TIER_APP_FEE_BIG_INT_DENOMINATOR!,
+    ),
+    squareTier0AppFeeBigIntNumerator: toBigIntOrThrow(
+      process.env.SQUARE_TIER_0_APP_FEE_BIG_INT_NUMERATOR!,
+    ),
+    squareTier1AppFeeBigIntNumerator: toBigIntOrThrow(
+      process.env.SQUARE_TIER_1_APP_FEE_BIG_INT_NUMERATOR!,
+    ),
+    squareTier2AppFeeBigIntNumerator: toBigIntOrThrow(
+      process.env.SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!,
+    ),
+
     squareTestCode: process.env.SQUARE_TEST_CODE,
     squareTestAccessToken: process.env.SQUARE_TEST_ACCESS_TOKEN,
     squareTestRefreshToken: process.env.SQUARE_TEST_REFRESH_TOKEN,

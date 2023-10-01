@@ -63,6 +63,8 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
 
   get dayOfWeekNumber(): number | null {
     switch (this.dayOfWeek?.toUpperCase()) {
+      case 'SUN':
+        return 0;
       case 'MON':
         return 1;
       case 'TUE':
@@ -75,8 +77,6 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
         return 5;
       case 'SAT':
         return 6;
-      case 'SUN':
-        return 7; // or 0, depending on your numbering system
       default:
         return null;
     }
