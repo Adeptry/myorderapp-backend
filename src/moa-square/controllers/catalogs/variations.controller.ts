@@ -76,7 +76,7 @@ export class VariationsController {
   @ApiParam({ name: 'id', required: true, type: String })
   @ApiOperation({
     summary: 'Update an Variation',
-    operationId: 'updateVariation',
+    operationId: 'patchVariation',
   })
   async patch(
     @Param('id') variationId: string,

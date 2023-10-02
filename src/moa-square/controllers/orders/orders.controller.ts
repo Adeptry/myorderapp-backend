@@ -364,14 +364,14 @@ export class OrdersController {
     operationId: 'getOrderStatisticsMe',
   })
   @ApiOkResponse({ type: OrdersStatisticsResponse })
-  @ApiQuery({ name: 'startDate', required: true, type: String })
-  @ApiQuery({ name: 'endDate', required: true, type: String })
+  @ApiQuery({ name: 'startDate', required: false, type: String })
+  @ApiQuery({ name: 'endDate', required: false, type: String })
   async getStatisticsMe(
     @Req() request: UserTypeGuardedRequest,
     @Query('startDate', ParseISODatePipe)
-    startDate: Date,
+    startDate?: Date,
     @Query('endDate', ParseISODatePipe)
-    endDate: Date,
+    endDate?: Date,
   ): Promise<OrdersStatisticsResponse> {
     this.logger.verbose(this.getStatisticsMe.name);
     const translations = this.currentLanguageTranslations();
@@ -382,9 +382,10 @@ export class OrdersController {
       throw new NotFoundException(translations.merchantNotFound);
     }
 
-    return await this.service.sums({
+    return await this.service.statistics({
       merchantId: id,
-      closedDate: Between(startDate, endDate),
+      closedDate:
+        startDate && startDate ? Between(startDate!, endDate!) : undefined,
     });
   }
 

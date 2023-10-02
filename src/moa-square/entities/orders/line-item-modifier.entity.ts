@@ -62,10 +62,6 @@ export class LineItemModifierEntity extends BaseEntity {
   @Column({ nullable: true })
   quantity?: string; // | null;
 
-  @ApiProperty({ type: String, nullable: true, required: false })
-  @Column({ nullable: true })
-  currency?: string;
-
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
   baseMoneyAmount?: number;

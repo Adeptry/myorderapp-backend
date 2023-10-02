@@ -72,13 +72,9 @@ export class LineItemEntity extends BaseEntity {
   @Column({ nullable: true })
   variationName?: string; // | null;
 
-  @ApiProperty({ type: String, nullable: true, required: false })
-  @Column({ nullable: true })
-  currency?: string;
-
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })
-  basePriceMoney?: number;
+  basePriceMoneyAmount?: number;
 
   @ApiProperty({ type: Number, nullable: true, required: false })
   @Column({ nullable: true })

@@ -1,24 +1,39 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsNumber } from 'class-validator';
+import { StatisticsOutput } from './statistics-output.dto.js';
 
 export class OrdersStatisticsResponse {
-  @ApiProperty({ required: true })
-  @IsNumber()
-  moneyAmountSum?: number;
+  @ApiProperty({
+    required: false,
+    type: () => StatisticsOutput,
+    nullable: true,
+  })
+  moneyAmount?: StatisticsOutput;
 
-  @ApiProperty({ required: true })
-  @IsNumber()
-  moneyTaxAmountSum?: number;
+  @ApiProperty({
+    required: false,
+    type: () => StatisticsOutput,
+    nullable: true,
+  })
+  moneyTaxAmount?: StatisticsOutput;
 
-  @ApiProperty({ required: true })
-  @IsNumber()
-  moneyTipAmountSum?: number;
+  @ApiProperty({
+    required: false,
+    type: () => StatisticsOutput,
+    nullable: true,
+  })
+  moneyTipAmount?: StatisticsOutput;
 
-  @ApiProperty({ required: true })
-  @IsNumber()
-  moneyServiceChargeAmountSum?: number;
+  @ApiProperty({
+    required: false,
+    type: () => StatisticsOutput,
+    nullable: true,
+  })
+  moneyServiceChargeAmount?: StatisticsOutput;
 
-  @ApiProperty({ required: true })
-  @IsNumber()
-  moneyAppFeeAmountSum?: number;
+  @ApiProperty({
+    required: false,
+    type: () => StatisticsOutput,
+    nullable: true,
+  })
+  moneyAppFeeAmount?: StatisticsOutput;
 }

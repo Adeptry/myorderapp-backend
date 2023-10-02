@@ -147,14 +147,6 @@ export class OrderEntity extends BaseEntity {
   pickupDate?: Date;
 
   @ApiProperty({
-    type: String,
-    required: false,
-    nullable: true,
-  })
-  @Column({ type: String, nullable: true })
-  currency?: string | null;
-
-  @ApiProperty({
     required: false,
     nullable: true,
   })

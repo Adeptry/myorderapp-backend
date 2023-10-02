@@ -3,8 +3,8 @@ import { isValid } from 'date-fns'; // using date-fns for date validation
 
 @Injectable()
 export class ParseISODatePipe implements PipeTransform {
-  transform(value: string): Date | null {
-    if (!value) return null;
+  transform(value: string): Date | undefined {
+    if (!value) return undefined;
     const parsedDate = new Date(value);
     if (!isValid(parsedDate)) {
       throw new BadRequestException(`Invalid date from value: ${value}`);

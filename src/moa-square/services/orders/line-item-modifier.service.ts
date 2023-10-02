@@ -26,8 +26,6 @@ export class LineItemModifierService extends EntityRepositoryService<LineItemMod
     // modifier.modifierId = squareLineItemModifier.catalogObjectId ?? undefined;
     modifier.name = squareLineItemModifier.name ?? undefined;
     modifier.quantity = squareLineItemModifier.quantity ?? undefined;
-    modifier.currency =
-      squareLineItemModifier.basePriceMoney?.currency ?? undefined;
     modifier.baseMoneyAmount = Number(
       squareLineItemModifier.basePriceMoney?.amount ?? 0,
     );

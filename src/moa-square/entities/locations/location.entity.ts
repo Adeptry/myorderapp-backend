@@ -246,5 +246,5 @@ export class LocationEntity extends BaseEntity {
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
   @Column({ nullable: true })
-  locationSquareId?: string;
+  squareId?: string;
 }

@@ -147,5 +147,5 @@
     "typeorm": "node --loader ts-node/esm -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "type": "module",
-  "version": "2.3.2"
+  "version": "2.3.4"
 }

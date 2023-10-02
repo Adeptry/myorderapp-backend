@@ -160,12 +160,8 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
             { locationId },
           )
           .addSelect(
-            'COALESCE(modifierLocationOverrides.amount, modifiers.priceAmount)',
-            'modifiers_priceAmount',
-          )
-          .addSelect(
-            'COALESCE(modifierLocationOverrides.currency, modifiers.priceCurrency)',
-            'modifiers_priceCurrency',
+            'COALESCE(modifierLocationOverrides.amount, modifiers.priceMoneyAmount)',
+            'modifiers_priceMoneyAmount',
           );
       }
     }
@@ -182,8 +178,8 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
             { locationId },
           )
           .addSelect(
-            'COALESCE("variationLocationOverrides".amount, variations.priceAmount)',
-            'variations_priceAmount',
+            'COALESCE("variationLocationOverrides".amount, variations.priceMoneyAmount)',
+            'variations_priceMoneyAmount',
           );
       }
     }

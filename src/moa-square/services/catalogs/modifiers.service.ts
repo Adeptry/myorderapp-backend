@@ -83,10 +83,9 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
 
     moaModifier.name = squareModifierData?.name;
     moaModifier.ordinal = squareModifierData?.ordinal;
-    moaModifier.priceAmount = Number(
+    moaModifier.priceMoneyAmount = Number(
       squareModifierData?.priceMoney?.amount ?? 0,
     );
-    moaModifier.priceCurrency = squareModifierData?.priceMoney?.currency;
 
     const modifierLists = await this.modifierListsService.findOne({
       where: {
@@ -120,8 +119,8 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
     if (modifierPresentAtSquareLocationsIds.length > 0) {
       moaModifier.presentAtLocations = moaLocations.filter((value) => {
         return (
-          value.locationSquareId &&
-          modifierPresentAtSquareLocationsIds.includes(value.locationSquareId)
+          value.squareId &&
+          modifierPresentAtSquareLocationsIds.includes(value.squareId)
         );
       });
     } else {
@@ -132,8 +131,8 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
     if (modifierAbsentAtSquareLocationsIds.length > 0) {
       moaModifier.absentAtLocations = moaLocations.filter((value) => {
         return (
-          value.locationSquareId &&
-          modifierAbsentAtSquareLocationsIds.includes(value.locationSquareId)
+          value.squareId &&
+          modifierAbsentAtSquareLocationsIds.includes(value.squareId)
         );
       });
     } else {

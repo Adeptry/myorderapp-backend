@@ -10,7 +10,7 @@ import { NestSquareService } from 'nest-square';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
-import { CustomerPatchBody } from '../../dto/customers/update-customer.dto.js';
+import { CustomerPatchBody } from '../../dto/customers/customer-patch-body.dto.js';
 import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import { LocationsService } from '../locations/locations.service.js';
 import { MerchantsService } from '../merchants/merchants.service.js';
@@ -39,6 +39,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     };
     relations?: FindOptionsRelations<CustomerEntity>;
   }) {
+    this.logger.verbose(this.findOneWithUserIdAndMerchantIdOrPath.name);
     return await this.findOne({
       where: [
         {
@@ -65,6 +66,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     };
     relations?: FindOptionsRelations<CustomerEntity>;
   }) {
+    this.logger.verbose(this.findOneWithIdAndMerchantIdOrPath.name);
     return await this.findOne({
       where: [
         { id: params.where.id, merchantId: params.where.merchantIdOrPath },
@@ -131,6 +133,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
           givenName: user.firstName ?? undefined,
           familyName: user.lastName ?? undefined,
           idempotencyKey: customer.id,
+          referenceId: customer.id,
         }),
     );
 
@@ -145,47 +148,78 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     return await this.save(customer);
   }
 
-  async updateOne(params: {
+  async patchOne(params: {
     id: string;
     merchantId: string;
-    customerUpdateDto: CustomerPatchBody;
+    body: CustomerPatchBody;
   }) {
-    this.logger.verbose(this.updateOne.name);
-    const { id, merchantId, customerUpdateDto } = params;
-    const customer = await this.findOne({
-      where: { id, merchantId },
-    });
+    this.logger.verbose(this.patchOne.name);
+    const { id, merchantId, body } = params;
+    const {
+      preferredLocationId,
+      preferredSquareCardId,
+      firstName,
+      lastName,
+      phoneNumber,
+    } = body;
 
-    if (customer == null) {
-      throw new NotFoundException(`Customer ${id} not found`);
+    const merchant = await this.merchantsService.findOneOrFail({
+      where: { id: merchantId },
+    });
+    const { squareAccessToken } = merchant;
+    if (!squareAccessToken) {
+      throw new BadRequestException(
+        `Merchant does not have Square access token`,
+      );
     }
 
-    let save = false;
+    const customer = await this.findOneOrFail({
+      where: { id, merchantId },
+    });
+    const { userId, squareId } = customer;
+    if (!userId || !squareId) {
+      throw new BadRequestException(`Customer does not have Square ID`);
+    }
 
-    if (customerUpdateDto.preferredLocationId !== undefined) {
-      if (customerUpdateDto.preferredLocationId !== null) {
+    if (userId && (firstName || lastName || phoneNumber)) {
+      await this.usersService.patch(
+        { where: { id: userId } },
+        { firstName, lastName, phoneNumber },
+      );
+
+      await this.squareService.retryOrThrow(squareAccessToken, (client) => {
+        return client.customersApi.updateCustomer(squareId, {
+          givenName: firstName,
+          familyName: lastName,
+          phoneNumber,
+        });
+      });
+    }
+
+    let saveCustomer = false;
+
+    if (preferredLocationId !== undefined) {
+      if (preferredLocationId !== null) {
         const location = await this.locationsService.findOne({
-          where: { id: customerUpdateDto.preferredLocationId },
+          where: { id: preferredLocationId },
         });
         if (!location) {
-          throw new NotFoundException(
-            `Location ${customerUpdateDto.preferredLocationId}`,
-          );
+          throw new NotFoundException(`Location ${preferredLocationId}`);
         }
         customer.preferredLocation = location;
       } else {
         customer.preferredLocation = null;
       }
 
-      save = true;
+      saveCustomer = true;
     }
 
-    if (customerUpdateDto.preferredSquareCardId !== undefined) {
-      customer.preferredSquareCardId = customerUpdateDto.preferredSquareCardId;
-      save = true;
+    if (preferredSquareCardId !== undefined) {
+      customer.preferredSquareCardId = preferredSquareCardId;
+      saveCustomer = true;
     }
 
-    if (save) {
+    if (saveCustomer) {
       return await this.save(customer);
     } else {
       return customer;

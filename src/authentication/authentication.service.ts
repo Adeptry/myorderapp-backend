@@ -43,9 +43,8 @@ export class AuthenticationService {
   constructor(
     private readonly jwtService: JwtService,
     @Inject(AuthenticationConfig.KEY)
-    private config: ConfigType<typeof AuthenticationConfig>,
+    private readonly config: ConfigType<typeof AuthenticationConfig>,
     private readonly i18n: I18nService<I18nTranslations>,
-
     private readonly usersService: UsersService,
     private readonly forgotService: ForgotService,
     private readonly sessionService: SessionService,
@@ -167,10 +166,7 @@ export class AuthenticationService {
       if (socialEmail && !userByEmail) {
         user.email = socialEmail;
       }
-      await this.usersService.patchOne(
-        { where: { id: user.id } },
-        { patch: user },
-      );
+      await this.usersService.patch({ where: { id: user.id } }, user);
     } else if (userByEmail) {
       user = userByEmail;
     } else {
@@ -426,9 +422,9 @@ export class AuthenticationService {
       throw new NotFoundException(translations.invalidSession);
     }
 
-    await this.usersService.patchOne(
+    await this.usersService.patch(
       { where: { id: userJwtPayload.id } },
-      { patch: userDto },
+      userDto,
     );
 
     return this.usersService.findOne({

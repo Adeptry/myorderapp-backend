@@ -83,7 +83,7 @@ export class MerchantEntity extends BaseEntity {
   appConfig?: Relation<AppConfigEntity>;
 
   /*
-   * Square
+   * Square Oauth
    */
 
   @Exclude({ toPlainOnly: true })
@@ -104,6 +104,53 @@ export class MerchantEntity extends BaseEntity {
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   squareId?: string;
+
+  /*
+   * Square merchant
+   */
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description: "The name of the merchant's overall business.",
+  })
+  @Column({ nullable: true, type: String })
+  squareBusinessName?: string | null;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description:
+      'Indicates the country associated with another entity, such as a business. Values are in ISO 3166-1-alpha-2 format.',
+  })
+  @Column({ nullable: true, type: String })
+  countryCode?: string;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description:
+      'The code indicating the language preferences of the merchant, in [BCP 47 format](https://tools.ietf.org/html/bcp47#appendix-A). For example, `en-US` or `fr-CA`. ',
+  })
+  @Column({ nullable: true, type: String })
+  languageCode?: string | null;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    description:
+      'Indicates the associated currency for an amount of money. Values correspond to ISO 4217.',
+  })
+  @Column({ nullable: true, type: String })
+  currencyCode?: string;
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: true, type: String })
+  squareStatus?: string;
+
+  @Column({ nullable: true, type: String })
+  @Exclude({ toPlainOnly: true })
+  squareMainLocationId?: string | null;
 
   /*
    * Stripe

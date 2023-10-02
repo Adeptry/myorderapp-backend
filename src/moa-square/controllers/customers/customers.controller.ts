@@ -41,8 +41,8 @@ import { OrderSortEnum } from '../../../moa-square/dto/orders-sort.enum.js';
 import { ErrorResponse } from '../../../utils/error-response.js';
 import { paginatedResults } from '../../../utils/paginated.js';
 import { AppInstallPostBody } from '../../dto/customers/app-install-update.dto.js';
-import { CustomersPaginatedResponse } from '../../dto/customers/customers-paginated.output.js';
-import { CustomerPatchBody } from '../../dto/customers/update-customer.dto.js';
+import { CustomerPatchBody } from '../../dto/customers/customer-patch-body.dto.js';
+import { CustomersPaginatedResponse } from '../../dto/customers/customers-paginated-response.dto.js';
 import { SquareCard } from '../../dto/square/square.dto.js';
 import { CustomerEntity } from '../../entities/customers/customer.entity.js';
 import type { CustomersGuardedRequest } from '../../guards/customers.guard.js';
@@ -245,10 +245,10 @@ export class CustomersController {
       );
     }
 
-    await this.service.updateOne({
+    await this.service.patchOne({
       id: customer.id,
       merchantId: merchant.id,
-      customerUpdateDto: body,
+      body: body,
     });
 
     const found = await this.service.findOneOrFail({

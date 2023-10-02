@@ -52,11 +52,7 @@ export class VariationLocationOverride extends BaseEntity {
 
   @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
-  amount?: number | null;
-
-  @ApiProperty({ type: String, required: false, nullable: true })
-  @Column({ type: String, nullable: true })
-  currency?: string | null;
+  priceMoneyAmount?: number | null;
 
   /*
    * Relations

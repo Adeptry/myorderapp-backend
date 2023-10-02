@@ -54,10 +54,6 @@ export class ModifierLocationOverrideEntity extends BaseEntity {
   @Column({ type: Number, nullable: true })
   amount?: number | null;
 
-  @ApiProperty({ type: String, required: false, nullable: true })
-  @Column({ type: String, nullable: true })
-  currency?: string | null;
-
   /*
    * Relations
    */

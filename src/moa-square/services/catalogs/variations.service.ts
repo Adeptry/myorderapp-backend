@@ -93,9 +93,8 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
 
     moaVariation.name = squareItemVariationData.name;
     moaVariation.ordinal = squareItemVariationData.ordinal;
-    moaVariation.priceAmount =
+    moaVariation.priceMoneyAmount =
       Number(squareItemVariationData.priceMoney?.amount ?? 0) ?? 0;
-    moaVariation.priceCurrency = squareItemVariationData.priceMoney?.currency;
 
     await this.save(moaVariation);
 
@@ -117,17 +116,16 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
       // Then, recreate them based on the current Square data
       for (const override of squareVariationLocationOverrides) {
         const moaLocationForVariationOverride = moaLocations.find((value) => {
-          return value.locationSquareId === override.locationId;
+          return value.squareId === override.locationId;
         });
 
         const moaVariationLocationOverride = new VariationLocationOverride();
         moaVariationLocationOverride.variationId = moaVariation.id;
         moaVariationLocationOverride.locationId =
           moaLocationForVariationOverride?.id;
-        moaVariationLocationOverride.amount = Number(
+        moaVariationLocationOverride.priceMoneyAmount = Number(
           override.priceMoney?.amount ?? 0,
         );
-        moaVariationLocationOverride.currency = override.priceMoney?.currency;
         moaVariationLocationOverride.catalogId = moaCatalogId;
         await this.variationLocationOverridesService.save(
           moaVariationLocationOverride,
@@ -158,8 +156,8 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
           { locationId },
         )
         .addSelect(
-          'COALESCE(variationLocationOverrides.amount, variations.priceAmount)',
-          'variations_priceAmount',
+          'COALESCE(variationLocationOverrides.amount, variations.priceMoneyAmount)',
+          'variations_priceMoneyAmount',
         );
     }
 

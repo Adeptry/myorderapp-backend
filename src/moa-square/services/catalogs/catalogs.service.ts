@@ -293,8 +293,8 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
         if (itemPresentAtSquareLocationsIds.length > 0) {
           moaItem.presentAtLocations = moaLocations.filter((value) => {
             return (
-              value.locationSquareId &&
-              itemPresentAtSquareLocationsIds.includes(value.locationSquareId)
+              value.squareId &&
+              itemPresentAtSquareLocationsIds.includes(value.squareId)
             );
           });
         } else {
@@ -306,8 +306,8 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
         if (itemAbsentAtSquareLocationsIds.length > 0) {
           moaItem.absentAtLocations = moaLocations.filter((value) => {
             return (
-              value.locationSquareId &&
-              itemAbsentAtSquareLocationsIds.includes(value.locationSquareId)
+              value.squareId &&
+              itemAbsentAtSquareLocationsIds.includes(value.squareId)
             );
           });
         } else {

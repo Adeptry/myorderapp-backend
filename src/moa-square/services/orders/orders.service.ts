@@ -18,11 +18,10 @@ import {
   UpdateOrderRequest,
   UpdateOrderResponse,
 } from 'square';
-import { OrdersStatisticsResponse } from 'src/moa-square/dto/orders/order-statistics-reponse.dto.js';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
 import { I18nTranslations } from '../../../i18n/i18n.generated.js';
+import { OrdersStatisticsResponse } from '../../../moa-square/dto/orders/order-statistics-reponse.dto.js';
 import { MyOrderAppSquareConfig } from '../../../moa-square/moa-square.config.js';
-import { UsersService } from '../../../users/users.service.js';
 import { EntityRepositoryService } from '../../../utils/entity-repository-service.js';
 import { OrdersPostPaymentBody } from '../../dto/orders/payment-create.dto.js';
 import { OrdersVariationLineItemInput } from '../../dto/orders/variation-add.dto.js';
@@ -54,7 +53,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     private readonly squareService: NestSquareService,
     private readonly locationsService: LocationsService,
     private readonly merchantsService: MerchantsService,
-    private readonly usersService: UsersService,
     private readonly customersService: CustomersService,
     private readonly variationsService: VariationsService,
     private readonly modifiersService: ModifiersService,
@@ -70,21 +68,66 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     });
   }
 
-  async sums(
+  async statistics(
     where?: FindOptionsWhere<OrderEntity> | FindOptionsWhere<OrderEntity>[],
   ): Promise<OrdersStatisticsResponse> {
     return {
-      moneyAmountSum:
-        (await this.repository.sum('totalMoneyAmount', where)) ?? 0,
-      moneyTaxAmountSum:
-        (await this.repository.sum('totalMoneyTaxAmount', where)) ?? 0,
-      moneyTipAmountSum:
-        (await this.repository.sum('totalMoneyTipAmount', where)) ?? 0,
-      moneyServiceChargeAmountSum:
-        (await this.repository.sum('totalMoneyServiceChargeAmount', where)) ??
-        0,
-      moneyAppFeeAmountSum:
-        (await this.repository.sum('appFeeMoneyAmount', where)) ?? 0,
+      moneyAmount: {
+        sum: (await this.repository.sum('totalMoneyAmount', where)) ?? 0,
+        average:
+          (await this.repository.average('totalMoneyAmount', where)) ?? 0,
+        minimum:
+          (await this.repository.minimum('totalMoneyAmount', where)) ?? 0,
+        maximum:
+          (await this.repository.maximum('totalMoneyAmount', where)) ?? 0,
+      },
+      moneyTipAmount: {
+        sum: (await this.repository.sum('totalMoneyTipAmount', where)) ?? 0,
+        average:
+          (await this.repository.average('totalMoneyTipAmount', where)) ?? 0,
+        minimum:
+          (await this.repository.minimum('totalMoneyTipAmount', where)) ?? 0,
+        maximum:
+          (await this.repository.maximum('totalMoneyTipAmount', where)) ?? 0,
+      },
+      moneyAppFeeAmount: {
+        sum: (await this.repository.sum('appFeeMoneyAmount', where)) ?? 0,
+        average:
+          (await this.repository.average('appFeeMoneyAmount', where)) ?? 0,
+        minimum:
+          (await this.repository.minimum('appFeeMoneyAmount', where)) ?? 0,
+        maximum:
+          (await this.repository.maximum('appFeeMoneyAmount', where)) ?? 0,
+      },
+      moneyServiceChargeAmount: {
+        sum:
+          (await this.repository.sum('totalMoneyServiceChargeAmount', where)) ??
+          0,
+        average:
+          (await this.repository.average(
+            'totalMoneyServiceChargeAmount',
+            where,
+          )) ?? 0,
+        minimum:
+          (await this.repository.minimum(
+            'totalMoneyServiceChargeAmount',
+            where,
+          )) ?? 0,
+        maximum:
+          (await this.repository.maximum(
+            'totalMoneyServiceChargeAmount',
+            where,
+          )) ?? 0,
+      },
+      moneyTaxAmount: {
+        sum: (await this.repository.sum('totalMoneyTaxAmount', where)) ?? 0,
+        average:
+          (await this.repository.average('totalMoneyTaxAmount', where)) ?? 0,
+        minimum:
+          (await this.repository.minimum('totalMoneyTaxAmount', where)) ?? 0,
+        maximum:
+          (await this.repository.maximum('totalMoneyTaxAmount', where)) ?? 0,
+      },
     };
   }
 
@@ -121,7 +164,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         const moaMainLocation = await this.locationsService.findOne({
           where: {
-            locationSquareId,
+            squareId: locationSquareId,
             merchantId: merchant.id,
           },
         });
@@ -169,7 +212,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
               state: 'DRAFT',
               referenceId: moaOrder.id,
               customerId: customer.squareId,
-              locationId: location?.locationSquareId ?? 'main',
+              locationId: location?.squareId ?? 'main',
               lineItems: squareOrderLineItems,
             },
           }),
@@ -182,9 +225,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         );
       }
 
-      if (!location?.locationSquareId) {
+      if (!location?.squareId) {
         location = await this.locationsService.findOneOrFail({
-          where: { locationSquareId: squareOrder.locationId },
+          where: { squareId: squareOrder.locationId },
           relations: {
             address: true,
             businessHours: true,
@@ -248,7 +291,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     const location = await this.locationsService.findOneOrFail({
       where: { id: locationMoaId, merchantId: params.merchant.id },
     });
-    const locationSquareId = location.locationSquareId;
+    const locationSquareId = location.squareId;
     if (!locationSquareId) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
@@ -333,7 +376,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       },
     });
 
-    const locationSquareId = order.location?.locationSquareId;
+    const locationSquareId = order.location?.squareId;
 
     const orderSquareId = order.squareId;
     if (!orderSquareId) {
@@ -407,7 +450,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     const location = await this.locationsService.findOne({
       where: { id: order.locationId },
     });
-    const locationSquareId = location?.locationSquareId;
+    const locationSquareId = location?.squareId;
     if (!locationSquareId) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
@@ -481,9 +524,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const customer = await this.customersService.findOneOrFail({
       where: { id: customerId },
-      relations: {
-        user: true,
-      },
     });
 
     /* Order */
@@ -495,7 +535,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     if (!location) {
       throw new UnprocessableEntityException(translations.locationNoId);
     }
-    const { locationSquareId, id: locationMoaId } = location;
+    const { squareId: locationSquareId, id: locationMoaId } = location;
     if (!locationSquareId || !locationMoaId) {
       throw new UnprocessableEntityException(translations.locationNoSquareId);
     }
@@ -520,9 +560,21 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     /* Customer */
 
-    const { squareId: customerSquareId, id: customerMoaId } = customer;
-    if (!customerSquareId || !customerMoaId) {
+    const {
+      squareId: customerSquareId,
+      id: customerMoaId,
+      userId: customerUserId,
+    } = customer;
+    if (!customerSquareId || !customerMoaId || !customerUserId) {
       throw new UnprocessableEntityException(translations.customerNoSquareId);
+    }
+
+    if (recipient) {
+      await this.customersService.patchOne({
+        id: customerUserId,
+        merchantId: merchantId,
+        body: recipient,
+      });
     }
 
     const pickupOrAsapDate = pickupDateString
@@ -536,38 +588,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       pickupDate: pickupOrAsapDate,
       id: locationMoaId,
     });
-
-    // TODO: move this to users service and sync with square
-    const user = customer.user;
-    if (user != undefined) {
-      let saveUser = false;
-      if (user.firstName == undefined && recipient?.firstName != undefined) {
-        user.firstName = recipient.firstName;
-        saveUser = true;
-      }
-
-      if (user.lastName == undefined && recipient?.lastName != undefined) {
-        user.lastName = recipient.lastName;
-        saveUser = true;
-      }
-
-      if (
-        user.phoneNumber == undefined &&
-        recipient?.phoneNumber != undefined
-      ) {
-        user.phoneNumber = recipient.phoneNumber;
-        saveUser = true;
-      }
-
-      if (saveUser) {
-        await this.usersService.save(user);
-      }
-    }
-
-    let recipientDisplayName = user?.fullName;
-    if (recipient?.firstName && recipient?.lastName) {
-      recipientDisplayName = `${recipient.firstName} ${recipient.lastName}`;
-    }
 
     const existingOrderResponse = await this.squareService.retryOrThrow(
       merchantSquareAccessToken,
@@ -606,8 +626,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                     pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {
                       customerId: customerSquareId,
-                      displayName: recipientDisplayName ?? user?.fullName,
-                      phoneNumber: recipient?.phoneNumber ?? user?.phoneNumber,
                     },
                   },
                 },
@@ -767,7 +785,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     order.squareVersion =
       squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
 
-    order.currency = squareOrder?.totalMoney?.currency;
     order.totalMoneyAmount = Number(squareOrder?.totalMoney?.amount);
     order.totalMoneyTaxAmount = Number(squareOrder?.totalTaxMoney?.amount);
     order.totalMoneyDiscountAmount = Number(

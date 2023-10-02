@@ -210,12 +210,12 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
       if (!squareLocation?.id) continue;
 
       let moaLocation = locations.find(
-        (location) => location.locationSquareId === squareLocation.id,
+        (location) => location.squareId === squareLocation.id,
       );
 
       if (!moaLocation) {
         moaLocation = this.create({
-          locationSquareId: squareLocation.id,
+          squareId: squareLocation.id,
           merchantSquareId: squareLocation.merchantId,
           isMain: squareLocation.id === squareMainLocation?.id,
           merchantId,

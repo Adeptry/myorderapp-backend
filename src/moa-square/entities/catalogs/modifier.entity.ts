@@ -63,11 +63,7 @@ export class ModifierEntity extends BaseEntity {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
-  priceAmount?: number;
-
-  @ApiProperty({ type: String, required: false, nullable: true })
-  @Column({ type: String, nullable: true })
-  priceCurrency?: string | null;
+  priceMoneyAmount?: number;
 
   @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })

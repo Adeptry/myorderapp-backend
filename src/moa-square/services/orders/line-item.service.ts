@@ -32,8 +32,7 @@ export class LineItemService extends EntityRepositoryService<LineItemEntity> {
     lineItem.note = squareLineItem.note ?? undefined;
     // lineItem.variationId = squareLineItem.catalogObjectId ?? undefined;
     lineItem.variationName = squareLineItem.variationName ?? undefined;
-    lineItem.currency = squareLineItem.basePriceMoney?.currency ?? undefined;
-    lineItem.basePriceMoney = Number(
+    lineItem.basePriceMoneyAmount = Number(
       squareLineItem.basePriceMoney?.amount ?? 0,
     );
     lineItem.variationTotalMoneyAmount = Number(

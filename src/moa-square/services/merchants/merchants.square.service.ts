@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Inject,
   Injectable,
   InternalServerErrorException,
@@ -105,35 +104,53 @@ export class MerchantsSquareService {
     const merchant = await this.service.findOneOrFail({
       where: { id: params.merchantId },
     });
+    const {
+      id: merchantId,
+      squareAccessToken,
+      squareId: merchantSquareId,
+    } = merchant;
 
-    if (merchant?.id == null) {
+    if (merchantId == null || merchantSquareId == null) {
       throw new NotFoundException(translations.doesNotExist);
     }
 
-    const squareAccessToken = merchant.squareAccessToken;
     if (squareAccessToken == null) {
       throw new UnauthorizedException(translations.needSquareAuthorization);
     }
 
-    let catalog = await this.service.loadOneRelation<CatalogEntity>(
-      merchant,
-      'catalog',
-    );
-    if (catalog == null) {
-      catalog = this.catalogsService.createEmpty();
-      merchant.catalog = catalog;
-      await this.catalogsService.save(catalog);
-      await this.service.save(merchant);
+    const catalog: CatalogEntity =
+      (await this.service.loadOneRelation<CatalogEntity>(
+        merchant,
+        'catalog',
+      )) ??
+      (await this.catalogsService.save(
+        this.catalogsService.create({ merchantId }),
+      ));
+
+    const { id: catalogId } = catalog;
+    if (!catalogId) {
+      throw new NotFoundException(translations.doesNotExist);
     }
 
-    if (catalog.id == null) {
-      throw new BadRequestException(translations.needsCatalog);
-    }
+    const squareMerchant = (
+      await this.squareService.retryOrThrow(squareAccessToken, (client) => {
+        return client.merchantsApi.retrieveMerchant(merchantSquareId);
+      })
+    ).result.merchant;
+
+    merchant.squareBusinessName = squareMerchant?.businessName;
+    merchant.countryCode = squareMerchant?.country;
+    merchant.languageCode = squareMerchant?.languageCode;
+    merchant.currencyCode = squareMerchant?.currency;
+    merchant.squareStatus = squareMerchant?.status;
+    merchant.squareMainLocationId = squareMerchant?.mainLocationId;
+
+    await this.service.save(merchant);
 
     await this.catalogsService.squareSync({
       squareAccessToken,
-      catalogId: catalog.id,
-      merchantId: merchant.id,
+      catalogId,
+      merchantId,
     });
 
     return;

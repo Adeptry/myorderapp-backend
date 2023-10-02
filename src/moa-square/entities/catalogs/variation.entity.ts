@@ -73,11 +73,7 @@ export class VariationEntity extends BaseEntity {
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
-  priceAmount?: number;
-
-  @ApiProperty({ type: String, required: false, nullable: true })
-  @Column({ type: String, nullable: true })
-  priceCurrency?: string | null;
+  priceMoneyAmount?: number;
 
   /*
    * Relations

@@ -33,14 +33,11 @@ export abstract class RestfulEntityRepositoryService<
     });
   }
 
-  async patchOne(
+  async patch(
     where: FindOneOptions<Entity>,
-    params: {
-      patch: DeepPartial<Entity>;
-    },
+    patch: DeepPartial<Entity>,
   ): Promise<Entity | null> {
-    const { patch } = params;
-    this.logger.verbose(this.patchOne.name);
+    this.logger.verbose(this.patch.name);
     const result = await this.repository.findOne(where);
     await this.repository.save({ ...result, ...patch });
     return await this.repository.findOne(where);

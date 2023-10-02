@@ -75,10 +75,10 @@ export class UsersController {
     const { user } = request;
     const { id } = user;
     this.logger.verbose(this.patchMe.name);
-    return await this.service.patchOne(
+    return await this.service.patch(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       { where: { id: id! } },
-      { patch: body },
+      body,
     );
   }
 
