@@ -167,7 +167,7 @@ export class AppConfigController {
   async postMe(
     @Req() request: MerchantsGuardedRequest,
     @Body()
-    createAppConfigDto: AppConfigUpdateBody,
+    body: AppConfigUpdateBody,
   ) {
     this.logger.verbose(this.postMe.name);
     const translations = this.currentLanguageTranslations();
@@ -185,7 +185,7 @@ export class AppConfigController {
       return this.service.save(
         this.service.create({
           merchantId: merchant.id,
-          ...createAppConfigDto,
+          ...body,
         }),
       );
     } catch (error) {
