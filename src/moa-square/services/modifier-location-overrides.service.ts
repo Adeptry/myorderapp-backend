@@ -2,9 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { ModifierLocationOverrides } from 'square';
 import { Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { ModifierLocationOverrideEntity } from '../entities/catalogs/modifier-location-override.entity.js';
-import { LocationEntity } from '../entities/locations/location.entity.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { LocationEntity } from '../entities/location.entity.js';
+import { ModifierLocationOverrideEntity } from '../entities/modifier-location-override.entity.js';
 
 @Injectable()
 export class ModifierLocationOverridesService extends EntityRepositoryService<ModifierLocationOverrideEntity> {

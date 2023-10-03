@@ -18,7 +18,7 @@ import { SquareCatalogVersionUpdatedEventPayload } from '../dto/square/square-ca
 import { SquareLocationCreatedEventPayload } from '../dto/square/square-location-created-event-payload.entity.js';
 import { SquareLocationUpdatedEventPayload } from '../dto/square/square-location-updated-event-payload.entity.js';
 import { SquareOauthAuthorizationRevokedEventPayload } from '../dto/square/square-oauth-authorization-revoked.payload.js';
-import { CatalogEntity } from '../entities/catalogs/catalog.entity.js';
+import { CatalogEntity } from '../entities/catalog.entity.js';
 import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 import { CatalogsService } from './catalogs.service.js';
 import { LocationsService } from './locations.service.js';

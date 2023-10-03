@@ -19,13 +19,11 @@ import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { BusinessHoursPeriod } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import {
-  LocationPatchBody,
-  LocationsPatchBody,
-} from '../dto/locations/location-update.input.js';
-import { LocationEntity } from '../entities/locations/location.entity.js';
+import { LocationPatchBody } from '../dto/locations/location-patch-body.dto.js';
+import { LocationsPatchBody } from '../dto/locations/locations-patch-body.dto.js';
+import { LocationEntity } from '../entities/location.entity.js';
 import { BusinessHoursUtils } from '../utils/locations/business-hours-period.utils.js';
 import { AddressService } from './address.service.js';
 import { BusinessHoursPeriodsService } from './business-hours-period.service.js';

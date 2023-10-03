@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import {
   ItemPatchBody,
   ItemsPatchBody,
 } from '../dto/catalogs/item-patch.dto.js';
-import { ItemEntity } from '../entities/catalogs/item.entity.js';
+import { ItemEntity } from '../entities/item.entity.js';
 
 @Injectable()
 export class ItemsService extends EntityRepositoryService<ItemEntity> {

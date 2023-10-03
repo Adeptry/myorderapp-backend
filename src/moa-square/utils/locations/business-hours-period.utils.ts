@@ -1,6 +1,6 @@
 import { Logger, NotFoundException } from '@nestjs/common';
 import { addDays, addMinutes, setHours, setMinutes } from 'date-fns';
-import { BusinessHoursPeriodEntity } from '../../entities/locations/business-hours-period.entity';
+import { BusinessHoursPeriodEntity } from '../../entities/business-hours-period.entity';
 
 export class BusinessHoursUtils {
   private static readonly logger = new Logger(BusinessHoursUtils.name);

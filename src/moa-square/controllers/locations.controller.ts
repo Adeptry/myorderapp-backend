@@ -28,15 +28,13 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { paginatedResults } from '../../utils/paginated.js';
-import {
-  LocationPatchBody,
-  LocationsPatchBody,
-} from '../dto/locations/location-update.input.js';
-import { LocationPaginatedResponse } from '../dto/locations/locations-paginated.output.js';
-import { LocationEntity as MoaLocation } from '../entities/locations/location.entity.js';
+import { LocationPatchBody } from '../dto/locations/location-patch-body.dto.js';
+import { LocationPaginatedResponse } from '../dto/locations/locations-paginated-response.dto.js';
+import { LocationsPatchBody } from '../dto/locations/locations-patch-body.dto.js';
+import { LocationEntity as MoaLocation } from '../entities/location.entity.js';
 import type { UserTypeGuardedRequest } from '../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../guards/customer-merchant.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
@@ -80,7 +78,7 @@ export class LocationsController {
     businessHoursRelation?: boolean,
   ): Promise<LocationPaginatedResponse> {
     this.logger.verbose(this.getMany.name);
-    return paginatedResults({
+    return buildPaginatedResults({
       results: await this.service.findAndCountWithMerchantIdOrPath({
         where: { merchantIdOrPath, status: 'ACTIVE' },
         relations: {
@@ -121,7 +119,7 @@ export class LocationsController {
     businessHoursRelation?: boolean,
   ): Promise<LocationPaginatedResponse> {
     this.logger.verbose(this.getMe.name);
-    return paginatedResults({
+    return buildPaginatedResults({
       results: await this.service.findAndCount({
         where: { merchantId: request.merchant.id, status: 'ACTIVE' },
         relations: {

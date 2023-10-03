@@ -5,15 +5,15 @@ import {
   NestSquareService,
 } from 'nest-square';
 import { DataSource, Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { CatalogImageEntity } from '../entities/catalogs/catalog-image.entity.js';
-import { CatalogEntity } from '../entities/catalogs/catalog.entity.js';
-import { CategoryEntity } from '../entities/catalogs/category.entity.js';
-import { ItemModifierListEntity } from '../entities/catalogs/item-modifier-list.entity.js';
-import { ItemEntity } from '../entities/catalogs/item.entity.js';
-import { ModifierListEntity } from '../entities/catalogs/modifier-list.entity.js';
-import { ModifierEntity } from '../entities/catalogs/modifier.entity.js';
-import { VariationEntity } from '../entities/catalogs/variation.entity.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
+import { CatalogEntity } from '../entities/catalog.entity.js';
+import { CategoryEntity } from '../entities/category.entity.js';
+import { ItemModifierListEntity } from '../entities/item-modifier-list.entity.js';
+import { ItemEntity } from '../entities/item.entity.js';
+import { ModifierListEntity } from '../entities/modifier-list.entity.js';
+import { ModifierEntity } from '../entities/modifier.entity.js';
+import { VariationEntity } from '../entities/variation.entity.js';
 import { CatalogImagesService } from './catalog-images.service.js';
 import { CategoriesService } from './categories.service.js';
 import { ItemModifierListService } from './item-modifier-list.service.js';

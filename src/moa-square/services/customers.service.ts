@@ -8,10 +8,10 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { NestSquareService } from 'nest-square';
 import { FindOptionsRelations, Repository } from 'typeorm';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { UsersService } from '../../users/users.service.js';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
 import { CustomerPatchBody } from '../dto/customers/customer-patch-body.dto.js';
-import { CustomerEntity } from '../entities/customers/customer.entity.js';
+import { CustomerEntity } from '../entities/customer.entity.js';
 import { LocationsService } from './locations.service.js';
 import { MerchantsService } from './merchants.service.js';
 

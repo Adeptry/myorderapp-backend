@@ -28,7 +28,7 @@ import {
 import type { Response } from 'express';
 import { UserEntity } from '../users/entities/user.entity.js';
 import { ErrorResponse } from '../utils/error-response.js';
-import { NullableType } from '../utils/types/nullable.type.js';
+import { NullableType } from '../utils/nullable.type.js';
 import { ApiKeyAuthGuard } from './apikey-auth.guard.js';
 import { AuthenticationService } from './authentication.service.js';
 import { AuthenticationEmailConfirmRequestBody } from './dto/authentication-email-confirm.dto.js';

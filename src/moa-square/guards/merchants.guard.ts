@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { AuthenticationService } from '../../authentication/authentication.service.js';
 import { UserEntity } from '../../users/entities/user.entity.js';
-import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
+import { MerchantEntity } from '../entities/merchant.entity.js';
 import { MerchantsService } from '../services/merchants.service.js';
 
 export interface MerchantsGuardedRequest extends Request {

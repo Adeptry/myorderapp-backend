@@ -15,8 +15,8 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { LocationEntity } from '../locations/location.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
+import { LocationEntity } from './location.entity.js';
 import { ModifierEntity } from './modifier.entity.js';
 
 @Entity('modifier_location_override')

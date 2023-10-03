@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { IsEmail, IsOptional, Validate } from 'class-validator';
-import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
-import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
+import { IsNotExist } from '../../utils/is-not-exists.validator.js';
+import { lowerCaseTransformer } from '../../utils/lower-case.transformer.js';
 
 export class UserPatchBody {
   @ApiProperty({

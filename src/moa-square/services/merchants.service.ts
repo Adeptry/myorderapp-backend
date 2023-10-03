@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { FindOptionsRelations, Repository } from 'typeorm';
-import { RestfulEntityRepositoryService } from '../../utils/restful-entity-repository-service.js';
-import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
+import { RestfulEntityRepositoryService } from '../../database/restful-entity-repository-service.js';
+import { MerchantEntity } from '../entities/merchant.entity.js';
 
 @Injectable()
 export class MerchantsService extends RestfulEntityRepositoryService<MerchantEntity> {

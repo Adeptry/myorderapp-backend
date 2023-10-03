@@ -2,13 +2,13 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { paginatedResults } from '../../utils/paginated.js';
+import { buildPaginatedResults } from '../../database/build-paginated-results.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import {
   CategoriesPatchBody,
   CategoryPatchBody,
 } from '../dto/catalogs/category-patch.dto.js';
-import { CategoryEntity } from '../entities/catalogs/category.entity.js';
+import { CategoryEntity } from '../entities/category.entity.js';
 import { CatalogSortService } from './catalog-sort.service.js';
 import { ItemsService } from './items.service.js';
 
@@ -82,7 +82,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
       );
     }
 
-    return paginatedResults({
+    return buildPaginatedResults({
       results,
       pagination: {
         page: page ?? 0,

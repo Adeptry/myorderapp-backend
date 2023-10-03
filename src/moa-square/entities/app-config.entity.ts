@@ -16,7 +16,7 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MerchantEntity } from '../merchants/merchant.entity.js';
+import { MerchantEntity } from './merchant.entity.js';
 import { ThemeModeEnum } from './theme-mode.enum.js';
 
 @Entity('app_config')
@@ -61,7 +61,7 @@ export class AppConfigEntity extends BaseEntity {
     required: false,
     nullable: true,
   })
-  @Column({ nullable: true, default: false })
+  @Column({ nullable: true, default: true })
   enabled?: boolean;
 
   @BeforeUpdate()

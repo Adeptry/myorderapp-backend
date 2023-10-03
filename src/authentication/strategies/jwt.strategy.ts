@@ -10,7 +10,7 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { SessionService } from '../../session/session.service.js';
-import { OrNeverType } from '../../utils/types/or-never.type.js';
+import { OrNeverType } from '../../utils/or-never.type.js';
 import { AuthenticationConfig } from '../authentication.config.js';
 import { JwtPayloadType } from './types/jwt-payload.type.js';
 

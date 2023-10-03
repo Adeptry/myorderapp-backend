@@ -18,18 +18,16 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { LocationEntity } from '../locations/location.entity.js';
+import { MoaSelectionType } from '../dto/catalogs/catalogs.types.js';
 import { CatalogImageEntity } from './catalog-image.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
-import { CategoryEntity } from './category.entity.js';
 import { ItemModifierListEntity } from './item-modifier-list.entity.js';
-import { VariationEntity } from './variation.entity.js';
+import { LocationEntity } from './location.entity.js';
+import { ModifierEntity } from './modifier.entity.js';
 
-@Entity('item')
-export class ItemEntity extends BaseEntity {
-  /*
-   * Base entity
-   */
+@Entity('modifier_list')
+export class ModifierListEntity extends BaseEntity {
+  /* Base entity */
 
   @ApiProperty({ required: false, nullable: true })
   @PrimaryColumn('varchar')
@@ -56,22 +54,7 @@ export class ItemEntity extends BaseEntity {
   @VersionColumn({ nullable: true })
   version?: number;
 
-  /*
-   * Moa
-   */
-
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true, default: 0 })
-  moaOrdinal?: number;
-
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true, default: true })
-  moaEnabled?: boolean;
-
-  /*
-   * Square
-   */
-
+  /* Square */
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: false }) // TODO unique: true
   squareId?: string;
@@ -80,85 +63,30 @@ export class ItemEntity extends BaseEntity {
   @Column({ type: String, nullable: true })
   name?: string | null;
 
-  @ApiProperty({ type: String, required: false, nullable: true })
-  @Column({ type: String, nullable: true })
-  description?: string | null;
+  @ApiProperty({ type: Number, required: false, nullable: true })
+  @Column({ type: Number, nullable: true })
+  ordinal?: number | null;
 
-  @OneToMany(() => CatalogImageEntity, (entity) => entity.item, {
-    nullable: true,
-  })
   @ApiProperty({
-    type: () => CatalogImageEntity,
-    isArray: true,
     required: false,
+    nullable: true,
+    enum: Object.values(MoaSelectionType),
+    enumName: 'MoaSelectionType',
+    default: MoaSelectionType.SINGLE,
+  })
+  @Column({ type: 'simple-enum', nullable: true, enum: MoaSelectionType })
+  selectionType?: MoaSelectionType;
+
+  @OneToMany(() => CatalogImageEntity, (entity) => entity.modifierList, {
     nullable: true,
   })
   images?: CatalogImageEntity[];
 
   /*
-   * Category
+   * Relations
    */
 
-  @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true })
-  categoryId?: string;
-
-  @ManyToOne(() => CategoryEntity, (entity) => entity.items, {
-    onDelete: 'CASCADE',
-    nullable: false,
-  })
-  @JoinColumn()
-  category?: Relation<CategoryEntity>;
-
-  /*
-   * Modifier lists
-   */
-
-  @ApiProperty({
-    type: () => ItemModifierListEntity,
-    isArray: true,
-    required: false,
-    nullable: true,
-  })
-  @OneToMany(
-    () => ItemModifierListEntity,
-    (itemModifierList) => itemModifierList.item,
-  )
-  itemModifierLists?: ItemModifierListEntity[];
-
-  /*
-   * Variations
-   */
-
-  @ApiProperty({
-    type: () => VariationEntity,
-    isArray: true,
-    required: false,
-    nullable: true,
-  })
-  @OneToMany(() => VariationEntity, (entity) => entity.item, {
-    nullable: true,
-  })
-  variations?: VariationEntity[];
-
-  /*
-   * Catalog
-   */
-
-  @Exclude({ toPlainOnly: true })
-  @Column({ nullable: false })
-  catalogId?: string;
-
-  @ManyToOne(() => CatalogEntity, (entity) => entity.items, {
-    nullable: false,
-    onDelete: 'CASCADE',
-  })
-  @JoinColumn()
-  catalog?: Relation<CatalogEntity>;
-
-  /*
-   *  Locations
-   */
+  // Presence
 
   @Column({ default: true, nullable: true, type: Boolean })
   @Exclude({ toPlainOnly: true })
@@ -166,9 +94,9 @@ export class ItemEntity extends BaseEntity {
 
   @ManyToMany(() => LocationEntity)
   @JoinTable({
-    name: 'items_present_at_locations',
+    name: 'modifier_lists_present_at_locations',
     joinColumn: {
-      name: 'itemId',
+      name: 'modifierListId',
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
@@ -181,9 +109,9 @@ export class ItemEntity extends BaseEntity {
 
   @ManyToMany(() => LocationEntity)
   @JoinTable({
-    name: 'items_absent_at_locations',
+    name: 'modifier_lists_absent_at_locations',
     joinColumn: {
-      name: 'itemId',
+      name: 'modifierListId',
       referencedColumnName: 'id',
     },
     inverseJoinColumn: {
@@ -193,4 +121,39 @@ export class ItemEntity extends BaseEntity {
   })
   @Exclude({ toPlainOnly: true })
   absentAtLocations?: LocationEntity[];
+
+  // Items
+
+  @OneToMany(
+    () => ItemModifierListEntity,
+    (itemModifierList) => itemModifierList.modifierList,
+  )
+  itemModifierLists?: ItemModifierListEntity[];
+
+  // Modifiers
+
+  @ApiProperty({
+    type: () => ModifierEntity,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
+  @OneToMany(() => ModifierEntity, (entity) => entity.modifierList, {
+    nullable: true,
+    eager: true,
+  })
+  modifiers?: ModifierEntity[];
+
+  // Catalog
+
+  @Exclude({ toPlainOnly: true })
+  @Column({ nullable: false })
+  catalogId?: string;
+
+  @ManyToOne(() => CatalogEntity, (entity) => entity.modifierLists, {
+    nullable: false,
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  catalog?: Relation<CatalogEntity>;
 }

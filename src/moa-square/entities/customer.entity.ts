@@ -17,12 +17,12 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { UserEntity } from '../../../users/entities/user.entity.js';
-import { SquareCard } from '../../dto/square/square.dto.js';
-import { LocationEntity } from '../locations/location.entity.js';
-import { MerchantEntity } from '../merchants/merchant.entity.js';
-import { OrderEntity } from '../orders/order.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
+import { SquareCard } from '../dto/square/square.dto.js';
 import { AppInstall } from './app-install.entity.js';
+import { LocationEntity } from './location.entity.js';
+import { MerchantEntity } from './merchant.entity.js';
+import { OrderEntity } from './order.entity.js';
 
 @Entity('customer')
 export class CustomerEntity extends BaseEntity {

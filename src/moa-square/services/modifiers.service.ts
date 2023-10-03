@@ -2,9 +2,9 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { ModifierEntity } from '../entities/catalogs/modifier.entity.js';
-import { LocationEntity } from '../entities/locations/location.entity.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { LocationEntity } from '../entities/location.entity.js';
+import { ModifierEntity } from '../entities/modifier.entity.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 

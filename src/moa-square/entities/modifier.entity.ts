@@ -18,8 +18,8 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { LocationEntity } from '../locations/location.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
+import { LocationEntity } from './location.entity.js';
 import { ModifierListEntity } from './modifier-list.entity.js';
 import { ModifierLocationOverrideEntity } from './modifier-location-override.entity.js';
 

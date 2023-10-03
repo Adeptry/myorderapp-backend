@@ -25,7 +25,7 @@ import {
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { VariationPatchBody } from '../dto/catalogs/variation-patch.dto.js';
-import { VariationEntity } from '../entities/catalogs/variation.entity.js';
+import { VariationEntity } from '../entities/variation.entity.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { VariationsService } from '../services/variations.service.js';
 

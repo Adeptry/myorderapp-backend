@@ -40,22 +40,20 @@ import {
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { Between, IsNull, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { buildPaginatedResults } from '../../database/build-paginated-results.js';
+import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { paginatedResults } from '../../utils/paginated.js';
-import { ParseISODatePipe } from '../../utils/parse-iso-date-pipe.js';
-import { OrderSortEnum } from '../dto/orders-sort.enum.js';
+import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
 import { OrderPatchBody } from '../dto/orders/order-patch.dto.js';
-import {
-  OrderPostBody,
-  OrderPostCurrentBody,
-} from '../dto/orders/order-post.dto.js';
-import { OrdersStatisticsResponse } from '../dto/orders/order-statistics-reponse.dto.js';
+import { OrderPostBody } from '../dto/orders/order-post.dto.js';
 import { OrdersOrderFieldEnum } from '../dto/orders/orders-order-field.enum.js';
-import { OrdersPaginatedReponse } from '../dto/orders/orders-paginated.dto.js';
+import { OrdersPaginatedResponse } from '../dto/orders/orders-paginated-response.dto.js';
+import { OrderPostCurrentBody } from '../dto/orders/orders-post-current-body.dto.js';
+import { OrdersStatisticsResponse } from '../dto/orders/orders-statistics-reponse.dto.js';
 import { OrdersPostPaymentBody } from '../dto/orders/payment-create.dto.js';
-import { OrderEntity } from '../entities/orders/order.entity.js';
+import { OrderEntity } from '../entities/order.entity.js';
 import type { UserTypeGuardedRequest } from '../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../guards/customer-merchant.guard.js';
 import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
@@ -240,7 +238,7 @@ export class OrdersController {
     summary: 'Get my Orders',
     operationId: 'getOrders',
   })
-  @ApiOkResponse({ type: OrdersPaginatedReponse })
+  @ApiOkResponse({ type: OrdersPaginatedResponse })
   @ApiQuery({ name: 'page', required: false, type: Number })
   @ApiQuery({ name: 'limit', required: false, type: Number })
   @ApiQuery({ name: 'merchantIdOrPath', required: false, type: String })
@@ -250,10 +248,10 @@ export class OrdersController {
   @ApiQuery({ name: 'location', required: false, type: Boolean })
   @ApiQuery({ name: 'customer', required: false, type: Boolean })
   @ApiQuery({ name: 'orderField', required: false, enum: OrdersOrderFieldEnum })
-  @ApiQuery({ name: 'orderSort', required: false, enum: OrderSortEnum })
+  @ApiQuery({ name: 'orderSort', required: false, enum: SortOrderEnum })
   @ApiQuery({ name: 'startDate', required: false, type: String })
   @ApiQuery({ name: 'endDate', required: false, type: String })
-  async getMany(
+  async getMe(
     @Req() request: UserTypeGuardedRequest,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
@@ -273,19 +271,19 @@ export class OrdersController {
     @Query(
       'orderSort',
       new DefaultValuePipe('DESC'),
-      new ParseEnumPipe(OrderSortEnum),
+      new ParseEnumPipe(SortOrderEnum),
     )
-    orderSort?: OrderSortEnum,
+    orderSort?: SortOrderEnum,
     @Query('startDate', ParseISODatePipe)
     startDate?: Date,
     @Query('endDate', ParseISODatePipe)
     endDate?: Date,
   ) {
     this.logger.verbose(
-      `${this.getMany.name} merchantId:${request.merchant?.id} customerId: ${request.customer?.id}`,
+      `${this.getMe.name} merchantId:${request.merchant?.id} customerId: ${request.customer?.id}`,
     );
 
-    return paginatedResults({
+    return buildPaginatedResults({
       results: await this.service.findAndCount({
         where: {
           customerId: request.customer?.id,
@@ -335,7 +333,7 @@ export class OrdersController {
   @ApiQuery({ name: 'actingAs', required: false, enum: UserTypeEnum })
   @ApiQuery({ name: 'lineItems', required: false, type: Boolean })
   @ApiQuery({ name: 'location', required: false, type: Boolean })
-  async getOne(
+  async getId(
     @Req() request: UserTypeGuardedRequest,
     @Param('id') id: string,
     @Query('lineItems', new DefaultValuePipe(false), ParseBoolPipe)
@@ -343,7 +341,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    this.logger.verbose(`${this.getOne.name} id:${id}`);
+    this.logger.verbose(`${this.getId.name} id:${id}`);
     const { merchant, customer } = { ...request };
     return await this.service.findOne({
       where: {

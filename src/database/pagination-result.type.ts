@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class InfinityPaginationResultType<T> {
+export class PaginationResultType<T> {
   @ApiProperty()
   data!: T[];
   @ApiProperty()

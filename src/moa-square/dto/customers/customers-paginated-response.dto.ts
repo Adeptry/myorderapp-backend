@@ -1,8 +1,8 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { InfinityPaginationResultType } from '../../../utils/types/infinity-pagination-result.type.js';
-import { CustomerEntity } from '../../entities/customers/customer.entity.js';
+import { PaginationResultType } from '../../../database/pagination-result.type.js';
+import { CustomerEntity } from '../../entities/customer.entity.js';
 
-export class CustomersPaginatedResponse extends InfinityPaginationResultType<CustomerEntity> {
+export class CustomersPaginatedResponse extends PaginationResultType<CustomerEntity> {
   @ApiProperty({
     type: () => CustomerEntity,
     isArray: true,

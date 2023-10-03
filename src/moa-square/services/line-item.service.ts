@@ -2,8 +2,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { OrderLineItem } from 'square';
 import { Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { LineItemEntity } from '../entities/orders/line-item.entity.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { LineItemEntity } from '../entities/line-item.entity.js';
 import { LineItemModifierService } from './line-item-modifier.service.js';
 
 @Injectable()

@@ -1,13 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PaginationResultType } from '../../../database/pagination-result.type.js';
-import { CategoryEntity } from '../../entities/category.entity.js';
+import { LocationEntity } from '../../entities/location.entity.js';
 
-export class CategoryPaginatedResponse extends PaginationResultType<CategoryEntity> {
+export class LocationPaginatedResponse extends PaginationResultType<LocationEntity> {
   @ApiProperty({
-    type: () => CategoryEntity,
+    type: () => LocationEntity,
     isArray: true,
     required: false,
     nullable: true,
   })
-  data!: CategoryEntity[];
+  data!: LocationEntity[];
 }

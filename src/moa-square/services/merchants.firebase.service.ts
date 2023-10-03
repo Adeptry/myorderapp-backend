@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 
 import firebaseAdminPkg from 'firebase-admin';
 import { FirebaseAdminService } from '../../firebase-admin/firebase-admin.service.js';
-import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
+import { MerchantEntity } from '../entities/merchant.entity.js';
 import { MerchantsService } from './merchants.service.js';
 
 const { credential } = firebaseAdminPkg;

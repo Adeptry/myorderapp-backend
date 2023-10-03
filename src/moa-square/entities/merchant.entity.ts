@@ -16,11 +16,11 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { UserEntity } from '../../../users/entities/user.entity.js';
-import { AppConfigEntity } from '../app-config/app-config.entity.js';
-import { CatalogEntity } from '../catalogs/catalog.entity.js';
-import { CustomerEntity } from '../customers/customer.entity.js';
-import { LocationEntity } from '../locations/location.entity.js';
+import { UserEntity } from '../../users/entities/user.entity.js';
+import { AppConfigEntity } from './app-config.entity.js';
+import { CatalogEntity } from './catalog.entity.js';
+import { CustomerEntity } from './customer.entity.js';
+import { LocationEntity } from './location.entity.js';
 
 @Entity('merchant')
 export class MerchantEntity extends BaseEntity {

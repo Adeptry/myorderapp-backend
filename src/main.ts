@@ -22,7 +22,7 @@ import { HealthModule } from './health/health.module.js';
 import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
 import { UsersModule } from './users/users.module.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
-import { GlobalExceptionsFilter } from './utils/global-exceptions-filter.js';
+import { GlobalExceptionsFilter } from './utils/global-exceptions.filter.js';
 
 async function bootstrap() {
   Sentry.init({
@@ -59,7 +59,6 @@ async function bootstrap() {
   app.enableVersioning({
     type: VersioningType.URI,
   });
-  // app.useGlobalPipes(new ValidationPipe(validationOptions));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new BigIntInterceptor());
   // app.useGlobalPipes(new I18nValidationPipe());

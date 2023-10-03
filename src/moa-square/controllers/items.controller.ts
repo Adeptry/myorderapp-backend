@@ -35,16 +35,16 @@ import {
 import { nanoid } from 'nanoid';
 import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { paginatedResults } from '../../utils/paginated.js';
 import {
   ItemPatchBody,
   ItemsPatchBody,
 } from '../dto/catalogs/item-patch.dto.js';
 import { ItemPaginatedResponse } from '../dto/catalogs/items-paginated.output.js';
-import { CatalogImageEntity } from '../entities/catalogs/catalog-image.entity.js';
-import { ItemEntity } from '../entities/catalogs/item.entity.js';
+import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
+import { ItemEntity } from '../entities/item.entity.js';
 import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { CatalogImagesService } from '../services/catalog-images.service.js';
@@ -132,7 +132,7 @@ export class ItemsController {
       })
       .getManyAndCount();
 
-    return paginatedResults({
+    return buildPaginatedResults({
       results: [this.catalogSortService.sortItems(results[0]), results[1]],
       pagination: { page: parsedPage ?? 0, limit: parsedLimit ?? 0 },
     });

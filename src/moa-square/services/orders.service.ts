@@ -19,18 +19,18 @@ import {
   UpdateOrderResponse,
 } from 'square';
 import { FindOptionsWhere, In, Repository } from 'typeorm';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { OrdersStatisticsResponse } from '../dto/orders/order-statistics-reponse.dto.js';
+import { OrdersStatisticsResponse } from '../dto/orders/orders-statistics-reponse.dto.js';
 import { OrdersPostPaymentBody } from '../dto/orders/payment-create.dto.js';
 import { OrdersVariationLineItemInput } from '../dto/orders/variation-add.dto.js';
 import {
   SquareOrderFulfillmentUpdatedPayload,
   isValidFulfillmentStatus,
 } from '../dto/square/square-order-fulfillment-updated.payload.js';
-import { CustomerEntity } from '../entities/customers/customer.entity.js';
-import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
-import { OrderEntity } from '../entities/orders/order.entity.js';
+import { CustomerEntity } from '../entities/customer.entity.js';
+import { MerchantEntity } from '../entities/merchant.entity.js';
+import { OrderEntity } from '../entities/order.entity.js';
 import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 import { CustomersService } from './customers.service.js';
 import { LineItemService } from './line-item.service.js';
@@ -72,6 +72,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     where?: FindOptionsWhere<OrderEntity> | FindOptionsWhere<OrderEntity>[],
   ): Promise<OrdersStatisticsResponse> {
     return {
+      count: (await this.repository.count({ where })) ?? 0,
       moneyAmount: {
         sum: (await this.repository.sum('totalMoneyAmount', where)) ?? 0,
         average:

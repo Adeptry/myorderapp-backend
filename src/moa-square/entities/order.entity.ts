@@ -16,11 +16,11 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { FulfillmentStatusEnum } from '../../dto/square/square-order-fulfillment-updated.payload.js';
-import { CustomerEntity } from '../customers/customer.entity.js';
-import { LocationEntity } from '../locations/location.entity.js';
-import { MerchantEntity } from '../merchants/merchant.entity.js';
+import { FulfillmentStatusEnum } from '../dto/square/square-order-fulfillment-updated.payload.js';
+import { CustomerEntity } from './customer.entity.js';
 import { LineItemEntity } from './line-item.entity.js';
+import { LocationEntity } from './location.entity.js';
+import { MerchantEntity } from './merchant.entity.js';
 
 @Entity('order')
 export class OrderEntity extends BaseEntity {

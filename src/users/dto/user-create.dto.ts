@@ -7,9 +7,9 @@ import {
   MinLength,
   Validate,
 } from 'class-validator';
-import { lowerCaseTransformer } from '../../utils/transformers/lower-case.transformer.js';
-import { IsExist } from '../../utils/validators/is-exists.validator.js';
-import { IsNotExist } from '../../utils/validators/is-not-exists.validator.js';
+import { IsExist } from '../../utils/is-exists.validator.js';
+import { IsNotExist } from '../../utils/is-not-exists.validator.js';
+import { lowerCaseTransformer } from '../../utils/lower-case.transformer.js';
 import { RoleEntity } from '../entities/role.entity.js';
 import { StatusEntity } from '../entities/status.entity.js';
 

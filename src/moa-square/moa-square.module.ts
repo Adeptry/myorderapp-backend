@@ -13,28 +13,28 @@ import { LocationsController } from './controllers/locations.controller.js';
 import { MerchantsController } from './controllers/merchants.controller.js';
 import { OrdersController } from './controllers/orders.controller.js';
 import { SquareWebhookController } from './controllers/square-webhook.controller.js';
-import { StripeWebhookController } from './controllers/stripe.webhooks.controller.js';
+import { StripeWebhookController } from './controllers/stripe-webhoook.controller.js';
 import { VariationsController } from './controllers/variations.controller.js';
-import { AppConfigEntity } from './entities/app-config/app-config.entity.js';
-import { CatalogImageEntity } from './entities/catalogs/catalog-image.entity.js';
-import { CatalogEntity } from './entities/catalogs/catalog.entity.js';
-import { CategoryEntity } from './entities/catalogs/category.entity.js';
-import { ItemModifierListEntity } from './entities/catalogs/item-modifier-list.entity.js';
-import { ItemEntity } from './entities/catalogs/item.entity.js';
-import { ModifierListEntity } from './entities/catalogs/modifier-list.entity.js';
-import { ModifierLocationOverrideEntity } from './entities/catalogs/modifier-location-override.entity.js';
-import { ModifierEntity } from './entities/catalogs/modifier.entity.js';
-import { VariationLocationOverride } from './entities/catalogs/variation-location-override.entity.js';
-import { VariationEntity } from './entities/catalogs/variation.entity.js';
-import { AppInstall } from './entities/customers/app-install.entity.js';
-import { CustomerEntity } from './entities/customers/customer.entity.js';
-import { AddressEntity } from './entities/locations/address.entity.js';
-import { BusinessHoursPeriodEntity } from './entities/locations/business-hours-period.entity.js';
-import { LocationEntity } from './entities/locations/location.entity.js';
-import { MerchantEntity } from './entities/merchants/merchant.entity.js';
-import { LineItemModifierEntity } from './entities/orders/line-item-modifier.entity.js';
-import { LineItemEntity } from './entities/orders/line-item.entity.js';
-import { OrderEntity } from './entities/orders/order.entity.js';
+import { AddressEntity } from './entities/address.entity.js';
+import { AppConfigEntity } from './entities/app-config.entity.js';
+import { AppInstall } from './entities/app-install.entity.js';
+import { BusinessHoursPeriodEntity } from './entities/business-hours-period.entity.js';
+import { CatalogImageEntity } from './entities/catalog-image.entity.js';
+import { CatalogEntity } from './entities/catalog.entity.js';
+import { CategoryEntity } from './entities/category.entity.js';
+import { CustomerEntity } from './entities/customer.entity.js';
+import { ItemModifierListEntity } from './entities/item-modifier-list.entity.js';
+import { ItemEntity } from './entities/item.entity.js';
+import { LineItemModifierEntity } from './entities/line-item-modifier.entity.js';
+import { LineItemEntity } from './entities/line-item.entity.js';
+import { LocationEntity } from './entities/location.entity.js';
+import { MerchantEntity } from './entities/merchant.entity.js';
+import { ModifierListEntity } from './entities/modifier-list.entity.js';
+import { ModifierLocationOverrideEntity } from './entities/modifier-location-override.entity.js';
+import { ModifierEntity } from './entities/modifier.entity.js';
+import { OrderEntity } from './entities/order.entity.js';
+import { VariationLocationOverride } from './entities/variation-location-override.entity.js';
+import { VariationEntity } from './entities/variation.entity.js';
 import { CustomerMerchantGuard } from './guards/customer-merchant.guard.js';
 import { CustomersGuard } from './guards/customers.guard.js';
 import { MerchantsGuard } from './guards/merchants.guard.js';
@@ -66,9 +66,10 @@ import { VariationsService } from './services/variations.service.js';
 
 @Module({
   imports: [
-    ConfigModule.forFeature(MyOrderAppSquareConfig),
     AuthenticationModule,
     UsersModule,
+    MailModule,
+    ConfigModule.forFeature(MyOrderAppSquareConfig),
     TypeOrmModule.forFeature([
       ItemEntity,
       CategoryEntity,
@@ -91,7 +92,6 @@ import { VariationsService } from './services/variations.service.js';
       LineItemEntity,
       LineItemModifierEntity,
     ]),
-    MailModule,
   ],
   exports: [MerchantsSquareService],
   providers: [

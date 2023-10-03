@@ -1,7 +1,7 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { RestfulEntityRepositoryService } from '../utils/restful-entity-repository-service.js';
+import { RestfulEntityRepositoryService } from '../database/restful-entity-repository-service.js';
 import { UserEntity } from './entities/user.entity.js';
 import { RoleEnum } from './roles.enum.js';
 

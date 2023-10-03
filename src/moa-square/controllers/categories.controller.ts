@@ -36,7 +36,7 @@ import {
   CategoriesPatchBody,
   CategoryPatchBody,
 } from '../dto/catalogs/category-patch.dto.js';
-import { CategoryEntity } from '../entities/catalogs/category.entity.js';
+import { CategoryEntity } from '../entities/category.entity.js';
 import type { UserTypeGuardedRequest } from '../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../guards/customer-merchant.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';

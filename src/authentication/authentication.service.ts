@@ -27,7 +27,7 @@ import { UserEntity } from '../users/entities/user.entity.js';
 import { RoleEnum } from '../users/roles.enum.js';
 import { StatusEnum } from '../users/statuses.enum.js';
 import { UsersService } from '../users/users.service.js';
-import { NullableType } from '../utils/types/nullable.type.js';
+import { NullableType } from '../utils/nullable.type.js';
 import { AuthenticationsProvidersEnum } from './authentication-providers.enum.js';
 import { AuthenticationConfig } from './authentication.config.js';
 import { AuthenticationEmailRegisterRequestBody } from './dto/authentication-email-register.dto.js';

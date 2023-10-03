@@ -37,16 +37,16 @@ import { Between } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
+import { buildPaginatedResults } from '../../database/build-paginated-results.js';
+import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { paginatedResults } from '../../utils/paginated.js';
-import { ParseISODatePipe } from '../../utils/parse-iso-date-pipe.js';
+import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
 import { AppInstallPostBody } from '../dto/customers/app-install-update.dto.js';
 import { CustomerPatchBody } from '../dto/customers/customer-patch-body.dto.js';
 import { CustomersFieldEnum } from '../dto/customers/customers-field.js';
 import { CustomersPaginatedResponse } from '../dto/customers/customers-paginated-response.dto.js';
-import { OrderSortEnum } from '../dto/orders-sort.enum.js';
 import { SquareCard } from '../dto/square/square.dto.js';
-import { CustomerEntity } from '../entities/customers/customer.entity.js';
+import { CustomerEntity } from '../entities/customer.entity.js';
 import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
@@ -70,7 +70,6 @@ export class CustomersController {
   constructor(
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,
-
     private readonly squareService: NestSquareService,
   ) {
     this.logger.verbose(this.constructor.name);
@@ -305,7 +304,7 @@ export class CustomersController {
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
   @ApiQuery({ name: 'orderField', required: false, enum: CustomersFieldEnum })
-  @ApiQuery({ name: 'orderSort', required: false, enum: OrderSortEnum })
+  @ApiQuery({ name: 'orderSort', required: false, enum: SortOrderEnum })
   @ApiQuery({ name: 'startDate', required: false, type: String })
   @ApiQuery({ name: 'endDate', required: false, type: String })
   async getMany(
@@ -329,16 +328,16 @@ export class CustomersController {
     @Query(
       'orderSort',
       new DefaultValuePipe('DESC'),
-      new ParseEnumPipe(OrderSortEnum),
+      new ParseEnumPipe(SortOrderEnum),
     )
-    orderSort?: OrderSortEnum,
+    orderSort?: SortOrderEnum,
     @Query('startDate', ParseISODatePipe)
     startDate?: Date,
     @Query('endDate', ParseISODatePipe)
     endDate?: Date,
   ): Promise<CustomersPaginatedResponse> {
     this.logger.verbose(this.getMany.name);
-    return paginatedResults({
+    return buildPaginatedResults({
       results: await this.service.findAndCount({
         where: {
           merchantId: request.merchant.id,

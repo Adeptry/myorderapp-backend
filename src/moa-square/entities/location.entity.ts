@@ -17,12 +17,12 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { ModifierLocationOverrideEntity } from '../catalogs/modifier-location-override.entity.js';
-import { VariationLocationOverride } from '../catalogs/variation-location-override.entity.js';
-import { CustomerEntity } from '../customers/customer.entity.js';
-import { MerchantEntity } from '../merchants/merchant.entity.js';
 import { AddressEntity } from './address.entity.js';
 import { BusinessHoursPeriodEntity } from './business-hours-period.entity.js';
+import { CustomerEntity } from './customer.entity.js';
+import { MerchantEntity } from './merchant.entity.js';
+import { ModifierLocationOverrideEntity } from './modifier-location-override.entity.js';
+import { VariationLocationOverride } from './variation-location-override.entity.js';
 
 @Entity('location')
 export class LocationEntity extends BaseEntity {

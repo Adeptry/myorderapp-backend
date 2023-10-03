@@ -16,9 +16,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
-import { MerchantEntity } from '../merchants/merchant.entity.js';
 import { CategoryEntity } from './category.entity.js';
 import { ItemEntity } from './item.entity.js';
+import { MerchantEntity } from './merchant.entity.js';
 import { ModifierListEntity } from './modifier-list.entity.js';
 import { ModifierEntity } from './modifier.entity.js';
 import { VariationEntity } from './variation.entity.js';

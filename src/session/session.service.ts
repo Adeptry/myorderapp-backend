@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
+import { RestfulEntityRepositoryService } from '../database/restful-entity-repository-service.js';
 import { UserEntity } from '../users/entities/user.entity.js';
-import { RestfulEntityRepositoryService } from '../utils/restful-entity-repository-service.js';
 import { Session } from './entities/session.entity.js';
 
 @Injectable()

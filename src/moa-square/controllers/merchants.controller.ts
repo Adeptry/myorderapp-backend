@@ -40,7 +40,7 @@ import { StripePostCheckoutBody } from '../dto/merchants/square-post-checkout-bo
 import { SquarePostOauthBody } from '../dto/merchants/square-post-oauth-body.dto.js';
 import { StripeBillingSessionResponse } from '../dto/merchants/stripe-billing-session-response.dto.js';
 import { StripePostCheckoutResponse } from '../dto/merchants/stripe-post-checkout-response.dto.js';
-import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
+import { MerchantEntity } from '../entities/merchant.entity.js';
 import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { MerchantsService } from '../services/merchants.service.js';

@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { EntityRepositoryService } from '../../utils/entity-repository-service.js';
-import { AddressEntity } from '../entities/locations/address.entity.js';
+import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { AddressEntity } from '../entities/address.entity.js';
 
 @Injectable()
 export class AddressService extends EntityRepositoryService<AddressEntity> {

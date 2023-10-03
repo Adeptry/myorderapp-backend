@@ -4,11 +4,11 @@ import {
   ObjectLiteral,
   Repository,
 } from 'typeorm';
+import { buildPaginatedResults } from './build-paginated-results.js';
 import { EntityRepositoryService } from './entity-repository-service.js';
-import { paginatedResults } from './paginated.js';
-import { RepositoryServiceLogger } from './reposistory-service-logger';
-import { InfinityPaginationResultType } from './types/infinity-pagination-result.type.js';
-import { PaginationOptions } from './types/pagination-options.js';
+import { PaginationOptionsInput } from './pagination-options-input.dto.js';
+import { PaginationResultType } from './pagination-result.type.js';
+import { RepositoryServiceLogger } from './reposistory-service-logger.js';
 
 export abstract class RestfulEntityRepositoryService<
   Entity extends ObjectLiteral,
@@ -21,10 +21,10 @@ export abstract class RestfulEntityRepositoryService<
   }
 
   async findAndPaginate(
-    pagination: PaginationOptions,
-  ): Promise<InfinityPaginationResultType<Entity>> {
+    pagination: PaginationOptionsInput,
+  ): Promise<PaginationResultType<Entity>> {
     this.logger.verbose(this.findAndPaginate.name);
-    return paginatedResults<Entity>({
+    return buildPaginatedResults<Entity>({
       results: await this.repository.findAndCount({
         skip: (pagination.page - 1) * pagination.limit,
         take: pagination.limit,
