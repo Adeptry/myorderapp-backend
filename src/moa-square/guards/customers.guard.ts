@@ -12,8 +12,8 @@ import { AuthenticationService } from '../../authentication/authentication.servi
 import { UserEntity } from '../../users/entities/user.entity.js';
 import { CustomerEntity } from '../entities/customers/customer.entity.js';
 import { MerchantEntity } from '../entities/merchants/merchant.entity.js';
-import { CustomersService } from '../services/customers/customers.service.js';
-import { MerchantsService } from '../services/merchants/merchants.service.js';
+import { CustomersService } from '../services/customers.service.js';
+import { MerchantsService } from '../services/merchants.service.js';
 
 export interface CustomersGuardedRequest extends Request {
   user: UserEntity;
