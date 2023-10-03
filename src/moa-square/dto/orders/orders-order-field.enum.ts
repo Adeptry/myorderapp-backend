@@ -4,10 +4,12 @@ import { SortItemsInput } from '../../../database/sort-items-input.dto.js';
 import { SortOrderEnum } from '../../../database/sort-order.enum.js';
 
 export enum OrdersOrderFieldEnum {
+  id = 'id',
+  squareId = 'squareId',
   pickupDate = 'pickupDate',
   closedDate = 'closedDate',
-  customer = 'customerId',
-  location = 'locationId',
+  customerId = 'customerId',
+  locationId = 'locationId',
   totalMoneyAmount = 'totalMoneyAmount',
   totalMoneyTaxAmount = 'totalMoneyTaxAmount',
   totalMoneyDiscountAmount = 'totalMoneyDiscountAmount',

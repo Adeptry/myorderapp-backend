@@ -41,6 +41,14 @@ export class AppConfigUpdateBody {
   @ApiProperty({
     required: false,
     nullable: true,
+  })
+  @IsBoolean()
+  @IsOptional()
+  enabled?: boolean;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
     enum: Object.values(ThemeModeEnum),
     enumName: 'ThemeModeEnum',
   })
