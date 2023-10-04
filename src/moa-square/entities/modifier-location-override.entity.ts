@@ -52,7 +52,7 @@ export class ModifierLocationOverrideEntity extends BaseEntity {
 
   @ApiProperty({ type: Number, required: false, nullable: true })
   @Column({ type: Number, nullable: true })
-  amount?: number | null;
+  priceMoneyAmount?: number | null;
 
   /*
    * Relations

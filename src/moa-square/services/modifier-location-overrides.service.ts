@@ -51,7 +51,7 @@ export class ModifierLocationOverridesService extends EntityRepositoryService<Mo
       moaModifierLocationOverride.modifierId = moaModifierId;
       moaModifierLocationOverride.locationId =
         moaLocationForModifierOverride?.id;
-      moaModifierLocationOverride.amount = Number(
+      moaModifierLocationOverride.priceMoneyAmount = Number(
         modifierOverride.priceMoney?.amount ?? 0,
       );
       moaModifierLocationOverride.catalogId = params.moaCatalogId;

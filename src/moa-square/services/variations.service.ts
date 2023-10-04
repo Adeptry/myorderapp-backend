@@ -156,7 +156,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
           { locationId },
         )
         .addSelect(
-          'COALESCE("variationLocationOverrides".priceMoneyAmount, variations.priceMoneyAmount)',
+          'COALESCE("variationLocationOverrides"."priceMoneyAmount", variations.priceMoneyAmount)',
           'variations_priceMoneyAmount',
         );
     }
