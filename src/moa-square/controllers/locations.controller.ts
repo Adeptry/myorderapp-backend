@@ -52,7 +52,7 @@ export class LocationsController {
   }
 
   @ApiBearerAuth()
-  @Get('me')
+  @Get()
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: LocationPaginatedResponse })
   @ApiUnauthorizedResponse({
