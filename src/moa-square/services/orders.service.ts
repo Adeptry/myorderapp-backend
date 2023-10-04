@@ -725,7 +725,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         throw new UnprocessableEntityException("Merchant doesn't have a tier");
     }
 
-    if (appFeeBigIntNumerator === BigInt(0)) {
+    if (this.config.squareAppFeeBigIntDenominator === BigInt(0)) {
       throw new Error('Denominator cannot be zero');
     }
 
