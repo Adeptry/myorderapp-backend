@@ -21,6 +21,7 @@ import { SquareOauthAuthorizationRevokedEventPayload } from '../dto/square/squar
 import { CatalogEntity } from '../entities/catalog.entity.js';
 import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 import { CatalogsService } from './catalogs.service.js';
+import { CustomersService } from './customers.service.js';
 import { LocationsService } from './locations.service.js';
 import { MerchantsService } from './merchants.service.js';
 
@@ -36,6 +37,7 @@ export class MerchantsSquareService {
     private readonly squareService: NestSquareService,
     private readonly catalogsService: CatalogsService,
     private readonly locationsService: LocationsService,
+    private readonly customersService: CustomersService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -53,6 +55,7 @@ export class MerchantsSquareService {
 
     const merchant = await this.service.findOneOrFail({
       where: { id: merchantId },
+      relations: { user: true },
     });
 
     const accessTokenResult =
@@ -93,7 +96,16 @@ export class MerchantsSquareService {
     merchant.squareId = merchantSquareId;
     merchant.squareRefreshToken = refreshToken;
 
-    return this.service.save(merchant);
+    await this.service.save(merchant);
+
+    if (merchant.user?.id && merchant.id) {
+      await this.customersService.createOne({
+        merchantIdOrPath: merchant.id,
+        userId: merchant.user?.id,
+      });
+    }
+
+    return merchant;
   }
 
   async sync(params: { merchantId: string }) {
