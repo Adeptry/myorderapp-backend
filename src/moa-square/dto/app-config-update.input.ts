@@ -5,7 +5,6 @@ import {
   IsOptional,
   IsString,
   Length,
-  Matches,
 } from 'class-validator';
 import { ThemeModeEnum } from '../entities/theme-mode.enum.js';
 
@@ -14,9 +13,6 @@ export class AppConfigUpdateBody {
   @IsString()
   @IsOptional()
   @Length(3, 30)
-  @Matches(/^[a-zA-Z0-9\s]*$/, {
-    message: 'Name should contain only alphanumeric characters and spaces',
-  })
   name?: string;
 
   @ApiProperty({ required: false, nullable: true })
