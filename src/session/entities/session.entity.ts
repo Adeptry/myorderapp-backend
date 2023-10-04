@@ -16,8 +16,8 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity.js';
 
-@Entity()
-export class Session extends BaseEntity {
+@Entity('session')
+export class SessionEntity extends BaseEntity {
   @PrimaryColumn('varchar')
   id?: string;
 

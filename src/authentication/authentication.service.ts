@@ -18,7 +18,7 @@ import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ForgotService } from '../forgot/forgot.service.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { MailService } from '../mail/mail.service.js';
-import { Session } from '../session/entities/session.entity.js';
+import { SessionEntity } from '../session/entities/session.entity.js';
 import { SessionService } from '../session/session.service.js';
 import { SocialInterface } from '../social/interfaces/social.interface.js';
 import { RoleEntity } from '../users/entities/role.entity.js';
@@ -60,11 +60,13 @@ export class AuthenticationService {
   }
 
   validateApiKey(apiKey: string): boolean {
-    this.logger.verbose(this.validateApiKey.name);
-    return (
-      this.config.apiKeys.find((key) => apiKey == key) !== undefined ||
-      this.config.apiKeys.length === 0
-    );
+    this.logger.verbose(`${this.validateApiKey.name} ${apiKey}`);
+    const noApiKeys = this.config.apiKeys.length === 0;
+    const foundApiKey =
+      this.config.apiKeys.find((key) => apiKey == key) !== undefined;
+    this.logger.verbose(`noApiKeys ${noApiKeys}`);
+    this.logger.verbose(`foundApiKey ${foundApiKey}`);
+    return noApiKeys || foundApiKey;
   }
 
   async loginOrThrow(
@@ -127,11 +129,16 @@ export class AuthenticationService {
       }),
     );
 
-    const { token, refreshToken, tokenExpires } = await this.getTokensData({
+    const tokensData = {
       id: user.id,
       role: user.role,
       sessionId: session.id,
-    });
+    };
+
+    this.logger.debug(`tokensData: ${JSON.stringify(tokensData)}`);
+
+    const { token, refreshToken, tokenExpires } =
+      await this.getTokensData(tokensData);
 
     return {
       refreshToken,
@@ -206,15 +213,17 @@ export class AuthenticationService {
       }),
     );
 
+    const tokensData = {
+      id: user.id,
+      role: user.role,
+      sessionId: session.id,
+    };
+
     const {
       token: jwtToken,
       refreshToken,
       tokenExpires,
-    } = await this.getTokensData({
-      id: user.id,
-      role: user.role,
-      sessionId: session.id,
-    });
+    } = await this.getTokensData(tokensData);
 
     return {
       refreshToken,
@@ -486,7 +495,7 @@ export class AuthenticationService {
   private async getTokensData(data: {
     id: UserEntity['id'];
     role: UserEntity['role'];
-    sessionId: Session['id'];
+    sessionId: SessionEntity['id'];
   }) {
     this.logger.verbose(this.getTokensData.name);
 
@@ -510,7 +519,7 @@ export class AuthenticationService {
         },
         {
           secret: this.config.refreshSecret,
-          expiresIn: this.config.expires,
+          expiresIn: this.config.refreshExpires,
         },
       ),
     ]);

@@ -31,7 +31,7 @@ import { nanoid } from 'nanoid';
 import { NestSquareService } from 'nest-square';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { CardsPostBody } from '../dto/cards/card-create.dto.js';
+import { CardsPostBody } from '../dto/cards-post-body.dto.js';
 import {
   SquareCard,
   SquareDisableCardResponse,

@@ -44,7 +44,7 @@ import { AwsS3Config } from '../../configs/aws-s3.config.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
-import { AppConfigUpdateBody } from '../dto/app-config/app-config-update.input.js';
+import { AppConfigUpdateBody } from '../dto/app-config-update.input.js';
 import { AppConfigEntity } from '../entities/app-config.entity.js';
 import type { UserTypeGuardedRequest } from '../guards/customer-merchant.guard.js';
 import { CustomerMerchantGuard } from '../guards/customer-merchant.guard.js';

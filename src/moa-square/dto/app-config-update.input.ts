@@ -7,7 +7,7 @@ import {
   Length,
   Matches,
 } from 'class-validator';
-import { ThemeModeEnum } from '../../entities/theme-mode.enum.js';
+import { ThemeModeEnum } from '../entities/theme-mode.enum.js';
 
 export class AppConfigUpdateBody {
   @ApiProperty({ required: false, nullable: true })

@@ -3,15 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Not, Repository } from 'typeorm';
 import { RestfulEntityRepositoryService } from '../database/restful-entity-repository-service.js';
 import { UserEntity } from '../users/entities/user.entity.js';
-import { Session } from './entities/session.entity.js';
+import { SessionEntity } from './entities/session.entity.js';
 
 @Injectable()
-export class SessionService extends RestfulEntityRepositoryService<Session> {
+export class SessionService extends RestfulEntityRepositoryService<SessionEntity> {
   protected readonly logger: Logger;
 
   constructor(
-    @InjectRepository(Session)
-    protected readonly repository: Repository<Session>,
+    @InjectRepository(SessionEntity)
+    protected readonly repository: Repository<SessionEntity>,
   ) {
     const logger = new Logger(SessionService.name);
     super(repository, logger);
@@ -22,9 +22,9 @@ export class SessionService extends RestfulEntityRepositoryService<Session> {
     excludeId,
     ...criteria
   }: {
-    id?: Session['id'];
+    id?: SessionEntity['id'];
     user?: Pick<UserEntity, 'id'>;
-    excludeId?: Session['id'];
+    excludeId?: SessionEntity['id'];
   }): Promise<void> {
     await this.repository.delete({
       ...criteria,

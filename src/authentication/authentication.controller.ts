@@ -163,7 +163,7 @@ export class AuthenticationController {
   })
   @ApiOkResponse({ type: AuthenticationResponse })
   public postRefresh(
-    @Req() request: JwtGuardedRequest,
+    @Req() request: any,
   ): Promise<Omit<AuthenticationResponse, 'user'>> {
     this.logger.verbose(this.postRefresh.name);
     if (request.user.sessionId == undefined) {

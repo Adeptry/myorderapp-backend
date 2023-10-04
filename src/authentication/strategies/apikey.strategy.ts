@@ -37,10 +37,13 @@ export class ApiKeyStrategy extends PassportStrategy(
       ) => {
         this.logger.verbose('verify');
         const translations = this.currentLanguageTranslations();
-        if (this.service.validateApiKey(apiKey)) {
+        const validated = this.service.validateApiKey(apiKey);
+        this.logger.verbose(`validate: ${validated}, apiKey: ${apiKey}`);
+        if (validated) {
           done(null, true);
+        } else {
+          done(new UnauthorizedException(translations.unauthorized), null);
         }
-        done(new UnauthorizedException(translations.unauthorized), null);
       },
     );
     this.logger.verbose(this.constructor.name);

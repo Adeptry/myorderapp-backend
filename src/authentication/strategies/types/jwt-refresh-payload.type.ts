@@ -1,7 +1,7 @@
-import { Session } from '../../../session/entities/session.entity.js';
+import { SessionEntity } from '../../../session/entities/session.entity.js';
 
 export type JwtRefreshPayloadType = {
-  sessionId: Session['id'];
+  sessionId: SessionEntity['id'];
   iat: number;
   exp: number;
 };
