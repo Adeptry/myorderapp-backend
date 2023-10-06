@@ -33,7 +33,7 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { NestSquareService } from 'nest-square';
-import { Between } from 'typeorm';
+import { Between, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
@@ -341,6 +341,9 @@ export class CustomersController {
       results: await this.service.findAndCount({
         where: {
           merchantId: request.merchant.id,
+          user: {
+            id: Not(request.user.id),
+          },
           createDate:
             startDate && startDate ? Between(startDate!, endDate!) : undefined,
         },
