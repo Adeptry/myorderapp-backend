@@ -1,7 +1,0 @@
-{
-  "notFound": "App not found",
-  "alreadyExists": "App already exists",
-  "unauthorized": "Merchant not found",
-  "nameAlreadyExists": "An app with that name already exists",
-  "nameNeedsToBeUnique": "App name needs to be unique"
-}

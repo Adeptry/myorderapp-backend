@@ -80,7 +80,7 @@ export class OrdersController {
   }
 
   currentLanguageTranslations() {
-    return this.i18n.t('orders', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -124,15 +124,17 @@ export class OrdersController {
     const translations = this.currentLanguageTranslations();
 
     if (customer.currentOrderId) {
-      throw new BadRequestException(translations.orderExists);
+      throw new BadRequestException(translations.ordersExists);
     }
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
     if (!customer.squareId) {
-      throw new UnprocessableEntityException(translations.customerNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.customersSquareIdNotFound,
+      );
     }
 
     const savedOrder = await this.service.createOne({
@@ -189,7 +191,7 @@ export class OrdersController {
     const translations = this.currentLanguageTranslations();
 
     if (!customer.currentOrderId) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
     const entity = await this.service.findOne({
       where: {
@@ -215,16 +217,18 @@ export class OrdersController {
       customer.currentOrderId = undefined;
       await customer.save();
 
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     if (!entity.squareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.ordersSquareIdNotFound,
+      );
     }
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
@@ -388,7 +392,7 @@ export class OrdersController {
       merchant: { id },
     } = { ...request };
     if (!id) {
-      throw new NotFoundException(translations.merchantNotFound);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     return await this.service.statistics({
@@ -440,11 +444,13 @@ export class OrdersController {
     const currentOrderId = customer.currentOrderId;
 
     if (!currentOrderId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.ordersSquareIdNotFound,
+      );
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     if (body.locationId) {
@@ -520,10 +526,14 @@ export class OrdersController {
     const translations = this.currentLanguageTranslations();
 
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(translations.merchantNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.merchantsSquareIdNotFound,
+      );
     }
     if (!customer.squareId) {
-      throw new UnprocessableEntityException(translations.customerNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.customersSquareIdNotFound,
+      );
     }
 
     let returnOrderId: string | undefined = undefined;
@@ -540,7 +550,7 @@ export class OrdersController {
         } else {
           customer.currentOrderId = undefined;
           await customer.save();
-          throw new NotFoundException(translations.orderNotFound);
+          throw new NotFoundException(translations.ordersNotFound);
         }
       } else {
         returnOrderId = (
@@ -555,7 +565,7 @@ export class OrdersController {
     }
 
     if (!returnOrderId) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     return await this.service.findOne({
@@ -607,17 +617,17 @@ export class OrdersController {
     const translations = this.currentLanguageTranslations();
 
     if (!currentOrderId) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     if (!squareAccessToken) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     await this.service.removeLineItems({
@@ -665,7 +675,7 @@ export class OrdersController {
     const translations = this.currentLanguageTranslations();
 
     if (!customer.currentOrderId) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     const entity = await this.service.findOne({
@@ -675,7 +685,7 @@ export class OrdersController {
     if (!entity) {
       customer.currentOrderId = undefined;
       await customer.save();
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     await this.service.remove(entity);
@@ -720,16 +730,16 @@ export class OrdersController {
     if (!currentOrderId) {
       customer.currentOrderId = undefined;
       await customer.save();
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     if (!(await this.service.exist({ where: { id: currentOrderId } }))) {
-      throw new NotFoundException(translations.orderNotFound);
+      throw new NotFoundException(translations.ordersNotFound);
     }
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 

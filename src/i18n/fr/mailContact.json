@@ -1,0 +1,5 @@
+{
+  "html": "<p>Bonjour {to.name},</p><p>Merci de nous avoir contacté chez MyOrderApp.</p><p>Nous avons reçu votre message concernant : '<strong>{subject}</strong>' et nous reviendrons vers vous prochainement.</p><blockquote>{text}</blockquote><p>Cordialement,</p><p>L'équipe MyOrderApp</p>",
+  "subject": "MyOrderApp : {subject}",
+  "text": "Bonjour {to.name},\n\nMerci de nous avoir contacté chez MyOrderApp.\n\nNous avons reçu votre message concernant : '{subject}' et nous reviendrons vers vous prochainement.\n\nVotre message original :\n{quote_start}{text}{quote_end}\n\nCordialement,\nL'équipe MyOrderApp"
+}

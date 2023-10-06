@@ -38,23 +38,33 @@ export class GlobalExceptionsFilter implements ExceptionFilter {
       message = exception.message;
       if (exception instanceof HttpException) {
         statusCode = exception.getStatus();
-
+        message = (translations && translations[`${statusCode}`]) ?? '';
         const response = exception.getResponse();
         if (typeof response === 'string') {
           message = response;
         } else if (typeof response === 'object' && response !== null) {
           fields = (response as any).fields ?? {};
+
+          if ((response as any).message?.length > 0) {
+            message = (response as any).message;
+          }
+
           const fallback = Object.values(fields).join(', ') + '.';
-          message = (response as any).message ?? fallback;
+          if (message.length === 0 && fallback.length > 0) {
+            message = fallback;
+          }
         }
       } else if (exception instanceof QueryFailedError) {
         statusCode = HttpStatus.UNPROCESSABLE_ENTITY;
-        message = translations?.unprocessableEntity ?? exception.message;
+        message = exception.message ?? (translations && translations['422']);
       } else if (exception instanceof EntityNotFoundError) {
         statusCode = HttpStatus.NOT_FOUND;
-        message = exception.name ?? translations?.notFound ?? exception.message;
+        message =
+          (translations && translations['404']) ??
+          exception.name ??
+          exception.message;
       } else if (exception instanceof TypeORMError) {
-        message = exception.name;
+        message = `${translations && translations['404']} ${exception.name}`;
         statusCode = HttpStatus.INTERNAL_SERVER_ERROR;
       }
     }

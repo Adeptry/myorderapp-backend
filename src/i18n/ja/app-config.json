@@ -1,7 +1,0 @@
-{
-  "notFound": "アプリが見つかりません",
-  "alreadyExists": "アプリは既に存在します",
-  "unauthorized": "加盟店が見つかりません",
-  "nameAlreadyExists": "その名前のアプリは既に存在します",
-  "nameNeedsToBeUnique": "アプリ名は一意である必要があります"
-}

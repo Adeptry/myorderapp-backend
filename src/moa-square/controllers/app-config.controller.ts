@@ -74,7 +74,7 @@ export class AppConfigController {
   }
 
   currentLanguageTranslations() {
-    return this.i18n.t('app-config', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -112,7 +112,7 @@ export class AppConfigController {
     });
 
     if (!appConfig) {
-      throw new NotFoundException(translations.notFound);
+      throw new NotFoundException(translations.appConfigsNotFound);
     }
 
     return appConfig;
@@ -139,7 +139,7 @@ export class AppConfigController {
     });
 
     if (!appConfig) {
-      throw new NotFoundException(translations.notFound);
+      throw new NotFoundException(translations.appConfigsNotFound);
     }
 
     return appConfig;
@@ -174,11 +174,11 @@ export class AppConfigController {
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(translations.notFound);
+      throw new UnauthorizedException(translations.merchantsNotFound);
     }
 
     if (await this.service.exist({ where: { merchantId: merchant.id } })) {
-      throw new ConflictException(translations.alreadyExists);
+      throw new ConflictException(translations.appConfigsExists);
     }
 
     try {
@@ -220,7 +220,7 @@ export class AppConfigController {
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(translations.unauthorized);
+      throw new UnauthorizedException(translations.merchantsNotFound);
     }
 
     let appConfig = await this.service.findOne({
@@ -243,9 +243,9 @@ export class AppConfigController {
         })
       ) {
         throw new ConflictException({
-          message: translations.nameAlreadyExists,
+          message: translations.appConfigsNameExists,
           fields: {
-            name: translations.nameNeedsToBeUnique,
+            name: translations.appConfigsNameExists,
           },
         });
       }
@@ -286,7 +286,7 @@ export class AppConfigController {
     const { merchant } = request;
 
     if (!merchant?.id) {
-      throw new UnauthorizedException(translations.notFound);
+      throw new UnauthorizedException(translations.merchantsNotFound);
     }
 
     let appConfig = await this.service.findOne({

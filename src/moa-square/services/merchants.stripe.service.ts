@@ -31,7 +31,7 @@ export class MerchantsStripeService {
   }
 
   currentTranslations() {
-    return this.i18n.t('merchants', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -49,12 +49,12 @@ export class MerchantsStripeService {
     });
 
     if (merchant.id == null) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     const stripeId = merchant.stripeId;
     if (stripeId == null) {
-      throw new UnauthorizedException(translations.needsStripeId);
+      throw new UnauthorizedException(translations.merchantsStripeIdNotFound);
     }
 
     const session = await this.stripeService.retryOrThrow((stripe) =>
@@ -66,7 +66,7 @@ export class MerchantsStripeService {
 
     if (!session) {
       throw new InternalServerErrorException(
-        translations.invalidStripeResponse,
+        translations.stripeInvalidResponse,
       );
     }
 
@@ -92,11 +92,11 @@ export class MerchantsStripeService {
       'user',
     );
     if (!user) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     if (!merchant.stripeId) {
-      throw new UnauthorizedException(translations.needsStripeId);
+      throw new UnauthorizedException(translations.merchantsStripeIdNotFound);
     }
 
     const response = await this.stripeService.retryOrThrow((stripe) =>
@@ -118,7 +118,7 @@ export class MerchantsStripeService {
 
     if (!response) {
       throw new InternalServerErrorException(
-        translations.invalidStripeResponse,
+        translations.stripeInvalidResponse,
       );
     }
 

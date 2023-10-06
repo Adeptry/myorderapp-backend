@@ -1,6 +1,0 @@
-{
-  "locationMissingTimezone": "No se puede determinar la zona horaria de la tienda.",
-  "pickupInPast": "Lo siento, no puedes establecer una hora de recogida en el pasado.",
-  "pickupTooFarInFuture": "Solo puedes programar recogidas dentro de los próximos 7 días.",
-  "pickupOutsideBusinessHours": "Elige una hora de recogida durante el horario comercial de la tienda."
-}

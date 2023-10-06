@@ -43,7 +43,7 @@ export class MerchantsSquareService {
   }
 
   currentTranslations() {
-    return this.i18n.t('merchants', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -74,7 +74,7 @@ export class MerchantsSquareService {
 
     if (!accessTokenResult) {
       throw new InternalServerErrorException(
-        translations.invalidSquareResponse,
+        translations.squareInvalidResponse,
       );
     }
 
@@ -87,7 +87,7 @@ export class MerchantsSquareService {
 
     if (!expiresAt) {
       throw new InternalServerErrorException(
-        translations.invalidSquareResponse,
+        translations.squareInvalidResponse,
       );
     }
 
@@ -123,11 +123,13 @@ export class MerchantsSquareService {
     } = merchant;
 
     if (merchantId == null || merchantSquareId == null) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     if (squareAccessToken == null) {
-      throw new UnauthorizedException(translations.needSquareAuthorization);
+      throw new UnauthorizedException(
+        translations.merchantsSquareAccessTokenNotFound,
+      );
     }
 
     const catalog: CatalogEntity =
@@ -141,7 +143,7 @@ export class MerchantsSquareService {
 
     const { id: catalogId } = catalog;
     if (!catalogId) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     const squareMerchant = (
@@ -180,12 +182,14 @@ export class MerchantsSquareService {
 
     const merchantId = merchant.id;
     if (merchantId == null) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     const squareAccessToken = merchant.squareAccessToken;
     if (squareAccessToken == null) {
-      throw new UnauthorizedException(translations.needSquareAuthorization);
+      throw new UnauthorizedException(
+        translations.merchantsSquareAccessTokenNotFound,
+      );
     }
 
     await this.locationsService.syncSquare({ merchantId, squareAccessToken });

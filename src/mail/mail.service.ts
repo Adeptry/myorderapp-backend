@@ -56,15 +56,12 @@ export class MailService {
     });
 
     const subject = this.i18n.t(
-      'emailForgotPassword.subject',
+      'mailForgotPassword.subject',
       translationOptions,
     );
-    const text = this.i18n.t('emailForgotPassword.text', translationOptions);
-    const html = this.i18n.t('emailForgotPassword.html', translationOptions);
-    const action = this.i18n.t(
-      'emailForgotPassword.action',
-      translationOptions,
-    );
+    const text = this.i18n.t('mailForgotPassword.text', translationOptions);
+    const html = this.i18n.t('mailForgotPassword.html', translationOptions);
+    const action = this.i18n.t('mailForgotPassword.action', translationOptions);
 
     const footer = this.i18n.t('mail.footer', translationOptions);
     const href = `${frontendUrl}/reset-password/confirm?hash=${hash}`;
@@ -122,14 +119,67 @@ export class MailService {
       },
     };
     const sendSubject = this.i18n.t(
-      'emailSupportRequest.subject',
+      'mailSupportRequest.subject',
       translationOptions,
     );
-    const sendText = this.i18n.t(
-      'emailSupportRequest.text',
-      translationOptions,
-    );
-    const html = this.i18n.t('emailSupportRequest.html', translationOptions);
+    const sendText = this.i18n.t('mailSupportRequest.text', translationOptions);
+    const html = this.i18n.t('mailSupportRequest.html', translationOptions);
+    const footer = this.i18n.t('mail.footer', translationOptions);
+
+    try {
+      return await this.service.sendMail({
+        to: {
+          name,
+          address,
+        },
+        bcc,
+        subject: sendSubject,
+        text: sendText,
+        template: 'base',
+        context: {
+          title: sendSubject,
+          preheader: sendText,
+          html,
+          text: sendText,
+          footer,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async sendContactOrThrow(params: {
+    to: {
+      name?: string;
+      address: string;
+    };
+    subject: string;
+    text: string;
+    bcc: string[];
+  }): Promise<SentMessageInfo> {
+    const { to, bcc } = params;
+    const { name: toName, address } = to;
+    this.logger.verbose(this.sendContactOrThrow.name);
+
+    const name =
+      toName ??
+      this.i18n.t('mail.defaultName', this.defaultTranslationOptions())!;
+
+    const translationOptions: TranslateOptions = {
+      ...this.defaultTranslationOptions(),
+      args: {
+        ...params,
+        to: {
+          name,
+          address,
+        },
+      },
+    };
+    const sendSubject = this.i18n.t('mailContact.subject', translationOptions);
+    const sendText = this.i18n.t('mailContact.text', translationOptions);
+    const html = this.i18n.t('mailContact.html', translationOptions);
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {

@@ -1,9 +1,0 @@
-{
-  "alreadyExists": "加盟店は既に存在します",
-  "doesNotExist": "加盟店は存在しません",
-  "invalidSquareResponse": "Squareからの無効な応答",
-  "needSquareAuthorization": "Squareの承認が必要です",
-  "needsCatalog": "カタログが必要です",
-  "needsStripeId": "Stripe IDが必要です",
-  "invalidStripeResponse": "Stripeからの無効な応答"
-}

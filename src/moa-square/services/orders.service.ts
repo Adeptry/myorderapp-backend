@@ -63,7 +63,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }
 
   private currentLanguageTranslations() {
-    return this.i18n.t('orders', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -143,7 +143,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     this.logger.verbose(this.createOne.name);
     const translations = this.currentLanguageTranslations();
     if (!merchant.squareAccessToken) {
-      throw new UnprocessableEntityException(translations.merchantNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.merchantsSquareIdNotFound,
+      );
     }
 
     let locationId = params.locationId;
@@ -160,7 +162,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         const locationSquareId = squareMainLocation.result.location?.id;
         if (!locationSquareId) {
           throw new UnprocessableEntityException(
-            translations.locationNoSquareId,
+            translations.locationsSquareIdNotFound,
           );
         }
         const moaMainLocation = await this.locationsService.findOne({
@@ -170,7 +172,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
           },
         });
         if (!moaMainLocation) {
-          throw new UnprocessableEntityException(translations.noMainLocation);
+          throw new UnprocessableEntityException(
+            translations.locationsMainNotFound,
+          );
         }
         locationId = moaMainLocation.id;
       }
@@ -194,7 +198,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     });
 
     if (!location) {
-      throw new NotFoundException(translations.locationNoId);
+      throw new NotFoundException(translations.locationsNotFound);
     }
 
     const squareOrderLineItems = variations
@@ -222,7 +226,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       const squareOrder = response.result.order;
       if (!squareOrder) {
         throw new InternalServerErrorException(
-          translations.invalidResponseFromSquare,
+          translations.squareInvalidResponse,
         );
       }
 
@@ -235,7 +239,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
           },
         });
         if (!location.id) {
-          throw new UnprocessableEntityException(translations.locationNoId);
+          throw new UnprocessableEntityException(
+            translations.locationsNotFound,
+          );
         }
         moaOrder.locationId = location.id;
         moaOrder.location = location;
@@ -282,23 +288,25 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
     const orderSquareId = order.squareId;
     if (!orderSquareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(translations.ordersNotFound);
     }
     const location = await this.locationsService.findOneOrFail({
       where: { id: locationMoaId, merchantId: params.merchant.id },
     });
     const locationSquareId = location.squareId;
     if (!locationSquareId) {
-      throw new UnprocessableEntityException(translations.locationNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.locationsSquareIdNotFound,
+      );
     }
 
     if (!location.id) {
-      throw new NotFoundException(translations.locationNoId);
+      throw new NotFoundException(translations.locationsNotFound);
     }
 
     const existingOrderResponse = await this.squareService.retryOrThrow(
@@ -344,7 +352,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       });
     } else {
       throw new InternalServerErrorException(
-        translations.invalidResponseFromSquare,
+        translations.squareInvalidResponse,
       );
     }
   }
@@ -381,10 +389,12 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const orderSquareId = order.squareId;
     if (!orderSquareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(translations.ordersNotFound);
     }
     if (!locationSquareId) {
-      throw new UnprocessableEntityException(translations.locationNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.locationsSquareIdNotFound,
+      );
     }
 
     const newLineItems =
@@ -417,7 +427,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         });
       } else {
         throw new InternalServerErrorException(
-          translations.invalidResponseFromSquare,
+          translations.squareInvalidResponse,
         );
       }
     } catch (error: any) {
@@ -446,14 +456,16 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const orderSquareId = order.squareId;
     if (!orderSquareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(translations.ordersNotFound);
     }
     const location = await this.locationsService.findOne({
       where: { id: order.locationId },
     });
     const locationSquareId = location?.squareId;
     if (!locationSquareId) {
-      throw new UnprocessableEntityException(translations.locationNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.locationsSquareIdNotFound,
+      );
     }
 
     const localLineItems = await this.lineItemsService.find({
@@ -483,7 +495,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       });
     } else {
       throw new InternalServerErrorException(
-        translations.invalidResponseFromSquare,
+        translations.squareInvalidResponse,
       );
     }
   }
@@ -531,14 +543,16 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const { squareId: orderSquareId, location } = order;
     if (!orderSquareId) {
-      throw new UnprocessableEntityException(translations.orderNoSquareId);
+      throw new UnprocessableEntityException(translations.ordersNotFound);
     }
     if (!location) {
-      throw new UnprocessableEntityException(translations.locationNoId);
+      throw new UnprocessableEntityException(translations.locationsNotFound);
     }
     const { squareId: locationSquareId, id: locationMoaId } = location;
     if (!locationSquareId || !locationMoaId) {
-      throw new UnprocessableEntityException(translations.locationNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.locationsSquareIdNotFound,
+      );
     }
 
     /* Merchant */
@@ -555,7 +569,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       merchantTier < 0
     ) {
       throw new UnprocessableEntityException(
-        translations.merchantNoSquareAccessToken,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
@@ -567,7 +581,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       userId: customerUserId,
     } = customer;
     if (!customerSquareId || !customerMoaId || !customerUserId) {
-      throw new UnprocessableEntityException(translations.customerNoSquareId);
+      throw new UnprocessableEntityException(
+        translations.customersSquareIdNotFound,
+      );
     }
 
     if (recipient) {
@@ -638,19 +654,19 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     const squareUpdateOrderResult = squareUpdateOrderResponse.result.order;
     if (!squareUpdateOrderResult) {
       throw new InternalServerErrorException(
-        translations.invalidResponseFromSquare,
+        translations.squareInvalidResponse,
       );
     }
     const { totalMoney: orderTotalAmountMoney } = squareUpdateOrderResult;
     if (!orderTotalAmountMoney) {
       throw new UnprocessableEntityException(
-        translations.invalidResponseFromSquare,
+        translations.squareInvalidResponse,
       );
     }
     const { amount: orderTotalMoneyAmount, currency } = orderTotalAmountMoney;
     if (!orderTotalMoneyAmount || !currency) {
       throw new UnprocessableEntityException(
-        translations.invalidResponseFromSquare,
+        translations.squareInvalidResponse,
       );
     }
 

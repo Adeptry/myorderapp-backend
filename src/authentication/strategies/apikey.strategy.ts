@@ -42,7 +42,7 @@ export class ApiKeyStrategy extends PassportStrategy(
         if (validated) {
           done(null, true);
         } else {
-          done(new UnauthorizedException(translations.unauthorized), null);
+          done(new UnauthorizedException(translations['401']), null);
         }
       },
     );

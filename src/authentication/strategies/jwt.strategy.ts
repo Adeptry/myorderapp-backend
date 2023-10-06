@@ -41,13 +41,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     this.logger.verbose(this.validate.name);
     const translations = this.currentLanguageTranslations();
     if (!payload.id) {
-      throw new UnauthorizedException(translations.unauthorized);
+      throw new UnauthorizedException(translations['401']);
     }
 
     if (
       !(await this.sessionService.exist({ where: { id: payload.sessionId } }))
     ) {
-      throw new UnauthorizedException(translations.unauthorized);
+      throw new UnauthorizedException(translations['401']);
     }
 
     return payload;

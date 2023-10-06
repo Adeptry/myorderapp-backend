@@ -46,7 +46,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
   }
 
   currentLanguageTranslations() {
-    return this.i18n.t('locations', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -68,17 +68,17 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     const { timezone, businessHours } = location;
 
     if (!timezone || !businessHours) {
-      throw new NotFoundException(translations.locationMissingTimezone);
+      throw new NotFoundException(translations.locationsTimezoneNotFound);
     }
 
     const now = new Date();
 
     if (isBefore(pickupDate, now)) {
-      throw new BadRequestException(translations.pickupInPast);
+      throw new BadRequestException(translations.locationsPickupInPast);
     }
 
     if (isAfter(pickupDate, addDays(now, 7))) {
-      throw new BadRequestException(translations.pickupTooFarInFuture);
+      throw new BadRequestException(translations.locationsPickupTooFarInFuture);
     }
 
     const pickupInLocalTimeDate = utcToZonedTime(pickupDate, timezone);
@@ -95,11 +95,15 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     const endLocalTime = matchingPeriod?.endLocalTime;
 
     if (!matchingPeriod || !startLocalTime || !endLocalTime) {
-      throw new BadRequestException(translations.pickupOutsideBusinessHours);
+      throw new BadRequestException(
+        translations.locationsPickupOutsideBusinessHours,
+      );
     }
 
     if (pickupLocalTime < startLocalTime || pickupLocalTime > endLocalTime) {
-      throw new BadRequestException(translations.pickupOutsideBusinessHours);
+      throw new BadRequestException(
+        translations.locationsPickupOutsideBusinessHours,
+      );
     }
   }
 
@@ -126,7 +130,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
 
     if (!timezone || !businessHours) {
       throw new UnprocessableEntityException(
-        translations.locationMissingTimezone,
+        translations.locationsTimezoneNotFound,
       );
     }
 

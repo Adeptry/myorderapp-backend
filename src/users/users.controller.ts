@@ -28,6 +28,7 @@ import type { JwtGuardedRequest } from '../authentication/strategies/jwt.strateg
 import { MailService } from '../mail/mail.service.js';
 import { SessionService } from '../session/session.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
+import { ContactPostBody } from './dto/contact-post-body.dto.js';
 import { SupportRequestPostBody } from './dto/support-request-post-body.dto.js';
 import { UserPatchBody } from './dto/user-update.dto.js';
 import { UserEntity } from './entities/user.entity.js';
@@ -101,7 +102,7 @@ export class UsersController {
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Send support request',
-    operationId: 'postSupport',
+    operationId: 'postSupportRequest',
   })
   @ApiBody({ type: SupportRequestPostBody })
   @ApiUnauthorizedResponse({
@@ -109,11 +110,11 @@ export class UsersController {
     type: ErrorResponse,
   })
   @ApiOkResponse({})
-  async postSupport(
+  async postSupportRequest(
     @Req() request: JwtGuardedRequest,
     @Body() body: SupportRequestPostBody,
   ): Promise<void> {
-    this.logger.verbose(this.postSupport.name);
+    this.logger.verbose(this.postSupportRequest.name);
 
     const { user: jwtUser } = request;
     const { id: userId } = jwtUser;
@@ -136,6 +137,58 @@ export class UsersController {
     const admins = await this.service.findAdmins();
 
     await this.mailService.sendSupportRequestOrThrow({
+      to: {
+        address: user.email,
+        name: user.fullName,
+      },
+      bcc: admins.map((admin) => admin.email!),
+      subject,
+      text,
+    });
+
+    return;
+  }
+
+  @Post('contact')
+  @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Send contact',
+    operationId: 'postContact',
+  })
+  @ApiBody({ type: ContactPostBody })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @ApiOkResponse({})
+  async postContact(
+    @Req() request: JwtGuardedRequest,
+    @Body() body: ContactPostBody,
+  ): Promise<void> {
+    this.logger.verbose(this.postContact.name);
+
+    const { user: jwtUser } = request;
+    const { id: userId } = jwtUser;
+    const { subject, text } = body;
+
+    if (!userId) {
+      throw new UnprocessableEntityException();
+    }
+
+    const user = await this.service.findOneOrFail({ where: { id: userId } });
+
+    if (!user.email) {
+      throw new UnprocessableEntityException();
+    }
+
+    if (!subject || !text) {
+      throw new BadRequestException();
+    }
+
+    const admins = await this.service.findAdmins();
+
+    await this.mailService.sendContactOrThrow({
       to: {
         address: user.email,
         name: user.fullName,

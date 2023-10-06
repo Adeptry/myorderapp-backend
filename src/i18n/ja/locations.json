@@ -1,6 +1,0 @@
-{
-  "locationMissingTimezone": "店舗のタイムゾーンが設定されていません。店舗のタイムゾーンを設定してください。",
-  "pickupInPast": "申し訳ありませんが、過去の時間をピックアップ時間として設定することはできません。",
-  "pickupTooFarInFuture": "ピックアップは次の7日間以内にしか予定できません。",
-  "pickupOutsideBusinessHours": "店舗の営業時間内でピックアップ時間を選んでください。"
-}

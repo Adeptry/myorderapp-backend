@@ -68,7 +68,7 @@ export class MerchantsController {
   }
 
   currentTranslations() {
-    return this.i18n.t('merchants', {
+    return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -98,7 +98,7 @@ export class MerchantsController {
         where: { userId: request.user.id },
       })
     ) {
-      throw new ConflictException(translations.alreadyExists);
+      throw new ConflictException(translations.merchantsExists);
     }
 
     const merchant = this.service.create({
@@ -158,7 +158,7 @@ export class MerchantsController {
     });
 
     if (!merchant) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     if (userRelation) {
@@ -188,7 +188,7 @@ export class MerchantsController {
     });
 
     if (!merchant) {
-      throw new NotFoundException(translations.doesNotExist);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     return merchant;

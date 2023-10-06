@@ -1,9 +1,0 @@
-{
-  "alreadyExists": "Merchant already exists",
-  "doesNotExist": "Merchant does not exist",
-  "invalidSquareResponse": "Invalid response from Square",
-  "needSquareAuthorization": "Needs Square authorization",
-  "needsCatalog": "Needs catalog",
-  "needsStripeId": "Needs Stripe ID",
-  "invalidStripeResponse": "Invalid response from Stripe"
-}

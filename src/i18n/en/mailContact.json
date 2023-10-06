@@ -1,0 +1,5 @@
+{
+  "html": "<p>Hey {to.name},</p><p>Thank you for contacting MyOrderApp.</p><p>We've received your message regarding: '<strong>{subject}</strong>' and will get back to you shortly.</p><blockquote>{text}</blockquote><p>Best regards,</p><p>The MyOrderApp Team</p>",
+  "subject": "MyOrderApp: {subject}",
+  "text": "Hey {to.name},\n\nThank you for contacting MyOrderApp.\n\nWe've received your message regarding: '{subject}' and will get back to you shortly.\n\nYour original message:\n{quote_start}{text}{quote_end}\n\nBest regards,\nThe MyOrderApp Team"
+}
