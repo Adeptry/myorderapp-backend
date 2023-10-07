@@ -28,7 +28,9 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { CategoryPaginatedResponse } from '../dto/catalogs/categories-paginated.output.js';
@@ -55,8 +57,15 @@ export class CategoriesController {
   constructor(
     private readonly service: CategoriesService,
     private readonly merchantsService: MerchantsService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -100,22 +109,19 @@ export class CategoriesController {
     modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
     this.logger.verbose(this.getCategories.name);
+    const translations = this.translations();
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
       if (isNaN(parsedPage)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
     let parsedLimit: number | undefined;
     if (limit !== undefined) {
       parsedLimit = parseInt(limit, 10);
       if (isNaN(parsedLimit)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
     const merchant = await this.merchantsService.findOneByIdOrPath({
@@ -126,7 +132,7 @@ export class CategoriesController {
     });
 
     if (!merchant || !merchant.catalog?.id) {
-      throw new NotFoundException('Merchants catalog not found');
+      throw new NotFoundException(translations.catalogsNotFound);
     }
 
     return this.service.findPaginatedResults({
@@ -182,22 +188,19 @@ export class CategoriesController {
     modifierLists?: boolean,
   ): Promise<CategoryPaginatedResponse> {
     this.logger.verbose(this.getCategoriesMe.name);
+    const translations = this.translations();
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
       if (isNaN(parsedPage)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
     let parsedLimit: number | undefined;
     if (limit !== undefined) {
       parsedLimit = parseInt(limit, 10);
       if (isNaN(parsedLimit)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
     const { merchant: requestMerchant, customer } = request;
@@ -211,7 +214,7 @@ export class CategoriesController {
     });
 
     if (!merchant || !merchant.catalog?.id || !requestMerchant.id) {
-      throw new NotFoundException('Merchants catalog not found');
+      throw new NotFoundException(translations.catalogsNotFound);
     }
 
     return this.service.findPaginatedResults({

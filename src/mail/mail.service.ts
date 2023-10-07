@@ -3,8 +3,8 @@ import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { SentMessageInfo } from 'nodemailer';
-import { I18nTranslations } from 'src/i18n/i18n.generated.js';
 import { RootConfigType } from '../app.config.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 
 @Injectable()
 export class MailService {

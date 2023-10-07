@@ -1,0 +1,5 @@
+{
+  "idNotFound": "Votre ID d'utilisateur est manquant dans la session actuelle. Veuillez vous reconnecter.",
+  "emailNotFound": "L'email fourni ne correspond à aucun de nos enregistrements. Vérifiez et réessayez.",
+  "invalidInput": "Les informations que vous avez saisies sont incorrectes. Veuillez vérifier et ressaisir."
+}

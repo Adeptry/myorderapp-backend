@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -38,7 +37,7 @@ import {
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { InjectS3, type S3 } from 'nestjs-s3';
-import { Not, QueryFailedError } from 'typeorm';
+import { Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { AwsS3Config } from '../../configs/aws-s3.config.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
@@ -181,22 +180,12 @@ export class AppConfigController {
       throw new ConflictException(translations.appConfigsExists);
     }
 
-    try {
-      return this.service.save(
-        this.service.create({
-          merchantId: merchant.id,
-          ...body,
-        }),
-      );
-    } catch (error) {
-      if (error instanceof QueryFailedError) {
-        throw new BadRequestException(error.message);
-      } else if (error instanceof Error) {
-        throw new InternalServerErrorException(error.message);
-      } else {
-        throw new InternalServerErrorException(error);
-      }
-    }
+    return this.service.save(
+      this.service.create({
+        merchantId: merchant.id,
+        ...body,
+      }),
+    );
   }
 
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)

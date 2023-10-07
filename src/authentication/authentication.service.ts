@@ -53,8 +53,8 @@ export class AuthenticationService {
     this.logger.verbose(this.constructor.name);
   }
 
-  currentLanguageTranslations() {
-    return this.i18n.t('auth', {
+  translations() {
+    return this.i18n.t('authentication', {
       lang: I18nContext.current()?.lang,
     });
   }
@@ -74,7 +74,7 @@ export class AuthenticationService {
     onlyAdmin: boolean,
   ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.loginOrThrow.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const user = await this.usersService.findOne({
       where: {
@@ -89,12 +89,12 @@ export class AuthenticationService {
           ? user.role.id === RoleEnum.admin
           : [RoleEnum.user].includes(user.role.id as RoleEnum)))
     ) {
-      throw new UnauthorizedException(translations.invalidEmailOrPassword);
+      throw new UnauthorizedException(translations.passwordOrEmailInvalid);
     }
 
     if (user.provider !== AuthenticationsProvidersEnum.email) {
       throw new UnprocessableEntityException(
-        this.i18n.t('auth.loginViaProvider', {
+        this.i18n.t('authentication.loginViaProvider', {
           args: { provider: user.provider },
         }),
       );
@@ -118,7 +118,7 @@ export class AuthenticationService {
       throw new UnauthorizedException({
         message: translations.loginFailed,
         fields: {
-          password: translations.passwordInvalid,
+          password: translations.invalidPassword,
         },
       });
     }
@@ -154,7 +154,7 @@ export class AuthenticationService {
     roleEnum: RoleEnum,
   ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.validateSocialLogin.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     let user: NullableType<UserEntity>;
     const socialEmail = socialData.email?.toLowerCase();
 
@@ -237,7 +237,7 @@ export class AuthenticationService {
     dto: AuthenticationEmailRegisterRequestBody,
   ): Promise<AuthenticationResponse> {
     this.logger.verbose(this.registerOrThrow.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     const hash = crypto
       .createHash('sha256')
       .update(randomStringGenerator())
@@ -247,7 +247,7 @@ export class AuthenticationService {
       throw new UnprocessableEntityException({
         message: translations.registrationFailed,
         fields: {
-          email: translations.emailAlreadyExists,
+          email: translations.emailFound,
         },
       });
     }
@@ -295,7 +295,7 @@ export class AuthenticationService {
 
   async confirmEmail(hash: string): Promise<void> {
     this.logger.verbose(this.confirmEmail.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     const user = await this.usersService.findOne({
       where: {
         hash,
@@ -315,7 +315,7 @@ export class AuthenticationService {
 
   async createForgotPasswordOrThrow(email: string): Promise<void> {
     this.logger.verbose(this.createForgotPasswordOrThrow.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     const user = await this.usersService.findOne({
       where: {
         email,
@@ -347,7 +347,7 @@ export class AuthenticationService {
 
   async resetPassword(hash: string, password: string): Promise<void> {
     this.logger.verbose(this.resetPassword.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     const forgot = await this.forgotService.findOne({
       where: {
         hash,
@@ -355,7 +355,7 @@ export class AuthenticationService {
     });
 
     if (!forgot) {
-      throw new UnprocessableEntityException(translations.invalidResetToken);
+      throw new UnprocessableEntityException(translations.refreshTokenInvalid);
     }
 
     const user = forgot.user;
@@ -389,7 +389,7 @@ export class AuthenticationService {
     userDto: AuthenticationUpdateRequestBody,
   ): Promise<NullableType<UserEntity>> {
     this.logger.verbose(this.update.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     if (userDto.password) {
       if (userDto.oldPassword) {
         const currentUser = await this.usersService.findOne({
@@ -409,9 +409,9 @@ export class AuthenticationService {
 
         if (!isValidOldPassword) {
           throw new UnprocessableEntityException({
-            message: translations.invalidOldPassword,
+            message: translations.oldPasswordInvalid,
             fields: {
-              oldPassword: translations.passwordInvalid,
+              oldPassword: translations.invalidPassword,
             },
           });
         } else {
@@ -423,12 +423,12 @@ export class AuthenticationService {
           });
         }
       } else {
-        throw new UnprocessableEntityException(translations.invalidOldPassword);
+        throw new UnprocessableEntityException(translations.oldPasswordInvalid);
       }
     }
 
     if (!userJwtPayload.id) {
-      throw new NotFoundException(translations.invalidSession);
+      throw new NotFoundException(translations.sessionInvalid);
     }
 
     await this.usersService.patch(
@@ -447,8 +447,9 @@ export class AuthenticationService {
     data: Pick<JwtRefreshPayloadType, 'sessionId'>,
   ): Promise<Omit<AuthenticationResponse, 'user'>> {
     this.logger.verbose(this.refreshToken.name);
+    const translations = this.translations();
     if (data.sessionId == undefined) {
-      throw new UnauthorizedException();
+      throw new UnauthorizedException(translations.sessionInvalid);
     }
 
     const session = await this.sessionService.findOne({
@@ -461,15 +462,11 @@ export class AuthenticationService {
     });
 
     if (!session) {
-      throw new UnauthorizedException(
-        `Unable to find session with ID ${data.sessionId}`,
-      );
+      throw new UnauthorizedException(translations.sessionNotFound);
     }
 
     if (!session.user) {
-      throw new UnauthorizedException(
-        `Unable to find user for session with ID ${data.sessionId}`,
-      );
+      throw new UnauthorizedException(translations.userNotFound);
     }
 
     const { token, refreshToken, tokenExpires } = await this.getTokensData({

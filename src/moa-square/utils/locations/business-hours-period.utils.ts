@@ -1,18 +1,18 @@
-import { Logger, NotFoundException } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import { addDays, addMinutes, setHours, setMinutes } from 'date-fns';
 import { BusinessHoursPeriodEntity } from '../../entities/business-hours-period.entity';
 
 export class BusinessHoursUtils {
   private static readonly logger = new Logger(BusinessHoursUtils.name);
 
-  static firstPickupDateAfter(params: {
+  static firstPickupDateAfterOrThrow(params: {
     date: Date;
     businessHours: BusinessHoursPeriodEntity[];
     durationMinutes: number;
   }): Date {
     const { date, businessHours, durationMinutes } = params;
 
-    this.logger.verbose(this.firstPickupDateAfter.name);
+    this.logger.verbose(this.firstPickupDateAfterOrThrow.name);
 
     const firstBusinessHours = this.firstBusinessHoursFromDate({
       businessHours,
@@ -44,7 +44,7 @@ export class BusinessHoursUtils {
         startLocalTimeMinutes == null ||
         dayOfWeekNumber == null
       ) {
-        throw new NotFoundException(
+        throw new Error(
           `No business hours found for ${startLocalTimeHours}:${startLocalTimeMinutes} ${dayOfWeekNumber}`,
         );
       }

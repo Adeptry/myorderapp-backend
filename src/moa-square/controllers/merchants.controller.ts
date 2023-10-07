@@ -67,7 +67,7 @@ export class MerchantsController {
     this.logger.verbose(this.constructor.name);
   }
 
-  currentTranslations() {
+  translations() {
     return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
@@ -92,7 +92,7 @@ export class MerchantsController {
   })
   async postMe(@Req() request: any) {
     this.logger.verbose(this.postMe.name);
-    const translations = this.currentTranslations();
+    const translations = this.translations();
     if (
       await this.service.findOne({
         where: { userId: request.user.id },
@@ -146,7 +146,7 @@ export class MerchantsController {
     catalog?: boolean,
   ): Promise<MerchantEntity> {
     this.logger.verbose(this.getMe.name);
-    const translations = this.currentTranslations();
+    const translations = this.translations();
     const { user } = request;
     const merchant = await this.service.findOne({
       where: { userId: user.id },
@@ -182,7 +182,7 @@ export class MerchantsController {
   @ApiOkResponse({ type: MerchantEntity })
   async get(@Param('idOrPath') idOrPath: string): Promise<MerchantEntity> {
     this.logger.verbose(this.get.name);
-    const translations = this.currentTranslations();
+    const translations = this.translations();
     const merchant = await this.service.findOneByIdOrPath({
       where: { idOrPath },
     });
@@ -262,6 +262,7 @@ export class MerchantsController {
     @Body() body: StripePostCheckoutBody,
   ): Promise<StripePostCheckoutResponse | null> {
     this.logger.verbose(this.postMeStripeCheckout.name);
+    const translations = this.translations();
     const checkoutSessionId =
       await this.merchantsStripeService.createCheckoutSessionId({
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -271,7 +272,7 @@ export class MerchantsController {
 
     if (!checkoutSessionId) {
       throw new InternalServerErrorException(
-        'Failed to create checkout session',
+        translations.stripeInvalidResponse,
       );
     }
 
@@ -297,6 +298,8 @@ export class MerchantsController {
     @Query('returnUrl') returnUrl: string,
   ): Promise<StripeBillingSessionResponse | null> {
     this.logger.verbose(this.getMeStripeBillingSession.name);
+    const translations = this.translations();
+
     const url = await this.merchantsStripeService.createBillingPortalSession({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       merchantId: request.merchant.id!,
@@ -305,7 +308,7 @@ export class MerchantsController {
 
     if (!url) {
       throw new InternalServerErrorException(
-        'Failed to create checkout session',
+        translations.stripeInvalidResponse,
       );
     }
 

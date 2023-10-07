@@ -2,18 +2,19 @@
 
 import { Path } from "nestjs-i18n";
 export type I18nTranslations = {
-    "auth": {
-        "emailAlreadyExists": string;
+    "authentication": {
+        "emailFound": string;
         "emailNotFound": string;
-        "invalidEmailOrPassword": string;
-        "invalidOldPassword": string;
-        "invalidResetToken": string;
-        "invalidSession": string;
+        "invalidPassword": string;
         "loginFailed": string;
         "loginViaProvider": string;
-        "passwordInvalid": string;
+        "oldPasswordInvalid": string;
+        "passwordOrEmailInvalid": string;
         "passwordRequired": string;
+        "refreshTokenInvalid": string;
         "registrationFailed": string;
+        "sessionInvalid": string;
+        "sessionNotFound": string;
         "userNotFound": string;
     };
     "errors": {
@@ -90,7 +91,14 @@ export type I18nTranslations = {
         "appConfigsExists": string;
         "appConfigsNameExists": string;
         "appConfigsNotFound": string;
+        "catalogsNotFound": string;
+        "customersExists": string;
+        "customersNotFound": string;
         "customersSquareIdNotFound": string;
+        "fileNotFound": string;
+        "idNotFound": string;
+        "itemsNotFound": string;
+        "locationsBusinessHoursNotFound": string;
         "locationsMainNotFound": string;
         "locationsNotFound": string;
         "locationsPickupInPast": string;
@@ -98,17 +106,28 @@ export type I18nTranslations = {
         "locationsPickupTooFarInFuture": string;
         "locationsSquareIdNotFound": string;
         "locationsTimezoneNotFound": string;
+        "merchantIdOrPathRequired": string;
         "merchantsExists": string;
         "merchantsNeedsCatalog": string;
         "merchantsNotFound": string;
         "merchantsSquareAccessTokenNotFound": string;
         "merchantsSquareIdNotFound": string;
         "merchantsStripeIdNotFound": string;
+        "merchantsTierNotFound": string;
         "ordersExists": string;
         "ordersNotFound": string;
         "ordersSquareIdNotFound": string;
+        "paginationIsNaN": string;
+        "squareIdNotFound": string;
         "squareInvalidResponse": string;
         "stripeInvalidResponse": string;
+        "userTypeInvalid": string;
+        "usersNotFound": string;
+    };
+    "users": {
+        "idNotFound": string;
+        "emailNotFound": string;
+        "invalidInput": string;
     };
 };
 export type I18nPath = Path<I18nTranslations>;

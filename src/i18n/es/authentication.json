@@ -1,0 +1,14 @@
+{
+  "emailFound": "El correo electrónico ya existe",
+  "emailNotFound": "Correo electrónico no encontrado",
+  "passwordOrEmailInvalid": "Correo electrónico o contraseña no válidos",
+  "oldPasswordInvalid": "Contraseña antigua no válida",
+  "refreshTokenInvalid": "Token de restablecimiento no válido",
+  "sessionInvalid": "Sesión no válida",
+  "loginFailed": "Inicio de sesión fallido",
+  "loginViaProvider": "Iniciar sesión a través de {provider}",
+  "invalidPassword": "Contraseña no válida",
+  "passwordRequired": "Contraseña obligatoria",
+  "registrationFailed": "Falló el registro",
+  "userNotFound": "Usuario no encontrado"
+}

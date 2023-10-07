@@ -33,12 +33,14 @@ import {
 } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { NestSquareService } from 'nest-square';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { Between, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { SortOrderEnum } from '../../database/sort-order.enum.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
 import { AppInstallPostBody } from '../dto/customers/app-install-update.dto.js';
@@ -71,8 +73,15 @@ export class CustomersController {
     private readonly service: CustomersService,
     private readonly appInstallsService: AppInstallsService,
     private readonly squareService: NestSquareService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -163,11 +172,13 @@ export class CustomersController {
     @Query('preferredSquareCard', new DefaultValuePipe(false), ParseBoolPipe)
     preferredSquareCardRelation?: boolean,
   ): Promise<CustomerEntity> {
-    this.logger.verbose(this.getMe.name);
     const { customer, merchant } = request;
 
+    this.logger.verbose(this.getMe.name);
+    const translations = this.translations();
+
     if (!customer.id || !merchant.id) {
-      throw new BadRequestException();
+      throw new BadRequestException(translations.idNotFound);
     }
 
     const found = await this.service.findOneOrFail({
@@ -187,7 +198,9 @@ export class CustomersController {
 
     if (preferredSquareCardRelation) {
       if (!merchant.squareAccessToken || !customer.squareId) {
-        throw new BadRequestException();
+        throw new BadRequestException(
+          translations.merchantsSquareAccessTokenNotFound,
+        );
       }
 
       const { preferredSquareCardId } = customer;
@@ -237,13 +250,13 @@ export class CustomersController {
     @Query('preferredSquareCard', new DefaultValuePipe(false), ParseBoolPipe)
     preferredSquareCardRelation?: boolean,
   ) {
-    this.logger.verbose(this.patchMe.name);
     const { customer, merchant } = request;
 
+    this.logger.verbose(this.patchMe.name);
+    const translations = this.translations();
+
     if (!customer.id || !merchant.id) {
-      throw new UnprocessableEntityException(
-        "Customer or Merchant doesn't exist",
-      );
+      throw new UnprocessableEntityException(translations.idNotFound);
     }
 
     await this.service.patchOne({
@@ -269,7 +282,9 @@ export class CustomersController {
 
     if (preferredSquareCardRelation) {
       if (!merchant.squareAccessToken || !customer.squareId) {
-        throw new BadRequestException();
+        throw new BadRequestException(
+          translations.merchantsSquareAccessTokenNotFound,
+        );
       }
 
       const { preferredSquareCardId } = customer;

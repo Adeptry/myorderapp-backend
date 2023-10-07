@@ -23,8 +23,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import type { JwtGuardedRequest } from '../authentication/strategies/jwt.strategy.js';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { MailService } from '../mail/mail.service.js';
 import { SessionService } from '../session/session.service.js';
 import { ErrorResponse } from '../utils/error-response.js';
@@ -49,8 +51,15 @@ export class UsersController {
     private readonly service: UsersService,
     private readonly sessionService: SessionService,
     private readonly mailService: MailService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('users', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @Get('me')
@@ -75,10 +84,17 @@ export class UsersController {
   ) {
     const { user } = request;
     const { id } = user;
+
     this.logger.verbose(this.patchMe.name);
+    const translations = this.translations();
+
+    if (id == undefined) {
+      throw new UnprocessableEntityException(translations.idNotFound);
+    }
+
     return await this.service.patch(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      { where: { id: id! } },
+      { where: { id } },
       body,
     );
   }
@@ -115,23 +131,24 @@ export class UsersController {
     @Body() body: SupportRequestPostBody,
   ): Promise<void> {
     this.logger.verbose(this.postSupportRequest.name);
+    const translations = this.translations();
 
     const { user: jwtUser } = request;
     const { id: userId } = jwtUser;
     const { subject, text } = body;
 
     if (!userId) {
-      throw new UnprocessableEntityException();
+      throw new UnprocessableEntityException(translations.idNotFound);
     }
 
     const user = await this.service.findOneOrFail({ where: { id: userId } });
 
     if (!user.email) {
-      throw new UnprocessableEntityException();
+      throw new UnprocessableEntityException(translations.emailNotFound);
     }
 
     if (!subject || !text) {
-      throw new BadRequestException();
+      throw new BadRequestException(translations.invalidInput);
     }
 
     const admins = await this.service.findAdmins();
@@ -167,23 +184,24 @@ export class UsersController {
     @Body() body: ContactPostBody,
   ): Promise<void> {
     this.logger.verbose(this.postContact.name);
+    const translations = this.translations();
 
     const { user: jwtUser } = request;
     const { id: userId } = jwtUser;
     const { subject, text } = body;
 
     if (!userId) {
-      throw new UnprocessableEntityException();
+      throw new UnprocessableEntityException(translations.idNotFound);
     }
 
     const user = await this.service.findOneOrFail({ where: { id: userId } });
 
     if (!user.email) {
-      throw new UnprocessableEntityException();
+      throw new UnprocessableEntityException(translations.emailNotFound);
     }
 
     if (!subject || !text) {
-      throw new BadRequestException();
+      throw new BadRequestException(translations.invalidInput);
     }
 
     const admins = await this.service.findAdmins();

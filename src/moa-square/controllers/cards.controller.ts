@@ -29,7 +29,9 @@ import {
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
 import { NestSquareService } from 'nest-square';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { CardsPostBody } from '../dto/cards-post-body.dto.js';
 import {
@@ -54,8 +56,15 @@ export class CardsController {
   constructor(
     private readonly squareService: NestSquareService,
     private readonly customersService: CustomersService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiOkResponse({ type: SquareListCardsResponse })
@@ -117,13 +126,17 @@ export class CardsController {
     @Req() request: CustomersGuardedRequest,
   ) {
     const { merchant, customer } = request;
+
     this.logger.verbose(this.postMe.name);
+    const translations = this.translations();
 
     if (
       customer.squareId == undefined ||
       merchant.squareAccessToken == undefined
     ) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        translations.merchantsSquareAccessTokenNotFound,
+      );
     }
 
     const response = await this.squareService.retryOrThrow(
@@ -174,9 +187,12 @@ export class CardsController {
   ) {
     const { customer, merchant } = request;
     this.logger.verbose(this.deleteMe.name);
+    const translations = this.translations();
 
     if (!merchant.squareAccessToken) {
-      throw new BadRequestException();
+      throw new BadRequestException(
+        translations.merchantsSquareAccessTokenNotFound,
+      );
     }
 
     await this.squareService.retryOrThrow(

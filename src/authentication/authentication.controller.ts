@@ -26,6 +26,8 @@ import {
   ApiUnprocessableEntityResponse,
 } from '@nestjs/swagger';
 import type { Response } from 'express';
+import { I18nContext, I18nService } from 'nestjs-i18n';
+import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { UserEntity } from '../users/entities/user.entity.js';
 import { ErrorResponse } from '../utils/error-response.js';
 import { NullableType } from '../utils/nullable.type.js';
@@ -50,8 +52,17 @@ import { AuthenticationResponse } from './types/authentication-response.type.js'
 export class AuthenticationController {
   private readonly logger = new Logger(AuthenticationController.name);
 
-  constructor(private readonly service: AuthenticationService) {
+  constructor(
+    private readonly service: AuthenticationService,
+    private readonly i18n: I18nService<I18nTranslations>,
+  ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('authentication', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @Post('email/login')
@@ -165,11 +176,15 @@ export class AuthenticationController {
   public postRefresh(
     @Req() request: any,
   ): Promise<Omit<AuthenticationResponse, 'user'>> {
+    const { sessionId } = request.user;
+
     this.logger.verbose(this.postRefresh.name);
-    if (request.user.sessionId == undefined) {
-      throw new UnauthorizedException();
+    const translations = this.translations();
+
+    if (sessionId == undefined) {
+      throw new UnauthorizedException(translations.sessionInvalid);
     }
-    return this.service.refreshToken({ sessionId: request.user.sessionId });
+    return this.service.refreshToken({ sessionId });
   }
 
   @ApiBearerAuth()
@@ -182,9 +197,12 @@ export class AuthenticationController {
   })
   @ApiNoContentResponse()
   public async deleteMe(@Req() request: JwtGuardedRequest): Promise<void> {
+    const { sessionId } = request.user;
+
     this.logger.verbose(this.deleteMe.name);
+
     await this.service.logout({
-      sessionId: request.user.sessionId,
+      sessionId,
     });
   }
 

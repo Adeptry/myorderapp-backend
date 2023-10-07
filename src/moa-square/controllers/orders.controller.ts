@@ -79,7 +79,7 @@ export class OrdersController {
     this.logger.verbose(this.constructor.name);
   }
 
-  currentLanguageTranslations() {
+  translations() {
     return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
@@ -121,7 +121,7 @@ export class OrdersController {
     const { idempotencyKey, locationId, variations } = body;
 
     this.logger.verbose(this.post.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (customer.currentOrderId) {
       throw new BadRequestException(translations.ordersExists);
@@ -188,7 +188,7 @@ export class OrdersController {
     const { customer, merchant } = { ...request };
 
     this.logger.verbose(this.getCurrent.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (!customer.currentOrderId) {
       throw new NotFoundException(translations.ordersNotFound);
@@ -387,7 +387,7 @@ export class OrdersController {
     endDate?: Date,
   ): Promise<OrdersStatisticsResponse> {
     this.logger.verbose(this.getStatisticsMe.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     const {
       merchant: { id },
     } = { ...request };
@@ -439,7 +439,7 @@ export class OrdersController {
     const { merchant, customer } = { ...request };
 
     this.logger.verbose(this.patchCurrent.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const currentOrderId = customer.currentOrderId;
 
@@ -523,7 +523,7 @@ export class OrdersController {
     const { currentOrderId } = customer;
 
     this.logger.verbose(this.postCurrent.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
@@ -614,7 +614,7 @@ export class OrdersController {
     const currentOrderId = customer.currentOrderId;
 
     this.logger.verbose(this.deleteCurrentLineItem.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (!currentOrderId) {
       throw new NotFoundException(translations.ordersNotFound);
@@ -672,7 +672,7 @@ export class OrdersController {
     const { customer } = request;
 
     this.logger.verbose(this.deleteCurrent.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (!customer.currentOrderId) {
       throw new NotFoundException(translations.ordersNotFound);
@@ -725,7 +725,7 @@ export class OrdersController {
     const { currentOrderId } = customer;
 
     this.logger.verbose(this.postCurrentPaymentSquare.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     if (!currentOrderId) {
       customer.currentOrderId = undefined;
@@ -744,7 +744,7 @@ export class OrdersController {
     }
 
     if (!customer.id || !merchant.id) {
-      throw new UnprocessableEntityException();
+      throw new UnprocessableEntityException(translations.idNotFound);
     }
 
     await this.service.createPaymentOrThrow({

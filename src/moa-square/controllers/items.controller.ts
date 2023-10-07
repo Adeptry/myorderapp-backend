@@ -34,8 +34,10 @@ import {
 } from '@nestjs/swagger';
 import { nanoid } from 'nanoid';
 import { NestSquareService } from 'nest-square';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import {
@@ -65,8 +67,15 @@ export class ItemsController {
     private readonly catalogSortService: CatalogSortService,
     private readonly catalogImagesService: CatalogImagesService,
     private readonly squareService: NestSquareService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -100,22 +109,19 @@ export class ItemsController {
     @Query('modifierLists') modifierLists?: boolean,
   ): Promise<ItemPaginatedResponse> {
     this.logger.verbose(this.getCategoriesItems.name);
+    const translations = this.translations();
     let parsedPage: number | undefined;
     if (page !== undefined) {
       parsedPage = parseInt(page, 10);
       if (isNaN(parsedPage)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
     let parsedLimit: number | undefined;
     if (limit !== undefined) {
       parsedLimit = parseInt(limit, 10);
       if (isNaN(parsedLimit)) {
-        throw new BadRequestException(
-          'Validation failed (numeric string is expected)',
-        );
+        throw new BadRequestException(translations.paginationIsNaN);
       }
     }
 
@@ -150,6 +156,7 @@ export class ItemsController {
     @Query('locationId') locationId?: string,
   ): Promise<ItemEntity> {
     this.logger.verbose(this.getItem.name);
+    const translations = this.translations();
     const entity = await this.service
       .joinOneQuery({
         id,
@@ -162,7 +169,7 @@ export class ItemsController {
       .getOne();
 
     if (!entity) {
-      throw new NotFoundException(`Item with id ${id} not found`);
+      throw new NotFoundException(translations.itemsNotFound);
     }
 
     entity.itemModifierLists?.forEach((itemModifierList) => {
@@ -255,23 +262,25 @@ export class ItemsController {
     @Query('idempotencyKey') idempotencyKey: string,
     @Param('id') id: string,
   ) {
-    this.logger.verbose(this.postItemSquareImageUpload.name);
     const { merchant } = request;
+
+    this.logger.verbose(this.postItemSquareImageUpload.name);
+    const translations = this.translations();
 
     if (!merchant.squareAccessToken) {
       throw new BadRequestException(
-        'Merchant does not have Square access token',
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
     if (!file) {
-      throw new BadRequestException('No file uploaded');
+      throw new BadRequestException(translations.fileNotFound);
     }
 
     const item = await this.service.findOne({ where: { id } });
 
     if (!item) {
-      throw new NotFoundException(`Item with id ${id} not found`);
+      throw new NotFoundException(translations.itemsNotFound);
     }
 
     const squareResponse = await this.squareService.uploadCatalogImageOrThrow({

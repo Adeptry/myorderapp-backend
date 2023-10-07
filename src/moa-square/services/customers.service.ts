@@ -7,8 +7,10 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { NestSquareService } from 'nest-square';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UsersService } from '../../users/users.service.js';
 import { CustomerPatchBody } from '../dto/customers/customer-patch-body.dto.js';
 import { CustomerEntity } from '../entities/customer.entity.js';
@@ -26,10 +28,17 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     private readonly squareService: NestSquareService,
     private readonly merchantsService: MerchantsService,
     private readonly locationsService: LocationsService,
+    private readonly i18n: I18nService<I18nTranslations>,
   ) {
     const logger = new Logger(CustomersService.name);
     super(repository, logger);
     this.logger = logger;
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   async findOneWithUserIdAndMerchantIdOrPath(params: {
@@ -86,18 +95,19 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
   async createOne(params: { userId: string; merchantIdOrPath: string }) {
     const { userId, merchantIdOrPath } = params;
     this.logger.verbose(this.createOne.name);
+    const translations = this.translations();
 
     const user = await this.usersService.findOne({ where: { id: userId } });
 
     if (!user) {
-      throw new NotFoundException(`User ${userId} not found`);
+      throw new NotFoundException(translations.usersNotFound);
     }
 
     const merchant = await this.merchantsService.findOneByIdOrPath({
       where: { idOrPath: merchantIdOrPath },
     });
     if (!merchant?.id) {
-      throw new NotFoundException(`Merchant ${merchantIdOrPath} not found`);
+      throw new NotFoundException(translations.merchantsNotFound);
     }
 
     if (
@@ -105,12 +115,12 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
         where: { userId, merchantId: merchant.id },
       })
     ) {
-      throw new BadRequestException('Customer already exists');
+      throw new BadRequestException(translations.customersExists);
     }
 
     if (!merchant?.squareAccessToken) {
       throw new BadRequestException(
-        `Merchant does not have Square access token`,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
@@ -139,7 +149,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
 
     if (!response.result.customer?.id) {
       throw new InternalServerErrorException(
-        `Failed to create Square customer`,
+        translations.squareInvalidResponse,
       );
     }
 
@@ -154,6 +164,8 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     body: CustomerPatchBody;
   }) {
     this.logger.verbose(this.patchOne.name);
+    const translations = this.translations();
+
     const { id, merchantId, body } = params;
     const {
       preferredLocationId,
@@ -169,7 +181,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     const { squareAccessToken } = merchant;
     if (!squareAccessToken) {
       throw new BadRequestException(
-        `Merchant does not have Square access token`,
+        translations.merchantsSquareAccessTokenNotFound,
       );
     }
 
@@ -178,7 +190,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     });
     const { userId, squareId } = customer;
     if (!userId || !squareId) {
-      throw new BadRequestException(`Customer does not have Square ID`);
+      throw new BadRequestException(translations.customersSquareIdNotFound);
     }
 
     if (userId && (firstName || lastName || phoneNumber)) {
@@ -204,7 +216,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
           where: { id: preferredLocationId },
         });
         if (!location) {
-          throw new NotFoundException(`Location ${preferredLocationId}`);
+          throw new NotFoundException(translations.locationsMainNotFound);
         }
         customer.preferredLocation = location;
       } else {

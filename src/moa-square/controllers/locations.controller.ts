@@ -27,8 +27,10 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
+import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { LocationPatchBody } from '../dto/locations/location-patch-body.dto.js';
@@ -47,8 +49,17 @@ import { LocationsService } from '../services/locations.service.js';
 export class LocationsController {
   private readonly logger = new Logger(LocationsController.name);
 
-  constructor(private readonly service: LocationsService) {
+  constructor(
+    private readonly service: LocationsService,
+    private readonly i18n: I18nService<I18nTranslations>,
+  ) {
     this.logger.verbose(this.constructor.name);
+  }
+
+  translations() {
+    return this.i18n.t('moaSquare', {
+      lang: I18nContext.current()?.lang,
+    });
   }
 
   @ApiBearerAuth()
@@ -147,12 +158,13 @@ export class LocationsController {
   })
   async getOne(@Param('id') id: string): Promise<MoaLocation> {
     this.logger.verbose(this.getOne.name);
+    const translations = this.translations();
     const entity = await this.service.findOne({
       where: { id },
     });
 
     if (!entity) {
-      throw new NotFoundException(`Location with id ${id} not found`);
+      throw new NotFoundException(translations.locationsNotFound);
     }
 
     return entity;
@@ -178,12 +190,13 @@ export class LocationsController {
     @Body() body: LocationPatchBody,
   ): Promise<MoaLocation> {
     this.logger.verbose(this.patchOne.name);
+    const translations = this.translations();
     const entity = await this.service.findOne({
       where: { id, merchantId: request.merchant.id },
     });
 
     if (!entity) {
-      throw new NotFoundException(`Location with id ${id} not found`);
+      throw new NotFoundException(translations.locationsNotFound);
     }
 
     return this.service.updateOne({

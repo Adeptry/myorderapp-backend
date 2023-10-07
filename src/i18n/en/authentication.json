@@ -1,0 +1,15 @@
+{
+  "emailFound": "The entered email is already in use. Try using a different one or retrieve your password if you've forgotten it.",
+  "emailNotFound": "The email you entered doesn't match our records. Please double-check and try again.",
+  "invalidPassword": "The password you entered is incorrect. Make sure it's the right one.",
+  "loginFailed": "Unable to log you in. Ensure your credentials are correct.",
+  "loginViaProvider": "Continue login using {provider}.",
+  "oldPasswordInvalid": "The old password you entered is incorrect. Ensure you're entering the right one.",
+  "passwordOrEmailInvalid": "The email or password you've entered is incorrect. Please double-check your input.",
+  "passwordRequired": "Please enter a password to proceed.",
+  "refreshTokenInvalid": "The reset token provided is no longer valid. You might need to request a new one.",
+  "registrationFailed": "We encountered an issue with your registration. Kindly try again after some time.",
+  "sessionInvalid": "Your current session has expired or is invalid. Please log in again.",
+  "sessionNotFound": "We couldn't find an active session. You might need to log in again.",
+  "userNotFound": "We couldn't find a user with the provided details. Ensure your entry is accurate."
+}

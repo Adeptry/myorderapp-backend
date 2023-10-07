@@ -45,7 +45,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     this.logger = logger;
   }
 
-  currentLanguageTranslations() {
+  translations() {
     return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
@@ -57,7 +57,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
   }) {
     this.logger.verbose(this.validatePickupDateTimeOrThrow.name);
     const { id, pickupDate } = params;
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const location = await this.findOneOrFail({
       where: { id },
@@ -116,7 +116,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     this.logger.verbose(this.firstPickupDateAtLocationWithinDuration.name);
     this.logger.verbose(JSON.stringify(params));
 
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const location = await this.findOneOrFail({
       where: { id: locationId },
@@ -141,15 +141,20 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
       { nearestTo: 5 },
     );
 
-    const firstPickupDateWithin = BusinessHoursUtils.firstPickupDateAfter({
-      businessHours,
-      date: localDateAfterDuration,
-      durationMinutes,
-    });
-    const result = zonedTimeToUtc(firstPickupDateWithin, timezone);
+    try {
+      const firstPickupDateWithin =
+        BusinessHoursUtils.firstPickupDateAfterOrThrow({
+          businessHours,
+          date: localDateAfterDuration,
+          durationMinutes,
+        });
+      const result = zonedTimeToUtc(firstPickupDateWithin, timezone);
 
-    this.logger.verbose(result?.toISOString());
-    return result;
+      this.logger.verbose(result?.toISOString());
+      return result;
+    } catch (error) {
+      throw new NotFoundException(translations.locationsBusinessHoursNotFound);
+    }
   }
 
   async findAndCountWithMerchantIdOrPath(params: {
@@ -183,6 +188,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
   }): Promise<LocationEntity[]> {
     this.logger.verbose(this.syncSquare.name);
     const { merchantId, squareAccessToken: accessToken } = params;
+    const translations = this.translations();
     const locations = await this.find({
       where: { merchantId },
       relations: ['address', 'businessHours'],
@@ -205,7 +211,7 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     const squareMainLocation = squareMainLocationResponse.result.location;
     if (!squareMainLocation) {
       this.logger.error('Failed to retrieve main location');
-      throw new NotFoundException('Failed to retrieve main location');
+      throw new NotFoundException(translations.locationsMainNotFound);
     }
 
     for (const squareLocation of squareLocations) {

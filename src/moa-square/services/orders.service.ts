@@ -62,7 +62,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     this.logger = logger;
   }
 
-  private currentLanguageTranslations() {
+  private translations() {
     return this.i18n.t('moaSquare', {
       lang: I18nContext.current()?.lang,
     });
@@ -141,7 +141,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }): Promise<OrderEntity> {
     const { variations, merchant, customer } = params;
     this.logger.verbose(this.createOne.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
     if (!merchant.squareAccessToken) {
       throw new UnprocessableEntityException(
         translations.merchantsSquareIdNotFound,
@@ -271,7 +271,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }) {
     const { locationMoaId, merchant, orderId } = params;
     this.logger.verbose(this.updateOne.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -370,7 +370,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       idempotencyKey,
     } = params;
     this.logger.verbose(this.updateMany.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -443,7 +443,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }) {
     const { orderId, lineItemIds, squareAccessToken } = params;
     this.logger.verbose(this.removeLineItems.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -517,7 +517,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     } = input;
 
     this.logger.verbose(this.createPaymentOrThrow.name);
-    const translations = this.currentLanguageTranslations();
+    const translations = this.translations();
 
     const order = await this.findOneOrFail({
       where: { id: orderId },
@@ -724,6 +724,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     const { orderTotalMoneyAmount, merchantTier } = params;
 
     this.logger.verbose(this.calculateAppFee.name);
+    const translations = this.translations();
 
     let appFeeBigIntNumerator: bigint;
 
@@ -738,7 +739,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         appFeeBigIntNumerator = this.config.squareTier2AppFeeBigIntNumerator;
         break;
       default:
-        throw new UnprocessableEntityException("Merchant doesn't have a tier");
+        throw new UnprocessableEntityException(
+          translations.merchantsTierNotFound,
+        );
     }
 
     if (this.config.squareAppFeeBigIntDenominator === BigInt(0)) {
@@ -838,6 +841,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     variations: OrdersVariationLineItemInput[];
   }) {
     this.logger.verbose(this.squareOrderLineItemsFor.name);
+    const translations = this.translations();
 
     const orderLineItems: OrderLineItem[] = [];
     for (const dto of params.variations) {
@@ -845,7 +849,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         where: { id: dto.id },
       });
       if (!variation?.squareId) {
-        throw new UnprocessableEntityException(`Invalid variation`);
+        throw new UnprocessableEntityException(translations.squareIdNotFound);
       }
       const squareOrderLineItem: OrderLineItem = {
         catalogObjectId: variation?.squareId,
@@ -859,12 +863,14 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         });
 
         if (modifiers.length !== dto.modifierIds.length) {
-          throw new UnprocessableEntityException(`Invalid modifiers`);
+          throw new UnprocessableEntityException(translations.squareIdNotFound);
         }
 
         for (const modifier of modifiers) {
           if (!modifier.squareId) {
-            throw new UnprocessableEntityException(`Invalid modifier`);
+            throw new UnprocessableEntityException(
+              translations.squareIdNotFound,
+            );
           }
           squareOrderLineItem.modifiers?.push({
             catalogObjectId: modifier.squareId,

@@ -1,0 +1,14 @@
+{
+  "emailFound": "メールアドレスは既に存在します",
+  "emailNotFound": "メールアドレスが見つかりません",
+  "passwordOrEmailInvalid": "無効なメールアドレスまたはパスワード",
+  "oldPasswordInvalid": "無効な古いパスワード",
+  "refreshTokenInvalid": "無効なリセットトークン",
+  "sessionInvalid": "無効なセッション",
+  "loginFailed": "ログインに失敗しました",
+  "loginViaProvider": "{provider} 経由でログイン",
+  "invalidPassword": "無効なパスワード",
+  "passwordRequired": "パスワードが必要です",
+  "registrationFailed": "登録に失敗しました",
+  "userNotFound": "ユーザーが見つかりません"
+}
