@@ -677,12 +677,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const updatedOrder = await this.saveFromSquareOrder({
       order,
-      squareOrder: (
-        await this.squareService.retryOrThrow(
-          merchantSquareAccessToken,
-          (client) => client.ordersApi.retrieveOrder(orderSquareId),
-        )
-      ).result.order!,
+      squareOrder: squareUpdateOrderResult,
     });
 
     const appFeeMoneyAmount = this.calculateAppFee({
