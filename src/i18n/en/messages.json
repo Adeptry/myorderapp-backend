@@ -1,0 +1,9 @@
+{
+  "postSquarePaymentOrderCurrent": "Thank you for your order with Ref #{order.displayId}. It's been submitted and we'll keep you in the loop on it.",
+  "onEventSquareFulfillmentUpdateCanceled": "Order Ref #{order.displayId} has been canceled. Please reach out to the store you have questions.",
+  "onEventSquareFulfillmentUpdateCompleted": "Great news! Order Ref #{order.displayId} is complete. Enjoy!",
+  "onEventSquareFulfillmentUpdateFailed": "Oops! There was an issue with Order Ref #{order.displayId}. Please contact the store.",
+  "onEventSquareFulfillmentUpdatePrepared": "Order Ref #{order.displayId} is prepared and ready. See you soon!",
+  "onEventSquareFulfillmentUpdateProposed": "Your order with Ref #{order.displayId} has been successfully received by the location.",
+  "onEventSquareFulfillmentUpdateReserved": "Order Ref #{order.displayId} is currently in progress. Sit tight!"
+}

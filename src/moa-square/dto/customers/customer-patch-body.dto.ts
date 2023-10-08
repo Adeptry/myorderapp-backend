@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsOptional, IsString } from 'class-validator';
 
 export class CustomerPatchBody {
   @ApiProperty({ required: false, nullable: true })
@@ -11,6 +11,21 @@ export class CustomerPatchBody {
   @IsString()
   @IsOptional()
   preferredSquareCardId?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  mailNotifications?: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  messageNotifications?: boolean;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsBoolean()
+  @IsOptional()
+  pushNotifications?: boolean;
 
   @ApiProperty({
     type: String,

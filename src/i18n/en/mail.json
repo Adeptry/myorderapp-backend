@@ -1,4 +1,65 @@
 {
+  "defaultName": "MyOrderApp user",
   "footer": "Powered by MyOrderApp",
-  "defaultName": "MyOrderApp user"
+  "postContact": {
+    "html": "<p>Hey {to.name},</p><p>Thank you for contacting MyOrderApp.</p><p>We've received your message regarding: '<strong>{subject}</strong>' and will get back to you shortly.</p><blockquote>{text}</blockquote><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "MyOrderApp: {subject}",
+    "text": "Hey {to.name},\n\nThank you for contacting MyOrderApp.\n\nWe've received your message regarding: '{subject}' and will get back to you shortly.\n\nYour original message:\n{quote_start}{text}{quote_end}\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "postCustomerMe": {
+    "html": "<p>Hello,</p><p>Welcome to {merchant.squareBusinessName} on MyOrderApp!</p><p>We're thrilled to have you with us. Dive in and enjoy hassle-free ordering from {merchant.squareBusinessName}. Should you have questions or encounter any issues with your orders, don't hesitate to contact us at <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Happy ordering!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Welcome to {merchant.squareBusinessName} on MyOrderApp,!",
+    "text": "Hello,\n\nThank you for choosing {merchant.squareBusinessName} on MyOrderApp! Explore and experience smooth and efficient ordering from us. If you need any assistance or have inquiries, please email us at {supportEmail}.\n\nHappy shopping!\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "postMerchantMe": {
+    "html": "<p>Hello {to.name},</p><p>Welcome to MyOrderApp!</p><p>We're thrilled to partner with your business. As a merchant on our platform, you have access to a wide array of tools and services designed to enhance your reach and operations. If you have questions or need assistance setting things up, please reach out to us at <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Here's to growing together!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Welcome to MyOrderApp, {to.name}!",
+    "text": "Hello {to.name},\n\nWe're excited to have your business on MyOrderApp. Our platform is tailored to help merchants like you thrive. If you have any questions or need help with anything, don't hesitate to contact us at {supportEmail}.\n\nTo success and growth!\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "postPasswordForgot": {
+    "action": "Reset Password",
+    "html": "<p>Hey {to.name},</p><p>Looks like you've forgotten your password. No worries, it happens to the best of us.</p><p>Click the button below to reset it.</p><p>If you didn't request this, ignore this email and your password will remain unchanged.</p>",
+    "subject": "Reset Your Password for MyOrderApp",
+    "text": "Hey {to.name}, it looks like you've requested a password reset."
+  },
+  "postSupport": {
+    "html": "<p>Hey {to.name},</p><p>Thank you for reaching out to us with your support request regarding: '<strong>{subject}</strong>'.</p><p>Your issue has been forwarded to our development team for investigation. We understand how important this is and will aim to resolve the issue as soon as possible.</p><blockquote>{text}</blockquote><p>Best regards,</p><p>The MyOrderApp Support Team</p>",
+    "subject": "MyOrderApp Support: {subject}",
+    "text": "Hey {to.name},\n\nThank you for reaching out to us with your support request regarding: '{subject}'.\n\nYour issue has been forwarded to our development team for investigation. We understand how important this is and will aim to resolve the issue as soon as possible.\n\nYour original message:\n{quote_start}{text}{quote_end}\n\nBest regards,\nThe MyOrderApp Support Team"
+  },
+  "postSquarePaymentOrderCurrent": {
+    "html": "<p>Hello,</p><p>Thank you for your order with Ref #{order.displayId}. It's been submitted and we'll keep you updated on its progress.</p><p>Happy ordering!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Thank you for your order Ref #{order.displayId} on MyOrderApp!",
+    "text": "Hello,\n\nThank you for your order with Ref #{order.displayId} on MyOrderApp. We'll keep you informed on its status.\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdateCanceled": {
+    "html": "<p>Hello,</p><p>Order Ref #{order.displayId} has been canceled. If you have any questions or concerns, please get in touch with the store directly.</p><p>We're here to help.</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Order Ref #{order.displayId} Cancellation on MyOrderApp",
+    "text": "Hello,\n\nYour order Ref #{order.displayId} has been canceled on MyOrderApp. For further details, please contact the store directly.\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdateCompleted": {
+    "html": "<p>Hello,</p><p>Great news! Order Ref #{order.displayId} is complete. Enjoy your items!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Order Ref #{order.displayId} Completed on MyOrderApp",
+    "text": "Hello,\n\nGreat news! Your order Ref #{order.displayId} is complete on MyOrderApp. Enjoy your items!\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdateFailed": {
+    "html": "<p>Hello,</p><p>Oops! There was an issue with Order Ref #{order.displayId}. Please get in touch with the store for more details.</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Issue with Order Ref #{order.displayId} on MyOrderApp",
+    "text": "Hello,\n\nOops! There was an issue with your order Ref #{order.displayId} on MyOrderApp. Please contact the store for further details.\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdatePrepared": {
+    "html": "<p>Hello,</p><p>Order Ref #{order.displayId} is prepared and ready for you. We hope you enjoy your items!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Order Ref #{order.displayId} Prepared on MyOrderApp",
+    "text": "Hello,\n\nOrder Ref #{order.displayId} is prepared and ready for you on MyOrderApp. Enjoy your items!\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdateProposed": {
+    "html": "<p>Hello,</p><p>Your order with Ref #{order.displayId} has been successfully received by the store.</p><p>Thank you for choosing MyOrderApp!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Your Order Ref #{order.displayId} Received on MyOrderApp",
+    "text": "Hello,\n\nYour order with Ref #{order.displayId} has been successfully received by the store on MyOrderApp. Thank you for choosing us!\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "onEventSquareFulfillmentUpdateReserved": {
+    "html": "<p>Hello,</p><p>Order Ref #{order.displayId} is currently in progress. We'll keep you updated on any changes.</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Order Ref #{order.displayId} In Progress on MyOrderApp",
+    "text": "Hello,\n\nYour order Ref #{order.displayId} is currently in progress on MyOrderApp. We'll keep you informed on its status.\n\nBest regards,\nThe MyOrderApp Team"
+  }
 }

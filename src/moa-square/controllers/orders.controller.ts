@@ -43,6 +43,8 @@ import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
+import { MailService } from '../../mail/mail.service.js';
+import { MessagesService } from '../../messages/messages.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
@@ -75,6 +77,8 @@ export class OrdersController {
   constructor(
     private readonly service: OrdersService,
     private readonly i18n: I18nService<I18nTranslations>,
+    private readonly messagesService: MessagesService,
+    private readonly mailService: MailService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -721,7 +725,7 @@ export class OrdersController {
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
   ) {
-    const { customer, merchant } = { ...request };
+    const { customer, merchant, user } = { ...request };
     const { currentOrderId } = customer;
 
     this.logger.verbose(this.postCurrentPaymentSquare.name);
@@ -743,7 +747,7 @@ export class OrdersController {
       );
     }
 
-    if (!customer.id || !merchant.id) {
+    if (!customer.id || !merchant.id || !user.id) {
       throw new UnprocessableEntityException(translations.idNotFound);
     }
 
@@ -754,7 +758,7 @@ export class OrdersController {
       merchantId: merchant.id,
     });
 
-    return await this.service.findOne({
+    const order = await this.service.findOne({
       where: { id: currentOrderId },
       relations: {
         lineItems: lineItems
@@ -770,5 +774,20 @@ export class OrdersController {
           : undefined,
       },
     });
+
+    if (!order) {
+      throw new NotFoundException(translations.ordersNotFound);
+    }
+
+    await this.messagesService.sendPostSquarePaymentOrderCurrentOrThrow({
+      userId: user.id,
+      order,
+    });
+    await this.mailService.sendPostSquarePaymentOrderCurrent({
+      userId: user.id,
+      order,
+    });
+
+    return order;
   }
 }

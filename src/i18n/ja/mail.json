@@ -1,4 +1,65 @@
 {
+  "defaultName": "MyOrderAppユーザー",
   "footer": "提供: MyOrderApp",
-  "defaultName": "MyOrderAppユーザー"
+  "onEventSquareFulfillmentUpdateCanceled": {
+    "html": "<p>こんにちは、</p><p>注文参照番号 #{order.displayId} はキャンセルされました。質問や懸念がある場合は、直接店舗に連絡してください。</p><p>助けるためにここにいます。</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp での注文参照番号 #{order.displayId} キャンセル",
+    "text": "こんにちは、\n\nMyOrderApp での注文参照番号 #{order.displayId} はキャンセルされました。詳細については、直接店舗にお問い合わせください。\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "onEventSquareFulfillmentUpdateCompleted": {
+    "html": "<p>こんにちは、</p><p>良いニュース！注文参照番号 #{order.displayId} は完了しました。あなたのアイテムを楽しんでください！</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp での注文参照番号 #{order.displayId} 完了",
+    "text": "こんにちは、\n\n良いニュース！MyOrderApp でのご注文参照番号 #{order.displayId} は完了しました。あなたのアイテムを楽しんでください！\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "onEventSquareFulfillmentUpdateFailed": {
+    "html": "<p>こんにちは、</p><p>おっと！注文参照番号 #{order.displayId} に問題がありました。詳細については、店舗にお問い合わせください。</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp での注文参照番号 #{order.displayId} に関する問題",
+    "text": "こんにちは、\n\nおっと！MyOrderApp でのご注文参照番号 #{order.displayId} に問題がありました。詳細については、店舗にお問い合わせください。\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "onEventSquareFulfillmentUpdatePrepared": {
+    "html": "<p>こんにちは、</p><p>注文参照番号 #{order.displayId} が準備され、お客様のために準備ができています。アイテムを楽しんでください！</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp での注文参照番号 #{order.displayId} 準備完了",
+    "text": "こんにちは、\n\n注文参照番号 #{order.displayId} がMyOrderApp で準備されています。アイテムを楽しんでください！\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "onEventSquareFulfillmentUpdateProposed": {
+    "html": "<p>こんにちは、</p><p>注文参照番号 #{order.displayId} は店舗に正常に受信されました。</p><p>MyOrderApp を選んでいただき、ありがとうございます！</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp でのご注文参照番号 #{order.displayId} 受信",
+    "text": "こんにちは、\n\n注文参照番号 #{order.displayId} はMyOrderApp で店舗に正常に受信されました。私たちを選んでいただき、ありがとうございます！\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "onEventSquareFulfillmentUpdateReserved": {
+    "html": "<p>こんにちは、</p><p>注文参照番号 #{order.displayId} は現在進行中です。変更があればお知らせします。</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp での注文参照番号 #{order.displayId} 進行中",
+    "text": "こんにちは、\n\n注文参照番号 #{order.displayId} はMyOrderApp で現在進行中です。変更があればお知らせします。\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "postContact": {
+    "html": "<p>{to.name}様、</p><p>MyOrderAppにお問い合わせいただき、ありがとうございます。</p><p>あなたのメッセージ '<strong>{subject}</strong>' を受け取りました。近日中にご返信いたします。</p><blockquote>{text}</blockquote><p>よろしくお願い申し上げます。</p><p>MyOrderAppチーム</p>",
+    "subject": "MyOrderApp: {subject}",
+    "text": "{to.name}様、\n\nMyOrderAppにお問い合わせいただき、ありがとうございます。\n\nあなたのメッセージ '{subject}' を受け取りました。近日中にご返信いたします。\n\nあなたの元のメッセージ:\n{quote_start}{text}{quote_end}\n\nよろしくお願い申し上げます。\nMyOrderAppチーム"
+  },
+  "postCustomerMe": {
+    "html": "<p>こんにちは、</p><p>MyOrderAppの{merchant.squareBusinessName}へようこそ！</p><p>私たちと一緒にいてくれて嬉しいです。{merchant.squareBusinessName}からの手間のかからない注文を楽しんでください。注文に関する質問や問題が発生した場合は、<a href='mailto:{supportEmail}'>{supportEmail}</a>までお気軽にお問い合わせください。</p><p>快適なショッピングをお楽しみください。</p><p>よろしくお願いします。</p><p>MyOrderAppチーム</p>",
+    "subject": "{merchant.squareBusinessName}のMyOrderAppへようこそ！",
+    "text": "こんにちは、\n\nMyOrderAppの{merchant.squareBusinessName}を選んでいただきありがとうございます！私たちとのスムーズで効率的な注文を体験してください。何か質問やサポートが必要な場合は、{supportEmail}までお気軽にご連絡ください。\n\n快適なショッピングを！\n\nよろしくお願いします。\nMyOrderAppチーム"
+  },
+  "postMerchantMe": {
+    "html": "<p>こんにちは、{to.name}様。</p><p>MyOrderAppへようこそ！</p><p>あなたのビジネスとの連携を楽しみにしています。当プラットフォームの加盟店として、あなたはあなたのリーチと運用を向上させるために設計された多くのツールとサービスにアクセスできます。質問がある場合や設定のサポートが必要な場合は、<a href='mailto:{supportEmail}'>{supportEmail}</a>でお気軽にお問い合わせください。</p><p>共に成長していきましょう！</p><p>よろしくお願いします。</p><p>MyOrderAppチーム</p>",
+    "subject": "MyOrderAppへようこそ、{to.name}様！",
+    "text": "こんにちは、{to.name}様。\n\nあなたのビジネスをMyOrderAppに迎えることができてうれしいです。私たちのプラットフォームは、あなたのような事業者が繁栄するのを助けるように設計されています。何か質問がある場合や、何かのサポートが必要な場合は、{supportEmail}にお気軽にお問い合わせください。\n\n成功と成長に向けて！\n\nよろしくお願いします。\nMyOrderAppチーム"
+  },
+  "postPasswordForgot": {
+    "action": "パスワードをリセット",
+    "html": "<p>こんにちは、{to.name}さん、</p><p>パスワードを忘れたようですね。心配いりません、誰にでも起こります。</p><p>以下のボタンをクリックしてリセットしてください。</p><p>これをリクエストしていない場合は、このメールを無視してください。パスワードは変更されません。</p>",
+    "subject": "MyOrderAppのパスワードをリセットしてください",
+    "text": "こんにちは、{to.name}さん、パスワードのリセットをリクエストしたようです。"
+  },
+  "postSquarePaymentOrderCurrent": {
+    "html": "<p>こんにちは、</p><p>ご注文の参照番号 #{order.displayId} に感謝いたします。それは提出され、進行状況についてお知らせします。</p><p>楽しいオーダリングを！</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",
+    "subject": "MyOrderApp でのご注文参照番号 #{order.displayId} に感謝します！",
+    "text": "こんにちは、\n\nMyOrderApp でのご注文参照番号 #{order.displayId} に感謝します。進行状況についてお知らせします。\n\nよろしくお願いいたします、\nMyOrderApp チーム"
+  },
+  "postSupport": {
+    "html": "<p>こんにちは、{to.name}様,</p><p>'<strong>{subject}</strong>'に関するサポートリクエストを送っていただき、ありがとうございます。</p><p>あなたの問題は、調査のために開発チームに転送されました。これがいかに重要であるかを理解しており、できるだけ早く問題を解決するよう努力します。</p><blockquote>{text}</blockquote><p>よろしくお願いします,</p><p>MyOrderAppサポートチーム</p>",
+    "subject": "MyOrderAppサポート：{subject}",
+    "text": "こんにちは、{to.name}様\n\n'{subject}'に関するサポートリクエストを送っていただき、ありがとうございます。\n\nあなたの問題は、調査のために開発チームに転送されました。これがいかに重要であるかを理解しており、できるだけ早く問題を解決するよう努力します。\n\nあなたの元のメッセージ:\n{quote_start}{text}{quote_end}\n\nよろしくお願いします、\nMyOrderAppサポートチーム"
+  }
 }

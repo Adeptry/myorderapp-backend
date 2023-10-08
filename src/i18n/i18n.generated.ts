@@ -68,24 +68,78 @@ export type I18nTranslations = {
         "505": string;
     };
     "mail": {
-        "footer": string;
         "defaultName": string;
+        "footer": string;
+        "postContact": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postCustomerMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postMerchantMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postPasswordForgot": {
+            "action": string;
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postSupport": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postSquarePaymentOrderCurrent": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdateCanceled": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdateCompleted": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdateFailed": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdatePrepared": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdateProposed": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "onEventSquareFulfillmentUpdateReserved": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
     };
-    "mailContact": {
-        "html": string;
-        "subject": string;
-        "text": string;
-    };
-    "mailForgotPassword": {
-        "subject": string;
-        "text": string;
-        "html": string;
-        "action": string;
-    };
-    "mailSupportRequest": {
-        "html": string;
-        "subject": string;
-        "text": string;
+    "messages": {
+        "postSquarePaymentOrderCurrent": string;
+        "onEventSquareFulfillmentUpdateCanceled": string;
+        "onEventSquareFulfillmentUpdateCompleted": string;
+        "onEventSquareFulfillmentUpdateFailed": string;
+        "onEventSquareFulfillmentUpdatePrepared": string;
+        "onEventSquareFulfillmentUpdateProposed": string;
+        "onEventSquareFulfillmentUpdateReserved": string;
     };
     "moaSquare": {
         "appConfigsExists": string;

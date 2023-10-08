@@ -263,6 +263,7 @@ export class AuthenticationService {
           id: StatusEnum.inactive,
         } as StatusEntity,
         hash,
+        language: I18nContext.current()?.lang,
       }),
     );
 
@@ -313,8 +314,8 @@ export class AuthenticationService {
     await user.save();
   }
 
-  async createForgotPasswordOrThrow(email: string): Promise<void> {
-    this.logger.verbose(this.createForgotPasswordOrThrow.name);
+  async createPasswordForgotOrThrow(email: string): Promise<void> {
+    this.logger.verbose(this.createPasswordForgotOrThrow.name);
     const translations = this.translations();
     const user = await this.usersService.findOne({
       where: {
@@ -322,7 +323,7 @@ export class AuthenticationService {
       },
     });
 
-    if (!user || !user.email || !user.firstName) {
+    if (!user || !user.email || !user.firstName || !user.id) {
       throw new UnprocessableEntityException(translations.emailNotFound);
     }
 
@@ -336,11 +337,8 @@ export class AuthenticationService {
         user,
       }),
     );
-    await this.mailService.sendForgotPasswordOrThrow({
-      to: {
-        name: user.fullName,
-        address: user.email,
-      },
+    await this.mailService.sendPostPasswordForgotOrThrow({
+      userId: user.id,
       hash,
     });
   }

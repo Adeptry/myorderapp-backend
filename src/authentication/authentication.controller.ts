@@ -147,7 +147,7 @@ export class AuthenticationController {
     @Body() body: AuthenticationPasswordForgotRequestBody,
   ): Promise<void> {
     this.logger.verbose(this.postPasswordForgot.name);
-    return this.service.createForgotPasswordOrThrow(body.email);
+    return this.service.createPasswordForgotOrThrow(body.email);
   }
 
   @Post('password/reset')

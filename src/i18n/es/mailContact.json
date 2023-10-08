@@ -1,5 +1,0 @@
-{
-  "html": "<p>Hola {to.name},</p><p>Gracias por contactar a MyOrderApp.</p><p>Hemos recibido tu mensaje sobre: '<strong>{subject}</strong>' y te responderemos pronto.</p><blockquote>{text}</blockquote><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
-  "subject": "MyOrderApp: {subject}",
-  "text": "Hola {to.name},\n\nGracias por contactar a MyOrderApp.\n\nHemos recibido tu mensaje sobre: '{subject}' y te responderemos pronto.\n\nTu mensaje original:\n{quote_start}{text}{quote_end}\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
-}

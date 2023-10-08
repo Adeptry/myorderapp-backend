@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { MailModule } from '../mail/mail.module.js';
+import { MessagesModule } from '../messages/messages.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { AppConfigController } from './controllers/app-config.controller.js';
 import { CardsController } from './controllers/cards.controller.js';
@@ -69,6 +70,7 @@ import { VariationsService } from './services/variations.service.js';
     AuthenticationModule,
     UsersModule,
     MailModule,
+    MessagesModule,
     ConfigModule.forFeature(MyOrderAppSquareConfig),
     TypeOrmModule.forFeature([
       ItemEntity,

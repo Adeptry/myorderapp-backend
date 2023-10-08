@@ -20,6 +20,7 @@ enum Environment {
 export type AppConfigType = {
   nodeEnv: string;
   name: string;
+  supportEmail: string;
   workingDirectory: string;
   frontendUrl: string;
   backendUrl: string;
@@ -66,6 +67,10 @@ class NestAppConfigValidator {
   @IsString()
   @IsOptional()
   APP_HEADER_API_KEY!: string;
+
+  @IsString()
+  @IsOptional()
+  APP_SUPPORT_EMAIL!: string;
 }
 
 export const NestAppConfig = registerAs<AppConfigType>('app', () => {
@@ -101,5 +106,6 @@ export const NestAppConfig = registerAs<AppConfigType>('app', () => {
     fallbackLanguage: process.env.APP_FALLBACK_LANGUAGE || 'en',
     headerLanguage: process.env.APP_HEADER_LANGUAGE || 'x-custom-lang',
     headerApiKey: process.env.APP_HEADER_API_KEY || 'Api-Key',
+    supportEmail: process.env.APP_SUPPORT_EMAIL!,
   };
 });

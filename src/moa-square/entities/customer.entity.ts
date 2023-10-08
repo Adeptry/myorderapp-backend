@@ -137,4 +137,29 @@ export class CustomerEntity extends BaseEntity {
 
   @ApiProperty({ required: false, type: SquareCard, nullable: true })
   preferredSquareCard?: SquareCard;
+
+  /*
+   * Notifications
+   */
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true, default: true })
+  mailNotifications?: boolean;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true, default: true })
+  messageNotifications?: boolean;
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true, default: true })
+  pushNotifications?: boolean;
 }

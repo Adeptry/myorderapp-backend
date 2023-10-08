@@ -19,6 +19,7 @@ import { AuthGoogleModule } from './auth-google/auth-google.module.js';
 import { AuthenticationModule } from './authentication/authentication.module.js';
 import { NestAppConfig } from './configs/app.config.js';
 import { HealthModule } from './health/health.module.js';
+import { MailModule } from './mail/mail.module.js';
 import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
 import { UsersModule } from './users/users.module.js';
 import { BigIntInterceptor } from './utils/big-int.intercepter.js';
@@ -86,7 +87,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Square API')
-        .setVersion('2.3.7')
+        .setVersion('2.4.0')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },
@@ -106,6 +107,7 @@ async function bootstrap() {
           AuthGoogleModule,
           AuthenticationModule,
           UsersModule,
+          MailModule,
           MyOrderAppSquareModule,
         ],
       },
@@ -123,7 +125,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.3.7')
+        .setVersion('2.4.0')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },

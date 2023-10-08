@@ -7,6 +7,7 @@ import {
   HttpCode,
   HttpStatus,
   Logger,
+  NotFoundException,
   ParseBoolPipe,
   ParseEnumPipe,
   ParseIntPipe,
@@ -41,6 +42,7 @@ import { AuthenticationGuard } from '../../authentication/authentication.guard.j
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
+import { MailService } from '../../mail/mail.service.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
 import { AppInstallPostBody } from '../dto/customers/app-install-update.dto.js';
@@ -54,6 +56,7 @@ import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { AppInstallsService } from '../services/app-installs.service.js';
 import { CustomersService } from '../services/customers.service.js';
+import { MerchantsService } from '../services/merchants.service.js';
 
 @ApiUnauthorizedResponse({
   description: 'You need to be authenticated to access this endpoint.',
@@ -74,6 +77,8 @@ export class CustomersController {
     private readonly appInstallsService: AppInstallsService,
     private readonly squareService: NestSquareService,
     private readonly i18n: I18nService<I18nTranslations>,
+    private readonly mailService: MailService,
+    private readonly merchantsService: MerchantsService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -119,11 +124,24 @@ export class CustomersController {
     preferredLocationRelation?: boolean,
   ) {
     this.logger.verbose(this.post.name);
+    const translations = this.translations();
+    const merchant = await this.merchantsService.findOneByIdOrPath({
+      where: { idOrPath: merchantIdOrPath },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException(translations.merchantsNotFound);
+    }
 
     const created = await this.service.createOne({
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       userId: request.user.id!,
       merchantIdOrPath: merchantIdOrPath,
+    });
+
+    await this.mailService.sendPostCustomerMeOrThrow({
+      userId: request.user.id!,
+      merchant,
     });
 
     const found = await this.service.findOne({

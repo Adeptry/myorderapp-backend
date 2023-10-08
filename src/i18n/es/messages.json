@@ -1,0 +1,9 @@
+{
+  "postSquarePaymentOrderCurrent": "Gracias por tu pedido, {order.displayId}. ¡Estamos en ello!",
+  "onEventSquareFulfillmentUpdateCanceled": "El pedido {order.displayId} ha sido cancelado. Por favor, comuníquese con nosotros si tiene alguna pregunta.",
+  "onEventSquareFulfillmentUpdateCompleted": "¡Buenas noticias! El pedido {order.displayId} está completo. ¡Disfruta!",
+  "onEventSquareFulfillmentUpdateFailed": "¡Vaya! Hubo un problema con el pedido {order.displayId}. Por favor, contáctanos.",
+  "onEventSquareFulfillmentUpdatePrepared": "El pedido {order.displayId} está preparado y listo. ¡Nos vemos pronto!",
+  "onEventSquareFulfillmentUpdateProposed": "Tu pedido con el ID {order.displayId} ha sido recibido exitosamente por la ubicación.",
+  "onEventSquareFulfillmentUpdateReserved": "El pedido {order.displayId} está en curso. ¡Espera un momento!"
+}

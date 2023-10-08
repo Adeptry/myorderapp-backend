@@ -1,4 +1,65 @@
 {
+  "defaultName": "Usuario de MyOrderApp",
   "footer": "Impulsado por MyOrderApp",
-  "defaultName": "Usuario de MyOrderApp"
+  "onEventSquareFulfillmentUpdateCanceled": {
+    "html": "<p>Hola,</p><p>El pedido con la Referencia #{order.displayId} ha sido cancelado. Si tienes alguna pregunta o inquietud, por favor contacta directamente con la tienda.</p><p>Estamos aquí para ayudarte.</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Cancelación del pedido con la Referencia #{order.displayId} en MyOrderApp",
+    "text": "Hola,\n\nTu pedido con la Referencia #{order.displayId} ha sido cancelado en MyOrderApp. Para más detalles, por favor contacta directamente con la tienda.\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "onEventSquareFulfillmentUpdateCompleted": {
+    "html": "<p>Hola,</p><p>¡Buenas noticias! El pedido con la Referencia #{order.displayId} está completo. ¡Disfruta de tus artículos!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Pedido con la Referencia #{order.displayId} completado en MyOrderApp",
+    "text": "Hola,\n\n¡Buenas noticias! Tu pedido con la Referencia #{order.displayId} está completo en MyOrderApp. ¡Disfruta de tus artículos!\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "onEventSquareFulfillmentUpdateFailed": {
+    "html": "<p>Hola,</p><p>¡Vaya! Hubo un problema con el pedido con la Referencia #{order.displayId}. Por favor, contacta con la tienda para más detalles.</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Problema con el pedido con la Referencia #{order.displayId} en MyOrderApp",
+    "text": "Hola,\n\n¡Vaya! Hubo un problema con tu pedido con la Referencia #{order.displayId} en MyOrderApp. Por favor, contacta con la tienda para más detalles.\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "onEventSquareFulfillmentUpdatePrepared": {
+    "html": "<p>Hola,</p><p>El pedido con la Referencia #{order.displayId} está preparado y listo para ti. ¡Esperamos que disfrutes de tus artículos!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Pedido con la Referencia #{order.displayId} preparado en MyOrderApp",
+    "text": "Hola,\n\nEl pedido con la Referencia #{order.displayId} está preparado y listo para ti en MyOrderApp. ¡Disfruta de tus artículos!\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "onEventSquareFulfillmentUpdateProposed": {
+    "html": "<p>Hola,</p><p>Tu pedido con la Referencia #{order.displayId} ha sido recibido con éxito por la tienda.</p><p>¡Gracias por elegir MyOrderApp!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Tu pedido con la Referencia #{order.displayId} recibido en MyOrderApp",
+    "text": "Hola,\n\nTu pedido con la Referencia #{order.displayId} ha sido recibido con éxito por la tienda en MyOrderApp. ¡Gracias por elegirnos!\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "onEventSquareFulfillmentUpdateReserved": {
+    "html": "<p>Hola,</p><p>El pedido con la Referencia #{order.displayId} está en proceso actualmente. Te mantendremos informado sobre cualquier cambio.</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Pedido con la Referencia #{order.displayId} en proceso en MyOrderApp",
+    "text": "Hola,\n\nTu pedido con la Referencia #{order.displayId} está en proceso en MyOrderApp. Te mantendremos informado sobre su estado.\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "postContact": {
+    "html": "<p>Hola {to.name},</p><p>Gracias por contactar a MyOrderApp.</p><p>Hemos recibido tu mensaje sobre: '<strong>{subject}</strong>' y te responderemos pronto.</p><blockquote>{text}</blockquote><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "MyOrderApp: {subject}",
+    "text": "Hola {to.name},\n\nGracias por contactar a MyOrderApp.\n\nHemos recibido tu mensaje sobre: '{subject}' y te responderemos pronto.\n\nTu mensaje original:\n{quote_start}{text}{quote_end}\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "postCustomerMe": {
+    "html": "<p>Hola,</p><p>¡Bienvenido a {merchant.squareBusinessName} en MyOrderApp!</p><p>Estamos encantados de tenerte con nosotros. Sumérgete y disfruta de un proceso de pedido sin complicaciones con {merchant.squareBusinessName}. Si tienes alguna pregunta o enfrentas algún problema con tus pedidos, no dudes en contactarnos en <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>¡Felices compras!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "¡Bienvenido a {merchant.squareBusinessName} en MyOrderApp!",
+    "text": "Hola,\n\n¡Gracias por elegir {merchant.squareBusinessName} en MyOrderApp! Explora y experimenta un proceso de pedido fluido y eficiente con nosotros. Si necesitas ayuda o tienes alguna consulta, por favor, escríbenos a {supportEmail}.\n\n¡Felices compras!\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "postMerchantMe": {
+    "html": "<p>Hola {to.name},</p><p>¡Bienvenido a MyOrderApp!</p><p>Estamos emocionados de asociarnos con tu negocio. Como comerciante en nuestra plataforma, tienes acceso a una amplia gama de herramientas y servicios diseñados para mejorar tu alcance y operaciones. Si tienes preguntas o necesitas ayuda para configurar, no dudes en ponerte en contacto con nosotros en <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>¡Hacia un crecimiento conjunto!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "¡Bienvenido a MyOrderApp, {to.name}!",
+    "text": "Hola {to.name},\n\nEstamos emocionados de tener tu negocio en MyOrderApp. Nuestra plataforma está diseñada para ayudar a comerciantes como tú a prosperar. Si tienes alguna pregunta o necesitas ayuda con algo, no dudes en contactarnos en {supportEmail}.\n\n¡Hacia el éxito y el crecimiento!\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "postPasswordForgot": {
+    "action": "Restablecer Contraseña",
+    "html": "<p>Hola {to.name},</p><p>Parece que has olvidado tu contraseña. No te preocupes, nos pasa a los mejores.</p><p>Haz clic en el botón de abajo para restablecerla.</p><p>Si no has solicitado esto, ignora este correo y tu contraseña permanecerá sin cambios.</p>",
+    "subject": "Restablece tu contraseña para MyOrderApp",
+    "text": "Hola {to.name}, parece que has solicitado un restablecimiento de contraseña."
+  },
+  "postSquarePaymentOrderCurrent": {
+    "html": "<p>Hola,</p><p>Gracias por tu pedido con la Referencia #{order.displayId}. Ha sido enviado y te mantendremos informado sobre su progreso.</p><p>¡Feliz pedido!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Gracias por tu pedido con la Referencia #{order.displayId} en MyOrderApp!",
+    "text": "Hola,\n\nGracias por tu pedido con la Referencia #{order.displayId} en MyOrderApp. Te mantendremos informado sobre su estado.\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "postSupport": {
+    "html": "<p>Hola {to.name},</p><p>Gracias por contactarnos con tu solicitud de soporte sobre: '<strong>{subject}</strong>'.</p><p>Tu problema ha sido enviado a nuestro equipo de desarrollo para su investigación. Entendemos lo importante que es y nos esforzaremos por resolverlo lo antes posible.</p><blockquote>{text}</blockquote><p>Saludos cordiales,</p><p>El equipo de soporte de MyOrderApp</p>",
+    "subject": "Soporte de MyOrderApp: {subject}",
+    "text": "Hola {to.name},\n\nGracias por contactarnos con tu solicitud de soporte sobre: '{subject}'.\n\nTu problema ha sido enviado a nuestro equipo de desarrollo para su investigación. Entendemos lo importante que es y nos esforzaremos por resolverlo lo antes posible.\n\nTu mensaje original:\n{quote_start}{text}{quote_end}\n\nSaludos cordiales,\nEl equipo de soporte de MyOrderApp"
+  }
 }

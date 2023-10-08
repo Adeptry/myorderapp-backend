@@ -35,6 +35,7 @@ import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
 import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
+import { MailService } from '../../mail/mail.service.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { StripePostCheckoutBody } from '../dto/merchants/square-post-checkout-body.dto.js';
 import { SquarePostOauthBody } from '../dto/merchants/square-post-oauth-body.dto.js';
@@ -63,6 +64,7 @@ export class MerchantsController {
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly merchantsStripeService: MerchantsStripeService,
     private readonly stripeService: NestStripeService,
+    private readonly mailService: MailService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -90,29 +92,40 @@ export class MerchantsController {
     description: 'Merchant already exists',
     type: ErrorResponse,
   })
-  async postMe(@Req() request: any) {
+  async postMe(@Req() request: AuthenticatedRequest) {
     this.logger.verbose(this.postMe.name);
     const translations = this.translations();
+
+    const { user } = request;
+
+    if (!user || !user.email) {
+      throw new NotFoundException(translations.usersNotFound);
+    }
+
     if (
       await this.service.findOne({
-        where: { userId: request.user.id },
+        where: { userId: user.id },
       })
     ) {
       throw new ConflictException(translations.merchantsExists);
     }
 
     const merchant = this.service.create({
-      userId: request.user.id,
+      userId: user.id,
     });
     const stripeCustomer = await this.stripeService.retryOrThrow((stripe) =>
       stripe.customers.create({
-        email: request.user.email ?? '',
-        phone: request.user.phoneNumber ?? '',
-        name: request.user.firstName ?? '',
+        email: user.email ?? '',
+        phone: user.phoneNumber ?? '',
+        name: user.firstName ?? '',
       }),
     );
 
     merchant.stripeId = stripeCustomer?.id;
+
+    await this.mailService.sendPostMerchantMeOrThrow({
+      userId: user.id!,
+    });
 
     return await this.service.save(merchant);
   }
