@@ -807,7 +807,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     this.logger.verbose(this.sendFullfillmentUpdateOrThrow.name);
 
     const order = await this.findOne({
-      where: { squareId: orderId },
+      where: { id: orderId },
       relations: {
         customer: {
           user: true,
