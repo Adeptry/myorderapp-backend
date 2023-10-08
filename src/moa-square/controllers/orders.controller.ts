@@ -351,26 +351,32 @@ export class OrdersController {
   ) {
     this.logger.verbose(`${this.getId.name} id:${id}`);
     const { merchant, customer } = { ...request };
-    return await this.service.findOne({
-      where: {
-        id: id,
-        customerId: customer?.id,
-        merchantId: merchant?.id,
-      },
-      relations: {
-        lineItems: lineItems
-          ? {
-              modifiers: lineItems,
-            }
-          : undefined,
-        location: location
-          ? {
-              address: true,
-              businessHours: true,
-            }
-          : undefined,
-      },
-    });
+    const translations = this.translations();
+    try {
+      return await this.service.findOneOrFail({
+        where: {
+          id: id,
+          customerId: customer?.id,
+          merchantId: merchant?.id,
+        },
+        relations: {
+          lineItems: lineItems
+            ? {
+                modifiers: lineItems,
+              }
+            : undefined,
+          location: location
+            ? {
+                address: true,
+                businessHours: true,
+              }
+            : undefined,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new NotFoundException(translations.ordersNotFound);
+    }
   }
 
   @ApiBearerAuth()
@@ -779,14 +785,23 @@ export class OrdersController {
       throw new NotFoundException(translations.ordersNotFound);
     }
 
-    await this.messagesService.sendPostSquarePaymentOrderCurrentOrThrow({
-      userId: user.id,
-      order,
-    });
-    await this.mailService.sendPostSquarePaymentOrderCurrent({
-      userId: user.id,
-      order,
-    });
+    try {
+      await this.messagesService.sendPostSquarePaymentOrderCurrentOrThrow({
+        userId: user.id,
+        order,
+      });
+    } catch (error) {
+      this.logger.log(error);
+    }
+
+    try {
+      await this.mailService.sendPostSquarePaymentOrderCurrentOrThrow({
+        userId: user.id,
+        order,
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     return order;
   }

@@ -92,9 +92,12 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     });
   }
 
-  async createOne(params: { userId: string; merchantIdOrPath: string }) {
+  async createSaveAndSyncSquare(params: {
+    userId: string;
+    merchantIdOrPath: string;
+  }) {
     const { userId, merchantIdOrPath } = params;
-    this.logger.verbose(this.createOne.name);
+    this.logger.verbose(this.createSaveAndSyncSquare.name);
     const translations = this.translations();
 
     const user = await this.usersService.findOne({ where: { id: userId } });
@@ -158,12 +161,12 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     return await this.save(customer);
   }
 
-  async patchOne(params: {
+  async patchAndSyncSquare(params: {
     id: string;
     merchantId: string;
     body: CustomerPatchBody;
   }) {
-    this.logger.verbose(this.patchOne.name);
+    this.logger.verbose(this.patchAndSyncSquare.name);
     const translations = this.translations();
 
     const { id, merchantId, body } = params;

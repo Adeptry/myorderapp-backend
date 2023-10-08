@@ -125,6 +125,14 @@ export class CustomersController {
   ) {
     this.logger.verbose(this.post.name);
     const translations = this.translations();
+
+    const { user } = request;
+    const { id: userId } = user;
+
+    if (!userId) {
+      throw new BadRequestException(translations.idNotFound);
+    }
+
     const merchant = await this.merchantsService.findOneByIdOrPath({
       where: { idOrPath: merchantIdOrPath },
     });
@@ -133,16 +141,19 @@ export class CustomersController {
       throw new NotFoundException(translations.merchantsNotFound);
     }
 
-    const created = await this.service.createOne({
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      userId: request.user.id!,
+    const created = await this.service.createSaveAndSyncSquare({
+      userId,
       merchantIdOrPath: merchantIdOrPath,
     });
 
-    await this.mailService.sendPostCustomerMeOrThrow({
-      userId: request.user.id!,
-      merchant,
-    });
+    try {
+      await this.mailService.sendPostCustomerMeOrThrow({
+        userId,
+        merchant,
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     const found = await this.service.findOne({
       where: { id: created.id },
@@ -158,6 +169,10 @@ export class CustomersController {
           : undefined,
       },
     });
+
+    if (found == undefined) {
+      throw new NotFoundException(translations.idNotFound);
+    }
 
     return found;
   }
@@ -277,7 +292,7 @@ export class CustomersController {
       throw new UnprocessableEntityException(translations.idNotFound);
     }
 
-    await this.service.patchOne({
+    await this.service.patchAndSyncSquare({
       id: customer.id,
       merchantId: merchant.id,
       body: body,

@@ -2,7 +2,6 @@ import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
-import { SentMessageInfo } from 'nodemailer';
 import { RootConfigType } from '../app.config.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { MerchantEntity } from '../moa-square/entities/merchant.entity.js';
@@ -32,7 +31,7 @@ export class MailService {
   async sendPostPasswordForgotOrThrow(params: {
     userId: string;
     hash: string;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, hash } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
@@ -83,7 +82,7 @@ export class MailService {
     const href = `${frontendUrl}/reset-password/confirm?hash=${hash}`;
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name: name,
           address,
@@ -111,7 +110,7 @@ export class MailService {
     userId: string;
     subject: string;
     text: string;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId } = params;
 
     const user = await this.usersService.findOneOrFail({
@@ -147,7 +146,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -176,7 +175,7 @@ export class MailService {
     userId: string;
     subject: string;
     text: string;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId } = params;
 
     const user = await this.usersService.findOneOrFail({
@@ -212,7 +211,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -237,9 +236,7 @@ export class MailService {
     }
   }
 
-  async sendPostMerchantMeOrThrow(params: {
-    userId: string;
-  }): Promise<SentMessageInfo> {
+  async sendPostMerchantMeOrThrow(params: { userId: string }): Promise<void> {
     const { userId } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
@@ -280,7 +277,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -308,7 +305,7 @@ export class MailService {
   async sendPostCustomerMeOrThrow(params: {
     userId: string;
     merchant: MerchantEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, merchant } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
@@ -350,7 +347,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -372,16 +369,16 @@ export class MailService {
     }
   }
 
-  async sendPostSquarePaymentOrderCurrent(params: {
+  async sendPostSquarePaymentOrderCurrentOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendPostSquarePaymentOrderCurrent.name);
+    this.logger.verbose(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
     const name =
       user.fullName ??
@@ -417,7 +414,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -439,16 +436,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdateCanceled(params: {
+  async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdateCanceled.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -484,7 +483,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -506,16 +505,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdateCompleted(params: {
+  async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdateCompleted.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -551,7 +552,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -573,16 +574,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdateFailed(params: {
+  async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdateFailed.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -618,7 +621,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -640,16 +643,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdatePrepared(params: {
+  async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdatePrepared.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -685,7 +690,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -707,16 +712,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdateProposed(params: {
+  async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdateProposed.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -752,7 +759,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,
@@ -774,16 +781,18 @@ export class MailService {
     }
   }
 
-  async sendOnEventSquareFulfillmentUpdateReserved(params: {
+  async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
     userId: string;
     order: OrderEntity;
-  }): Promise<SentMessageInfo> {
+  }): Promise<void> {
     const { userId, order } = params;
     const user = await this.usersService.findOneOrFail({
       where: { id: userId },
     });
 
-    this.logger.verbose(this.sendOnEventSquareFulfillmentUpdateReserved.name);
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
+    );
 
     const name =
       user.fullName ??
@@ -819,7 +828,7 @@ export class MailService {
     const footer = this.i18n.t('mail.footer', translationOptions);
 
     try {
-      return await this.service.sendMail({
+      await this.service.sendMail({
         to: {
           name,
           address,

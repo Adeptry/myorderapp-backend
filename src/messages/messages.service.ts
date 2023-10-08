@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, NotFoundException } from '@nestjs/common';
 import type { ConfigType } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { TwilioService } from 'nestjs-twilio';
@@ -24,11 +24,17 @@ export class MessagesService {
     this.logger.verbose(this.constructor.name);
   }
 
-  defaultTranslationOptions(lang?: string | null): TranslateOptions {
+  private defaultTranslationOptions(lang?: string | null): TranslateOptions {
     return {
       lang: lang ?? I18nContext.current()?.lang,
       defaultValue: this.configService.fallbackLanguage,
     };
+  }
+
+  private translations(lang?: string | null) {
+    return this.i18n.t('messages', {
+      lang: lang ?? I18nContext.current()?.lang,
+    });
   }
 
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
@@ -41,10 +47,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.postSquarePaymentOrderCurrent', {
         ...this.defaultTranslationOptions(user.language),
@@ -54,7 +62,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdateCanceled(params: {
+  async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -64,10 +72,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdateCanceled', {
         ...this.defaultTranslationOptions(user.language),
@@ -77,7 +87,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdateCompleted(params: {
+  async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -87,10 +97,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdateCompleted', {
         ...this.defaultTranslationOptions(user.language),
@@ -100,7 +112,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdateFailed(params: {
+  async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -110,10 +122,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdateFailed', {
         ...this.defaultTranslationOptions(user.language),
@@ -123,7 +137,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdatePrepared(params: {
+  async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -133,10 +147,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdatePrepared', {
         ...this.defaultTranslationOptions(user.language),
@@ -146,7 +162,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdateProposed(params: {
+  async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -156,10 +172,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdateProposed', {
         ...this.defaultTranslationOptions(user.language),
@@ -169,7 +187,7 @@ export class MessagesService {
     });
   }
 
-  async sendOnEventSquareFulfillmentUpdateReserved(params: {
+  async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
     userId: string;
     order: OrderEntity;
   }) {
@@ -179,10 +197,12 @@ export class MessagesService {
     });
 
     if (!user.phoneNumber) {
-      return;
+      throw new NotFoundException(
+        this.translations(user.language).phoneNumberNotFound,
+      );
     }
 
-    return await this.twilioService.client.messages.create({
+    await this.twilioService.client.messages.create({
       to: user.phoneNumber,
       body: this.i18n.t('messages.onEventSquareFulfillmentUpdateReserved', {
         ...this.defaultTranslationOptions(user.language),

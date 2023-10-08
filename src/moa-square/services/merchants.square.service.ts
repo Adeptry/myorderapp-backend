@@ -99,7 +99,7 @@ export class MerchantsSquareService {
     await this.service.save(merchant);
 
     if (merchant.user?.id && merchant.id) {
-      await this.customersService.createOne({
+      await this.customersService.createSaveAndSyncSquare({
         merchantIdOrPath: merchant.id,
         userId: merchant.user?.id,
       });

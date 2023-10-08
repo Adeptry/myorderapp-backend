@@ -1,4 +1,5 @@
 {
+  "phoneNumberNotFound": "Numéro de téléphone introuvable",
   "postSquarePaymentOrderCurrent": "Merci pour votre commande, {order.displayId}. Nous sommes dessus!",
   "onEventSquareFulfillmentUpdateCanceled": "La commande {order.displayId} a été annulée. Veuillez nous contacter si vous avez des questions.",
   "onEventSquareFulfillmentUpdateCompleted": "Bonne nouvelle! La commande {order.displayId} est terminée. Bon appétit!",

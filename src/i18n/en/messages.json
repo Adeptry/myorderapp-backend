@@ -1,4 +1,5 @@
 {
+  "phoneNumberNotFound": "Phone number not found",
   "postSquarePaymentOrderCurrent": "Thank you for your order with Ref #{order.displayId}. It's been submitted and we'll keep you in the loop on it.",
   "onEventSquareFulfillmentUpdateCanceled": "Order Ref #{order.displayId} has been canceled. Please reach out to the store you have questions.",
   "onEventSquareFulfillmentUpdateCompleted": "Great news! Order Ref #{order.displayId} is complete. Enjoy!",

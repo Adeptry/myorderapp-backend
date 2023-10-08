@@ -98,7 +98,7 @@ export class MerchantsController {
 
     const { user } = request;
 
-    if (!user || !user.email) {
+    if (!user.id || !user.email) {
       throw new NotFoundException(translations.usersNotFound);
     }
 
@@ -123,9 +123,13 @@ export class MerchantsController {
 
     merchant.stripeId = stripeCustomer?.id;
 
-    await this.mailService.sendPostMerchantMeOrThrow({
-      userId: user.id!,
-    });
+    try {
+      await this.mailService.sendPostMerchantMeOrThrow({
+        userId: user.id,
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     return await this.service.save(merchant);
   }

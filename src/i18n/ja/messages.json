@@ -1,4 +1,5 @@
 {
+  "phoneNumberNotFound": "電話番号が見つかりません",
   "postSquarePaymentOrderCurrent": "{order.displayId}の注文をいただきありがとうございます。対応中です!",
   "onEventSquareFulfillmentUpdateCanceled": "{order.displayId}の注文はキャンセルされました。質問がある場合はお問い合わせください。",
   "onEventSquareFulfillmentUpdateCompleted": "嬉しいニュース！ {order.displayId}の注文が完了しました。楽しんでください！",

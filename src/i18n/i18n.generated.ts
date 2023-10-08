@@ -133,6 +133,7 @@ export type I18nTranslations = {
         };
     };
     "messages": {
+        "phoneNumberNotFound": string;
         "postSquarePaymentOrderCurrent": string;
         "onEventSquareFulfillmentUpdateCanceled": string;
         "onEventSquareFulfillmentUpdateCompleted": string;

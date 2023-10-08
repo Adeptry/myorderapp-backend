@@ -592,7 +592,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
 
     if (recipient) {
-      await this.customersService.patchOne({
+      await this.customersService.patchAndSyncSquare({
         id: customerUserId,
         merchantId: merchantId,
         body: recipient,
@@ -780,17 +780,12 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const order = await this.findOne({
       where: { squareId: squareOrderId },
-      relations: {
-        customer: {
-          user: true,
-        },
-      },
     });
-    const user = order?.customer?.user;
-    if (!order || !user?.id) {
+    if (!order?.id) {
       this.logger.error(`Order with id ${squareOrderId} not found`);
       return; // Exit if order not found
     }
+    const { id: orderId } = order;
 
     const orderFulfillment = payload?.data?.object?.order_fulfillment_updated;
     const lastFulfillmentUpdate = (
@@ -802,82 +797,119 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       if (fulfillmentStatus && isValidFulfillmentStatus(fulfillmentStatus)) {
         order.squareFulfillmentStatus = fulfillmentStatus;
         await this.save(order);
-
-        switch (fulfillmentStatus) {
-          case FulfillmentStatusEnum.proposed:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdateProposed(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdateProposed({
-              userId: user.id,
-              order,
-            });
-            break;
-          case FulfillmentStatusEnum.reserved:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdateReserved(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdateReserved({
-              userId: user.id,
-              order,
-            });
-            break;
-          case FulfillmentStatusEnum.prepared:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdatePrepared(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdatePrepared({
-              userId: user.id,
-              order,
-            });
-            break;
-          case FulfillmentStatusEnum.completed:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdateCompleted(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdateCompleted({
-              userId: user.id,
-              order,
-            });
-            break;
-          case FulfillmentStatusEnum.canceled:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceled(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdateCanceled({
-              userId: user.id,
-              order,
-            });
-            break;
-          case FulfillmentStatusEnum.failed:
-            await this.messagesService.sendOnEventSquareFulfillmentUpdateFailed(
-              {
-                userId: user.id,
-                order,
-              },
-            );
-            await this.mailService.sendOnEventSquareFulfillmentUpdateFailed({
-              userId: user.id,
-              order,
-            });
-            break;
+        try {
+          await this.sendFullfillmentUpdateOrThrow({ orderId });
+        } catch (error) {
+          this.logger.error(error);
         }
       }
+    }
+  }
+
+  private async sendFullfillmentUpdateOrThrow(params: { orderId: string }) {
+    const { orderId } = params;
+
+    this.logger.verbose(this.sendFullfillmentUpdateOrThrow.name);
+
+    const order = await this.findOne({
+      where: { squareId: orderId },
+      relations: {
+        customer: {
+          user: true,
+        },
+      },
+    });
+    const userId = order?.customer?.user?.id;
+
+    if (!userId || !order?.squareFulfillmentStatus) {
+      throw new UnprocessableEntityException(
+        'Missing userId or squareFulfillmentStatus',
+      );
+    }
+
+    switch (order?.squareFulfillmentStatus) {
+      case FulfillmentStatusEnum.proposed:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        break;
+      case FulfillmentStatusEnum.reserved:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        break;
+      case FulfillmentStatusEnum.prepared:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        break;
+      case FulfillmentStatusEnum.completed:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        break;
+      case FulfillmentStatusEnum.canceled:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        break;
+      case FulfillmentStatusEnum.failed:
+        await this.messagesService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
+          {
+            userId,
+            order,
+          },
+        );
+        await this.mailService.sendOnEventSquareFulfillmentUpdateFailedOrThrow({
+          userId,
+          order,
+        });
+        break;
     }
   }
 
