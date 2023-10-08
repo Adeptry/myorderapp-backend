@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { IsString, validateSync } from 'class-validator';
+import { IsOptional, IsString, validateSync } from 'class-validator';
 import { toBigIntOrThrow } from '../utils/to-big-int-or-throw.js';
 
 export type MyOrderAppSquareConfigType = {
@@ -66,72 +66,95 @@ class MyOrderAppSquareConfigValidator {
   SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!: number;
 
   @IsString()
+  @IsOptional()
   SQUARE_TEST_CODE?: string;
 
   @IsString()
+  @IsOptional()
   SQUARE_TEST_ACCESS_TOKEN?: string;
 
   @IsString()
+  @IsOptional()
   SQUARE_TEST_REFRESH_TOKEN?: string;
 
   @IsString()
+  @IsOptional()
   SQUARE_TEST_EXPIRE_AT?: string;
 
   @IsString()
+  @IsOptional()
   SQUARE_TEST_ID?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_USD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_EUR?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_GBP?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_JPY?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_CAD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_0_AUD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_USD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_EUR?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_GBP?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_JPY?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_CAD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_1_AUD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_USD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_EUR?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_GBP?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_JPY?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_CAD?: string;
 
   @IsString()
+  @IsOptional()
   STRIPE_PRICE_ID_TIER_2_AUD?: string;
 }
 
