@@ -393,7 +393,7 @@ export class CustomersController {
             id: Not(request.user.id),
           },
           createDate:
-            startDate && startDate ? Between(startDate!, endDate!) : undefined,
+            startDate && endDate ? Between(startDate!, endDate!) : undefined,
         },
         order: { [orderField as keyof CustomerEntity]: orderSort },
         take: limit,

@@ -27,8 +27,8 @@ export class CustomerMerchantGuard implements CanActivate {
   private readonly logger = new Logger(CustomerMerchantGuard.name);
 
   constructor(
-    private readonly service: CustomersService,
     private readonly authenticationService: AuthenticationService,
+    private readonly customersService: CustomersService,
     private readonly merchantsService: MerchantsService,
     private readonly i18n: I18nService<I18nTranslations>,
   ) {
@@ -67,22 +67,22 @@ export class CustomerMerchantGuard implements CanActivate {
       if (!queryMerchantIdOrPath) {
         throw new BadRequestException(translations.merchantIdOrPathRequired);
       }
-      const customer = await this.service.findOne({
-        where: { userId: user.id },
-      });
-      if (!customer) {
-        throw new UnauthorizedException(translations.customersNotFound);
-      }
-      request.customer = customer;
       const customersMerchant = await this.merchantsService.findOneByIdOrPath({
         where: {
           idOrPath: queryMerchantIdOrPath,
         },
       });
-      if (!customersMerchant) {
+      if (!customersMerchant?.id) {
         throw new UnauthorizedException(translations.merchantsNotFound);
       }
       request.merchant = customersMerchant;
+      const customer = await this.customersService.findOne({
+        where: { userId: user.id, merchantId: customersMerchant.id },
+      });
+      if (!customer) {
+        throw new UnauthorizedException(translations.customersNotFound);
+      }
+      request.customer = customer;
     } else {
       throw new BadRequestException(translations.userTypeInvalid);
     }

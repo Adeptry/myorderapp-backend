@@ -297,7 +297,7 @@ export class OrdersController {
           customerId: request.customer?.id,
           merchantId: request.merchant?.id,
           closedDate:
-            startDate && startDate
+            startDate && endDate
               ? Between(startDate!, endDate!)
               : closed
               ? Not(IsNull())
