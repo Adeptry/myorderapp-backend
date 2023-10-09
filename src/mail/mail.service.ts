@@ -6,6 +6,7 @@ import { RootConfigType } from '../app.config.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { MerchantEntity } from '../moa-square/entities/merchant.entity.js';
 import { OrderEntity } from '../moa-square/entities/order.entity.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 import { UsersService } from '../users/users.service.js';
 
 @Injectable()
@@ -29,13 +30,10 @@ export class MailService {
   }
 
   async sendPostPasswordForgotOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     hash: string;
   }): Promise<void> {
-    const { userId, hash } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, hash } = params;
 
     this.logger.verbose(this.sendPostPasswordForgotOrThrow.name);
 
@@ -107,15 +105,11 @@ export class MailService {
   }
 
   async sendPostSupportOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     subject: string;
     text: string;
   }): Promise<void> {
-    const { userId } = params;
-
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user } = params;
 
     const address = user.email!;
     this.logger.verbose(this.sendPostSupportOrThrow.name);
@@ -172,15 +166,11 @@ export class MailService {
   }
 
   async sendPostContactOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     subject: string;
     text: string;
   }): Promise<void> {
-    const { userId } = params;
-
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user } = params;
 
     this.logger.verbose(this.sendPostContactOrThrow.name);
 
@@ -236,11 +226,8 @@ export class MailService {
     }
   }
 
-  async sendPostMerchantMeOrThrow(params: { userId: string }): Promise<void> {
-    const { userId } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+  async sendPostMerchantMeOrThrow(params: { user: UserEntity }): Promise<void> {
+    const { user } = params;
 
     this.logger.verbose(this.sendPostMerchantMeOrThrow.name);
 
@@ -303,13 +290,10 @@ export class MailService {
   }
 
   async sendPostCustomerMeOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     merchant: MerchantEntity;
   }): Promise<void> {
-    const { userId, merchant } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, merchant } = params;
 
     this.logger.verbose(this.sendPostCustomerMeOrThrow.name);
 
@@ -369,14 +353,140 @@ export class MailService {
     }
   }
 
+  async sendDeleteMerchantMeOrThrow(params: {
+    user: UserEntity;
+  }): Promise<void> {
+    const { user } = params;
+
+    this.logger.verbose(this.sendDeleteMerchantMeOrThrow.name);
+
+    const name =
+      user.fullName ??
+      this.i18n.t(
+        'mail.defaultName',
+        this.defaultTranslationOptions(user.language),
+      )!;
+    const address = user.email!;
+
+    const translationOptions: TranslateOptions = {
+      ...this.defaultTranslationOptions(),
+      args: {
+        ...params,
+        to: {
+          name,
+          address,
+        },
+        supportEmail: this.configService.getOrThrow('app.supportEmail', {
+          infer: true,
+        }),
+      },
+    };
+    const sendSubject = this.i18n.t(
+      'mail.deleteMerchantMe.subject',
+      translationOptions,
+    );
+    const sendText = this.i18n.t(
+      'mail.deleteMerchantMe.text',
+      translationOptions,
+    );
+    const html = this.i18n.t('mail.deleteMerchantMe.html', translationOptions);
+    const footer = this.i18n.t('mail.footer', translationOptions);
+
+    try {
+      await this.service.sendMail({
+        to: {
+          name,
+          address,
+        },
+        bcc: (await this.usersService.findAdmins()).map(
+          (admin) => admin.email!,
+        ),
+        subject: sendSubject,
+        text: sendText,
+        template: 'base',
+        context: {
+          title: sendSubject,
+          preheader: sendText,
+          html,
+          text: sendText,
+          footer,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async sendDeleteCustomerMeOrThrow(params: {
+    user: UserEntity;
+    merchant: MerchantEntity;
+  }): Promise<void> {
+    const { user, merchant } = params;
+
+    this.logger.verbose(this.sendDeleteCustomerMeOrThrow.name);
+
+    const name =
+      user.fullName ??
+      this.i18n.t(
+        'mail.defaultName',
+        this.defaultTranslationOptions(user.language),
+      )!;
+    const address = user.email!;
+
+    const translationOptions: TranslateOptions = {
+      ...this.defaultTranslationOptions(),
+      args: {
+        ...params,
+        to: {
+          name,
+          address,
+        },
+        supportEmail: this.configService.getOrThrow('app.supportEmail', {
+          infer: true,
+        }),
+        merchant,
+      },
+    };
+    const sendSubject = this.i18n.t(
+      'mail.deleteCustomerMe.subject',
+      translationOptions,
+    );
+    const sendText = this.i18n.t(
+      'mail.deleteCustomerMe.text',
+      translationOptions,
+    );
+    const html = this.i18n.t('mail.deleteCustomerMe.html', translationOptions);
+    const footer = this.i18n.t('mail.footer', translationOptions);
+
+    try {
+      await this.service.sendMail({
+        to: {
+          name,
+          address,
+        },
+        subject: sendSubject,
+        text: sendText,
+        template: 'base',
+        context: {
+          title: sendSubject,
+          preheader: sendText,
+          html,
+          text: sendText,
+          footer,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
@@ -437,13 +547,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
@@ -506,13 +613,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
@@ -575,13 +679,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name,
@@ -644,13 +745,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
@@ -713,13 +811,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
@@ -782,13 +877,10 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
@@ -842,6 +934,34 @@ export class MailService {
           html,
           text: sendText,
           footer,
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw error;
+    }
+  }
+
+  async sendAdminMailOrThrow(params: {
+    subject: string;
+    text: string;
+  }): Promise<void> {
+    const { subject, text } = params;
+
+    this.logger.verbose(this.sendAdminMailOrThrow.name);
+
+    try {
+      await this.service.sendMail({
+        to: (await this.usersService.findAdmins()).map((admin) => admin.email!),
+        subject: subject,
+        text: text,
+        template: 'base',
+        context: {
+          title: subject,
+          preheader: text,
+          html: text,
+          text: text,
+          footer: '',
         },
       });
     } catch (error) {

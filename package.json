@@ -32,7 +32,7 @@
     "nanoid": "^5.0.1",
     "nest-square": "^1.1.1",
     "nest-stripe2": "^1.0.0",
-    "nestjs-i18n": "10.3.5",
+    "nestjs-i18n": "^10.3.6",
     "nestjs-s3": "^2.1.0-next.1",
     "nestjs-spelunker": "^1.1.5",
     "nestjs-twilio": "^4.1.1",
@@ -148,5 +148,5 @@
     "typeorm": "node --loader ts-node/esm -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "type": "module",
-  "version": "2.4.0"
+  "version": "2.4.1"
 }

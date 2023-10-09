@@ -13,8 +13,8 @@ export class UserPatchBody {
   })
   @Transform(lowerCaseTransformer)
   @IsOptional()
-  @Validate(IsNotExist, ['User'], {
-    message: 'emailAlreadyExists',
+  @Validate(IsNotExist, ['user'], {
+    message: 'User with this email already exists.',
   })
   @IsEmail()
   email?: string | null;

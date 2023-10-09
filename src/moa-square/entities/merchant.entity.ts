@@ -188,6 +188,7 @@ export class MerchantEntity extends BaseEntity {
 
   @OneToMany(() => CustomerEntity, (entity) => entity.merchant, {
     nullable: true,
+    onDelete: 'NO ACTION',
   })
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()

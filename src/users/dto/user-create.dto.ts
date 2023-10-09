@@ -17,7 +17,7 @@ export class UserCreateDto {
   @ApiProperty({ example: 'test1@example.com' })
   @Transform(lowerCaseTransformer)
   @IsNotEmpty()
-  @Validate(IsNotExist, ['User'], {
+  @Validate(IsNotExist, ['user'], {
     message: 'emailAlreadyExists',
   })
   @IsEmail()
@@ -44,21 +44,14 @@ export class UserCreateDto {
   @IsOptional()
   phoneNumber?: string | null;
 
-  // @ApiProperty({ type: () => FileEntity })
-  // @IsOptional()
-  // @Validate(IsExist, ['FileEntity', 'id'], {
-  //   message: 'imageNotExists',
-  // })
-  // photo?: FileEntity | null;
-
   @ApiProperty({ type: RoleEntity })
-  @Validate(IsExist, ['Role', 'id'], {
+  @Validate(IsExist, ['role', 'id'], {
     message: 'roleNotExists',
   })
   role?: RoleEntity | null;
 
   @ApiProperty({ type: StatusEntity })
-  @Validate(IsExist, ['Status', 'id'], {
+  @Validate(IsExist, ['status', 'id'], {
     message: 'statusNotExists',
   })
   status?: StatusEntity;

@@ -60,16 +60,20 @@ export class CustomerEntity extends BaseEntity {
   userId?: string;
 
   @ApiProperty({ type: () => UserEntity, required: false, nullable: true })
-  @ManyToOne(() => UserEntity, { onDelete: 'CASCADE' })
+  @ManyToOne(() => UserEntity, (entity) => entity.customers, {
+    onDelete: 'CASCADE',
+  })
   user?: Relation<UserEntity>;
 
   /* Merchant */
 
-  @Exclude({ toPlainOnly: true })
+  @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   merchantId?: string;
 
-  @ManyToOne(() => MerchantEntity, { onDelete: 'SET NULL' })
+  @ManyToOne(() => MerchantEntity, (entity) => entity.customers, {
+    onDelete: 'CASCADE',
+  })
   merchant?: Relation<MerchantEntity>;
 
   /* Current order */
@@ -116,14 +120,10 @@ export class CustomerEntity extends BaseEntity {
   preferredLocationId?: string;
 
   @ApiProperty({ type: () => LocationEntity, nullable: true, required: false })
-  @ManyToOne(
-    () => LocationEntity,
-    (entity) => entity.variationLocationOverrides,
-    {
-      onDelete: 'SET NULL',
-      nullable: false,
-    },
-  )
+  @ManyToOne(() => LocationEntity, (entity) => entity.preferredByCustomers, {
+    onDelete: 'SET NULL',
+    nullable: false,
+  })
   @JoinColumn({ name: 'preferredLocationId' })
   preferredLocation?: Relation<LocationEntity> | null;
 

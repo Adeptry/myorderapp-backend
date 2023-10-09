@@ -14,10 +14,13 @@ import {
   Entity,
   Index,
   ManyToOne,
+  OneToMany,
   PrimaryColumn,
   UpdateDateColumn,
 } from 'typeorm';
 import { AuthenticationsProvidersEnum } from '../../authentication/authentication-providers.enum.js';
+import { CustomerEntity } from '../../moa-square/entities/customer.entity.js';
+import { MerchantEntity } from '../../moa-square/entities/merchant.entity.js';
 import { RoleEntity } from './role.entity.js';
 import { StatusEntity } from './status.entity.js';
 
@@ -133,4 +136,20 @@ export class UserEntity extends BaseEntity {
       return `${this.firstName} ${this.lastName}`;
     }
   }
+
+  /*
+   * Relations
+   */
+
+  @OneToMany(() => CustomerEntity, (entity) => entity.user, {
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  customers?: CustomerEntity[];
+
+  @OneToMany(() => MerchantEntity, (entity) => entity.user, {
+    nullable: true,
+    onDelete: 'NO ACTION',
+  })
+  merchants?: MerchantEntity[];
 }

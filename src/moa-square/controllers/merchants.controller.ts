@@ -3,6 +3,7 @@ import {
   ConflictException,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -36,6 +37,7 @@ import type { AuthenticatedRequest } from '../../authentication/authentication.g
 import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
+import { UsersService } from '../../users/users.service.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { StripePostCheckoutBody } from '../dto/merchants/square-post-checkout-body.dto.js';
 import { SquarePostOauthBody } from '../dto/merchants/square-post-oauth-body.dto.js';
@@ -64,6 +66,7 @@ export class MerchantsController {
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly merchantsStripeService: MerchantsStripeService,
     private readonly stripeService: NestStripeService,
+    private readonly usersService: UsersService,
     private readonly mailService: MailService,
   ) {
     this.logger.verbose(this.constructor.name);
@@ -125,7 +128,7 @@ export class MerchantsController {
 
     try {
       await this.mailService.sendPostMerchantMeOrThrow({
-        userId: user.id,
+        user,
       });
     } catch (error) {
       this.logger.error(error);
@@ -183,6 +186,44 @@ export class MerchantsController {
     }
 
     return merchant;
+  }
+
+  @Delete('me')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete current Merchant',
+    operationId: 'deleteMerchantMe',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @ApiOkResponse({ type: MerchantEntity })
+  async deleteMe(@Req() request: AuthenticatedRequest): Promise<void> {
+    this.logger.verbose(this.deleteMe.name);
+    const translations = this.translations();
+    const { user } = request;
+    const merchant = await this.service.findOne({
+      where: { userId: user.id },
+    });
+
+    if (!merchant) {
+      throw new NotFoundException(translations.merchantsNotFound);
+    }
+
+    await this.service.remove(merchant);
+
+    try {
+      await this.mailService.sendDeleteMerchantMeOrThrow({ user });
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    await this.usersService.removeIfUnrelated(user);
+
+    return;
   }
 
   @Get(':idOrPath')

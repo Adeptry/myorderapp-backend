@@ -1,5 +1,15 @@
 {
   "defaultName": "Utilisateur de MyOrderApp",
+  "deleteCustomerMe": {
+    "html": "<p>Bonjour,</p><p>Nous sommes désolés de vous voir partir de MyOrderApp. Nous avons réussi à supprimer votre compte de notre plateforme. Si vous avez des commentaires ou des raisons pour votre départ, nous aimerions les entendre. Votre avis nous aide à nous améliorer. Vous pouvez nous contacter à tout moment à <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Nous vous souhaitons le meilleur!</p><p>Cordialement,</p><p>L'équipe MyOrderApp</p>",
+    "subject": "Confirmation de suppression de compte sur MyOrderApp",
+    "text": "Bonjour,\n\nNous sommes désolés de vous voir partir de MyOrderApp. Votre compte a été supprimé avec succès. Si vous souhaitez partager vos commentaires ou la raison de votre départ, n'hésitez pas à nous contacter à {supportEmail}. Votre avis compte pour nous.\n\nMeilleurs vœux,\nL'équipe MyOrderApp"
+  },
+  "deleteMerchantMe": {
+    "html": "<p>Bonjour {to.name},</p><p>Nous sommes attristés d'apprendre votre décision de quitter MyOrderApp. Nous avons supprimé avec succès votre entreprise de notre plateforme. Vos retours et commentaires nous sont précieux. Si vous souhaitez discuter ou partager les raisons de votre départ, vous pouvez nous contacter à <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Nous espérons que nos chemins se croiseront à nouveau à l'avenir.</p><p>Cordialement,</p><p>L'équipe MyOrderApp</p>",
+    "subject": "Confirmation de suppression de compte professionnel sur MyOrderApp",
+    "text": "Bonjour {to.name},\n\nNous regrettons que vous ayez décidé de quitter MyOrderApp. Votre compte professionnel a été supprimé avec succès. Nous apprécierions grandement vos commentaires et retours. N'hésitez pas à nous envoyer un email à {supportEmail}.\n\nEn espérant une future collaboration,\nL'équipe MyOrderApp"
+  },
   "footer": "Propulsé par MyOrderApp",
   "onEventSquareFulfillmentUpdateCanceled": {
     "html": "<p>Bonjour,</p><p>La commande Référence #{order.displayId} a été annulée. Si vous avez des questions ou des préoccupations, veuillez contacter directement le magasin.</p><p>Nous sommes là pour vous aider.</p><p>Cordialement,</p><p>L'équipe de MyOrderApp</p>",

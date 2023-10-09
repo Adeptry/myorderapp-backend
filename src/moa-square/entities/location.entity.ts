@@ -176,6 +176,7 @@ export class LocationEntity extends BaseEntity {
 
   @OneToMany(() => CustomerEntity, (entity) => entity.preferredLocation, {
     nullable: true,
+    onDelete: 'NO ACTION',
   })
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()

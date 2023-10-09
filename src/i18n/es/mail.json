@@ -1,5 +1,15 @@
 {
   "defaultName": "Usuario de MyOrderApp",
+  "deleteCustomerMe": {
+    "html": "<p>Hola,</p><p>Lamentamos verlo marchar de MyOrderApp. Hemos eliminado con éxito su cuenta de nuestra plataforma. Si tiene comentarios o razones para su salida, nos encantaría escucharlo. Sus comentarios nos ayudan a mejorar. Siempre puede comunicarse con nosotros en <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>¡Le deseamos todo lo mejor!</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Confirmación de eliminación de cuenta en MyOrderApp",
+    "text": "Hola,\n\nSentimos verlo marchar de MyOrderApp. Hemos eliminado su cuenta con éxito. Si desea compartir comentarios o la razón de su salida, no dude en contactarnos a {supportEmail}. Valoramos su opinión.\n\nSaludos cordiales,\nEl equipo de MyOrderApp"
+  },
+  "deleteMerchantMe": {
+    "html": "<p>Hola {to.name},</p><p>Nos entristece escuchar su decisión de abandonar MyOrderApp. Hemos eliminado con éxito su negocio de nuestra plataforma. Sus opiniones y comentarios son invaluables para nosotros. Si desea discutir o compartir las razones de su salida, no dude en contactarnos en <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Esperamos que nuestros caminos se crucen nuevamente en el futuro.</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",
+    "subject": "Confirmación de eliminación de cuenta de negocio en MyOrderApp",
+    "text": "Hola {to.name},\n\nLamentamos que haya decidido abandonar MyOrderApp. Hemos eliminado su cuenta de negocio con éxito. Agradeceríamos mucho cualquier comentario o idea que pueda compartir con nosotros. No dude en enviarnos un correo electrónico a {supportEmail}.\n\nEsperando colaboraciones futuras,\nEl equipo de MyOrderApp"
+  },
   "footer": "Impulsado por MyOrderApp",
   "onEventSquareFulfillmentUpdateCanceled": {
     "html": "<p>Hola,</p><p>El pedido con la Referencia #{order.displayId} ha sido cancelado. Si tienes alguna pregunta o inquietud, por favor contacta directamente con la tienda.</p><p>Estamos aquí para ayudarte.</p><p>Saludos cordiales,</p><p>El equipo de MyOrderApp</p>",

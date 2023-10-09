@@ -338,7 +338,7 @@ export class AuthenticationService {
       }),
     );
     await this.mailService.sendPostPasswordForgotOrThrow({
-      userId: user.id,
+      user,
       hash,
     });
   }

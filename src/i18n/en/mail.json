@@ -61,5 +61,15 @@
     "html": "<p>Hello,</p><p>Order Ref #{order.displayId} is currently in progress. We'll keep you updated on any changes.</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
     "subject": "Order Ref #{order.displayId} In Progress on MyOrderApp",
     "text": "Hello,\n\nYour order Ref #{order.displayId} is currently in progress on MyOrderApp. We'll keep you informed on its status.\n\nBest regards,\nThe MyOrderApp Team"
+  },
+  "deleteCustomerMe": {
+    "html": "<p>Hello,</p><p>We're sorry to see you go from MyOrderApp. We've successfully removed your account from our platform. If you have feedback or reasons for your departure, we'd love to hear from you. Your input helps us improve. You can reach us anytime at <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Wishing you all the best!</p><p>Warm regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Account Removal Confirmation on MyOrderApp",
+    "text": "Hello,\n\nWe're sorry to see you go from MyOrderApp. Your account has been successfully removed. If you'd like to share feedback or the reason for your departure, please reach out to us at {supportEmail}. We value your input.\n\nBest wishes,\nThe MyOrderApp Team"
+  },
+  "deleteMerchantMe": {
+    "html": "<p>Hello {to.name},</p><p>We're saddened to hear of your decision to depart from MyOrderApp. We've successfully removed your business from our platform. Your insights and feedback are invaluable to us. Should you wish to discuss or share reasons for your departure, you can contact us at <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>We hope our paths cross again in the future.</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
+    "subject": "Business Account Removal Confirmation on MyOrderApp",
+    "text": "Hello {to.name},\n\nWe regret that you've decided to leave MyOrderApp. Your business account has been successfully removed. We'd greatly appreciate any feedback or insights you can share with us. Please feel free to email us at {supportEmail}.\n\nHoping for future collaborations,\nThe MyOrderApp Team"
   }
 }

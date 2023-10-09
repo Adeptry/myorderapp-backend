@@ -131,6 +131,16 @@ export type I18nTranslations = {
             "subject": string;
             "text": string;
         };
+        "deleteCustomerMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "deleteMerchantMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
     };
     "messages": {
         "phoneNumberNotFound": string;

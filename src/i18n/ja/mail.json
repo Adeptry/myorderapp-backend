@@ -1,5 +1,15 @@
 {
   "defaultName": "MyOrderAppユーザー",
+  "deleteCustomerMe": {
+    "html": "<p>こんにちは、</p><p>MyOrderAppをご利用いただきありがとうございました。あなたのアカウントを無事に削除しました。もし、ご意見や退会の理由があれば、お聞かせください。貴重なご意見を元に、サービスの向上を図っています。<a href='mailto:{supportEmail}'>{supportEmail}</a>でいつでもお問い合わせいただけます。</p><p>今後ともよろしくお願い申し上げます。</p><p>MyOrderAppチームより</p>",
+    "subject": "MyOrderApp アカウントの削除確認",
+    "text": "こんにちは、\n\nMyOrderAppをご利用いただき、誠にありがとうございました。アカウントの削除を確認いたしました。何かご意見や退会の理由があれば、{supportEmail}までお知らせください。\n\nよろしくお願い申し上げます。\nMyOrderAppチーム"
+  },
+  "deleteMerchantMe": {
+    "html": "<p>こんにちは、{to.name}様</p><p>MyOrderAppからのご退会を承知しました。貴店のアカウントを無事に削除いたしました。ご意見やご感想がございましたら、お気軽に<a href='mailto:{supportEmail}'>{supportEmail}</a>までご連絡ください。今後ともよろしくお願い申し上げます。</p><p>またのご利用を心よりお待ちしております。</p><p>MyOrderAppチームより</p>",
+    "subject": "MyOrderApp 事業者アカウントの削除確認",
+    "text": "こんにちは、{to.name}様\n\nMyOrderAppをご利用いただき、誠にありがとうございました。貴店のアカウントの削除を確認いたしました。何かご意見や退会の理由があれば、{supportEmail}までお知らせください。\n\n今後ともよろしくお願い申し上げます。\nMyOrderAppチーム"
+  },
   "footer": "提供: MyOrderApp",
   "onEventSquareFulfillmentUpdateCanceled": {
     "html": "<p>こんにちは、</p><p>注文参照番号 #{order.displayId} はキャンセルされました。質問や懸念がある場合は、直接店舗に連絡してください。</p><p>助けるためにここにいます。</p><p>よろしくお願いいたします、</p><p>MyOrderApp チーム</p>",

@@ -62,7 +62,7 @@ async function bootstrap() {
   });
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
   app.useGlobalInterceptors(new BigIntInterceptor());
-  // app.useGlobalPipes(new I18nValidationPipe());
+
   app.useGlobalPipes(
     new ValidationPipe({
       exceptionFactory: (errors: ValidationError[]) => {
@@ -87,7 +87,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Square API')
-        .setVersion('2.4.0')
+        .setVersion('2.4.1')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },
@@ -125,7 +125,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.4.0')
+        .setVersion('2.4.1')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },

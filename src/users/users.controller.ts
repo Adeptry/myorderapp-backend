@@ -1,12 +1,15 @@
 import {
   Body,
   Controller,
+  DefaultValuePipe,
   Delete,
   Get,
   HttpCode,
   HttpStatus,
   Logger,
+  ParseBoolPipe,
   Patch,
+  Query,
   Req,
   UnprocessableEntityException,
   UseGuards,
@@ -17,6 +20,7 @@ import {
   ApiBody,
   ApiOkResponse,
   ApiOperation,
+  ApiQuery,
   ApiSecurity,
   ApiTags,
   ApiUnauthorizedResponse,
@@ -61,9 +65,23 @@ export class UsersController {
   @ApiOkResponse({ type: UserEntity })
   @ApiOperation({ operationId: 'getUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
-  getMe(@Req() request: JwtGuardedRequest) {
+  @ApiQuery({ name: 'customers', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchants', required: false, type: Boolean })
+  getMe(
+    @Req() request: JwtGuardedRequest,
+    @Query('customers', new DefaultValuePipe(false), ParseBoolPipe)
+    customersRelation?: boolean,
+    @Query('merchants', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantsRelation?: boolean,
+  ) {
     this.logger.verbose(this.getMe.name);
-    return this.service.findOne({ where: { id: request.user.id } });
+    return this.service.findOne({
+      where: { id: request.user.id },
+      relations: {
+        customers: customersRelation,
+        merchants: merchantsRelation,
+      },
+    });
   }
 
   @Patch('me')
@@ -72,9 +90,15 @@ export class UsersController {
   @ApiOperation({ operationId: 'patchUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   @ApiBody({ type: UserPatchBody })
+  @ApiQuery({ name: 'customers', required: false, type: Boolean })
+  @ApiQuery({ name: 'merchants', required: false, type: Boolean })
   async patchMe(
     @Req() request: JwtGuardedRequest,
     @Body() body: UserPatchBody,
+    @Query('customers', new DefaultValuePipe(false), ParseBoolPipe)
+    customersRelation?: boolean,
+    @Query('merchants', new DefaultValuePipe(false), ParseBoolPipe)
+    merchantsRelation?: boolean,
   ) {
     const { user } = request;
     const { id } = user;
@@ -86,11 +110,15 @@ export class UsersController {
       throw new UnprocessableEntityException(translations.idNotFound);
     }
 
-    return await this.service.patch(
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      { where: { id } },
-      body,
-    );
+    await this.service.patch({ where: { id } }, body);
+
+    return this.service.findOne({
+      where: { id },
+      relations: {
+        customers: customersRelation,
+        merchants: merchantsRelation,
+      },
+    });
   }
 
   @Delete('me')
@@ -99,11 +127,19 @@ export class UsersController {
   @ApiOperation({ operationId: 'deleteUserMe' })
   @ApiUnauthorizedResponse({ type: ErrorResponse })
   async deleteMe(@Req() request: JwtGuardedRequest) {
+    const { user } = request;
+    const { id } = user;
+
     this.logger.verbose(this.deleteMe.name);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await this.service.delete(request.user.id!);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    await this.sessionService.delete({ userId: request.user.id! });
+    const translations = this.translations();
+
+    if (id == undefined) {
+      throw new UnprocessableEntityException(translations.idNotFound);
+    }
+
+    await this.service.delete(id);
+    await this.sessionService.delete({ userId: id });
+
     return;
   }
 }

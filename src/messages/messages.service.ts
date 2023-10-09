@@ -6,7 +6,7 @@ import { NestAppConfig } from '../configs/app.config.js';
 import { TwilioConfig } from '../configs/twilio.config.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { OrderEntity } from '../moa-square/entities/order.entity.js';
-import { UsersService } from '../users/users.service.js';
+import { UserEntity } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class MessagesService {
@@ -15,7 +15,6 @@ export class MessagesService {
   constructor(
     private readonly twilioService: TwilioService,
     private readonly i18n: I18nService<I18nTranslations>,
-    private readonly usersService: UsersService,
     @Inject(TwilioConfig.KEY)
     private readonly config: ConfigType<typeof TwilioConfig>,
     @Inject(NestAppConfig.KEY)
@@ -38,13 +37,10 @@ export class MessagesService {
   }
 
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -63,13 +59,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -88,13 +81,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -113,13 +103,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -138,13 +125,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -163,13 +147,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -188,13 +169,10 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
-    userId: string;
+    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { userId, order } = params;
-    const user = await this.usersService.findOneOrFail({
-      where: { id: userId },
-    });
+    const { user, order } = params;
 
     if (!user.phoneNumber) {
       throw new NotFoundException(

@@ -787,7 +787,7 @@ export class OrdersController {
 
     try {
       await this.messagesService.sendPostSquarePaymentOrderCurrentOrThrow({
-        userId: user.id,
+        user,
         order,
       });
     } catch (error) {
@@ -796,7 +796,7 @@ export class OrdersController {
 
     try {
       await this.mailService.sendPostSquarePaymentOrderCurrentOrThrow({
-        userId: user.id,
+        user,
         order,
       });
     } catch (error) {

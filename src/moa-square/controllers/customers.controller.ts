@@ -3,6 +3,7 @@ import {
   Body,
   Controller,
   DefaultValuePipe,
+  Delete,
   Get,
   HttpCode,
   HttpStatus,
@@ -43,6 +44,7 @@ import { buildPaginatedResults } from '../../database/build-paginated-results.js
 import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
+import { UsersService } from '../../users/users.service.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
 import { AppInstallPostBody } from '../dto/customers/app-install-update.dto.js';
@@ -79,6 +81,7 @@ export class CustomersController {
     private readonly i18n: I18nService<I18nTranslations>,
     private readonly mailService: MailService,
     private readonly merchantsService: MerchantsService,
+    private readonly usersService: UsersService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -148,7 +151,7 @@ export class CustomersController {
 
     try {
       await this.mailService.sendPostCustomerMeOrThrow({
-        userId,
+        user,
         merchant,
       });
     } catch (error) {
@@ -250,6 +253,40 @@ export class CustomersController {
     }
 
     return found;
+  }
+
+  @ApiBearerAuth()
+  @Delete('me')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard('jwt'), CustomersGuard)
+  @ApiQuery({ name: 'merchantIdOrPath', required: true, type: String })
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: CustomerEntity })
+  @ApiOperation({
+    summary: 'Delete current Customer',
+    operationId: 'deleteCustomerMe',
+  })
+  async deleteMe(@Req() request: CustomersGuardedRequest): Promise<void> {
+    const { customer, merchant, user } = request;
+
+    this.logger.verbose(this.deleteMe.name);
+    const translations = this.translations();
+
+    if (!customer.id || !merchant.id) {
+      throw new BadRequestException(translations.idNotFound);
+    }
+
+    await this.service.remove(customer);
+
+    try {
+      await this.mailService.sendDeleteCustomerMeOrThrow({ user, merchant });
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    await this.usersService.removeIfUnrelated(user);
+
+    return;
   }
 
   @UseGuards(AuthGuard('jwt'), CustomersGuard)

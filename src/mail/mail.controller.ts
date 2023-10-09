@@ -94,7 +94,7 @@ export class MailController {
     }
 
     await this.service.sendPostSupportOrThrow({
-      userId,
+      user,
       subject,
       text,
     });
@@ -143,7 +143,7 @@ export class MailController {
     }
 
     await this.service.sendPostContactOrThrow({
-      userId: user.id!,
+      user,
       subject,
       text,
     });

@@ -814,9 +814,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         },
       },
     });
-    const userId = order?.customer?.user?.id;
+    const user = order?.customer?.user;
 
-    if (!userId || !order?.squareFulfillmentStatus) {
+    if (!user || !order?.squareFulfillmentStatus) {
       throw new UnprocessableEntityException(
         'Missing userId or squareFulfillmentStatus',
       );
@@ -826,13 +826,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.proposed:
         await this.messagesService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
@@ -840,13 +840,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.reserved:
         await this.messagesService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
@@ -854,13 +854,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.prepared:
         await this.messagesService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
@@ -868,13 +868,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.completed:
         await this.messagesService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
@@ -882,13 +882,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.canceled:
         await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
@@ -896,12 +896,12 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       case FulfillmentStatusEnum.failed:
         await this.messagesService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
           {
-            userId,
+            user,
             order,
           },
         );
         await this.mailService.sendOnEventSquareFulfillmentUpdateFailedOrThrow({
-          userId,
+          user,
           order,
         });
         break;
