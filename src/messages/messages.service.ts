@@ -42,6 +42,8 @@ export class MessagesService {
   }) {
     const { user, order } = params;
 
+    this.logger.verbose(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+
     if (!user.phoneNumber) {
       throw new NotFoundException(
         this.translations(user.language).phoneNumberNotFound,
@@ -63,6 +65,10 @@ export class MessagesService {
     order: OrderEntity;
   }) {
     const { user, order } = params;
+
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
+    );
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -86,6 +92,10 @@ export class MessagesService {
   }) {
     const { user, order } = params;
 
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
+    );
+
     if (!user.phoneNumber) {
       throw new NotFoundException(
         this.translations(user.language).phoneNumberNotFound,
@@ -107,6 +117,10 @@ export class MessagesService {
     order: OrderEntity;
   }) {
     const { user, order } = params;
+
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name,
+    );
 
     if (!user.phoneNumber) {
       throw new NotFoundException(
@@ -130,6 +144,10 @@ export class MessagesService {
   }) {
     const { user, order } = params;
 
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
+    );
+
     if (!user.phoneNumber) {
       throw new NotFoundException(
         this.translations(user.language).phoneNumberNotFound,
@@ -152,6 +170,10 @@ export class MessagesService {
   }) {
     const { user, order } = params;
 
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
+    );
+
     if (!user.phoneNumber) {
       throw new NotFoundException(
         this.translations(user.language).phoneNumberNotFound,
@@ -173,6 +195,10 @@ export class MessagesService {
     order: OrderEntity;
   }) {
     const { user, order } = params;
+
+    this.logger.verbose(
+      this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
+    );
 
     if (!user.phoneNumber) {
       throw new NotFoundException(

@@ -56,6 +56,7 @@ export class CustomersGuard implements CanActivate {
     if (!user?.id) {
       throw new UnauthorizedException(translations.usersNotFound);
     }
+    request.user = user;
 
     let customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
       where: {

@@ -54,6 +54,7 @@ export class CustomerMerchantGuard implements CanActivate {
     if (!user?.id) {
       throw new UnauthorizedException(translations.usersNotFound);
     }
+    request.user = user;
 
     if (userType === UserTypeEnum.merchant) {
       const merchant = await this.merchantsService.findOne({

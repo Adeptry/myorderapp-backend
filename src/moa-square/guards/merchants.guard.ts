@@ -43,6 +43,7 @@ export class MerchantsGuard implements CanActivate {
     if (!user) {
       throw new UnauthorizedException(translations.usersNotFound);
     }
+    request.user = user;
 
     const merchant = await this.service.findOne({
       where: { userId: user.id },
