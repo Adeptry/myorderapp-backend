@@ -10,13 +10,13 @@ import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { UserEntity } from '../users/entities/user.entity.js';
 import { AuthenticationService } from './authentication.service.js';
 
-export interface AuthenticatedRequest extends Request {
+export interface UsersGuardedRequest extends Request {
   user: UserEntity;
 }
 
 @Injectable()
-export class AuthenticationGuard implements CanActivate {
-  private readonly logger = new Logger(AuthenticationGuard.name);
+export class UsersGuard implements CanActivate {
+  private readonly logger = new Logger(UsersGuard.name);
 
   constructor(
     private readonly service: AuthenticationService,
@@ -42,7 +42,6 @@ export class AuthenticationGuard implements CanActivate {
       throw new UnauthorizedException(translations.userNotFound);
     }
 
-    // Store user object in request for later use
     request.user = user;
 
     return true;

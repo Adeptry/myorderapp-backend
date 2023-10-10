@@ -38,8 +38,8 @@ import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { Between, Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
-import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
-import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
+import type { UsersGuardedRequest } from '../../authentication/users.guard.js';
+import { UsersGuard } from '../../authentication/users.guard.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
@@ -93,7 +93,7 @@ export class CustomersController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant does not have Square access token',
@@ -115,7 +115,7 @@ export class CustomersController {
   @ApiQuery({ name: 'currentOrder', required: false, type: Boolean })
   @ApiQuery({ name: 'preferredLocation', required: false, type: Boolean })
   async post(
-    @Req() request: AuthenticatedRequest,
+    @Req() request: UsersGuardedRequest,
     @Query('merchantIdOrPath') merchantIdOrPath: string,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
@@ -277,6 +277,24 @@ export class CustomersController {
     }
 
     await this.service.remove(customer);
+
+    const customerSquareId = customer.squareId;
+    if (
+      merchant.squareAccessToken &&
+      customerSquareId !== undefined &&
+      customerSquareId !== null
+    ) {
+      try {
+        await this.squareService.retryOrThrow(
+          merchant.squareAccessToken,
+          (client) => {
+            return client.customersApi.deleteCustomer(customerSquareId);
+          },
+        );
+      } catch (error) {
+        this.logger.error(error);
+      }
+    }
 
     try {
       await this.mailService.sendDeleteCustomerMeOrThrow({ user, merchant });

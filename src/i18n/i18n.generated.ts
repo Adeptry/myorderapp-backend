@@ -69,38 +69,17 @@ export type I18nTranslations = {
     };
     "mail": {
         "defaultName": string;
+        "deleteCustomerMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "deleteMerchantMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
         "footer": string;
-        "postContact": {
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
-        "postCustomerMe": {
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
-        "postMerchantMe": {
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
-        "postPasswordForgot": {
-            "action": string;
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
-        "postSupport": {
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
-        "postSquarePaymentOrderCurrent": {
-            "html": string;
-            "subject": string;
-            "text": string;
-        };
         "onEventSquareFulfillmentUpdateCanceled": {
             "html": string;
             "subject": string;
@@ -131,12 +110,33 @@ export type I18nTranslations = {
             "subject": string;
             "text": string;
         };
-        "deleteCustomerMe": {
+        "postContact": {
             "html": string;
             "subject": string;
             "text": string;
         };
-        "deleteMerchantMe": {
+        "postCustomerMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postMerchantMe": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postPasswordForgot": {
+            "action": string;
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postSquarePaymentOrderCurrent": {
+            "html": string;
+            "subject": string;
+            "text": string;
+        };
+        "postSupport": {
             "html": string;
             "subject": string;
             "text": string;

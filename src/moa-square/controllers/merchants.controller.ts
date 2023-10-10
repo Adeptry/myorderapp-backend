@@ -33,8 +33,8 @@ import {
 import { NestStripeService } from 'nest-stripe2';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
-import type { AuthenticatedRequest } from '../../authentication/authentication.guard.js';
-import { AuthenticationGuard } from '../../authentication/authentication.guard.js';
+import type { UsersGuardedRequest } from '../../authentication/users.guard.js';
+import { UsersGuard } from '../../authentication/users.guard.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
 import { UsersService } from '../../users/users.service.js';
@@ -79,7 +79,7 @@ export class MerchantsController {
   }
 
   @ApiBearerAuth()
-  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @Post('me')
   @ApiBadRequestResponse({
     description: 'Merchant already exists',
@@ -95,7 +95,7 @@ export class MerchantsController {
     description: 'Merchant already exists',
     type: ErrorResponse,
   })
-  async postMe(@Req() request: AuthenticatedRequest) {
+  async postMe(@Req() request: UsersGuardedRequest) {
     this.logger.verbose(this.postMe.name);
     const translations = this.translations();
 
@@ -139,7 +139,7 @@ export class MerchantsController {
 
   @Get('me')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Get current Merchant',
@@ -155,7 +155,7 @@ export class MerchantsController {
   })
   @ApiOkResponse({ type: MerchantEntity })
   async getMe(
-    @Req() request: AuthenticatedRequest,
+    @Req() request: UsersGuardedRequest,
     @Query('user', new DefaultValuePipe(false), ParseBoolPipe)
     userRelation?: boolean,
     @Query('appConfig', new DefaultValuePipe(false), ParseBoolPipe)
@@ -190,7 +190,7 @@ export class MerchantsController {
 
   @Delete('me')
   @HttpCode(HttpStatus.OK)
-  @UseGuards(AuthGuard('jwt'), AuthenticationGuard)
+  @UseGuards(AuthGuard('jwt'), UsersGuard)
   @ApiBearerAuth()
   @ApiOperation({
     summary: 'Delete current Merchant',
@@ -201,7 +201,7 @@ export class MerchantsController {
     type: ErrorResponse,
   })
   @ApiOkResponse({ type: MerchantEntity })
-  async deleteMe(@Req() request: AuthenticatedRequest): Promise<void> {
+  async deleteMe(@Req() request: UsersGuardedRequest): Promise<void> {
     this.logger.verbose(this.deleteMe.name);
     const translations = this.translations();
     const { user } = request;

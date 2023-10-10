@@ -145,6 +145,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
           emailAddress: user.email ?? undefined,
           givenName: user.firstName ?? undefined,
           familyName: user.lastName ?? undefined,
+          phoneNumber: user.phoneNumber ?? undefined,
           idempotencyKey: customer.id,
           referenceId: customer.id,
         }),
@@ -176,6 +177,9 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       firstName,
       lastName,
       phoneNumber,
+      mailNotifications,
+      messageNotifications,
+      pushNotifications,
     } = body;
 
     const merchant = await this.merchantsService.findOneOrFail({
@@ -231,6 +235,19 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
 
     if (preferredSquareCardId !== undefined) {
       customer.preferredSquareCardId = preferredSquareCardId;
+      saveCustomer = true;
+    }
+
+    if (mailNotifications !== undefined) {
+      customer.mailNotifications = mailNotifications;
+      saveCustomer = true;
+    }
+    if (messageNotifications !== undefined) {
+      customer.messageNotifications = messageNotifications;
+      saveCustomer = true;
+    }
+    if (pushNotifications !== undefined) {
+      customer.pushNotifications = pushNotifications;
       saveCustomer = true;
     }
 

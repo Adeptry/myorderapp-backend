@@ -57,7 +57,7 @@ export class CustomersGuard implements CanActivate {
       throw new UnauthorizedException(translations.usersNotFound);
     }
 
-    const customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+    let customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
       where: {
         userId: user.id,
         merchantIdOrPath,
@@ -65,7 +65,10 @@ export class CustomersGuard implements CanActivate {
     });
 
     if (!customer) {
-      throw new NotFoundException(translations.customersNotFound);
+      customer = await this.service.createSaveAndSyncSquare({
+        userId: user.id,
+        merchantIdOrPath,
+      });
     }
 
     // Store customer object in request for later use

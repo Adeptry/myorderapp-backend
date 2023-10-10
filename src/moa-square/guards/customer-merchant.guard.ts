@@ -51,7 +51,7 @@ export class CustomerMerchantGuard implements CanActivate {
 
     const user = await this.authenticationService.me(request.user);
 
-    if (!user) {
+    if (!user?.id) {
       throw new UnauthorizedException(translations.usersNotFound);
     }
 
@@ -76,11 +76,14 @@ export class CustomerMerchantGuard implements CanActivate {
         throw new UnauthorizedException(translations.merchantsNotFound);
       }
       request.merchant = customersMerchant;
-      const customer = await this.customersService.findOne({
+      let customer = await this.customersService.findOne({
         where: { userId: user.id, merchantId: customersMerchant.id },
       });
       if (!customer) {
-        throw new UnauthorizedException(translations.customersNotFound);
+        customer = await this.customersService.createSaveAndSyncSquare({
+          userId: user.id,
+          merchantIdOrPath: customersMerchant.id,
+        });
       }
       request.customer = customer;
     } else {
