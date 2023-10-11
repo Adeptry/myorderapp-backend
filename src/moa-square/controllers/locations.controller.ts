@@ -122,6 +122,7 @@ export class LocationsController {
   })
   async getMe(
     @Req() request: UserTypeGuardedRequest,
+    @Query('actingAs') actingAs: UserTypeEnum,
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('address', new DefaultValuePipe(false), ParseBoolPipe)
@@ -132,7 +133,11 @@ export class LocationsController {
     this.logger.verbose(this.getMe.name);
     return buildPaginatedResults({
       results: await this.service.findAndCount({
-        where: { merchantId: request.merchant.id, status: 'ACTIVE' },
+        where: {
+          merchantId: request.merchant.id,
+          status: 'ACTIVE',
+          moaEnabled: actingAs === UserTypeEnum.customer ? true : undefined,
+        },
         relations: {
           address: addressRelation,
           businessHours: businessHoursRelation,

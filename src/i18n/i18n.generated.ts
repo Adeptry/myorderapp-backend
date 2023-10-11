@@ -165,6 +165,7 @@ export type I18nTranslations = {
         "itemsNotFound": string;
         "locationsBusinessHoursNotFound": string;
         "locationsMainNotFound": string;
+        "locationsNotEnabled": string;
         "locationsNotFound": string;
         "locationsPickupInPast": string;
         "locationsPickupOutsideBusinessHours": string;
@@ -174,6 +175,7 @@ export type I18nTranslations = {
         "merchantIdOrPathRequired": string;
         "merchantsExists": string;
         "merchantsNeedsCatalog": string;
+        "merchantsNotEnabled": string;
         "merchantsNotFound": string;
         "merchantsSquareAccessTokenNotFound": string;
         "merchantsSquareIdNotFound": string;

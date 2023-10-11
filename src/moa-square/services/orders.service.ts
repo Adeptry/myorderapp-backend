@@ -538,6 +538,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const merchant = await this.merchantsService.findOneOrFail({
       where: { id: merchantId },
+      relations: {
+        appConfig: true,
+      },
     });
 
     const customer = await this.customersService.findOneOrFail({
@@ -553,11 +556,18 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     if (!location) {
       throw new UnprocessableEntityException(translations.locationsNotFound);
     }
-    const { squareId: locationSquareId, id: locationMoaId } = location;
+    const {
+      squareId: locationSquareId,
+      id: locationMoaId,
+      moaEnabled: locationMoaEnabled,
+    } = location;
     if (!locationSquareId || !locationMoaId) {
       throw new UnprocessableEntityException(
         translations.locationsSquareIdNotFound,
       );
+    }
+    if (!locationMoaEnabled) {
+      throw new UnprocessableEntityException(translations.locationsNotEnabled);
     }
 
     /* Merchant */
@@ -566,16 +576,24 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       tier: merchantTier,
       pickupLeadDurationMinutes,
       squareAccessToken: merchantSquareAccessToken,
+      appConfig,
     } = merchant;
     if (
       !merchantSquareAccessToken ||
       merchantTier == undefined ||
       merchantTier > 2 ||
-      merchantTier < 0
+      merchantTier < 0 ||
+      !appConfig
     ) {
       throw new UnprocessableEntityException(
         translations.merchantsSquareAccessTokenNotFound,
       );
+    }
+
+    const { enabled: merchantAppEnabled } = appConfig;
+
+    if (!merchantAppEnabled) {
+      throw new UnprocessableEntityException(translations.merchantsNotEnabled);
     }
 
     /* Customer */

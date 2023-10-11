@@ -145,7 +145,7 @@ export class AppConfigEntity extends BaseEntity {
   merchantId?: string;
 
   @ManyToOne(() => MerchantEntity, (entity) => entity.appConfig, {
-    onDelete: 'SET NULL',
+    onDelete: 'CASCADE',
   })
   @JoinColumn()
   merchant?: Relation<MerchantEntity>;

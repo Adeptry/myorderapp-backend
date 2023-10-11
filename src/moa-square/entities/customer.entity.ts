@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  Index,
   JoinColumn,
   ManyToOne,
   OneToMany,
@@ -24,6 +25,7 @@ import { LocationEntity } from './location.entity.js';
 import { MerchantEntity } from './merchant.entity.js';
 import { OrderEntity } from './order.entity.js';
 
+@Index(['userId', 'merchantId'], { unique: true })
 @Entity('customer')
 export class CustomerEntity extends BaseEntity {
   /* Base entity */
