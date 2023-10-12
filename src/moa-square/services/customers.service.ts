@@ -127,17 +127,6 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       );
     }
 
-    const customer = await this.save(
-      this.create({
-        merchantId: merchant.id,
-        userId: userId,
-      }),
-    );
-
-    customer.preferredLocation = await this.locationsService.findOne({
-      where: { isMain: true, merchantId: merchant.id },
-    });
-
     const response = await this.squareService.retryOrThrow(
       merchant.squareAccessToken,
       (client) =>
@@ -146,18 +135,35 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
           givenName: user.firstName ?? undefined,
           familyName: user.lastName ?? undefined,
           phoneNumber: user.phoneNumber ?? undefined,
-          idempotencyKey: customer.id,
-          referenceId: customer.id,
         }),
     );
 
-    if (!response.result.customer?.id) {
+    const squareCustomerId = response.result.customer?.id;
+    if (!squareCustomerId) {
       throw new InternalServerErrorException(
         translations.squareInvalidResponse,
       );
     }
 
-    customer.squareId = response.result.customer?.id;
+    const customer = await this.save(
+      this.create({
+        merchantId: merchant.id,
+        userId: userId,
+        squareId: squareCustomerId,
+      }),
+    );
+
+    customer.preferredLocation = await this.locationsService.findOne({
+      where: { isMain: true, merchantId: merchant.id },
+    });
+
+    await this.squareService.retryOrThrow(
+      merchant.squareAccessToken,
+      (client) =>
+        client.customersApi.updateCustomer(squareCustomerId, {
+          referenceId: customer.id,
+        }),
+    );
 
     return await this.save(customer);
   }

@@ -110,8 +110,8 @@ export class CustomerEntity extends BaseEntity {
   /* Square */
 
   @Exclude({ toPlainOnly: true })
-  @Column('text', { nullable: true })
-  squareId?: string | null;
+  @Column('text')
+  squareId?: string;
 
   /*
    * Preferred location

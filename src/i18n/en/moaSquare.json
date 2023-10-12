@@ -5,7 +5,7 @@
   "catalogsNotFound": "Unable to locate the specified catalog. Please verify your details.",
   "customersExists": "A customer with these details already exists. Consider using a different name or updating the information.",
   "customersNotFound": "Unable to locate the specified customer. Double-check and try again.",
-  "customersSquareIdNotFound": "Your account does not have an associated Square ID. Update your account details.",
+  "customersSquareIdNotFound": "Your account does not yet have an associated Square ID. Just try again, and if the problem persists, contact support.",
   "fileNotFound": "The request did not contain a file. Please attach one and try again.",
   "idNotFound": "The specified ID was not found. Please ensure the details are correct.",
   "itemsNotFound": "No item with the specified ID was found.",
