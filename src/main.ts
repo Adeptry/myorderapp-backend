@@ -87,7 +87,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Square API')
-        .setVersion('2.4.1')
+        .setVersion('2.4.2')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },
@@ -125,7 +125,7 @@ async function bootstrap() {
       app,
       new DocumentBuilder()
         .setTitle('MyOrderApp Admin API')
-        .setVersion('2.4.1')
+        .setVersion('2.4.2')
         .addBearerAuth()
         .addApiKey(
           { type: 'apiKey', name: config.headerApiKey, in: 'header' },

@@ -57,13 +57,6 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true, unique: true })
   path?: string;
 
-  @ApiProperty({
-    required: false,
-    nullable: true,
-  })
-  @Column({ nullable: true, default: true })
-  enabled?: boolean;
-
   @BeforeUpdate()
   @BeforeInsert()
   setPathComponent() {
@@ -83,6 +76,13 @@ export class AppConfigEntity extends BaseEntity {
 
     this.path = processedPathComponent;
   }
+
+  @ApiProperty({
+    required: false,
+    nullable: true,
+  })
+  @Column({ nullable: true, default: true })
+  enabled?: boolean;
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
@@ -109,17 +109,9 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ type: 'simple-enum', nullable: true, enum: ThemeModeEnum })
   themeMode?: ThemeModeEnum;
 
-  @ApiProperty({ required: false, nullable: true })
+  @ApiProperty({ required: false, type: String, nullable: true })
   @Column({ nullable: true })
-  message?: string;
-
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  blockingMessage?: string;
-
-  @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  minimumVersion?: string;
+  description?: string;
 
   /* App Icon */
 
@@ -134,9 +126,18 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   iconFileFullUrl?: string;
 
-  // @ApiProperty({ required: false, nullable: true })
-  // @Column({ nullable: true })
-  // enabled?: boolean;
+  /* Favicon */
+
+  @Column({ nullable: true })
+  faviconFileKey?: string;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  faviconFileDisplayName?: string;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  faviconFileFullUrl?: string;
 
   /* Relations */
 

@@ -26,6 +26,11 @@ export class AppConfigUpdateBody {
   @IsOptional()
   fontFamily?: string;
 
+  @ApiProperty({ required: false, nullable: true })
+  @IsString()
+  @IsOptional()
+  description?: string;
+
   @ApiProperty({
     required: false,
     nullable: true,
