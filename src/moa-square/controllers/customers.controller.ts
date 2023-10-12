@@ -233,13 +233,13 @@ export class CustomersController {
     });
 
     if (preferredSquareCardRelation) {
-      if (!merchant.squareAccessToken || !customer.squareId) {
+      if (!merchant.squareAccessToken || !found.squareId) {
         throw new BadRequestException(
           translations.merchantsSquareAccessTokenNotFound,
         );
       }
 
-      const { preferredSquareCardId } = customer;
+      const { preferredSquareCardId } = found;
       if (
         preferredSquareCardId !== null &&
         preferredSquareCardId !== undefined
@@ -375,7 +375,7 @@ export class CustomersController {
         );
       }
 
-      const { preferredSquareCardId } = customer;
+      const { preferredSquareCardId } = found;
       if (
         preferredSquareCardId !== null &&
         preferredSquareCardId !== undefined

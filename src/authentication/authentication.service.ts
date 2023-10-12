@@ -323,7 +323,7 @@ export class AuthenticationService {
       },
     });
 
-    if (!user || !user.email || !user.firstName || !user.id) {
+    if (!user || !user.email || !user.id) {
       throw new UnprocessableEntityException(translations.emailNotFound);
     }
 
