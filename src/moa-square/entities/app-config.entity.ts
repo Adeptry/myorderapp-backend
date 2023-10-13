@@ -134,23 +134,6 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   iconFileContentType?: string;
 
-  /* Favicon */
-
-  @Column({ nullable: true })
-  faviconFileKey?: string;
-
-  @ApiProperty({ required: false, type: String, nullable: true })
-  @Column({ nullable: true })
-  faviconFileDisplayName?: string;
-
-  @ApiProperty({ required: false, type: String, nullable: true })
-  @Column({ nullable: true })
-  faviconFileFullUrl?: string;
-
-  @ApiProperty({ required: false, type: String, nullable: true })
-  @Column({ nullable: true })
-  faviconFileContentType?: string;
-
   /* Relations */
 
   @Exclude({ toPlainOnly: true })

@@ -44,4 +44,28 @@ export class OrdersPostPaymentBody {
   })
   @IsOptional()
   recipient?: FulfillmentRecipientInput;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+    nullable: true,
+  })
+  @IsOptional()
+  platformIsAndroid?: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+    nullable: true,
+  })
+  @IsOptional()
+  platformIsIos?: boolean;
+
+  @ApiProperty({
+    required: false,
+    type: Boolean,
+    nullable: true,
+  })
+  @IsOptional()
+  platformIsWeb?: boolean;
 }
