@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   ConflictException,
   Controller,
@@ -37,6 +38,7 @@ import {
 } from '@nestjs/swagger';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { InjectS3, type S3 } from 'nestjs-s3';
+import path from 'path';
 import { Not } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import { AwsS3Config } from '../../configs/aws-s3.config.js';
@@ -278,6 +280,17 @@ export class AppConfigController {
       throw new UnauthorizedException(translations.merchantsNotFound);
     }
 
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    let contentType: string;
+
+    if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+      contentType = 'image/jpeg';
+    } else if (fileExtension === '.png') {
+      contentType = 'image/png';
+    } else {
+      throw new BadRequestException('Invalid file type'); // You can customize this message
+    }
+
     let appConfig = await this.service.findOne({
       where: { merchantId: merchant.id },
     });
@@ -301,6 +314,8 @@ export class AppConfigController {
         Bucket: defaultBucket,
         Key: key,
         Body: file.buffer,
+        ContentType: contentType,
+        ContentDisposition: 'inline',
       });
     } catch (error) {
       this.logger.error(error);
@@ -310,6 +325,7 @@ export class AppConfigController {
     appConfig.iconFileKey = key;
     appConfig.iconFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
     appConfig.iconFileDisplayName = file.originalname;
+    appConfig.iconFileContentType = contentType;
 
     return this.service.save(appConfig);
   }

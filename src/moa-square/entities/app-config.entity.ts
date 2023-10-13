@@ -130,6 +130,9 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   iconFileFullUrl?: string;
 
+  @Column({ nullable: true })
+  iconFileContentType?: string;
+
   /* Favicon */
 
   @Column({ nullable: true })
@@ -142,6 +145,9 @@ export class AppConfigEntity extends BaseEntity {
   @ApiProperty({ required: false, type: String, nullable: true })
   @Column({ nullable: true })
   faviconFileFullUrl?: string;
+
+  @Column({ nullable: true })
+  faviconFileContentType?: string;
 
   /* Relations */
 
