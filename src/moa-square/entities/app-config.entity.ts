@@ -111,6 +111,10 @@ export class AppConfigEntity extends BaseEntity {
 
   @ApiProperty({ required: false, type: String, nullable: true })
   @Column({ nullable: true })
+  title?: string;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
   description?: string;
 
   /* App Icon */

@@ -29,6 +29,11 @@ export class AppConfigUpdateBody {
   @ApiProperty({ required: false, nullable: true })
   @IsString()
   @IsOptional()
+  title?: string;
+
+  @ApiProperty({ required: false, nullable: true })
+  @IsString()
+  @IsOptional()
   description?: string;
 
   @ApiProperty({
