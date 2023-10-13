@@ -155,7 +155,7 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
             { locationId },
           )
           .andWhere(
-            '(EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE "locationId" = :locationId AND "modifierId" = modifiers.id) OR ' +
+            '(itemModifierLists.id IS NULL OR EXISTS (SELECT 1 FROM modifiers_present_at_locations WHERE "locationId" = :locationId AND "modifierId" = modifiers.id) OR ' +
               '(modifiers.presentAtAllLocations = true AND NOT EXISTS (SELECT 1 FROM modifiers_absent_at_locations WHERE "locationId" = :locationId AND "modifierId" = modifiers.id)))',
             { locationId },
           )

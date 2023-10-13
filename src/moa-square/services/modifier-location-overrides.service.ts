@@ -42,18 +42,18 @@ export class ModifierLocationOverridesService extends EntityRepositoryService<Mo
     }
 
     // Then, recreate them based on the current Square data
-    for (const modifierOverride of squareModifierLocationOverrides) {
+    for (const override of squareModifierLocationOverrides) {
       const moaLocationForModifierOverride = moaLocations.find((value) => {
-        return value.squareId === modifierOverride.locationId;
+        return value.squareId === override.locationId;
       });
 
       const moaModifierLocationOverride = new ModifierLocationOverrideEntity();
       moaModifierLocationOverride.modifierId = moaModifierId;
       moaModifierLocationOverride.locationId =
         moaLocationForModifierOverride?.id;
-      moaModifierLocationOverride.priceMoneyAmount = Number(
-        modifierOverride.priceMoney?.amount ?? 0,
-      );
+      moaModifierLocationOverride.priceMoneyAmount = override.priceMoney?.amount
+        ? Number(override.priceMoney?.amount)
+        : undefined;
       moaModifierLocationOverride.catalogId = params.moaCatalogId;
 
       await this.save(moaModifierLocationOverride);
