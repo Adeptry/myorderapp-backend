@@ -11,10 +11,10 @@ export enum OrdersOrderFieldEnum {
   customerId = 'customerId',
   locationId = 'locationId',
   totalMoneyAmount = 'totalMoneyAmount',
-  totalMoneyTaxAmount = 'totalMoneyTaxAmount',
-  totalMoneyDiscountAmount = 'totalMoneyDiscountAmount',
-  totalMoneyTipAmount = 'totalMoneyTipAmount',
-  totalMoneyServiceChargeAmount = 'totalMoneyServiceChargeAmount',
+  totalTaxMoneyAmount = 'totalTaxMoneyAmount',
+  totalDiscountMoneyAmount = 'totalDiscountMoneyAmount',
+  totalTipMoneyAmount = 'totalTipMoneyAmount',
+  totalServiceChargeMoneyAmount = 'totalServiceChargeMoneyAmount',
   appFeeMoneyAmount = 'appFeeMoneyAmount',
 }
 

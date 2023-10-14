@@ -158,28 +158,28 @@ export class OrderEntity extends BaseEntity {
     nullable: true,
   })
   @Column({ default: 0 })
-  totalMoneyTaxAmount!: number;
+  totalTaxMoneyAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ default: 0 })
-  totalMoneyDiscountAmount!: number;
+  totalDiscountMoneyAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ default: 0 })
-  totalMoneyTipAmount!: number;
+  totalTipMoneyAmount!: number;
 
   @ApiProperty({
     required: false,
     nullable: true,
   })
   @Column({ default: 0 })
-  totalMoneyServiceChargeAmount!: number;
+  totalServiceChargeMoneyAmount!: number;
 
   @ApiProperty({
     required: false,

@@ -19,26 +19,26 @@ export class OrdersStatisticsResponse {
     type: () => StatisticsOutput,
     nullable: true,
   })
-  moneyTaxAmount?: StatisticsOutput;
+  taxMoneyAmount?: StatisticsOutput;
 
   @ApiProperty({
     required: false,
     type: () => StatisticsOutput,
     nullable: true,
   })
-  moneyTipAmount?: StatisticsOutput;
+  tipMoneyAmount?: StatisticsOutput;
 
   @ApiProperty({
     required: false,
     type: () => StatisticsOutput,
     nullable: true,
   })
-  moneyServiceChargeAmount?: StatisticsOutput;
+  serviceChargeMoneyAmount?: StatisticsOutput;
 
   @ApiProperty({
     required: false,
     type: () => StatisticsOutput,
     nullable: true,
   })
-  moneyAppFeeAmount?: StatisticsOutput;
+  appFeeMoneyAmount?: StatisticsOutput;
 }

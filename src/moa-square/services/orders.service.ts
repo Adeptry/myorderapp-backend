@@ -87,16 +87,16 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         maximum:
           (await this.repository.maximum('totalMoneyAmount', where)) ?? 0,
       },
-      moneyTipAmount: {
-        sum: (await this.repository.sum('totalMoneyTipAmount', where)) ?? 0,
+      tipMoneyAmount: {
+        sum: (await this.repository.sum('totalTipMoneyAmount', where)) ?? 0,
         average:
-          (await this.repository.average('totalMoneyTipAmount', where)) ?? 0,
+          (await this.repository.average('totalTipMoneyAmount', where)) ?? 0,
         minimum:
-          (await this.repository.minimum('totalMoneyTipAmount', where)) ?? 0,
+          (await this.repository.minimum('totalTipMoneyAmount', where)) ?? 0,
         maximum:
-          (await this.repository.maximum('totalMoneyTipAmount', where)) ?? 0,
+          (await this.repository.maximum('totalTipMoneyAmount', where)) ?? 0,
       },
-      moneyAppFeeAmount: {
+      appFeeMoneyAmount: {
         sum: (await this.repository.sum('appFeeMoneyAmount', where)) ?? 0,
         average:
           (await this.repository.average('appFeeMoneyAmount', where)) ?? 0,
@@ -105,34 +105,34 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         maximum:
           (await this.repository.maximum('appFeeMoneyAmount', where)) ?? 0,
       },
-      moneyServiceChargeAmount: {
+      serviceChargeMoneyAmount: {
         sum:
-          (await this.repository.sum('totalMoneyServiceChargeAmount', where)) ??
+          (await this.repository.sum('totalServiceChargeMoneyAmount', where)) ??
           0,
         average:
           (await this.repository.average(
-            'totalMoneyServiceChargeAmount',
+            'totalServiceChargeMoneyAmount',
             where,
           )) ?? 0,
         minimum:
           (await this.repository.minimum(
-            'totalMoneyServiceChargeAmount',
+            'totalServiceChargeMoneyAmount',
             where,
           )) ?? 0,
         maximum:
           (await this.repository.maximum(
-            'totalMoneyServiceChargeAmount',
+            'totalServiceChargeMoneyAmount',
             where,
           )) ?? 0,
       },
-      moneyTaxAmount: {
-        sum: (await this.repository.sum('totalMoneyTaxAmount', where)) ?? 0,
+      taxMoneyAmount: {
+        sum: (await this.repository.sum('totalTaxMoneyAmount', where)) ?? 0,
         average:
-          (await this.repository.average('totalMoneyTaxAmount', where)) ?? 0,
+          (await this.repository.average('totalTaxMoneyAmount', where)) ?? 0,
         minimum:
-          (await this.repository.minimum('totalMoneyTaxAmount', where)) ?? 0,
+          (await this.repository.minimum('totalTaxMoneyAmount', where)) ?? 0,
         maximum:
-          (await this.repository.maximum('totalMoneyTaxAmount', where)) ?? 0,
+          (await this.repository.maximum('totalTaxMoneyAmount', where)) ?? 0,
       },
     };
   }
@@ -680,13 +680,14 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         translations.squareInvalidResponse,
       );
     }
-    const { totalMoney: orderTotalAmountMoney } = squareUpdateOrderResult;
-    if (!orderTotalAmountMoney) {
+    const { totalMoney: orderTotalMoney, totalTaxMoney: orderTotalTaxMoney } =
+      squareUpdateOrderResult;
+    if (!orderTotalMoney || !orderTotalTaxMoney) {
       throw new UnprocessableEntityException(
         translations.squareInvalidResponse,
       );
     }
-    const { amount: orderTotalMoneyAmount, currency } = orderTotalAmountMoney;
+    const { amount: orderTotalMoneyAmount, currency } = orderTotalMoney;
     if (!orderTotalMoneyAmount || !currency) {
       throw new UnprocessableEntityException(
         translations.squareInvalidResponse,
@@ -703,31 +704,41 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       merchantTier,
     });
 
-    await this.squareService.retryOrThrow(merchantSquareAccessToken, (client) =>
-      client.paymentsApi.createPayment({
-        sourceId: paymentSquareId,
-        idempotencyKey: idempotencyKey,
-        customerId: customerSquareId,
-        locationId: locationSquareId,
-        amountMoney: orderTotalAmountMoney,
-        tipMoney: {
-          amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
-          currency,
-        },
-        appFeeMoney: {
-          amount: appFeeMoneyAmount,
-          currency,
-        },
-        orderId: squareUpdateOrderResult.id,
-        referenceId: order.id,
-      }),
+    const squarePaymentResponse = await this.squareService.retryOrThrow(
+      merchantSquareAccessToken,
+      (client) =>
+        client.paymentsApi.createPayment({
+          sourceId: paymentSquareId,
+          idempotencyKey: idempotencyKey,
+          customerId: customerSquareId,
+          locationId: locationSquareId,
+          amountMoney: orderTotalMoney,
+          tipMoney: {
+            amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
+            currency,
+          },
+          appFeeMoney: {
+            amount: appFeeMoneyAmount,
+            currency,
+          },
+          orderId: squareUpdateOrderResult.id,
+          referenceId: order.id,
+        }),
     );
+    const squarePayment = squarePaymentResponse.result.payment;
 
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
-    updatedOrder.appFeeMoneyAmount = Number(appFeeMoneyAmount);
-    updatedOrder.totalMoneyTipAmount = tipMoneyAmount;
+    updatedOrder.totalMoneyAmount = Number(
+      squarePayment?.totalMoney?.amount ?? 0,
+    );
+    updatedOrder.totalTipMoneyAmount = Number(
+      squarePayment?.tipMoney?.amount ?? 0,
+    );
+    updatedOrder.appFeeMoneyAmount = Number(
+      squarePayment?.appFeeMoney?.amount ?? 0,
+    );
 
     customer.currentOrder = null;
     await customer.save();
@@ -938,12 +949,12 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       squareOrder?.version ?? (order.squareVersion ?? 0) + 1;
 
     order.totalMoneyAmount = Number(squareOrder?.totalMoney?.amount);
-    order.totalMoneyTaxAmount = Number(squareOrder?.totalTaxMoney?.amount);
-    order.totalMoneyDiscountAmount = Number(
+    order.totalTaxMoneyAmount = Number(squareOrder?.totalTaxMoney?.amount);
+    order.totalDiscountMoneyAmount = Number(
       squareOrder?.totalDiscountMoney?.amount,
     );
-    order.totalMoneyTipAmount = Number(squareOrder?.totalTipMoney?.amount);
-    order.totalMoneyServiceChargeAmount = Number(
+    order.totalTipMoneyAmount = Number(squareOrder?.totalTipMoney?.amount);
+    order.totalServiceChargeMoneyAmount = Number(
       squareOrder?.totalServiceChargeMoney?.amount,
     );
 
