@@ -1,0 +1,21 @@
+Token,Item Name,Variation Name,SKU,Description,Category,Price,Sellable,Stockable,Option Name 1,Option Value 1,Current Quantity Starbeans Coffee,New Quantity Starbeans Coffee,Stock Alert Enabled Starbeans Coffee,Stock Alert Count Starbeans Coffee
+,Americano,Small,AM-S,Strong espresso with hot water,Coffee,2.95,Y,Y,,,50,50,true,10
+,Americano,Medium,AM-M,Strong espresso with hot water,Coffee,3.45,Y,Y,,,35,35,true,10
+,Americano,Large,AM-L,Strong espresso with hot water,Coffee,3.95,Y,Y,,,25,25,true,10
+,Cappuccino,Small,CAP-S,Espresso steamed milk and foam,Coffee,3.65,Y,Y,,,45,45,true,10
+,Cappuccino,Medium,CAP-M,Espresso steamed milk and foam,Coffee,4.15,Y,Y,,,30,30,true,10
+,Cappuccino,Large,CAP-L,Espresso steamed milk and foam,Coffee,4.65,Y,Y,,,20,20,true,10
+,Flat White,Small,FW-S,Espresso with steamed milk,Coffee,3.75,Y,Y,,,40,40,true,10
+,Flat White,Medium,FW-M,Espresso with steamed milk,Coffee,4.25,Y,Y,,,30,30,true,10
+,Flat White,Large,FW-L,Espresso with steamed milk,Coffee,4.75,Y,Y,,,25,25,true,10
+,Latte,Small,LT-S,Espresso with more steamed milk,Coffee,3.55,Y,Y,,,50,50,true,10
+,Latte,Medium,LT-M,Espresso with more steamed milk,Coffee,4.05,Y,Y,,,35,35,true,10
+,Latte,Large,LT-L,Espresso with more steamed milk,Coffee,4.55,Y,Y,,,20,20,true,10
+,Chai Latte,Small,CHAI-S,Chai tea with steamed milk,Tea,3.95,Y,Y,,,40,40,true,10
+,Chai Latte,Medium,CHAI-M,Chai tea with steamed milk,Tea,4.45,Y,Y,,,30,30,true,10
+,Chai Latte,Large,CHAI-L,Chai tea with steamed milk,Tea,4.95,Y,Y,,,20,20,true,10
+,Green Tea,Small,GT-S,Steamed green tea,Tea,2.65,Y,Y,,,50,50,true,10
+,Green Tea,Medium,GT-M,Steamed green tea,Tea,3.15,Y,Y,,,30,30,true,10
+,Green Tea,Large,GT-L,Steamed green tea,Tea,3.65,Y,Y,,,20,20,true,10
+,Muffin,Blueberry,MB,Fresh baked muffin,Food,2.75,Y,Y,,,30,30,true,10
+,Muffin,Chocolate Chip,MCC,Fresh baked muffin,Food,2.75,Y,Y,,,20,20,true,10

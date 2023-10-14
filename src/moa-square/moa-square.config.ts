@@ -1,6 +1,6 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { IsOptional, IsString, validateSync } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, validateSync } from 'class-validator';
 import { toBigIntOrThrow } from '../utils/to-big-int-or-throw.js';
 
 export type MyOrderAppSquareConfigType = {
@@ -14,6 +14,7 @@ export type MyOrderAppSquareConfigType = {
   squareTier1AppFeeBigIntNumerator: bigint;
   squareTier2AppFeeBigIntNumerator: bigint;
 
+  squareTestUseS3?: boolean;
   squareTestCode?: string;
   squareTestAccessToken?: string;
   squareTestRefreshToken?: string;
@@ -64,6 +65,10 @@ class MyOrderAppSquareConfigValidator {
   SQUARE_TIER_1_APP_FEE_BIG_INT_NUMERATOR!: number;
 
   SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!: number;
+
+  @IsBoolean()
+  @IsOptional()
+  SQUARE_TEST_USE_S3?: boolean;
 
   @IsString()
   @IsOptional()
@@ -200,6 +205,7 @@ export const MyOrderAppSquareConfig = registerAs('moaSquare', () => {
     squareTestRefreshToken: process.env.SQUARE_TEST_REFRESH_TOKEN,
     squareTestExpireAt: process.env.SQUARE_TEST_EXPIRE_AT,
     squareTestId: process.env.SQUARE_TEST_ID,
+    squareTestUseS3: process.env.SQUARE_TEST_USE_S3 === 'true',
 
     stripeWebhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 

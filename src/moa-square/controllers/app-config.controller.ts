@@ -305,8 +305,6 @@ export class AppConfigController {
       file.originalname,
     )}`;
 
-    this.logger.verbose(`key: ${key}`);
-
     const { defaultBucket, region } = this.awsS3Config;
 
     try {
@@ -326,6 +324,87 @@ export class AppConfigController {
     appConfig.iconFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
     appConfig.iconFileDisplayName = file.originalname;
     appConfig.iconFileContentType = contentType;
+
+    return this.service.save(appConfig);
+  }
+
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @Post('me/banner/upload')
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        file: {
+          type: 'string',
+          format: 'binary',
+        },
+      },
+    },
+  })
+  @UseInterceptors(FileInterceptor('file'))
+  @ApiOperation({ summary: 'Upload banner', operationId: 'postBannerUploadMe' })
+  async postBannerUploadMe(
+    @Req() request: MerchantsGuardedRequest,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    this.logger.verbose(this.postBannerUploadMe.name);
+    const translations = this.currentLanguageTranslations();
+    const { merchant } = request;
+
+    if (!merchant?.id) {
+      throw new UnauthorizedException(translations.merchantsNotFound);
+    }
+
+    const fileExtension = path.extname(file.originalname).toLowerCase();
+    let contentType: string;
+
+    if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+      contentType = 'image/jpeg';
+    } else if (fileExtension === '.png') {
+      contentType = 'image/png';
+    } else {
+      throw new BadRequestException('Invalid file type'); // You can customize this message
+    }
+
+    let appConfig = await this.service.findOne({
+      where: { merchantId: merchant.id },
+    });
+
+    if (!appConfig) {
+      appConfig = this.service.create({
+        merchantId: merchant.id,
+      });
+    }
+
+    const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
+      file.originalname,
+    )}`;
+
+    const { defaultBucket, region } = this.awsS3Config;
+
+    try {
+      await this.s3.putObject({
+        Bucket: defaultBucket,
+        Key: key,
+        Body: file.buffer,
+        ContentType: contentType,
+        ContentDisposition: 'inline',
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(error);
+    }
+
+    appConfig.bannerFileKey = key;
+    appConfig.bannerFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
+    appConfig.bannerFileDisplayName = file.originalname;
+    appConfig.bannerFileContentType = contentType;
 
     return this.service.save(appConfig);
   }

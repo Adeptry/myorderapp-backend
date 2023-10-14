@@ -1,0 +1,16 @@
+Token,Item Name,Variation Name,SKU,Description,Category,Price,Sellable,Stockable,Option Name 1,Option Value 1,Current Quantity Windy's,New Quantity Windy's,Stock Alert Enabled Windy's,Stock Alert Count Windy's
+,Baconator,Single,BA-S,,Burger,6.59,Y,Y,Size,1,100,,Y,20
+,Baconator,Double,BA-D,,Burger,8.59,Y,Y,Size,2,80,,Y,20
+,Spicy Chicken Sandwich,Regular,SC-R,,Chicken,5.99,Y,Y,Size,1,50,,Y,15
+,Spicy Chicken Sandwich,Deluxe,SC-D,,Chicken,7.49,Y,Y,Size,2,40,,Y,15
+,Classic Frosty,Small,FRO-S,,Dessert,1.99,Y,N,Size,1,,,Y,0
+,Classic Frosty,Medium,FRO-M,,Dessert,2.49,Y,N,Size,2,,,Y,0
+,Classic Frosty,Large,FRO-L,,Dessert,2.99,Y,N,Size,3,,,Y,0
+,Apple Pecan Chicken Salad,Half,APC-H,,Premium Salad,4.99,Y,Y,Size,1,30,,Y,10
+,Apple Pecan Chicken Salad,Full,APC-F,,Premium Salad,6.99,Y,Y,Size,2,20,,Y,10
+,Fries,Small,FR-S,,Sides,1.99,Y,Y,Size,1,200,,Y,40
+,Fries,Medium,FR-M,,Sides,2.49,Y,Y,Size,2,150,,Y,40
+,Fries,Large,FR-L,,Sides,2.99,Y,Y,Size,3,100,,Y,40
+,Soft Drink,Small,SD-S,,Drink,1.89,Y,N,Size,1,,,Y,0
+,Soft Drink,Medium,SD-M,,Drink,2.19,Y,N,Size,2,,,Y,0
+,Soft Drink,Large,SD-L,,Drink,2.49,Y,N,Size,3,,,Y,0

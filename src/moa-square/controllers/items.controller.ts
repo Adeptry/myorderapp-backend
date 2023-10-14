@@ -5,6 +5,8 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Inject,
+  InternalServerErrorException,
   Logger,
   NotFoundException,
   Param,
@@ -16,6 +18,7 @@ import {
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { AuthGuard } from '@nestjs/passport';
 import { FileInterceptor } from '@nestjs/platform-express';
 import {
@@ -35,7 +38,10 @@ import {
 import { nanoid } from 'nanoid';
 import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { InjectS3, type S3 } from 'nestjs-s3';
+import path from 'path';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
+import { AwsS3Config } from '../../configs/aws-s3.config.js';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
@@ -49,6 +55,7 @@ import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
 import { ItemEntity } from '../entities/item.entity.js';
 import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
+import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 import { CatalogImagesService } from '../services/catalog-images.service.js';
 import { CatalogSortService } from '../services/catalog-sort.service.js';
 import { ItemsService } from '../services/items.service.js';
@@ -68,6 +75,12 @@ export class ItemsController {
     private readonly catalogImagesService: CatalogImagesService,
     private readonly squareService: NestSquareService,
     private readonly i18n: I18nService<I18nTranslations>,
+    @InjectS3()
+    private readonly s3: S3,
+    @Inject(AwsS3Config.KEY)
+    protected awsS3Config: ConfigType<typeof AwsS3Config>,
+    @Inject(MyOrderAppSquareConfig.KEY)
+    private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -283,26 +296,68 @@ export class ItemsController {
       throw new NotFoundException(translations.itemsNotFound);
     }
 
-    const squareResponse = await this.squareService.uploadCatalogImageOrThrow({
-      accessToken: merchant.squareAccessToken,
-      idempotencyKey,
-      objectId: item.squareId,
-      id: nanoid(),
-      file,
-    });
+    if (this.config.squareTestUseS3) {
+      const fileExtension = path.extname(file.originalname).toLowerCase();
 
-    console.log(squareResponse);
+      let contentType: string;
 
-    const squareCatalogImage = squareResponse.image;
-    const moaCatalogImage = this.catalogImagesService.create({
-      item,
-      squareId: squareCatalogImage?.id,
-      name: squareCatalogImage?.imageData?.name,
-      url: squareCatalogImage?.imageData?.url,
-      caption: squareCatalogImage?.imageData?.caption,
-      catalogId: item.catalogId,
-    });
+      if (fileExtension === '.jpg' || fileExtension === '.jpeg') {
+        contentType = 'image/jpeg';
+      } else if (fileExtension === '.png') {
+        contentType = 'image/png';
+      } else {
+        throw new BadRequestException('Invalid file type'); // You can customize this message
+      }
+      const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
+        file.originalname,
+      )}`;
+      const { defaultBucket, region } = this.awsS3Config;
+      try {
+        await this.s3.putObject({
+          Bucket: defaultBucket,
+          Key: key,
+          Body: file.buffer,
+          ContentType: contentType,
+          ContentDisposition: 'inline',
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw new InternalServerErrorException(error);
+      }
 
-    return moaCatalogImage.save();
+      const iconFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
+      const moaCatalogImage = this.catalogImagesService.create({
+        item,
+        squareId: nanoid(),
+        name: key,
+        url: iconFileFullUrl,
+        caption: '',
+        catalogId: item.catalogId,
+      });
+
+      return moaCatalogImage.save();
+    } else {
+      const squareResponse = await this.squareService.uploadCatalogImageOrThrow(
+        {
+          accessToken: merchant.squareAccessToken,
+          idempotencyKey,
+          objectId: item.squareId,
+          id: nanoid(),
+          file,
+        },
+      );
+
+      const squareCatalogImage = squareResponse.image;
+      const moaCatalogImage = this.catalogImagesService.create({
+        item,
+        squareId: squareCatalogImage?.id,
+        name: squareCatalogImage?.imageData?.name,
+        url: squareCatalogImage?.imageData?.url,
+        caption: squareCatalogImage?.imageData?.caption,
+        catalogId: item.catalogId,
+      });
+
+      return moaCatalogImage.save();
+    }
   }
 }
