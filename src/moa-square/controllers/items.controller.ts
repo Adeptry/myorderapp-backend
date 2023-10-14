@@ -185,13 +185,7 @@ export class ItemsController {
       throw new NotFoundException(translations.itemsNotFound);
     }
 
-    entity.itemModifierLists?.forEach((itemModifierList) => {
-      itemModifierList.modifierList?.modifiers?.sort(
-        (a, b) => (a.ordinal ?? 0) - (b.ordinal ?? 0),
-      );
-    });
-
-    return entity;
+    return this.catalogSortService.sortItem(entity);
   }
 
   @ApiBearerAuth()
