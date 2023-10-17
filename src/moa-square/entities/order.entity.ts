@@ -189,6 +189,12 @@ export class OrderEntity extends BaseEntity {
   appFeeMoneyAmount!: number;
 
   @Expose()
+  @ApiProperty({ required: false, type: Number, nullable: true })
+  get subtotalMoneyAmount(): number {
+    return this.totalMoneyAmount - this.totalTaxMoneyAmount;
+  }
+
+  @Expose()
   @ApiProperty({ required: false, type: String, nullable: true })
   get displayId(): string | undefined {
     return (this.squareId?.length ?? 0) > 8

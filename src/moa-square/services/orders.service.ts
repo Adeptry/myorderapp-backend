@@ -220,6 +220,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
             idempotencyKey: params.idempotencyKey,
             order: {
               state: 'DRAFT',
+              pricingOptions: {
+                autoApplyTaxes: true,
+              },
               referenceId: moaOrder.id,
               customerId: customer.squareId,
               locationId: location?.squareId ?? 'main',
@@ -342,6 +345,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
             lineItems: existingSquareOrderLineItems,
             state: 'DRAFT',
             fulfillments: existingSquareOrder?.fulfillments,
+            pricingOptions: {
+              autoApplyTaxes: true,
+            },
           },
         }),
     );
@@ -657,6 +663,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
               locationId: locationSquareId,
               state: 'OPEN',
               lineItems: existingSquareOrderLineItems,
+              pricingOptions: {
+                autoApplyTaxes: true,
+              },
               fulfillments: [
                 {
                   type: 'PICKUP',
@@ -700,45 +709,33 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     });
 
     const appFeeMoneyAmount = this.calculateAppFee({
-      orderTotalMoneyAmount,
+      orderSubtotalMoneyAmount: BigInt(order.subtotalMoneyAmount),
       merchantTier,
     });
 
-    const squarePaymentResponse = await this.squareService.retryOrThrow(
-      merchantSquareAccessToken,
-      (client) =>
-        client.paymentsApi.createPayment({
-          sourceId: paymentSquareId,
-          idempotencyKey: idempotencyKey,
-          customerId: customerSquareId,
-          locationId: locationSquareId,
-          amountMoney: orderTotalMoney,
-          tipMoney: {
-            amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
-            currency,
-          },
-          appFeeMoney: {
-            amount: appFeeMoneyAmount,
-            currency,
-          },
-          orderId: squareUpdateOrderResult.id,
-          referenceId: order.id,
-        }),
+    await this.squareService.retryOrThrow(merchantSquareAccessToken, (client) =>
+      client.paymentsApi.createPayment({
+        sourceId: paymentSquareId,
+        idempotencyKey: idempotencyKey,
+        customerId: customerSquareId,
+        locationId: locationSquareId,
+        amountMoney: orderTotalMoney,
+        tipMoney: {
+          amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
+          currency,
+        },
+        appFeeMoney: {
+          amount: appFeeMoneyAmount,
+          currency,
+        },
+        orderId: squareUpdateOrderResult.id,
+        referenceId: order.id,
+      }),
     );
-    const squarePayment = squarePaymentResponse.result.payment;
 
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
-    updatedOrder.totalMoneyAmount = Number(
-      squarePayment?.totalMoney?.amount ?? 0,
-    );
-    updatedOrder.totalTipMoneyAmount = Number(
-      squarePayment?.tipMoney?.amount ?? 0,
-    );
-    updatedOrder.appFeeMoneyAmount = Number(
-      squarePayment?.appFeeMoney?.amount ?? 0,
-    );
 
     customer.currentOrder = null;
     await customer.save();
@@ -747,10 +744,10 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
   }
 
   private calculateAppFee(params: {
-    orderTotalMoneyAmount: bigint;
+    orderSubtotalMoneyAmount: bigint;
     merchantTier: number;
   }): bigint {
-    const { orderTotalMoneyAmount, merchantTier } = params;
+    const { orderSubtotalMoneyAmount, merchantTier } = params;
 
     this.logger.verbose(this.calculateAppFee.name);
     const translations = this.translations();
@@ -778,11 +775,11 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     }
 
     this.logger.debug(
-      `(${orderTotalMoneyAmount} * ${appFeeBigIntNumerator}) / ${this.config.squareAppFeeBigIntDenominator}`,
+      `(${orderSubtotalMoneyAmount} * ${appFeeBigIntNumerator}) / ${this.config.squareAppFeeBigIntDenominator}`,
     );
 
     return (
-      (orderTotalMoneyAmount * appFeeBigIntNumerator) /
+      (orderSubtotalMoneyAmount * appFeeBigIntNumerator) /
       this.config.squareAppFeeBigIntDenominator
     );
   }
