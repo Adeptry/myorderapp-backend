@@ -736,6 +736,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
+    updatedOrder.totalTipMoneyAmount = tipMoneyAmount;
 
     customer.currentOrder = null;
     await customer.save();
