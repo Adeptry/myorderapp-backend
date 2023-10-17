@@ -1,10 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogItemModifierListInfo } from 'square';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { ItemModifierListEntity } from '../entities/item-modifier-list.entity.js';
 import { ModifierListsService } from './modifier-lists.service.js';
+import { ModifiersService } from './modifiers.service.js';
 
 @Injectable()
 export class ItemModifierListService extends EntityRepositoryService<ItemModifierListEntity> {
@@ -14,6 +15,7 @@ export class ItemModifierListService extends EntityRepositoryService<ItemModifie
     @InjectRepository(ItemModifierListEntity)
     protected readonly repository: Repository<ItemModifierListEntity>,
     protected readonly modifierListService: ModifierListsService,
+    protected readonly modifiersService: ModifiersService,
   ) {
     const logger = new Logger(ItemModifierListService.name);
     super(repository, logger);
@@ -76,10 +78,24 @@ export class ItemModifierListService extends EntityRepositoryService<ItemModifie
       );
     }
 
+    const onByDefaultModiferOverrides =
+      squareItemModifierListInfo?.modifierOverrides?.filter(
+        (value) => value.onByDefault,
+      );
+    const onByDefaultModifierOverrideSquareIds =
+      onByDefaultModiferOverrides?.map((value) => value.modifierId) ?? [];
+    const onByDefaultModifiers = await this.modifiersService.find({
+      where: { squareId: In(onByDefaultModifierOverrideSquareIds) },
+    });
+    const onByDefaultModifierIds = onByDefaultModifiers.map(
+      (value) => value.id!,
+    );
+
     return await this.save(
       this.create({
         itemId: moaItemId,
         modifierListId: modifierList.id,
+        onByDefaultModifierIds: onByDefaultModifierIds,
         minSelectedModifiers: squareItemModifierListInfo?.minSelectedModifiers,
         maxSelectedModifiers: squareItemModifierListInfo?.maxSelectedModifiers,
         enabled: squareItemModifierListInfo?.enabled,

@@ -83,4 +83,13 @@ export class ItemModifierListEntity extends BaseEntity {
     onDelete: 'CASCADE',
   })
   modifierList?: Relation<ModifierListEntity>;
+
+  @ApiProperty({
+    type: () => String,
+    isArray: true,
+    required: false,
+    nullable: true,
+  })
+  @Column('simple-array', { nullable: true })
+  onByDefaultModifierIds?: string[];
 }
