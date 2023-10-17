@@ -713,30 +713,42 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       merchantTier,
     });
 
-    await this.squareService.retryOrThrow(merchantSquareAccessToken, (client) =>
-      client.paymentsApi.createPayment({
-        sourceId: paymentSquareId,
-        idempotencyKey: idempotencyKey,
-        customerId: customerSquareId,
-        locationId: locationSquareId,
-        amountMoney: orderTotalMoney,
-        tipMoney: {
-          amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
-          currency,
-        },
-        appFeeMoney: {
-          amount: appFeeMoneyAmount,
-          currency,
-        },
-        orderId: squareUpdateOrderResult.id,
-        referenceId: order.id,
-      }),
+    const squarePaymentResponse = await this.squareService.retryOrThrow(
+      merchantSquareAccessToken,
+      (client) =>
+        client.paymentsApi.createPayment({
+          sourceId: paymentSquareId,
+          idempotencyKey: idempotencyKey,
+          customerId: customerSquareId,
+          locationId: locationSquareId,
+          amountMoney: orderTotalMoney,
+          tipMoney: {
+            amount: BigInt(Math.floor(tipMoneyAmount ?? 0)),
+            currency,
+          },
+          appFeeMoney: {
+            amount: appFeeMoneyAmount,
+            currency,
+          },
+          orderId: squareUpdateOrderResult.id,
+          referenceId: order.id,
+        }),
     );
+    const squarePayment = squarePaymentResponse.result.payment;
 
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
-    updatedOrder.totalTipMoneyAmount = tipMoneyAmount;
+    updatedOrder.totalMoneyAmount = Number(
+      squarePayment?.totalMoney?.amount ?? 0,
+    );
+    updatedOrder.totalTipMoneyAmount = Number(
+      squarePayment?.tipMoney?.amount ?? 0,
+    );
+    updatedOrder.appFeeMoneyAmount = Number(
+      squarePayment?.appFeeMoney?.amount ?? 0,
+    );
+    updatedOrder.note = note;
 
     customer.currentOrder = null;
     await customer.save();

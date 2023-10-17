@@ -188,6 +188,14 @@ export class OrderEntity extends BaseEntity {
   @Column({ default: 0 })
   appFeeMoneyAmount!: number;
 
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: String,
+  })
+  @Column({ nullable: true, type: String })
+  note?: string | null;
+
   @Expose()
   @ApiProperty({ required: false, type: Number, nullable: true })
   get subtotalMoneyAmount(): number {
