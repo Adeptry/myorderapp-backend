@@ -284,7 +284,12 @@ export class ItemsController {
       throw new BadRequestException(translations.fileNotFound);
     }
 
-    const item = await this.service.findOne({ where: { id } });
+    const item = await this.service.findOne({
+      where: { id },
+      relations: {
+        images: true,
+      },
+    });
 
     if (!item) {
       throw new NotFoundException(translations.itemsNotFound);
@@ -302,8 +307,9 @@ export class ItemsController {
       } else {
         throw new BadRequestException('Invalid file type'); // You can customize this message
       }
+      const sanitizedFilename = file.originalname.replace(/[^\w\s.-]/g, '_');
       const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
-        file.originalname,
+        sanitizedFilename,
       )}`;
       const { defaultBucket, region } = this.awsS3Config;
       try {
@@ -318,6 +324,8 @@ export class ItemsController {
         this.logger.error(error);
         throw new InternalServerErrorException(error);
       }
+
+      await this.catalogImagesService.removeAll(item.images ?? []);
 
       const iconFileFullUrl = `https://${defaultBucket}.s3.${region}.amazonaws.com/${key}`;
       const moaCatalogImage = this.catalogImagesService.create({
