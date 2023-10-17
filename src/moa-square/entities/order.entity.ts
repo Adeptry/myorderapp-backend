@@ -199,7 +199,11 @@ export class OrderEntity extends BaseEntity {
   @Expose()
   @ApiProperty({ required: false, type: Number, nullable: true })
   get subtotalMoneyAmount(): number {
-    return this.totalMoneyAmount - this.totalTaxMoneyAmount;
+    return (
+      this.totalMoneyAmount -
+      this.totalTaxMoneyAmount -
+      this.totalTipMoneyAmount
+    );
   }
 
   @Expose()
