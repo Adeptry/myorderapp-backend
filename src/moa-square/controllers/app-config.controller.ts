@@ -301,8 +301,9 @@ export class AppConfigController {
       });
     }
 
+    const sanitizedFilename = file.originalname.replace(/[^\w\s.-]/g, '_');
     const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
-      file.originalname,
+      sanitizedFilename,
     )}`;
 
     const { defaultBucket, region } = this.awsS3Config;
@@ -382,8 +383,9 @@ export class AppConfigController {
       });
     }
 
+    const sanitizedFilename = file.originalname.replace(/[^\w\s.-]/g, '_');
     const key = `${encodeURIComponent(Date.now())}-${encodeURIComponent(
-      file.originalname,
+      sanitizedFilename,
     )}`;
 
     const { defaultBucket, region } = this.awsS3Config;
