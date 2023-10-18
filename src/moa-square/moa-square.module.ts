@@ -1,6 +1,8 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { AuthAppleModule } from '../auth-apple/auth-apple.module.js';
+import { AuthGoogleModule } from '../auth-google/auth-google.module.js';
 import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { MailModule } from '../mail/mail.module.js';
 import { MessagesModule } from '../messages/messages.module.js';
@@ -68,6 +70,8 @@ import { VariationsService } from './services/variations.service.js';
 @Module({
   imports: [
     AuthenticationModule,
+    AuthGoogleModule,
+    AuthAppleModule,
     UsersModule,
     MailModule,
     MessagesModule,
