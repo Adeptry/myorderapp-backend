@@ -16,6 +16,7 @@ import {
 import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
+import { RoleEnum } from '../users/roles.enum.js';
 import { AuthGoogleService } from './auth-google.service.js';
 import { AuthGoogleLoginDto } from './dto/auth-google-login.dto.js';
 
@@ -52,7 +53,7 @@ export class AuthGoogleController {
     return this.authService.validateSocialLogin(
       'google',
       socialData,
-      body.role,
+      RoleEnum.user,
     );
   }
 }

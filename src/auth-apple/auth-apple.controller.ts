@@ -16,6 +16,7 @@ import {
 import { ApiKeyAuthGuard } from '../authentication/apikey-auth.guard.js';
 import { AuthenticationService } from '../authentication/authentication.service.js';
 import { AuthenticationResponse } from '../authentication/types/authentication-response.type.js';
+import { RoleEnum } from '../users/roles.enum.js';
 import { AuthAppleService } from './auth-apple.service.js';
 import { AuthAppleLoginDto } from './dto/auth-apple-login.dto.js';
 
@@ -51,7 +52,7 @@ export class AuthAppleController {
     return this.authenticationService.validateSocialLogin(
       'apple',
       socialData,
-      body.role,
+      RoleEnum.user,
     );
   }
 }
