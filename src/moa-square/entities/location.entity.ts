@@ -244,8 +244,7 @@ export class LocationEntity extends BaseEntity {
   @Column({ nullable: true })
   merchantSquareId?: string;
 
-  @Exclude({ toPlainOnly: true })
-  @ApiHideProperty()
+  @ApiProperty({ type: String, required: false, nullable: true })
   @Column({ nullable: true })
   squareId?: string;
 }

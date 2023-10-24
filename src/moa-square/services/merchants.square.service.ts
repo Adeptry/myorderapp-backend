@@ -274,6 +274,11 @@ export class MerchantsSquareService {
     );
   }
 
+  /*
+  We recommend refreshing access tokens every 7 days. 
+  It's not recommended to wait the full 30 day before refreshing. 
+  If the token does expire you'll have 10 days after expiration to refresh the token.
+  */
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async refreshTokensCron() {
     this.logger.verbose(this.refreshTokensCron.name);
