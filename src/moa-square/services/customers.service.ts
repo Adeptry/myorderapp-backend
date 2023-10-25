@@ -8,6 +8,7 @@ import {
 import { InjectRepository } from '@nestjs/typeorm';
 import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
+import { Customer as SquareCustomer } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
@@ -106,6 +107,11 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       throw new NotFoundException(translations.usersNotFound);
     }
 
+    const { email } = user;
+    if (!email) {
+      throw new NotFoundException(translations.usersNotFound);
+    }
+
     const merchant = await this.merchantsService.findOneByIdOrPath({
       where: { idOrPath: merchantIdOrPath },
     });
@@ -127,18 +133,42 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       );
     }
 
-    const response = await this.squareService.retryOrThrow(
+    let squareCustomer: SquareCustomer | undefined;
+
+    const searchCustomersResponse = await this.squareService.retryOrThrow(
       merchant.squareAccessToken,
       (client) =>
-        client.customersApi.createCustomer({
-          emailAddress: user.email ?? undefined,
-          givenName: user.firstName ?? undefined,
-          familyName: user.lastName ?? undefined,
-          phoneNumber: user.phoneNumber ?? undefined,
+        client.customersApi.searchCustomers({
+          query: {
+            filter: {
+              emailAddress: {
+                exact: email,
+              },
+            },
+          },
         }),
     );
 
-    const squareCustomerId = response.result.customer?.id;
+    const squareSearchResults = searchCustomersResponse.result.customers ?? [];
+    if (squareSearchResults.length > 0) {
+      squareCustomer = squareSearchResults[0];
+      this.logger.verbose('Found Square customer');
+    } else {
+      const createCustomerResponse = await this.squareService.retryOrThrow(
+        merchant.squareAccessToken,
+        (client) =>
+          client.customersApi.createCustomer({
+            emailAddress: user.email ?? undefined,
+            givenName: user.firstName ?? undefined,
+            familyName: user.lastName ?? undefined,
+            phoneNumber: user.phoneNumber ?? undefined,
+          }),
+      );
+      squareCustomer = createCustomerResponse.result.customer;
+      this.logger.verbose('Created Square customer');
+    }
+
+    const squareCustomerId = squareCustomer?.id;
     if (!squareCustomerId) {
       throw new InternalServerErrorException(
         translations.squareInvalidResponse,
