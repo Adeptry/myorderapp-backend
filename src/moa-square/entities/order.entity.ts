@@ -118,7 +118,6 @@ export class OrderEntity extends BaseEntity {
     type: 'simple-enum',
     nullable: true,
     enum: FulfillmentStatusEnum,
-    default: FulfillmentStatusEnum.proposed,
   })
   squareFulfillmentStatus?: FulfillmentStatusEnum;
 
