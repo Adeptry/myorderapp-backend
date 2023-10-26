@@ -81,13 +81,18 @@ export class PushService {
         continue;
       }
       this.logger.log('Sending');
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -144,13 +149,18 @@ export class PushService {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -207,13 +217,18 @@ export class PushService {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -265,13 +280,18 @@ export class PushService {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -328,13 +348,18 @@ export class PushService {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -391,13 +416,18 @@ export class PushService {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
@@ -459,13 +489,18 @@ export class PushService {
         continue;
       }
       this.logger.log('send');
-      await messaging.send({
-        token: appInstall.firebaseCloudMessagingToken,
-        notification: {
-          title,
-          body,
-        },
-      });
+      try {
+        await messaging.send({
+          token: appInstall.firebaseCloudMessagingToken,
+          notification: {
+            title,
+            body,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+        throw error;
+      }
     }
   }
 
