@@ -379,7 +379,7 @@ export class PushService {
     const messaging = this.firebaseAdminService.messaging(app);
 
     const title = this.i18n.t(
-      'push.onEventSquareFulfillmentUpdateProposed.title',
+      'push.onEventSquareFulfillmentUpdateReserved.title',
       {
         ...this.defaultTranslationOptions(user?.language),
         args: { order },
@@ -387,7 +387,7 @@ export class PushService {
     );
 
     const body = this.i18n.t(
-      'push.onEventSquareFulfillmentUpdateProposed.body',
+      'push.onEventSquareFulfillmentUpdateReserved.body',
       {
         ...this.defaultTranslationOptions(user?.language),
         args: { order },
