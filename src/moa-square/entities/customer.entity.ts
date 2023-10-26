@@ -20,7 +20,7 @@ import {
 } from 'typeorm';
 import { UserEntity } from '../../users/entities/user.entity.js';
 import { SquareCard } from '../dto/square/square.dto.js';
-import { AppInstall } from './app-install.entity.js';
+import { AppInstallEntity } from './app-install.entity.js';
 import { LocationEntity } from './location.entity.js';
 import { MerchantEntity } from './merchant.entity.js';
 import { OrderEntity } from './order.entity.js';
@@ -102,10 +102,10 @@ export class CustomerEntity extends BaseEntity {
 
   /* Installs */
 
-  @OneToMany(() => AppInstall, (entity) => entity.customer, {
+  @OneToMany(() => AppInstallEntity, (entity) => entity.customer, {
     nullable: true,
   })
-  appInstalls?: AppInstall[];
+  appInstalls?: AppInstallEntity[];
 
   /* Square */
 

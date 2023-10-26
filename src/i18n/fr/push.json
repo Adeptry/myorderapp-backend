@@ -1,0 +1,30 @@
+{
+  "postSquarePaymentOrderCurrent": {
+    "title": "Nouvelle Commande",
+    "body": "Merci pour votre commande avec la Réf #{order.displayId}. Elle a été soumise et nous vous tiendrons informé."
+  },
+  "onEventSquareFulfillmentUpdateCanceled": {
+    "title": "Commande Annulée",
+    "body": "La commande avec la Réf #{order.displayId} a été annulée. Veuillez contacter le magasin si vous avez des questions."
+  },
+  "onEventSquareFulfillmentUpdateCompleted": {
+    "title": "Commande Complétée",
+    "body": "Bonne nouvelle ! La commande avec la Réf #{order.displayId} est complétée. Profitez-en !"
+  },
+  "onEventSquareFulfillmentUpdateFailed": {
+    "title": "Échec de la Commande",
+    "body": "Oups ! Il y a eu un problème avec la commande ayant la Réf #{order.displayId}. Veuillez contacter le magasin."
+  },
+  "onEventSquareFulfillmentUpdatePrepared": {
+    "title": "Commande Prête",
+    "body": "La commande avec la Réf #{order.displayId} est préparée et prête. À bientôt !"
+  },
+  "onEventSquareFulfillmentUpdateProposed": {
+    "title": "Commande Reçue",
+    "body": "Votre commande avec la Réf #{order.displayId} a été reçue avec succès par le magasin."
+  },
+  "onEventSquareFulfillmentUpdateReserved": {
+    "title": "Commande en Cours",
+    "body": "La commande avec la Réf #{order.displayId} est actuellement en cours. Patience !"
+  }
+}

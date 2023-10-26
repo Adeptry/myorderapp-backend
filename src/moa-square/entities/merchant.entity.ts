@@ -201,8 +201,4 @@ export class MerchantEntity extends BaseEntity {
   @Exclude({ toPlainOnly: true })
   @Column('simple-json', { nullable: true })
   firebaseAppOptions?: Record<string, any>;
-
-  @Exclude({ toPlainOnly: true })
-  @Column({ nullable: true })
-  firebaseDatabaseUrl?: string;
 }

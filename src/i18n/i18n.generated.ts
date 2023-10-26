@@ -191,6 +191,36 @@ export type I18nTranslations = {
         "userTypeInvalid": string;
         "usersNotFound": string;
     };
+    "push": {
+        "postSquarePaymentOrderCurrent": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdateCanceled": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdateCompleted": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdateFailed": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdatePrepared": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdateProposed": {
+            "title": string;
+            "body": string;
+        };
+        "onEventSquareFulfillmentUpdateReserved": {
+            "title": string;
+            "body": string;
+        };
+    };
     "users": {
         "idNotFound": string;
         "emailNotFound": string;

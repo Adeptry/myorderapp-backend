@@ -23,6 +23,7 @@ import { EntityRepositoryService } from '../../database/entity-repository-servic
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
 import { MessagesService } from '../../messages/messages.service.js';
+import { PushService } from '../../push/push.service.js';
 import { OrdersStatisticsResponse } from '../dto/orders/orders-statistics-reponse.dto.js';
 import { OrdersPostPaymentBody } from '../dto/orders/payment-create.dto.js';
 import { OrdersVariationLineItemInput } from '../dto/orders/variation-add.dto.js';
@@ -61,6 +62,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     private readonly modifiersService: ModifiersService,
     private readonly messagesService: MessagesService,
     private readonly mailService: MailService,
+    private readonly pushService: PushService,
   ) {
     const logger = new Logger(OrdersService.name);
     super(repository, logger);
@@ -850,99 +852,199 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       relations: {
         customer: {
           user: true,
+          appInstalls: true,
         },
+        merchant: true,
       },
     });
-    const user = order?.customer?.user;
+    const customer = order?.customer;
+    const user = customer?.user;
+    const merchant = order?.merchant;
 
-    if (!user || !order?.squareFulfillmentStatus) {
+    if (!user || !order?.squareFulfillmentStatus || !merchant) {
       throw new UnprocessableEntityException(
-        'Missing userId or squareFulfillmentStatus',
+        'Missing userId or squareFulfillmentStatus or merchant',
       );
     }
 
     switch (order?.squareFulfillmentStatus) {
       case FulfillmentStatusEnum.proposed:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
+            { customer, merchant, order },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
       case FulfillmentStatusEnum.reserved:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
+            { customer, merchant, order },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
       case FulfillmentStatusEnum.prepared:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
+            { customer, merchant, order },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
       case FulfillmentStatusEnum.completed:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
+            { customer, merchant, order },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
       case FulfillmentStatusEnum.canceled:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
-          {
-            user,
-            order,
-          },
-        );
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
+            { customer, merchant, order },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
       case FulfillmentStatusEnum.failed:
-        await this.messagesService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
-          {
-            user,
-            order,
-          },
-        );
-        await this.mailService.sendOnEventSquareFulfillmentUpdateFailedOrThrow({
-          user,
-          order,
-        });
+        try {
+          await this.messagesService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.mailService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
+            {
+              user,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
+        try {
+          await this.pushService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
+            {
+              customer,
+              merchant,
+              order,
+            },
+          );
+        } catch (error) {
+          this.logger.error(error);
+        }
         break;
     }
   }

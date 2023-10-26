@@ -18,7 +18,7 @@ import {
 import { CustomerEntity } from './customer.entity.js';
 
 @Entity('app_install')
-export class AppInstall extends BaseEntity {
+export class AppInstallEntity extends BaseEntity {
   /* Base entity */
 
   @PrimaryColumn('varchar')

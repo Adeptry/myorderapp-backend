@@ -26,9 +26,7 @@ import { MailerConfig } from './configs/mailer.config.js';
 import { TwilioConfig } from './configs/twilio.config.js';
 import { DatabaseConfig } from './database/database.config.js';
 import { TypeOrmConfigService } from './database/typeorm-config.service.js';
-import { FirebaseAdminModule } from './firebase-admin/firebase-admin.module.js';
 import { HealthModule } from './health/health.module.js';
-import { MessagesModule } from './messages/messages.module.js';
 import { MyOrderAppSquareConfig } from './moa-square/moa-square.config.js';
 import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
 
@@ -150,10 +148,8 @@ import { MyOrderAppSquareModule } from './moa-square/moa-square.module.js';
     }),
     NestSquareModule.fromEnv(),
     NestStripeModule.fromEnv(),
-    FirebaseAdminModule,
     AdminModule,
     MyOrderAppSquareModule,
-    MessagesModule,
   ],
   controllers: [],
 })

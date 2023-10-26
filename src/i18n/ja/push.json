@@ -1,0 +1,30 @@
+{
+  "postSquarePaymentOrderCurrent": {
+    "title": "新規注文",
+    "body": "注文ID #{order.displayId} でのご注文ありがとうございます。受付けましたので、状況についてお知らせします。"
+  },
+  "onEventSquareFulfillmentUpdateCanceled": {
+    "title": "注文キャンセル",
+    "body": "注文ID #{order.displayId} はキャンセルされました。何か質問があれば、店舗にお問い合わせください。"
+  },
+  "onEventSquareFulfillmentUpdateCompleted": {
+    "title": "注文完了",
+    "body": "良いお知らせです！注文ID #{order.displayId} は完了しました。楽しんでください！"
+  },
+  "onEventSquareFulfillmentUpdateFailed": {
+    "title": "注文失敗",
+    "body": "おっと！注文ID #{order.displayId} に問題が発生しました。店舗にお問い合わせください。"
+  },
+  "onEventSquareFulfillmentUpdatePrepared": {
+    "title": "注文準備完了",
+    "body": "注文ID #{order.displayId} は準備が整いました。お待ちしています！"
+  },
+  "onEventSquareFulfillmentUpdateProposed": {
+    "title": "注文受付",
+    "body": "注文ID #{order.displayId} は店舗によって正常に受け取られました。"
+  },
+  "onEventSquareFulfillmentUpdateReserved": {
+    "title": "注文進行中",
+    "body": "注文ID #{order.displayId} は現在進行中です。お待ちください！"
+  }
+}

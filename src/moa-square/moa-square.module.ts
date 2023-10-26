@@ -6,6 +6,7 @@ import { AuthGoogleModule } from '../auth-google/auth-google.module.js';
 import { AuthenticationModule } from '../authentication/authentication.module.js';
 import { MailModule } from '../mail/mail.module.js';
 import { MessagesModule } from '../messages/messages.module.js';
+import { PushModule } from '../push/push.module.js';
 import { UsersModule } from '../users/users.module.js';
 import { AppConfigController } from './controllers/app-config.controller.js';
 import { CardsController } from './controllers/cards.controller.js';
@@ -20,7 +21,7 @@ import { StripeWebhookController } from './controllers/stripe-webhoook.controlle
 import { VariationsController } from './controllers/variations.controller.js';
 import { AddressEntity } from './entities/address.entity.js';
 import { AppConfigEntity } from './entities/app-config.entity.js';
-import { AppInstall } from './entities/app-install.entity.js';
+import { AppInstallEntity } from './entities/app-install.entity.js';
 import { BusinessHoursPeriodEntity } from './entities/business-hours-period.entity.js';
 import { CatalogImageEntity } from './entities/catalog-image.entity.js';
 import { CatalogEntity } from './entities/catalog.entity.js';
@@ -56,7 +57,6 @@ import { ItemsService } from './services/items.service.js';
 import { LineItemModifierService } from './services/line-item-modifier.service.js';
 import { LineItemService } from './services/line-item.service.js';
 import { LocationsService } from './services/locations.service.js';
-import { MerchantsFirebaseService } from './services/merchants.firebase.service.js';
 import { MerchantsService } from './services/merchants.service.js';
 import { MerchantsSquareService } from './services/merchants.square.service.js';
 import { MerchantsStripeService } from './services/merchants.stripe.service.js';
@@ -75,6 +75,7 @@ import { VariationsService } from './services/variations.service.js';
     UsersModule,
     MailModule,
     MessagesModule,
+    PushModule,
     ConfigModule.forFeature(MyOrderAppSquareConfig),
     TypeOrmModule.forFeature([
       ItemEntity,
@@ -91,7 +92,7 @@ import { VariationsService } from './services/variations.service.js';
       AddressEntity,
       BusinessHoursPeriodEntity,
       CustomerEntity,
-      AppInstall,
+      AppInstallEntity,
       AppConfigEntity,
       MerchantEntity,
       OrderEntity,
@@ -123,7 +124,6 @@ import { VariationsService } from './services/variations.service.js';
     MerchantsService,
     MerchantsSquareService,
     MerchantsStripeService,
-    MerchantsFirebaseService,
     MerchantsGuard,
     OrdersService,
     LineItemService,
