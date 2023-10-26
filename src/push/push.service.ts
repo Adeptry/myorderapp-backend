@@ -4,7 +4,6 @@ import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { NestAppConfig } from '../configs/app.config.js';
 import { FirebaseAdminService } from '../firebase-admin/firebase-admin.service.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
-import { CustomerEntity } from '../moa-square/entities/customer.entity.js';
 import { MerchantEntity } from '../moa-square/entities/merchant.entity.js';
 import { OrderEntity } from '../moa-square/entities/order.entity.js';
 
@@ -33,16 +32,22 @@ export class PushService {
   }
 
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -82,16 +87,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -137,16 +148,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -192,16 +209,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -244,16 +267,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -299,16 +328,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');
@@ -354,16 +389,22 @@ export class PushService {
   }
 
   async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
-    customer: CustomerEntity;
-    merchant: MerchantEntity;
     order: OrderEntity;
   }) {
-    const { customer, merchant, order } = params;
+    const { order } = params;
+    const { customer, merchant } = order;
 
     this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    const appInstalls = customer.appInstalls ?? [];
-    const user = customer.user;
+    if (!merchant) {
+      throw new NotFoundException();
+    }
+
+    const appInstalls = customer?.appInstalls ?? [];
+    const user = customer?.user;
+    if (!(customer?.pushNotifications ?? false)) {
+      return;
+    }
 
     if (appInstalls.length === 0) {
       this.logger.error('Customer has no app installs');

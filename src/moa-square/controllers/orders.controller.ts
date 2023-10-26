@@ -778,6 +778,10 @@ export class OrdersController {
               businessHours: true,
             }
           : undefined,
+        customer: {
+          user: true,
+        },
+        merchant: true,
       },
     });
 
@@ -787,7 +791,6 @@ export class OrdersController {
 
     try {
       await this.messagesService.sendPostSquarePaymentOrderCurrentOrThrow({
-        user,
         order,
       });
     } catch (error) {
@@ -796,7 +799,6 @@ export class OrdersController {
 
     try {
       await this.mailService.sendPostSquarePaymentOrderCurrentOrThrow({
-        user,
         order,
       });
     } catch (error) {

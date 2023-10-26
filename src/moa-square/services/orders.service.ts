@@ -857,22 +857,12 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         merchant: true,
       },
     });
-    const customer = order?.customer;
-    const user = customer?.user;
-    const merchant = order?.merchant;
-
-    if (!user || !order?.squareFulfillmentStatus || !merchant) {
-      throw new UnprocessableEntityException(
-        'Missing userId or squareFulfillmentStatus or merchant',
-      );
-    }
 
     switch (order?.squareFulfillmentStatus) {
       case FulfillmentStatusEnum.proposed:
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -882,7 +872,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -891,7 +880,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdateProposedOrThrow(
-            { customer, merchant, order },
+            { order },
           );
         } catch (error) {
           this.logger.error(error);
@@ -901,7 +890,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -911,7 +899,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -920,7 +907,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdateReservedOrThrow(
-            { customer, merchant, order },
+            { order },
           );
         } catch (error) {
           this.logger.error(error);
@@ -930,7 +917,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -940,7 +926,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -949,7 +934,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdatePreparedOrThrow(
-            { customer, merchant, order },
+            { order },
           );
         } catch (error) {
           this.logger.error(error);
@@ -959,7 +944,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -969,7 +953,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -978,7 +961,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdateCompletedOrThrow(
-            { customer, merchant, order },
+            { order },
           );
         } catch (error) {
           this.logger.error(error);
@@ -988,7 +971,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
             {
-              user,
               order,
             },
           );
@@ -998,7 +980,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
             {
-              user,
               order,
             },
           );
@@ -1007,7 +988,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         }
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdateCanceledOrThrow(
-            { customer, merchant, order },
+            { order },
           );
         } catch (error) {
           this.logger.error(error);
@@ -1017,7 +998,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.messagesService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -1027,7 +1007,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.mailService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
             {
-              user,
               order,
             },
           );
@@ -1037,8 +1016,6 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
         try {
           await this.pushService.sendOnEventSquareFulfillmentUpdateFailedOrThrow(
             {
-              customer,
-              merchant,
               order,
             },
           );

@@ -6,7 +6,6 @@ import { NestAppConfig } from '../configs/app.config.js';
 import { TwilioConfig } from '../configs/twilio.config.js';
 import { I18nTranslations } from '../i18n/i18n.generated.js';
 import { OrderEntity } from '../moa-square/entities/order.entity.js';
-import { UserEntity } from '../users/entities/user.entity.js';
 
 @Injectable()
 export class MessagesService {
@@ -37,16 +36,21 @@ export class MessagesService {
   }
 
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer?.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -61,18 +65,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -87,18 +96,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -113,18 +127,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -139,18 +158,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -165,18 +189,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 
@@ -191,18 +220,23 @@ export class MessagesService {
   }
 
   async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }) {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
     );
 
-    if (!user.phoneNumber) {
+    if (
+      !user ||
+      !user.phoneNumber ||
+      !(customer.messageNotifications ?? false)
+    ) {
       throw new NotFoundException(
-        this.translations(user.language).phoneNumberNotFound,
+        this.translations(user?.language).phoneNumberNotFound,
       );
     }
 

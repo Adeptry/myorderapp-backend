@@ -1,5 +1,5 @@
 import { MailerService } from '@nestjs-modules/mailer';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { I18nContext, I18nService, TranslateOptions } from 'nestjs-i18n';
 import { RootConfigType } from '../app.config.js';
@@ -483,10 +483,15 @@ export class MailService {
   }
 
   async sendPostSquarePaymentOrderCurrentOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
 
@@ -547,10 +552,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCanceledOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
@@ -613,10 +623,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateCompletedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
@@ -679,10 +694,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateFailedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name,
@@ -745,10 +765,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdatePreparedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
@@ -811,10 +836,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateProposedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
@@ -877,10 +907,15 @@ export class MailService {
   }
 
   async sendOnEventSquareFulfillmentUpdateReservedOrThrow(params: {
-    user: UserEntity;
     order: OrderEntity;
   }): Promise<void> {
-    const { user, order } = params;
+    const { order } = params;
+    const { customer } = order;
+    const user = customer?.user;
+
+    if (!user || !(customer.mailNotifications ?? false)) {
+      throw new NotFoundException();
+    }
 
     this.logger.verbose(
       this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
