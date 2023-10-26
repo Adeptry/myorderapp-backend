@@ -412,12 +412,14 @@ export class PushService {
     );
 
     if (!merchant) {
+      this.logger.error('No merchant');
       throw new NotFoundException();
     }
 
     const appInstalls = customer?.appInstalls ?? [];
     const user = customer?.user;
     if (!(customer?.pushNotifications ?? false)) {
+      this.logger.error('Customer doesnt want pushes');
       return;
     }
 
@@ -441,6 +443,7 @@ export class PushService {
         args: { order },
       },
     );
+    this.logger.log(`title: ${title}`);
 
     const body = this.i18n.t(
       'push.onEventSquareFulfillmentUpdateReserved.body',
@@ -449,11 +452,13 @@ export class PushService {
         args: { order },
       },
     );
+    this.logger.log(`body: ${body}`);
 
     for (const appInstall of appInstalls) {
       if (!appInstall.firebaseCloudMessagingToken) {
         continue;
       }
+      this.logger.log('send');
       await messaging.send({
         token: appInstall.firebaseCloudMessagingToken,
         notification: {
