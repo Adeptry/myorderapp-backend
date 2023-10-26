@@ -117,7 +117,7 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   description?: string;
 
-  @ApiProperty({ required: false, type: String, nullable: true })
+  @ApiProperty({ required: false, type: Boolean, nullable: true })
   @Column({ nullable: true })
   useAdaptiveScaffold?: boolean;
 
