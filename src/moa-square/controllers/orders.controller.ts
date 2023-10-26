@@ -45,6 +45,7 @@ import { SortOrderEnum } from '../../database/sort-order.enum.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
 import { MessagesService } from '../../messages/messages.service.js';
+import { PushService } from '../../push/push.service.js';
 import { UserTypeEnum } from '../../users/dto/type-user.dto.js';
 import { ErrorResponse } from '../../utils/error-response.js';
 import { ParseISODatePipe } from '../../utils/parse-iso-date.pipe-transform.js';
@@ -79,6 +80,7 @@ export class OrdersController {
     private readonly i18n: I18nService<I18nTranslations>,
     private readonly messagesService: MessagesService,
     private readonly mailService: MailService,
+    private readonly pushService: PushService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -800,6 +802,14 @@ export class OrdersController {
 
     try {
       await this.mailService.sendPostSquarePaymentOrderCurrentOrThrow({
+        order,
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    try {
+      await this.pushService.sendPostSquarePaymentOrderCurrentOrThrow({
         order,
       });
     } catch (error) {
