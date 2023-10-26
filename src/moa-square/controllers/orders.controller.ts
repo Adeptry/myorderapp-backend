@@ -780,6 +780,7 @@ export class OrdersController {
           : undefined,
         customer: {
           user: true,
+          appInstalls: true,
         },
         merchant: true,
       },

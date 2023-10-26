@@ -92,7 +92,9 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(
+      this.sendOnEventSquareFulfillmentUpdateCanceledOrThrow.name,
+    );
 
     if (!merchant) {
       throw new NotFoundException();
@@ -153,7 +155,9 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(
+      this.sendOnEventSquareFulfillmentUpdateCompletedOrThrow.name,
+    );
 
     if (!merchant) {
       throw new NotFoundException();
@@ -214,7 +218,7 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(this.sendOnEventSquareFulfillmentUpdateFailedOrThrow.name);
 
     if (!merchant) {
       throw new NotFoundException();
@@ -272,7 +276,9 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(
+      this.sendOnEventSquareFulfillmentUpdatePreparedOrThrow.name,
+    );
 
     if (!merchant) {
       throw new NotFoundException();
@@ -333,7 +339,9 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(
+      this.sendOnEventSquareFulfillmentUpdateProposedOrThrow.name,
+    );
 
     if (!merchant) {
       throw new NotFoundException();
@@ -394,7 +402,9 @@ export class PushService {
     const { order } = params;
     const { customer, merchant } = order;
 
-    this.logger.log(this.sendPostSquarePaymentOrderCurrentOrThrow.name);
+    this.logger.log(
+      this.sendOnEventSquareFulfillmentUpdateReservedOrThrow.name,
+    );
 
     if (!merchant) {
       throw new NotFoundException();

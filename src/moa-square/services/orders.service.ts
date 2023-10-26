@@ -829,9 +829,14 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
     ).pop();
 
     if (lastFulfillmentUpdate) {
-      const fulfillmentStatus = lastFulfillmentUpdate.new_state;
-      if (fulfillmentStatus && isValidFulfillmentStatus(fulfillmentStatus)) {
-        order.squareFulfillmentStatus = fulfillmentStatus;
+      const newFulfillmentStatus = lastFulfillmentUpdate.new_state;
+      const oldFulfillmentStatus = order.squareFulfillmentStatus;
+      if (
+        newFulfillmentStatus &&
+        isValidFulfillmentStatus(newFulfillmentStatus) &&
+        newFulfillmentStatus != oldFulfillmentStatus
+      ) {
+        order.squareFulfillmentStatus = newFulfillmentStatus;
         await this.save(order);
         try {
           await this.sendFullfillmentUpdateOrThrow({ orderId });
