@@ -117,6 +117,10 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   description?: string;
 
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  useAdaptiveScaffold?: boolean;
+
   /* App Icon */
 
   @Column({ nullable: true })
@@ -134,7 +138,7 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   iconFileContentType?: string;
 
-  /* App Icon */
+  /* App Banner */
 
   @Column({ nullable: true })
   bannerFileKey?: string;
