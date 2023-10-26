@@ -91,7 +91,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -159,7 +158,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -227,7 +225,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -290,7 +287,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -358,7 +354,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -426,7 +421,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
@@ -499,7 +493,6 @@ export class PushService {
         });
       } catch (error) {
         this.logger.error(error);
-        throw error;
       }
     }
   }
