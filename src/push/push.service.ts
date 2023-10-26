@@ -46,6 +46,7 @@ export class PushService {
     const appInstalls = customer?.appInstalls ?? [];
     const user = customer?.user;
     if (!(customer?.pushNotifications ?? false)) {
+      this.logger.log("Customer doesn't want push notifications");
       return;
     }
 
@@ -66,16 +67,20 @@ export class PushService {
       ...this.defaultTranslationOptions(user?.language),
       args: { order },
     });
+    this.logger.log(`title: ${title}`);
 
     const body = this.i18n.t('push.postSquarePaymentOrderCurrent.body', {
       ...this.defaultTranslationOptions(user?.language),
       args: { order },
     });
+    this.logger.log(`body: ${body}`);
 
     for (const appInstall of appInstalls) {
       if (!appInstall.firebaseCloudMessagingToken) {
+        this.logger.log("App install doesn't have a token");
         continue;
       }
+      this.logger.log('Sending');
       await messaging.send({
         token: appInstall.firebaseCloudMessagingToken,
         notification: {
