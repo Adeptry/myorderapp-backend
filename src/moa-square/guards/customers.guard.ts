@@ -66,10 +66,23 @@ export class CustomersGuard implements CanActivate {
     });
 
     if (!customer) {
-      customer = await this.service.createSaveAndSyncSquare({
-        userId: user.id,
-        merchantIdOrPath,
-      });
+      try {
+        customer = await this.service.createSaveAndSyncSquare({
+          userId: user.id,
+          merchantIdOrPath,
+        });
+      } catch {
+        customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+          where: {
+            userId: user.id,
+            merchantIdOrPath,
+          },
+        });
+
+        if (!customer) {
+          throw new NotFoundException(translations.customersNotFound);
+        }
+      }
     }
 
     // Store customer object in request for later use
