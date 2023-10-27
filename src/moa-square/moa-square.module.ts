@@ -100,7 +100,7 @@ import { VariationsService } from './services/variations.service.js';
       LineItemModifierEntity,
     ]),
   ],
-  exports: [MerchantsSquareService],
+  exports: [MerchantsSquareService, AppConfigService],
   providers: [
     CatalogsService,
     ItemsService,
