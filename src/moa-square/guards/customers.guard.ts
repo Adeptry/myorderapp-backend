@@ -65,6 +65,9 @@ export class CustomersGuard implements CanActivate {
       },
     });
 
+    /*
+     * This fix is dedicated to Michael Ryan Bearce
+     */
     if (!customer) {
       try {
         customer = await this.service.createSaveAndSyncSquare({
