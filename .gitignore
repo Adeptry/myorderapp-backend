@@ -37,5 +37,6 @@ lerna-debug.log*
 .data
 /files
 .env
+.env.production
 /ormconfig.json
 *.sqlite
