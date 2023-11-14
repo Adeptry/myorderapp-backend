@@ -211,7 +211,7 @@ export class OrderEntity extends BaseEntity {
     return (this.squareId?.length ?? 0) > 8
       ? this.squareId?.slice(0, 8).toUpperCase()
       : (this.id?.length ?? 0) > 8
-      ? this.id?.slice(0, 8).toUpperCase()
-      : undefined;
+        ? this.id?.slice(0, 8).toUpperCase()
+        : undefined;
   }
 }

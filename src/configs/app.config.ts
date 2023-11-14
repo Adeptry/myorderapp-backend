@@ -92,8 +92,8 @@ export const NestAppConfig = registerAs<AppConfigType>('app', () => {
     port: process.env.PORT
       ? parseInt(process.env.PORT, 10)
       : process.env.PORT
-      ? parseInt(process.env.PORT, 10)
-      : 3000,
+        ? parseInt(process.env.PORT, 10)
+        : 3000,
     workingDirectory: process.env.PWD || process.cwd(),
     name: process.env.APP_NAME || 'app',
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion

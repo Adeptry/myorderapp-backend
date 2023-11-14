@@ -656,6 +656,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       },
     );
 
+    const noteSuffix = `MyOrderApp Order #${order.displayId}`;
+
     const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
       await this.squareService.retryOrThrow(
         merchantSquareAccessToken,
@@ -672,7 +674,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                 {
                   type: 'PICKUP',
                   pickupDetails: {
-                    note,
+                    note: note ? `${note}\n\n${noteSuffix}` : `${noteSuffix}`,
                     scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
                     pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {

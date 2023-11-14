@@ -302,8 +302,8 @@ export class OrdersController {
             startDate && endDate
               ? Between(startDate!, endDate!)
               : closed
-              ? Not(IsNull())
-              : undefined,
+                ? Not(IsNull())
+                : undefined,
         },
         order: { [orderField as keyof OrderEntity]: orderSort },
         take: limit,
