@@ -637,13 +637,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       id: locationMoaId,
     });
 
-    const existingOrderResponse = await this.squareService.retryOrThrow(
+    const squareRetrieveOrderResponse = await this.squareService.retryOrThrow(
       merchantSquareAccessToken,
       (client) => client.ordersApi.retrieveOrder(orderSquareId),
     );
 
-    const existingSquareOrder = existingOrderResponse.result.order;
-    const existingSquareOrderLineItems = existingSquareOrder?.lineItems?.map(
+    const squareRetrievedOrder = squareRetrieveOrderResponse.result.order;
+    const squareRetrievedOrderLineItems = squareRetrievedOrder?.lineItems?.map(
       (lineItem) => {
         return {
           catalogObjectId: lineItem.catalogObjectId,
@@ -656,9 +656,28 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       },
     );
 
-    const noteSuffix = `MyOrderApp Order #${order.displayId}`;
+    try {
+      const squareUpdateBody: UpdateOrderRequest = {
+        order: {
+          locationId: locationSquareId,
+          version: order.squareVersion,
+          state: 'CANCELED',
+        },
+      };
+      await this.squareService.retryOrThrow(
+        merchantSquareAccessToken,
+        (client) =>
+          client.ordersApi.updateOrder(orderSquareId, {
+            ...squareUpdateBody,
+            idempotencyKey,
+          }),
+      );
+      this.logger.log(`Canceled order ${orderSquareId}`);
+    } catch (error) {
+      this.logger.error(error);
+    }
 
-    const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
+    const squareCreateOrderResponse: ApiResponse<UpdateOrderResponse> =
       await this.squareService.retryOrThrow(
         merchantSquareAccessToken,
         (client) =>
@@ -666,15 +685,16 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
             order: {
               locationId: locationSquareId,
               state: 'OPEN',
-              lineItems: existingSquareOrderLineItems,
+              lineItems: squareRetrievedOrderLineItems,
               pricingOptions: {
                 autoApplyTaxes: true,
               },
+              referenceId: order.id,
               fulfillments: [
                 {
                   type: 'PICKUP',
                   pickupDetails: {
-                    note: note ? `${note}\n\n${noteSuffix}` : `${noteSuffix}`,
+                    note,
                     scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
                     pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {
@@ -687,14 +707,14 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
           }),
       );
 
-    const squareUpdateOrderResult = squareUpdateOrderResponse.result.order;
-    if (!squareUpdateOrderResult) {
+    const squareCreateOrderResult = squareCreateOrderResponse.result.order;
+    if (!squareCreateOrderResult) {
       throw new InternalServerErrorException(
         translations.squareInvalidResponse,
       );
     }
     const { totalMoney: orderTotalMoney, totalTaxMoney: orderTotalTaxMoney } =
-      squareUpdateOrderResult;
+      squareCreateOrderResult;
     if (!orderTotalMoney || !orderTotalTaxMoney) {
       throw new UnprocessableEntityException(
         translations.squareInvalidResponse,
@@ -709,7 +729,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     const updatedOrder = await this.saveFromSquareOrder({
       order,
-      squareOrder: squareUpdateOrderResult,
+      squareOrder: squareCreateOrderResult,
     });
 
     const appFeeMoneyAmount = this.calculateAppFee({
@@ -734,12 +754,13 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
             amount: appFeeMoneyAmount,
             currency,
           },
-          orderId: squareUpdateOrderResult.id,
+          orderId: squareCreateOrderResult.id,
           referenceId: order.id,
         }),
     );
     const squarePayment = squarePaymentResponse.result.payment;
 
+    updatedOrder.squareId = squareCreateOrderResult.id;
     updatedOrder.closedDate = new Date();
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
