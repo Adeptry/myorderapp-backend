@@ -11,7 +11,7 @@ export class EncryptSquareTokens1700008096601 implements MigrationInterface {
     this.logger.verbose(this.up.name);
 
     const merchants: Array<MerchantEntity> = await queryRunner.query(
-      'SELECT id, squareAccessToken, squareRefreshToken FROM merchant',
+      `SELECT id, 'squareAccessToken', 'squareRefreshToken' FROM merchant`,
     );
     const transformer = new EncryptionTransformer(
       MoaSquareEncryptionTransformerConfig,
@@ -22,14 +22,14 @@ export class EncryptSquareTokens1700008096601 implements MigrationInterface {
         merchant.squareAccessToken,
       );
       await queryRunner.query(
-        `UPDATE merchant SET squareAccessToken = '${encryptedSquareAccessToken}' WHERE id = '${merchant.id}'`,
+        `UPDATE merchant SET 'squareAccessToken' = '${encryptedSquareAccessToken}' WHERE id = '${merchant.id}'`,
       );
 
       const encryptedSquareRefreshToken = transformer.to(
         merchant.squareRefreshToken,
       );
       await queryRunner.query(
-        `UPDATE merchant SET squareRefreshToken = '${encryptedSquareRefreshToken}' WHERE id = '${merchant.id}'`,
+        `UPDATE merchant SET 'squareRefreshToken' = '${encryptedSquareRefreshToken}' WHERE id = '${merchant.id}'`,
       );
     }
   }
