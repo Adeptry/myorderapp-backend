@@ -1,12 +1,12 @@
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 
-import fs from 'fs';
-const envConfig = fs.readFileSync('.env');
-for (const line of envConfig.toString().split('\n')) {
-  const [key, value] = line.split('=');
-  process.env[key] = value;
-}
+// import fs from 'fs';
+// const envConfig = fs.readFileSync('.env');
+// for (const line of envConfig.toString().split('\n')) {
+//   const [key, value] = line.split('=');
+//   process.env[key] = value;
+// }
 
 export const AppDataSource = new DataSource({
   type: process.env.DATABASE_TYPE,
