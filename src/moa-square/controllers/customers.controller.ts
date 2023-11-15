@@ -58,6 +58,7 @@ import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
 import { AppInstallsService } from '../services/app-installs.service.js';
 import { CustomersService } from '../services/customers.service.js';
+import { LocationsService } from '../services/locations.service.js';
 import { MerchantsService } from '../services/merchants.service.js';
 
 @ApiUnauthorizedResponse({
@@ -82,6 +83,7 @@ export class CustomersController {
     private readonly mailService: MailService,
     private readonly merchantsService: MerchantsService,
     private readonly usersService: UsersService,
+    private readonly locationsService: LocationsService,
   ) {
     this.logger.verbose(this.constructor.name);
   }
@@ -231,6 +233,13 @@ export class CustomersController {
           : undefined,
       },
     });
+
+    if (preferredLocationRelation && !found.preferredLocation) {
+      found.preferredLocation = await this.locationsService.findOne({
+        where: { isMain: true, merchantId: merchant.id },
+      });
+      await this.service.save(found);
+    }
 
     if (preferredSquareCardRelation) {
       if (!merchant.squareAccessToken || !found.squareId) {
