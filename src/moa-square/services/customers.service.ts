@@ -119,12 +119,11 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       throw new NotFoundException(translations.merchantsNotFound);
     }
 
-    if (
-      await this.findOne({
-        where: { userId, merchantId: merchant.id },
-      })
-    ) {
-      throw new BadRequestException(translations.customersExists);
+    const existing = await this.findOne({
+      where: { userId, merchantId: merchant.id },
+    });
+    if (existing) {
+      return existing;
     }
 
     if (!merchant?.squareAccessToken) {

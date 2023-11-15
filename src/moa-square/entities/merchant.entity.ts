@@ -1,5 +1,5 @@
 import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
-import { Exclude } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import { nanoid } from 'nanoid';
 import type { Relation } from 'typeorm';
 import {
@@ -16,7 +16,9 @@ import {
   UpdateDateColumn,
   VersionColumn,
 } from 'typeorm';
+import { EncryptionTransformer } from 'typeorm-encrypted';
 import { UserEntity } from '../../users/entities/user.entity.js';
+import { MoaSquareEncryptionTransformerConfig } from '../moa-square.config.js';
 import { AppConfigEntity } from './app-config.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
 import { CustomerEntity } from './customer.entity.js';
@@ -88,22 +90,45 @@ export class MerchantEntity extends BaseEntity {
 
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  @Column({ nullable: true })
-  squareAccessToken?: string;
+  @Column({
+    nullable: true,
+    type: String,
+    transformer: new EncryptionTransformer(
+      MoaSquareEncryptionTransformerConfig,
+    ),
+  })
+  squareAccessToken?: string | null;
 
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  @Column({ nullable: true })
-  squareRefreshToken?: string;
+  @Column({
+    nullable: true,
+    type: String,
+    transformer: new EncryptionTransformer(
+      MoaSquareEncryptionTransformerConfig,
+    ),
+  })
+  squareRefreshToken?: string | null;
 
   @Exclude({ toPlainOnly: true })
   @ApiHideProperty()
-  @Column({ nullable: true })
-  squareExpiresAt?: Date;
+  @Column({ nullable: true, type: Date })
+  squareExpiresAt?: Date | null;
 
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true })
   squareId?: string;
+
+  @Expose()
+  @ApiProperty({ required: false, type: Boolean, nullable: true })
+  get squareConnected(): boolean {
+    return (
+      this.squareAccessToken != undefined &&
+      this.squareRefreshToken != undefined &&
+      this.squareExpiresAt != undefined &&
+      this.squareExpiresAt > new Date()
+    );
+  }
 
   /*
    * Square merchant
@@ -112,6 +137,7 @@ export class MerchantEntity extends BaseEntity {
   @ApiProperty({
     required: false,
     nullable: true,
+    type: String,
     description: "The name of the merchant's overall business.",
   })
   @Column({ nullable: true, type: String })

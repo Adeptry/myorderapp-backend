@@ -281,6 +281,29 @@ export class MerchantsController {
     return;
   }
 
+  @Get('me/square/logout')
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @ApiBearerAuth()
+  @ApiOperation({
+    summary: 'Delete Square Oauth',
+    operationId: 'getMeSquareLogout',
+  })
+  @ApiUnauthorizedResponse({
+    description: 'You need to be authenticated to access this endpoint.',
+    type: ErrorResponse,
+  })
+  @ApiOkResponse({ description: 'Square Oauth deleted' })
+  async getMeSquareLogout(@Req() request: any): Promise<void> {
+    this.logger.verbose(this.getMeSquareLogout.name);
+
+    await this.merchantsSquareService.deleteOauth({
+      merchantId: request.merchant.id,
+    });
+
+    return;
+  }
+
   @Get('me/square/sync')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard('jwt'), MerchantsGuard)

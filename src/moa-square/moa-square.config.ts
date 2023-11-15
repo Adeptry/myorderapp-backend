@@ -1,13 +1,21 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
 import { IsBoolean, IsOptional, IsString, validateSync } from 'class-validator';
+import { EncryptionOptions } from 'typeorm-encrypted';
 import { toBigIntOrThrow } from '../utils/to-big-int-or-throw.js';
+
+export const MoaSquareEncryptionTransformerConfig: EncryptionOptions = {
+  key: '0a7c51002579544f0519682287fb9119bb98d04437cdf82df547e41826c61794',
+  algorithm: 'aes-256-cbc',
+  ivLength: 16,
+};
 
 export type MyOrderAppSquareConfigType = {
   squareClientEnvironment: string;
   squareOauthClientId: string;
   squareOauthClientSecret: string;
   squareWebhookSignatureKey: string;
+  squareEncryptionToken: string;
 
   squareAppFeeBigIntDenominator: bigint;
   squareTier0AppFeeBigIntNumerator: bigint;
@@ -46,6 +54,9 @@ export type MyOrderAppSquareConfigType = {
 };
 
 class MyOrderAppSquareConfigValidator {
+  @IsString()
+  SQUARE_ENCRYPTION_TOKEN!: string;
+
   @IsString()
   SQUARE_OAUTH_CLIENT_ID!: string;
 
@@ -186,6 +197,8 @@ export const MyOrderAppSquareConfig = registerAs('moaSquare', () => {
     squareOauthClientSecret: process.env.SQUARE_OAUTH_CLIENT_SECRET!,
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     squareWebhookSignatureKey: process.env.SQUARE_WEBHOOK_SIGNATURE_KEY!,
+    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+    squareEncryptionToken: process.env.SQUARE_ENCRYPTION_TOKEN!,
 
     squareAppFeeBigIntDenominator: toBigIntOrThrow(
       process.env.SQUARE_TIER_APP_FEE_BIG_INT_DENOMINATOR!,

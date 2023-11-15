@@ -108,6 +108,24 @@ export class MerchantsSquareService {
     return merchant;
   }
 
+  async deleteOauth(params: { merchantId: string }) {
+    this.logger.verbose(this.deleteOauth.name);
+    const { merchantId } = params;
+
+    const merchant = await this.service.findOneOrFail({
+      where: { id: merchantId },
+      relations: { user: true },
+    });
+
+    merchant.squareAccessToken = null;
+    merchant.squareExpiresAt = null;
+    merchant.squareRefreshToken = null;
+
+    await this.service.save(merchant);
+
+    return merchant;
+  }
+
   async sync(params: { merchantId: string }) {
     this.logger.verbose(this.sync.name);
     const translations = this.currentTranslations();
@@ -282,14 +300,14 @@ export class MerchantsSquareService {
   @Cron(CronExpression.EVERY_DAY_AT_4AM)
   async refreshTokensCron() {
     this.logger.verbose(this.refreshTokensCron.name);
-    const seventyTwoHoursFromNow = new Date(
-      new Date().getTime() + 72 * 60 * 60 * 1000,
+    const threeWeeksFromNow = new Date(
+      new Date().getTime() + 21 * 24 * 60 * 60 * 1000, // 21 days, 24 hours per day, 60 minutes per hour, 60 seconds per minute, 1000 milliseconds per second
     );
     const merchantsWhereSquareTokenExpiresInLessThan72Hours =
       await this.service.find({
         where: {
           squareExpiresAt: LessThan(
-            DateUtils.mixedDateToUtcDatetimeString(seventyTwoHoursFromNow),
+            DateUtils.mixedDateToUtcDatetimeString(threeWeeksFromNow),
           ),
         },
       });
