@@ -10,6 +10,7 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as Sentry from '@sentry/node';
 import { ValidationError, useContainer } from 'class-validator';
+import 'dotenv/config';
 import helmet from 'helmet';
 // import { SpelunkerModule } from 'nestjs-spelunker';
 import { AdminModule } from './admin/admin.module.js';

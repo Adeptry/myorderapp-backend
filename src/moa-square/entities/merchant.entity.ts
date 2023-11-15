@@ -18,7 +18,7 @@ import {
 } from 'typeorm';
 import { EncryptionTransformer } from 'typeorm-encrypted';
 import { UserEntity } from '../../users/entities/user.entity.js';
-import { MoaSquareEncryptionTransformerConfig } from '../moa-square.config.js';
+import { MoaSquareEncryptionTransformerConfig } from '../utils/moa-square-encryption-transformer-config.js';
 import { AppConfigEntity } from './app-config.entity.js';
 import { CatalogEntity } from './catalog.entity.js';
 import { CustomerEntity } from './customer.entity.js';

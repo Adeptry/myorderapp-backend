@@ -1,8 +1,8 @@
 import { Logger } from '@nestjs/common';
-import { MerchantEntity } from 'src/moa-square/entities/merchant.entity.js';
 import { MigrationInterface, QueryRunner } from 'typeorm';
 import { EncryptionTransformer } from 'typeorm-encrypted';
-import { MoaSquareEncryptionTransformerConfig } from '../../moa-square/moa-square.config.js';
+import { MerchantEntity } from '../../moa-square/entities/merchant.entity.js';
+import { MoaSquareEncryptionTransformerConfig } from '../../moa-square/utils/moa-square-encryption-transformer-config.js';
 
 export class EncryptSquareTokens1700008096601 implements MigrationInterface {
   private readonly logger = new Logger(EncryptSquareTokens1700008096601.name);
