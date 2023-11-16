@@ -694,7 +694,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
                 {
                   type: 'PICKUP',
                   pickupDetails: {
-                    note,
+                    note: `${note}\n\nMyOrderApp Order #${order.displayId}`,
                     scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
                     pickupAt: pickupOrAsapDate.toISOString(),
                     recipient: {
