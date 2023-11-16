@@ -527,7 +527,6 @@ export class OrdersController {
     lineItems?: boolean,
     @Query('location', new DefaultValuePipe(false), ParseBoolPipe)
     location?: boolean,
-
     @Query('idempotencyKey') idempotencyKey?: string,
   ) {
     const { variations } = body;

@@ -282,14 +282,12 @@ export class MerchantsSquareService {
   }
 
   @OnEvent('square.oauth.authorization.revoked')
-  handleOauthAuthorizationRevoked(
+  async handleOauthAuthorizationRevoked(
     payload: SquareOauthAuthorizationRevokedEventPayload,
   ) {
-    this.logger.debug(
-      `Handling SquareOauthAuthorizationRevokedEventPayload ${JSON.stringify(
-        payload,
-      )}}`,
-    );
+    if (payload.merchant_id) {
+      await this.deleteOauth({ merchantId: payload.merchant_id });
+    }
   }
 
   /*

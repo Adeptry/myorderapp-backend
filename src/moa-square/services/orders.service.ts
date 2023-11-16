@@ -762,6 +762,7 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
 
     updatedOrder.squareId = squareCreateOrderResult.id;
     updatedOrder.closedDate = new Date();
+    updatedOrder.squareFulfillmentStatus = FulfillmentStatusEnum.proposed;
     updatedOrder.pickupDate = new Date(pickupOrAsapDate);
     updatedOrder.customerId = customerMoaId;
     updatedOrder.totalMoneyAmount = Number(
@@ -857,7 +858,8 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       if (
         newFulfillmentStatus &&
         isValidFulfillmentStatus(newFulfillmentStatus) &&
-        newFulfillmentStatus != oldFulfillmentStatus
+        newFulfillmentStatus != oldFulfillmentStatus &&
+        newFulfillmentStatus != FulfillmentStatusEnum.proposed
       ) {
         order.squareFulfillmentStatus = newFulfillmentStatus;
         await this.save(order);
