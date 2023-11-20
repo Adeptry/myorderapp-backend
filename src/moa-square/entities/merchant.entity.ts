@@ -116,8 +116,8 @@ export class MerchantEntity extends BaseEntity {
   squareExpiresAt?: Date | null;
 
   @ApiProperty({ required: false, nullable: true })
-  @Column({ nullable: true })
-  squareId?: string;
+  @Column({ nullable: true, type: String })
+  squareId?: string | null;
 
   @Expose()
   @ApiProperty({ required: false, type: Boolean, nullable: true })

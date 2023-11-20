@@ -120,6 +120,7 @@ export class MerchantsSquareService {
     merchant.squareAccessToken = null;
     merchant.squareExpiresAt = null;
     merchant.squareRefreshToken = null;
+    merchant.squareId = null;
 
     await this.service.save(merchant);
 
