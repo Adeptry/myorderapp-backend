@@ -114,7 +114,7 @@ export class MerchantsSquareService {
 
     const merchant = await this.service.findOneOrFail({
       where: { id: merchantId },
-      relations: { user: true },
+      relations: { user: true, catalog: true },
     });
 
     merchant.squareAccessToken = null;
@@ -122,6 +122,14 @@ export class MerchantsSquareService {
     merchant.squareRefreshToken = null;
 
     await this.service.save(merchant);
+
+    const catalogId = merchant?.catalog?.id;
+    if (catalogId) {
+      await this.catalogsService.delete({ id: catalogId });
+    }
+
+    await this.customersService.delete({ merchantId: merchant.id });
+    await this.locationsService.delete({ merchantId: merchant.id });
 
     return merchant;
   }
