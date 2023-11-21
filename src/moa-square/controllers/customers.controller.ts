@@ -36,7 +36,7 @@ import {
 import type { Response } from 'express';
 import { NestSquareService } from 'nest-square';
 import { I18nContext, I18nService } from 'nestjs-i18n';
-import { Between, Not } from 'typeorm';
+import { Between } from 'typeorm';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
 import type { UsersGuardedRequest } from '../../authentication/users.guard.js';
 import { UsersGuard } from '../../authentication/users.guard.js';
@@ -453,9 +453,10 @@ export class CustomersController {
       results: await this.service.findAndCount({
         where: {
           merchantId: request.merchant.id,
-          user: {
-            id: Not(request.user.id),
-          },
+          // should I list the customers of the current user?
+          // user: {
+          //   id: Not(request.user.id),
+          // },
           createDate:
             startDate && endDate ? Between(startDate!, endDate!) : undefined,
         },
