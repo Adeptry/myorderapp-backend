@@ -637,79 +637,38 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
       id: locationMoaId,
     });
 
-    const squareRetrieveOrderResponse = await this.squareService.retryOrThrow(
-      merchantSquareAccessToken,
-      (client) => client.ordersApi.retrieveOrder(orderSquareId),
-    );
-
-    const squareRetrievedOrder = squareRetrieveOrderResponse.result.order;
-    const squareRetrievedOrderLineItems = squareRetrievedOrder?.lineItems?.map(
-      (lineItem) => {
-        return {
-          catalogObjectId: lineItem.catalogObjectId,
-          quantity: lineItem.quantity,
-          note: lineItem.note,
-          modifiers: lineItem.modifiers?.map((modifier) => {
-            return { catalogObjectId: modifier.catalogObjectId };
-          }),
-        };
-      },
-    );
-
-    try {
-      const squareUpdateBody: UpdateOrderRequest = {
-        order: {
-          locationId: locationSquareId,
-          version: order.squareVersion,
-          state: 'CANCELED',
-        },
-      };
-      await this.squareService.retryOrThrow(
-        merchantSquareAccessToken,
-        (client) =>
-          client.ordersApi.updateOrder(orderSquareId, {
-            ...squareUpdateBody,
-            idempotencyKey,
-          }),
-      );
-      this.logger.log(`Canceled order ${orderSquareId}`);
-    } catch (error) {
-      this.logger.error(error);
-    }
-
-    const squareCreateOrderResponse: ApiResponse<UpdateOrderResponse> =
-      await this.squareService.retryOrThrow(
-        merchantSquareAccessToken,
-        (client) =>
-          client.ordersApi.createOrder({
-            order: {
-              locationId: locationSquareId,
-              state: 'OPEN',
-              lineItems: squareRetrievedOrderLineItems,
-              pricingOptions: {
-                autoApplyTaxes: true,
+    const squareUpdateBody: UpdateOrderRequest = {
+      idempotencyKey,
+      order: {
+        locationId: locationSquareId,
+        version: order.squareVersion,
+        state: 'OPEN',
+        fulfillments: [
+          {
+            type: 'PICKUP',
+            pickupDetails: {
+              note: `${note ? note : ''}\n\nMyOrderApp Order #${
+                order.displayId
+              }`,
+              scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
+              pickupAt: pickupOrAsapDate.toISOString(),
+              recipient: {
+                customerId: customerSquareId,
               },
-              referenceId: order.id,
-              fulfillments: [
-                {
-                  type: 'PICKUP',
-                  pickupDetails: {
-                    note: `${note ? note : ''}\n\nMyOrderApp Order #${
-                      order.displayId
-                    }`,
-                    scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
-                    pickupAt: pickupOrAsapDate.toISOString(),
-                    recipient: {
-                      customerId: customerSquareId,
-                    },
-                  },
-                },
-              ],
             },
-          }),
+          },
+        ],
+      },
+    };
+
+    const squareUpdateOrderResponse: ApiResponse<UpdateOrderResponse> =
+      await this.squareService.retryOrThrow(
+        merchantSquareAccessToken,
+        (client) =>
+          client.ordersApi.updateOrder(orderSquareId, squareUpdateBody),
       );
 
-    const squareCreateOrderResult = squareCreateOrderResponse.result.order;
+    const squareCreateOrderResult = squareUpdateOrderResponse.result.order;
     if (!squareCreateOrderResult) {
       throw new InternalServerErrorException(
         translations.squareInvalidResponse,

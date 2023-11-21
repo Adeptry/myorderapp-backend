@@ -17,7 +17,7 @@ import { LocationsController } from './controllers/locations.controller.js';
 import { MerchantsController } from './controllers/merchants.controller.js';
 import { OrdersController } from './controllers/orders.controller.js';
 import { SquareWebhookController } from './controllers/square-webhook.controller.js';
-import { StripeWebhookController } from './controllers/stripe-webhoook.controller.js';
+import { StripeWebhookController } from './controllers/stripe-webhook.controller.js';
 import { VariationsController } from './controllers/variations.controller.js';
 import { AddressEntity } from './entities/address.entity.js';
 import { AppConfigEntity } from './entities/app-config.entity.js';
