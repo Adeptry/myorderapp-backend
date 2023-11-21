@@ -69,9 +69,59 @@ See comment above - fixed and very cool.
 
 Didn't make it to production in time, my apologies, I have revalidated this now.
 
+### If schedule_type is 'SCHEDULED', partner must populate pick_up time and prep_time_duration
+
+> It is scheduled within MyOrderApp Interface, but there is no pick_up time and
+> prep_time duration that appears in the API call of the order
+
+I have added prep_time_duration for scheduled orders. Specifically, in my FAQ I
+state that all "pickup lead time durations" are by default 15 minutes, and that
+this is configurable upon submission of a support ticket. I plan on making this
+merchant configurable soon after launch.
+
+## Customers
+
+For items:
+
+- Create customer in partner app creates customer in Square (P1)
+- Delete customer in partner app deletes customer in Square
+- Update customer in partner app updates customer in Square
+- All Partner/Square common customer fields are synced between systems
+
+> Partner is not created in partner app but it is created in Square - made an
+> order with a customer ‘Amit Test’ but the customer does not appear in the
+> MyOrderApp Interface. Within customers, the list is empty
+
+When you log in as a Seller in the "MyOrderApp for Sellers" dashboard,
+it automatically passes your authentication information to the created
+application, which in turn automatically creates a MyOrderApp Customer
+(which also creates a Square Customer) on the Merchant's behalf.
+
+That is to say that there is a User who is both a Merchant and a Customer.
+
+In the Customer list on MyOrderApp, I exclude the Customer that has the same
+User ID as the current Merchant.
+
+In order to test the create/read/update/delete functions of MyOrderApp seperate
+from the Merchant, because even if you hit "delete" while on the Seller
+dashboard, it will just automatically create a new one, you need to navigate
+in a separate browser or browse anonymously. This is because the authentication
+information is securely stored in cookies for persistance.
+
+If you test it in a new browser, you should find that you can create a Customer,
+perform any operations, and then delete that customer, and as long as you do not
+use the same email as the Merchant account, that Customer will be visible on the
+Dashboard, and regardless of whether they're the Merchant or not, that Square
+is kept up to date on the Customer information.
+
 ## Orders
 
-### Order fulfillment state pushed as PROPOSED & Order can move through all states
+For items:
+
+- Order can move through all states
+- If partner is closing Orders in Square, partner must mark Order and Order
+  Fulfillment as 'COMPLETE'
+- Order fulfillment state pushed as PROPOSED
 
 > "For two test orders, I made one that was pickup ASAP and another that was to
 > be picked up in the future. For the pickup in the future (Using Order ID
@@ -107,40 +157,58 @@ Order IDs:
 - 1HhiNZC3ZkqCifO5yacO2YBwjH6YY
 - tHpvzLtGBxfq6TrPEF16Lh6I4pFZY
 
-When a Customer taps the pay button, I mark these draft orders as cancelled
-and open a new order with the final details and post the payment for that order.
+When you tapped the pay button, I marked these DRAFT Orders as CANCELED and
+created a new OPEN Order with the final details and posted the payment for that
+Order.
 
-First, from the documentation, the reason that I cancel the order instead of deleting it:
+The reason I did this was I found that if something goes wrong with updating the
+Order, my app and Square can get into a state where the Customer is stuck,
+because Orders may only have and be created with one fulfillment object.
+However, assuming nothing goes wrong with the UpdateOrder call, this is safe.
 
-> In the current implementation, the Orders API doesn't provide an endpoint to
-> delete an order. However, Square reserves the right to delete DRAFT orders
-> that haven't been updated in 30 days.
+All that is to say: **I've changed the behavior to be what I think is more
+conventional, try it now.**
 
-Second, you ask "why have DRAFT orders?" The reason is that Customers can change
-information about the order while they're building it. Specifcally, customers can change
-the location and fulfillment information. The API does not allow Orders to have
-these fields updated.
-
-### If partner is closing Orders in Square, partner must mark Order and Order Fulfillment as 'COMPLETE'
-
-> No Order Fulfillment Line item for one order but appears on another
-
-## If partner is closing Orders, partner must send corresponding refund to Refunds API to maintain proper reporting
-
-> Do not see refund reporting from Square to MyOrderApp - please add an
-> indicator of refunds processed in order to maintain proper reporting across
-> both platforms
-
-## Sync an item with a location price override, correct price must be shown for location chosen in partner platform
+### Sync an item with a location price override, correct price must be shown for location chosen in partner platform (P1)
 
 > I set the test item "Croissant" with a location price override of $0.50 for my
 > New York location. While the price is updated when selecting 'Check out,' in
 > the interface it still shows the old price. Small UI fix to ensure that
 > sellers see the correct price per location
 
+If a Merchant updates their Catalog while a Customer has a Draft Order with
+an updated object, they will see stale information until they update the Order.
+However, given that the price at the time of Order creation is a valid price,
+if they do not update the Order and they checkout, they will have the original
+price, which I believe is the correct behavior. When they subsequently refresh
+their catalog by either pulling down to refresh, selecting a new location, or
+otherwise refreshing the application, they will receive the updated catalog.
+
 ## Future fixes
 
-### Refunds in third-party are pushed to Square via Refunds API
+For items:
+
+- Refunds in third-party are pushed to Square via Refunds API
+- If partner is closing Orders, partner must send corresponding refund to Refunds API to maintain proper reporting
+
+With comment:
+
+> Do not see refund reporting from Square to MyOrderApp - please add an
+> indicator of refunds processed in order to maintain proper reporting across
+> both platforms
+
+And:
 
 > While MyOrderApp does not allow refunds within the platform, please at minimum
 > add in a status indicator of refunds
+
+I kindly request that this do not block passing QA. I am happy to implement refund
+awareness in the customer and merchant applications, and I've even started it,
+but I do not want to do it hastily and make a mistake.
+
+### Invalid CVV & Invalid expiration date (P2)
+
+> Long loading time then eventually get a 400 error (Our servers couldn't handle that) -
+> recommend adjusting this wording to be more user friendly
+
+Similarly, I can commit to having this fixed within a week.

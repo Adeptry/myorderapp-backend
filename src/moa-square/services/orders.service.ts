@@ -652,6 +652,9 @@ export class OrdersService extends EntityRepositoryService<OrderEntity> {
               }`,
               scheduleType: pickupDateString ? 'SCHEDULED' : 'ASAP',
               pickupAt: pickupOrAsapDate.toISOString(),
+              prepTimeDuration: pickupDateString
+                ? `P${merchant.pickupLeadDurationMinutes ?? '15'}M`
+                : undefined,
               recipient: {
                 customerId: customerSquareId,
               },
