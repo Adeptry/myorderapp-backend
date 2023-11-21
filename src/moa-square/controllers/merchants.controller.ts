@@ -15,6 +15,7 @@ import {
   Post,
   Query,
   Req,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -30,6 +31,7 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { NestSquareService } from 'nest-square';
 import { NestStripeService } from 'nest-stripe2';
 import { I18nContext, I18nService } from 'nestjs-i18n';
 import { ApiKeyAuthGuard } from '../../authentication/apikey-auth.guard.js';
@@ -66,6 +68,7 @@ export class MerchantsController {
     private readonly merchantsSquareService: MerchantsSquareService,
     private readonly merchantsStripeService: MerchantsStripeService,
     private readonly stripeService: NestStripeService,
+    private readonly squareService: NestSquareService,
     private readonly usersService: UsersService,
     private readonly mailService: MailService,
   ) {
@@ -296,6 +299,22 @@ export class MerchantsController {
   @ApiOkResponse({ description: 'Square Oauth deleted' })
   async getMeSquareLogout(@Req() request: any): Promise<void> {
     this.logger.verbose(this.getMeSquareLogout.name);
+
+    const merchantSquareId = request.merchant.squareId;
+
+    if (!merchantSquareId) {
+      throw new UnauthorizedException(
+        this.translations().merchantsSquareAccessTokenNotFound,
+      );
+    }
+
+    try {
+      await this.squareService.retryRevokeTokenOrThrow({
+        merchantId: merchantSquareId,
+      });
+    } catch (error: any) {
+      this.logger.error("Failed to revoke merchant's Square token", error);
+    }
 
     await this.merchantsSquareService.deleteOauth({
       merchantId: request.merchant.id,

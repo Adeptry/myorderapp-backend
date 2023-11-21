@@ -117,23 +117,6 @@ export class MerchantsSquareService {
       relations: { user: true, catalog: true },
     });
 
-    const merchantSquareId = merchant.squareId;
-
-    if (!merchantSquareId) {
-      throw new UnauthorizedException(
-        this.currentTranslations().merchantsSquareAccessTokenNotFound,
-      );
-    }
-
-    try {
-      await this.squareService.retryRevokeTokenOrThrow({
-        merchantId: merchantSquareId,
-      });
-    } catch (error: any) {
-      this.logger.error("Failed to revoke merchant's Square token", error);
-      throw error;
-    }
-
     merchant.squareAccessToken = null;
     merchant.squareExpiresAt = null;
     merchant.squareRefreshToken = null;
