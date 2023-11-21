@@ -317,7 +317,12 @@ export class MerchantsSquareService {
     payload: SquareOauthAuthorizationRevokedEventPayload,
   ) {
     if (payload.merchant_id) {
-      await this.deleteOauth({ merchantId: payload.merchant_id });
+      const merchant = await this.service.findOneOrFail({
+        where: { squareId: payload.merchant_id },
+      });
+      if (merchant.id) {
+        await this.deleteOauth({ merchantId: merchant.id });
+      }
     }
   }
 
