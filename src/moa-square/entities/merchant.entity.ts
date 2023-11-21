@@ -150,7 +150,7 @@ export class MerchantEntity extends BaseEntity {
       'Indicates the country associated with another entity, such as a business. Values are in ISO 3166-1-alpha-2 format.',
   })
   @Column({ nullable: true, type: String })
-  countryCode?: string;
+  countryCode?: string | null;
 
   @ApiProperty({
     required: false,
@@ -168,11 +168,11 @@ export class MerchantEntity extends BaseEntity {
       'Indicates the associated currency for an amount of money. Values correspond to ISO 4217.',
   })
   @Column({ nullable: true, type: String })
-  currencyCode?: string;
+  currencyCode?: string | null;
 
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, type: String })
-  squareStatus?: string;
+  squareStatus?: string | null;
 
   @Column({ nullable: true, type: String })
   @Exclude({ toPlainOnly: true })
