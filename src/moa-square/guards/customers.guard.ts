@@ -58,35 +58,35 @@ export class CustomersGuard implements CanActivate {
     }
     request.user = user;
 
-    let customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+    const customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
       where: {
         userId: user.id,
         merchantIdOrPath,
       },
     });
 
-    /*
-     * This fix is dedicated to Michael Ryan Bearce
-     */
-    if (!customer) {
-      try {
-        customer = await this.service.createSaveAndSyncSquare({
-          userId: user.id,
-          merchantIdOrPath,
-        });
-      } catch {
-        customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
-          where: {
-            userId: user.id,
-            merchantIdOrPath,
-          },
-        });
+    // /*
+    //  * This fix is dedicated to Michael Ryan Bearce
+    //  */
+    // if (!customer) {
+    //   try {
+    //     customer = await this.service.createSaveAndSyncSquare({
+    //       userId: user.id,
+    //       merchantIdOrPath,
+    //     });
+    //   } catch {
+    //     customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+    //       where: {
+    //         userId: user.id,
+    //         merchantIdOrPath,
+    //       },
+    //     });
 
-        if (!customer) {
-          throw new NotFoundException(translations.customersNotFound);
-        }
-      }
+    if (!customer) {
+      throw new NotFoundException(translations.customersNotFound);
     }
+    //   }
+    // }
 
     // Store customer object in request for later use
     request.customer = customer;
