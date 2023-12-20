@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -68,6 +69,7 @@ export class ItemModifierListEntity extends BaseEntity {
   @ManyToOne(() => ItemEntity, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'itemId' })
   item?: Relation<ItemEntity>;
 
   @Exclude({ toPlainOnly: true })
@@ -82,6 +84,7 @@ export class ItemModifierListEntity extends BaseEntity {
   @ManyToOne(() => ModifierListEntity, (entity) => entity.itemModifierLists, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'modifierListId' })
   modifierList?: Relation<ModifierListEntity>;
 
   @ApiProperty({

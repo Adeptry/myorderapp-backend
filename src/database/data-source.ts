@@ -1,8 +1,11 @@
+import { dirname } from 'path';
 import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
+import { fileURLToPath } from 'url';
 
+// For local:
 // import fs from 'fs';
-// const envConfig = fs.readFileSync('.env');
+// const envConfig = fs.readFileSync('.env.staging');
 // for (const line of envConfig.toString().split('\n')) {
 //   const [key, value] = line.split('=');
 //   process.env[key] = value;
@@ -22,8 +25,12 @@ export const AppDataSource = new DataSource({
   dropSchema: false,
   keepConnectionAlive: true,
   logging: process.env.DATABASE_LOGGING,
-  entities: ['/src/**/*.entity{.ts,.js}'],
-  migrations: ['src/database/migrations/**/*{.ts,.js}'],
+  entities: [
+    dirname(fileURLToPath(import.meta.url)) + '/../**/*.entity{.ts,.js}',
+  ],
+  migrations: [
+    dirname(fileURLToPath(import.meta.url)) + '/migrations/**/*{.ts,.js}',
+  ],
   cli: {
     entitiesDir: 'src',
     migrationsDir: 'src/database/migrations',

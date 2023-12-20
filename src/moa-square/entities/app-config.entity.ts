@@ -121,6 +121,10 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   useAdaptiveScaffold?: boolean;
 
+  @ApiProperty({ type: Number, nullable: true, required: false })
+  @Column({ nullable: true, default: 7 })
+  categoryCollapseThreshold?: number;
+
   /* App Icon */
 
   @Column({ nullable: true })
@@ -164,6 +168,6 @@ export class AppConfigEntity extends BaseEntity {
   @ManyToOne(() => MerchantEntity, (entity) => entity.appConfig, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'merchantId' })
   merchant?: Relation<MerchantEntity>;
 }

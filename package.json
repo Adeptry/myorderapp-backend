@@ -133,6 +133,8 @@
     "migration:generate": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:generate",
     "migration:revert": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:revert",
     "migration:run": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:run",
+    "migration:show": "npm run typeorm -- --dataSource=src/database/data-source.ts migration:show",
+    "schema:sync": "npm run typeorm -- --dataSource=src/database/data-source.ts schema:sync",
     "prebuild": "rimraf dist",
     "prepare": "is-ci || husky install",
     "schema:drop": "npm run typeorm -- --dataSource=src/database/data-source.ts schema:drop",
@@ -150,5 +152,5 @@
     "typeorm": "node --loader ts-node/esm -r tsconfig-paths/register ./node_modules/typeorm/cli.js"
   },
   "type": "module",
-  "version": "2.5.11"
+  "version": "2.5.12"
 }

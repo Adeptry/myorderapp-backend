@@ -77,7 +77,7 @@ export class ModifierEntity extends BaseEntity {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'modifierListId' })
   modifierList?: Relation<ModifierListEntity> | null;
 
   @Exclude({ toPlainOnly: true })
@@ -88,7 +88,7 @@ export class ModifierEntity extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Relation<CatalogEntity>;
 
   // Locations

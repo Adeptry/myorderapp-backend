@@ -9,6 +9,7 @@ import {
   CreateDateColumn,
   DeleteDateColumn,
   Entity,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -165,5 +166,6 @@ export class BusinessHoursPeriodEntity extends BaseEntity {
   @ManyToOne(() => LocationEntity, (entity) => entity.businessHours, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'locationId' })
   location?: Relation<LocationEntity>;
 }

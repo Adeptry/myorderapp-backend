@@ -92,7 +92,7 @@ export class VariationEntity extends BaseEntity {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'itemId' })
   item?: Relation<ItemEntity>;
 
   @Exclude({ toPlainOnly: true })

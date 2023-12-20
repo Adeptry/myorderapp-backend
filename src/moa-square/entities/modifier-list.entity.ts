@@ -154,6 +154,6 @@ export class ModifierListEntity extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Relation<CatalogEntity>;
 }

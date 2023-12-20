@@ -107,7 +107,7 @@ export class ItemEntity extends BaseEntity {
     onDelete: 'CASCADE',
     nullable: false,
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'categoryId' })
   category?: Relation<CategoryEntity>;
 
   /*
@@ -153,7 +153,7 @@ export class ItemEntity extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Relation<CatalogEntity>;
 
   /*

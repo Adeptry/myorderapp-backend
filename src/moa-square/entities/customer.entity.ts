@@ -65,6 +65,7 @@ export class CustomerEntity extends BaseEntity {
   @ManyToOne(() => UserEntity, (entity) => entity.customers, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'userId' })
   user?: Relation<UserEntity>;
 
   /* Merchant */
@@ -76,6 +77,7 @@ export class CustomerEntity extends BaseEntity {
   @ManyToOne(() => MerchantEntity, (entity) => entity.customers, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'merchantId' })
   merchant?: Relation<MerchantEntity>;
 
   /* Current order */

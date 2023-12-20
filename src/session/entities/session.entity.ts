@@ -9,6 +9,7 @@ import {
   DeleteDateColumn,
   Entity,
   Index,
+  JoinColumn,
   ManyToOne,
   PrimaryColumn,
   UpdateDateColumn,
@@ -51,5 +52,6 @@ export class SessionEntity extends BaseEntity {
     onDelete: 'CASCADE',
   })
   @Index()
+  @JoinColumn({ name: 'userId' })
   user?: Relation<UserEntity>;
 }

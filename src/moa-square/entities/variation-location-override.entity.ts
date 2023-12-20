@@ -92,6 +92,6 @@ export class VariationLocationOverride extends BaseEntity {
     nullable: false,
     onDelete: 'CASCADE',
   })
-  @JoinColumn()
+  @JoinColumn({ name: 'catalogId' })
   catalog?: Relation<CatalogEntity>;
 }

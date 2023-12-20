@@ -168,6 +168,7 @@ export class LocationEntity extends BaseEntity {
   @ManyToOne(() => MerchantEntity, (entity) => entity.locations, {
     onDelete: 'CASCADE',
   })
+  @JoinColumn({ name: 'merchantId' })
   merchant?: Relation<MerchantEntity>;
 
   /*
