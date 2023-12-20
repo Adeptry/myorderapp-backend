@@ -146,6 +146,7 @@ export class MerchantEntity extends BaseEntity {
   @ApiProperty({
     required: false,
     nullable: true,
+    type: String,
     description:
       'Indicates the country associated with another entity, such as a business. Values are in ISO 3166-1-alpha-2 format.',
   })
@@ -164,6 +165,7 @@ export class MerchantEntity extends BaseEntity {
   @ApiProperty({
     required: false,
     nullable: true,
+    type: String,
     description:
       'Indicates the associated currency for an amount of money. Values correspond to ISO 4217.',
   })
