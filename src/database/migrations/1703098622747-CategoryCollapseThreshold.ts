@@ -10,7 +10,7 @@ export class CategoryCollapseThreshold1703098622747
       `ALTER TABLE "app_config" ADD "categoryCollapseThreshold" integer DEFAULT '7'`,
     );
     await queryRunner.query(
-      `DELETE FROM business_hours_period WHERE locationId IS NULL;`,
+      `DELETE FROM "business_hours_period" WHERE "locationId" IS NULL;`,
     );
   }
 
