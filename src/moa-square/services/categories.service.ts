@@ -1,9 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { buildPaginatedResults } from '../../database/build-paginated-results.js';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { type WrapperType } from '../../utils/wrapper-type.js';
 import {
   CategoriesPatchBody,
   CategoryPatchBody,
@@ -19,7 +20,8 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
   constructor(
     @InjectRepository(CategoryEntity)
     protected readonly repository: Repository<CategoryEntity>,
-    private readonly itemsService: ItemsService,
+    @Inject(forwardRef(() => ItemsService))
+    private readonly itemsService: WrapperType<ItemsService>,
     private readonly catalogSortService: CatalogSortService,
   ) {
     const logger = new Logger(CategoriesService.name);
@@ -135,6 +137,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
     }
 
     moaCategory.name = squareCategoryCatalogObject.categoryData?.name;
+    this.logger.verbose(`Updated category ${moaCategory.name}.`);
     return await this.save(moaCategory);
   }
 

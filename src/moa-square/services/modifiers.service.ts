@@ -3,8 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
-import { LocationEntity } from '../entities/location.entity.js';
 import { ModifierEntity } from '../entities/modifier.entity.js';
+import { LocationsService } from './locations.service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 import { ModifierLocationOverridesService } from './modifier-location-overrides.service.js';
 
@@ -17,6 +17,7 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
     protected readonly repository: Repository<ModifierEntity>,
     protected readonly modifierListsService: ModifierListsService,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
+    protected readonly locationsService: LocationsService,
   ) {
     const logger = new Logger(ModifiersService.name);
     super(repository, logger);
@@ -47,13 +48,16 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
   */
   async process(params: {
     squareCatalogObject: CatalogObject;
-    moaCatalogId: string;
-    moaLocations: LocationEntity[];
+    catalogId: string;
+    merchantId: string;
   }) {
     this.logger.verbose(this.process.name);
-    const { squareCatalogObject, moaCatalogId, moaLocations } = params;
+    const { squareCatalogObject, catalogId: moaCatalogId, merchantId } = params;
     const squareModifierData = squareCatalogObject.modifierData;
 
+    const moaLocations = await this.locationsService.find({
+      where: { merchantId },
+    });
     if (squareModifierData?.modifierListId == null) {
       throw new Error(
         `Modifier ${squareCatalogObject.id} has no modifier list.`,

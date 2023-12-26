@@ -4,9 +4,9 @@ import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { VariationPatchBody } from '../dto/catalogs/variation-patch.dto.js';
-import { LocationEntity } from '../entities/location.entity.js';
 import { VariationLocationOverride } from '../entities/variation-location-override.entity.js';
 import { VariationEntity } from '../entities/variation.entity.js';
+import { LocationsService } from './locations.service.js';
 import { VariationLocationOverridesService } from './variation-location-overrides.service.js';
 
 @Injectable()
@@ -17,6 +17,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
     @InjectRepository(VariationEntity)
     protected readonly repository: Repository<VariationEntity>,
     protected readonly variationLocationOverridesService: VariationLocationOverridesService,
+    protected readonly locationsService: LocationsService,
   ) {
     const logger = new Logger(VariationsService.name);
     super(repository, logger);
@@ -60,16 +61,19 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
   */
   async process(params: {
     squareCatalogObject: CatalogObject;
-    moaCatalogId: string;
-    moaLocations: LocationEntity[];
+    catalogId: string;
+    merchantId: string;
     moaItemId: string;
   }) {
     this.logger.verbose(this.process.name);
-    const { squareCatalogObject, moaCatalogId, moaLocations, moaItemId } =
-      params;
+    const { squareCatalogObject, catalogId, merchantId, moaItemId } = params;
     const squareItemVariationData = squareCatalogObject.itemVariationData;
 
-    if (!squareItemVariationData) {
+    const moaLocations = await this.locationsService.find({
+      where: { merchantId },
+    });
+
+    if (!squareItemVariationData || !squareItemVariationData.itemId) {
       throw new Error(`No itemVariationData for ${squareCatalogObject.id}.`);
     }
 
@@ -79,7 +83,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
     let moaVariation = await this.findOne({
       where: {
         squareId: squareCatalogObject.id,
-        catalogId: moaCatalogId,
+        catalogId,
       },
     });
 
@@ -87,7 +91,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
       moaVariation = this.create({
         squareId: squareCatalogObject.id,
         itemId: moaItemId,
-        catalogId: moaCatalogId,
+        catalogId,
       });
     }
 
@@ -127,7 +131,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
           ?.amount
           ? Number(override.priceMoney?.amount)
           : undefined;
-        moaVariationLocationOverride.catalogId = moaCatalogId;
+        moaVariationLocationOverride.catalogId = catalogId;
         await this.variationLocationOverridesService.save(
           moaVariationLocationOverride,
         );

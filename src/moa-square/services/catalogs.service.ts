@@ -6,19 +6,15 @@ import {
 } from 'nest-square';
 import { DataSource, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
-import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
 import { CatalogEntity } from '../entities/catalog.entity.js';
 import { CategoryEntity } from '../entities/category.entity.js';
-import { ItemModifierListEntity } from '../entities/item-modifier-list.entity.js';
 import { ItemEntity } from '../entities/item.entity.js';
 import { ModifierListEntity } from '../entities/modifier-list.entity.js';
 import { ModifierEntity } from '../entities/modifier.entity.js';
 import { VariationEntity } from '../entities/variation.entity.js';
 import { CatalogImagesService } from './catalog-images.service.js';
 import { CategoriesService } from './categories.service.js';
-import { ItemModifierListService } from './item-modifier-list.service.js';
 import { ItemsService } from './items.service.js';
-import { LocationsService } from './locations.service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
 import { ModifiersService } from './modifiers.service.js';
 import { VariationsService } from './variations.service.js';
@@ -38,13 +34,139 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
     private readonly modifierListsService: ModifierListsService,
     private readonly categoriesService: CategoriesService,
     private readonly catalogImagesService: CatalogImagesService,
-    private readonly itemModifierListService: ItemModifierListService,
     private readonly squareService: NestSquareService,
-    private readonly locationsService: LocationsService,
   ) {
     const logger = new Logger(CatalogsService.name);
     super(repository, logger);
     this.logger = logger;
+  }
+
+  async squareSync2(params: {
+    squareAccessToken: string;
+    catalogId: string;
+    merchantId: string;
+  }) {
+    this.logger.verbose(this.squareSync2.name);
+    const { merchantId, catalogId, squareAccessToken: accessToken } = params;
+    const moaCatalog = await this.findOneOrFail({
+      where: { id: catalogId },
+    });
+
+    await this.itemsService.delete({ catalogId: moaCatalog.id });
+    await this.variationsService.delete({ catalogId: moaCatalog.id });
+    await this.modifierListsService.delete({ catalogId: moaCatalog.id });
+    await this.categoriesService.delete({ catalogId: moaCatalog.id });
+    await this.catalogImagesService.delete({ catalogId: moaCatalog.id });
+
+    let modifierListCursor: string | undefined | null = null;
+    while (modifierListCursor !== undefined) {
+      const response = await this.squareService.retryOrThrow(
+        accessToken,
+        async (client) => {
+          return await client.catalogApi.listCatalog(
+            modifierListCursor ?? undefined,
+            'MODIFIER_LIST',
+          );
+        },
+      );
+      for (const modifierList of response.result.objects ?? []) {
+        await this.modifierListsService.process({
+          catalogObject: modifierList,
+          moaCatalogId: catalogId,
+        });
+      }
+      modifierListCursor = response.result.cursor;
+    }
+
+    let modifierCursor: string | undefined | null = null;
+    while (modifierCursor !== undefined) {
+      const response = await this.squareService.retryOrThrow(
+        accessToken,
+        async (client) => {
+          return await client.catalogApi.listCatalog(
+            modifierCursor ?? undefined,
+            'MODIFIER',
+          );
+        },
+      );
+      for (const squareModifier of response.result.objects ?? []) {
+        await this.modifiersService.process({
+          squareCatalogObject: squareModifier,
+          catalogId,
+          merchantId,
+        });
+      }
+      modifierCursor = response.result.cursor;
+    }
+
+    let categoriesCursor: string | undefined | null = null;
+    while (categoriesCursor !== undefined) {
+      const response = await this.squareService.retryOrThrow(
+        accessToken,
+        async (client) => {
+          return await client.catalogApi.listCatalog(
+            categoriesCursor ?? undefined,
+            'CATEGORY',
+          );
+        },
+      );
+      let squareCategoryIndex = 0;
+      for (const category of response.result.objects ?? []) {
+        await this.categoriesService.process({
+          squareCategoryCatalogObject: category,
+          moaCatalogId: catalogId,
+          moaOrdinal: squareCategoryIndex,
+        });
+        squareCategoryIndex++;
+      }
+      categoriesCursor = response.result.cursor;
+    }
+
+    let catalogImagesCursor: string | undefined | null = null;
+    while (catalogImagesCursor !== undefined) {
+      const response = await this.squareService.retryOrThrow(
+        accessToken,
+        async (client) => {
+          return await client.catalogApi.listCatalog(
+            catalogImagesCursor ?? undefined,
+            'IMAGE',
+          );
+        },
+      );
+      for (const category of response.result.objects ?? []) {
+        await this.catalogImagesService.process({
+          catalogImage: category,
+          catalogId: catalogId,
+        });
+      }
+      catalogImagesCursor = response.result.cursor;
+    }
+
+    let itemsCursor: string | undefined | null = null;
+    while (itemsCursor !== undefined) {
+      const response = await this.squareService.retryOrThrow(
+        accessToken,
+        async (client) => {
+          return await client.catalogApi.listCatalog(
+            itemsCursor ?? undefined,
+            'ITEM',
+          );
+        },
+      );
+      let index = 0;
+      for (const item of response.result.objects ?? []) {
+        await this.itemsService.process({
+          merchantId,
+          squareItemCatalogObject: item,
+          catalogId: catalogId,
+          moaOrdinal: index,
+        });
+        index++;
+      }
+      itemsCursor = response.result.cursor;
+    }
+
+    this.logger.verbose(`Finished syncing catalog ${moaCatalog.id}.`);
   }
 
   async squareSync(params: {
@@ -59,8 +181,6 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
     });
 
     await this.dataSource.transaction(async () => {
-      const moaLocations = await this.locationsService.findBy({ merchantId });
-
       if (moaCatalog.id == null) {
         throw new Error('Catalog id is null.');
       }
@@ -145,8 +265,8 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       for (const squareModifier of squareModifierCatalogObjects) {
         await this.modifiersService.process({
           squareCatalogObject: squareModifier,
-          moaCatalogId: moaCatalog.id,
-          moaLocations,
+          catalogId: moaCatalog.id,
+          merchantId,
         });
       }
 
@@ -192,11 +312,14 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
           accessToken,
           types: [NestSquareCatalogObjectTypeEnum.item],
         })) ?? [];
+      this.logger.debug(
+        `Found ${squareItemCatalogObjects.length} remote items.`,
+      );
       let moaItems = await this.loadManyRelation<ItemEntity>(
         moaCatalog,
         'items',
       );
-      this.logger.debug(`Found ${moaItems.length} items.`);
+      this.logger.debug(`Found ${moaItems.length} local items.`);
       const deletedMoaItems = moaItems.filter((moaValue) => {
         return !squareItemCatalogObjects.some((squareValue) => {
           return squareValue.id === moaValue.squareId;
@@ -210,171 +333,29 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       });
       this.logger.debug(`Deleted ${deletedMoaItems.length} items.`);
 
-      // Catalog images
+      await this.catalogImagesService.delete({ catalogId: moaCatalog.id });
       const squareImages =
         (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [NestSquareCatalogObjectTypeEnum.image],
         })) ?? [];
+      for (const squareImage of squareImages) {
+        await this.catalogImagesService.process({
+          catalogImage: squareImage,
+          catalogId: moaCatalog.id,
+        });
+      }
 
       for (const [
         squareItemCatalogObjectIndex,
         squareItemCatalogObject,
       ] of squareItemCatalogObjects.entries()) {
-        const squareItemData = squareItemCatalogObject.itemData;
-        if (!squareItemData || !squareItemData.categoryId) {
-          continue;
-        }
-
-        this.logger.debug(
-          `Processing item ${squareItemCatalogObject.itemData?.name} ${squareItemCatalogObjectIndex}.`,
-        );
-
-        const moaCategory = await this.categoriesService.findOne({
-          where: {
-            squareId: squareItemData.categoryId,
-            catalogId: moaCatalog.id,
-          },
+        await this.itemsService.process({
+          merchantId,
+          squareItemCatalogObject,
+          catalogId: moaCatalog.id,
+          moaOrdinal: squareItemCatalogObjectIndex,
         });
-
-        if (!moaCategory) {
-          throw new Error(`No category for ${squareItemData.categoryId}.`);
-        }
-
-        let moaItem = await this.itemsService.findOne({
-          where: {
-            squareId: squareItemCatalogObject.id,
-            catalogId: moaCatalog.id,
-          },
-        });
-        if (moaItem == null) {
-          moaItem = this.itemsService.create({
-            squareId: squareItemCatalogObject.id,
-            categoryId: moaCategory.id,
-            catalogId: moaCatalog.id,
-            presentAtAllLocations:
-              squareItemCatalogObject.presentAtAllLocations,
-          });
-          moaItem.moaOrdinal = squareItemCatalogObjectIndex;
-        }
-
-        moaItem.name = squareItemData.name;
-        moaItem.description = squareItemData.description;
-        moaItem.category = moaCategory;
-
-        moaItem = await this.itemsService.save(moaItem);
-
-        if (moaItem.id == null) {
-          throw new Error(`Item id is null.`);
-        }
-
-        const itemModifierLists =
-          await this.itemsService.loadManyRelation<ItemModifierListEntity>(
-            moaItem,
-            'itemModifierLists',
-          );
-        for (const moaItemModifierList of itemModifierLists ?? []) {
-          await this.itemModifierListService.remove(moaItemModifierList);
-        }
-
-        for (const squareItemModifierListInfo of squareItemData.modifierListInfo ??
-          []) {
-          await this.itemModifierListService.process({
-            squareItemModifierListInfo: squareItemModifierListInfo,
-            moaItemId: moaItem.id,
-            catalogId: moaCatalog.id,
-          });
-        }
-
-        moaItem.presentAtAllLocations =
-          squareItemCatalogObject.presentAtAllLocations;
-        const itemPresentAtSquareLocationsIds =
-          squareItemCatalogObject.presentAtLocationIds ?? [];
-        if (itemPresentAtSquareLocationsIds.length > 0) {
-          moaItem.presentAtLocations = moaLocations.filter((value) => {
-            return (
-              value.squareId &&
-              itemPresentAtSquareLocationsIds.includes(value.squareId)
-            );
-          });
-        } else {
-          moaItem.presentAtLocations = [];
-        }
-
-        const itemAbsentAtSquareLocationsIds =
-          squareItemCatalogObject.absentAtLocationIds ?? [];
-        if (itemAbsentAtSquareLocationsIds.length > 0) {
-          moaItem.absentAtLocations = moaLocations.filter((value) => {
-            return (
-              value.squareId &&
-              itemAbsentAtSquareLocationsIds.includes(value.squareId)
-            );
-          });
-        } else {
-          moaItem.absentAtLocations = [];
-        }
-
-        if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
-          for (const squareImageId of squareItemData.imageIds) {
-            let catalogImage = await this.catalogImagesService.findOne({
-              where: { squareId: squareImageId, catalogId: moaCatalog.id },
-            });
-
-            const squareImageForItem = squareImages.find(
-              (value) => value.id === squareImageId,
-            );
-
-            if (!catalogImage) {
-              catalogImage = this.catalogImagesService.create({
-                item: moaItem,
-                squareId: squareImageId,
-                name: squareImageForItem?.imageData?.name,
-                url: squareImageForItem?.imageData?.url,
-                caption: squareImageForItem?.imageData?.caption,
-              });
-            } else {
-              catalogImage.squareId = squareImageId;
-              catalogImage.name = squareImageForItem?.imageData?.name;
-              catalogImage.url = squareImageForItem?.imageData?.url;
-              catalogImage.caption = squareImageForItem?.imageData?.caption;
-              catalogImage.item = moaItem; // Associate the image to the item
-            }
-            // Save changes to the image
-            catalogImage.catalogId = moaCatalog.id;
-            await this.catalogImagesService.save(catalogImage);
-          }
-        } else {
-          await this.catalogImagesService.removeAll(
-            await this.itemsService.loadManyRelation<CatalogImageEntity>(
-              moaItem,
-              'images',
-            ),
-          );
-        }
-
-        moaItem = await this.itemsService.save(moaItem);
-
-        if (moaItem.id == null) {
-          throw new Error('Item id is null.');
-        }
-
-        for (const squareItemDataVariation of squareItemData.variations ?? []) {
-          const squareVariationCatalogObject =
-            squareItemVariationCatalogObjects.find((value) => {
-              return value.id === squareItemDataVariation.id;
-            });
-
-          if (squareVariationCatalogObject == null) {
-            throw new Error(`No variation for ${squareItemDataVariation.id}.`);
-          }
-
-          await this.variationsService.process({
-            squareCatalogObject: squareVariationCatalogObject,
-            moaCatalogId: moaCatalog.id,
-            moaLocations: moaLocations,
-            moaItemId: moaItem.id,
-          });
-        }
       }
     });
 

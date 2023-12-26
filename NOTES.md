@@ -1,5 +1,50 @@
 # Notes
 
+## Tue 26 Dec 2023 04:57:39 PM EST
+
+https://www.reddit.com/r/nestjs/comments/15yb1ek/i_have_seen_so_many_posts_recommending_forwardref/
+
+```TypeScript
+        if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
+          for (const squareImageId of squareItemData.imageIds) {
+            let catalogImage = await this.catalogImagesService.findOne({
+              where: { squareId: squareImageId, catalogId: moaCatalog.id },
+            });
+
+            const squareImageForItem = squareImages.find(
+              (value) => value.id === squareImageId,
+            );
+
+            if (!catalogImage) {
+              catalogImage = this.catalogImagesService.create({
+                item: moaItem,
+                squareId: squareImageId,
+                name: squareImageForItem?.imageData?.name,
+                url: squareImageForItem?.imageData?.url,
+                caption: squareImageForItem?.imageData?.caption,
+              });
+            } else {
+              catalogImage.squareId = squareImageId;
+              catalogImage.name = squareImageForItem?.imageData?.name;
+              catalogImage.url = squareImageForItem?.imageData?.url;
+              catalogImage.caption = squareImageForItem?.imageData?.caption;
+              catalogImage.item = moaItem; // Associate the image to the item
+            }
+            // Save changes to the image
+            catalogImage.catalogId = moaCatalog.id;
+            await this.catalogImagesService.save(catalogImage);
+          }
+        } else {
+          await this.catalogImagesService.removeAll(
+            await this.itemsService.loadManyRelation<CatalogImageEntity>(
+              moaItem,
+              'images',
+            ),
+          );
+        }
+
+```
+
 ## Fri 03 Nov 2023 11:50:42 AM EDT
 
 - Live, functioning preview
@@ -38,4 +83,5 @@ console.log(mermaidEdges.join('\n'));
 ```
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'));"
 ```
+
 d

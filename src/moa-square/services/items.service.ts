@@ -1,12 +1,20 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CatalogObject } from 'square';
 import { Brackets, Repository, SelectQueryBuilder } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { type WrapperType } from '../../utils/wrapper-type.js';
 import {
   ItemPatchBody,
   ItemsPatchBody,
 } from '../dto/catalogs/item-patch.dto.js';
+import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
 import { ItemEntity } from '../entities/item.entity.js';
+import { CatalogImagesService } from './catalog-images.service.js';
+import { CategoriesService } from './categories.service.js';
+import { ItemModifierListService } from './item-modifier-list.service.js';
+import { LocationsService } from './locations.service.js';
+import { VariationsService } from './variations.service.js';
 
 @Injectable()
 export class ItemsService extends EntityRepositoryService<ItemEntity> {
@@ -15,10 +23,143 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
   constructor(
     @InjectRepository(ItemEntity)
     protected readonly repository: Repository<ItemEntity>,
+    @Inject(forwardRef(() => CategoriesService))
+    private readonly categoriesService: WrapperType<CategoriesService>,
+    private readonly catalogImagesService: CatalogImagesService,
+    private readonly itemModifierListService: ItemModifierListService,
+    private readonly locationsService: LocationsService,
+    private readonly variationsService: VariationsService,
   ) {
     const logger = new Logger(ItemsService.name);
     super(repository, logger);
     this.logger = logger;
+  }
+
+  async process(params: {
+    merchantId: string;
+    squareItemCatalogObject: CatalogObject;
+    catalogId: string;
+    moaOrdinal: number;
+  }) {
+    this.logger.verbose(this.process.name);
+    const { squareItemCatalogObject, catalogId, moaOrdinal, merchantId } =
+      params;
+
+    const moaLocations = await this.locationsService.find({
+      where: { merchantId },
+    });
+
+    const squareItemData = squareItemCatalogObject?.itemData;
+    const categorySquareId =
+      squareItemData?.categoryId ?? squareItemData?.reportingCategory?.id;
+    if (!squareItemData || !categorySquareId) {
+      return;
+    }
+
+    this.logger.debug(
+      `Processing item ${squareItemCatalogObject.itemData?.name}.`,
+    );
+
+    const moaCategory = await this.categoriesService.findOne({
+      where: {
+        squareId: categorySquareId,
+        catalogId,
+      },
+    });
+
+    if (!moaCategory) {
+      throw new Error(`No category for ${squareItemData.categoryId}.`);
+    }
+
+    let moaItem = await this.findOne({
+      where: {
+        squareId: squareItemCatalogObject.id,
+        catalogId,
+      },
+    });
+    if (moaItem == null) {
+      moaItem = this.create({
+        squareId: squareItemCatalogObject.id,
+        categoryId: moaCategory.id,
+        catalogId,
+        moaOrdinal: moaOrdinal,
+        presentAtAllLocations: squareItemCatalogObject.presentAtAllLocations,
+      });
+    }
+
+    moaItem.name = squareItemData.name;
+    moaItem.description = squareItemData.description;
+    moaItem.category = moaCategory;
+
+    moaItem = await this.save(moaItem);
+
+    for (const squareItemModifierListInfo of squareItemData.modifierListInfo ??
+      []) {
+      await this.itemModifierListService.process({
+        squareItemModifierListInfo: squareItemModifierListInfo,
+        moaItemId: moaItem.id!,
+        catalogId,
+      });
+    }
+
+    moaItem.presentAtAllLocations =
+      squareItemCatalogObject.presentAtAllLocations;
+    const itemPresentAtSquareLocationsIds =
+      squareItemCatalogObject.presentAtLocationIds ?? [];
+    if (itemPresentAtSquareLocationsIds.length > 0) {
+      moaItem.presentAtLocations = moaLocations.filter((value) => {
+        return (
+          value.squareId &&
+          itemPresentAtSquareLocationsIds.includes(value.squareId)
+        );
+      });
+    } else {
+      moaItem.presentAtLocations = [];
+    }
+
+    const itemAbsentAtSquareLocationsIds =
+      squareItemCatalogObject.absentAtLocationIds ?? [];
+    if (itemAbsentAtSquareLocationsIds.length > 0) {
+      moaItem.absentAtLocations = moaLocations.filter((value) => {
+        return (
+          value.squareId &&
+          itemAbsentAtSquareLocationsIds.includes(value.squareId)
+        );
+      });
+    } else {
+      moaItem.absentAtLocations = [];
+    }
+
+    if (squareItemData.imageIds && squareItemData.imageIds.length > 0) {
+      for (const squareImageId of squareItemData.imageIds) {
+        const catalogImage = await this.catalogImagesService.findOne({
+          where: { squareId: squareImageId, catalogId: catalogId },
+        });
+
+        if (catalogImage) {
+          catalogImage.item = moaItem; // Associate the image to the item
+          await this.catalogImagesService.save(catalogImage);
+        }
+        // Save changes to the image
+      }
+    } else {
+      await this.catalogImagesService.removeAll(
+        await this.loadManyRelation<CatalogImageEntity>(moaItem, 'images'),
+      );
+    }
+
+    await moaItem.save();
+
+    for (const squareItemDataVariation of squareItemData.variations ?? []) {
+      await this.variationsService.process({
+        squareCatalogObject: squareItemDataVariation,
+        catalogId,
+        merchantId,
+        moaItemId: moaItem.id!,
+      });
+    }
+
+    this.logger.verbose(`Processed item ${squareItemData.name}.`);
   }
 
   joinManyQuery(params: {

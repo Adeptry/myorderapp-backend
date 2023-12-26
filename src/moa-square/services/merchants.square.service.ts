@@ -193,7 +193,7 @@ export class MerchantsSquareService {
 
     await this.service.save(merchant);
 
-    await this.catalogsService.squareSync({
+    await this.catalogsService.squareSync2({
       squareAccessToken,
       catalogId,
       merchantId,

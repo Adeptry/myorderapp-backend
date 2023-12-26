@@ -25,6 +25,7 @@ export class ModifierListsService extends EntityRepositoryService<ModifierListEn
     catalogObject: CatalogObject;
     moaCatalogId: string;
   }) {
+    this.logger.verbose(this.process.name);
     const squareModifierList = params.catalogObject.modifierListData;
     const moaCatalogId = params.moaCatalogId;
 
@@ -62,7 +63,7 @@ export class ModifierListsService extends EntityRepositoryService<ModifierListEn
         'SINGLE') as MoaSelectionType;
       moaModifierList = await this.save(moaModifierList);
     }
-
+    this.logger.verbose(`Updated modifier list ${moaModifierList.name}.`);
     return moaModifierList;
   }
 }
