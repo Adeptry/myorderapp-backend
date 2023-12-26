@@ -211,14 +211,11 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       this.logger.debug(`Deleted ${deletedMoaItems.length} items.`);
 
       // Catalog images
-      const squareImages: any[] = [];
-
-      /*
-      (await this.squareService.accumulateCatalogOrThrow({
+      const squareImages =
+        (await this.squareService.accumulateCatalogOrThrow({
           accessToken,
           types: [NestSquareCatalogObjectTypeEnum.image],
-        })) ??
-      */
+        })) ?? [];
 
       for (const [
         squareItemCatalogObjectIndex,
