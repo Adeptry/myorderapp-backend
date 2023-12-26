@@ -84,6 +84,10 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
       );
     }
 
+    results[0] = results[0].filter(
+      (category) => (category.items?.length ?? 0) > 0,
+    );
+
     return buildPaginatedResults({
       results,
       pagination: {
