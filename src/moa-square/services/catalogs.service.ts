@@ -54,6 +54,7 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
 
     await this.itemsService.delete({ catalogId: moaCatalog.id });
     await this.variationsService.delete({ catalogId: moaCatalog.id });
+    await this.modifiersService.delete({ catalogId: moaCatalog.id });
     await this.modifierListsService.delete({ catalogId: moaCatalog.id });
     await this.categoriesService.delete({ catalogId: moaCatalog.id });
     await this.catalogImagesService.delete({ catalogId: moaCatalog.id });
@@ -70,34 +71,39 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
         },
       );
       for (const modifierList of response.result.objects ?? []) {
-        await this.modifierListsService.process({
-          catalogObject: modifierList,
-          moaCatalogId: catalogId,
-        });
+        try {
+          await this.modifierListsService.process({
+            catalogObject: modifierList,
+            catalogId: catalogId,
+            merchantId: merchantId,
+          });
+        } catch (error) {
+          this.logger.error(error);
+        }
       }
       modifierListCursor = response.result.cursor;
     }
 
-    let modifierCursor: string | undefined | null = null;
-    while (modifierCursor !== undefined) {
-      const response = await this.squareService.retryOrThrow(
-        accessToken,
-        async (client) => {
-          return await client.catalogApi.listCatalog(
-            modifierCursor ?? undefined,
-            'MODIFIER',
-          );
-        },
-      );
-      for (const squareModifier of response.result.objects ?? []) {
-        await this.modifiersService.process({
-          squareCatalogObject: squareModifier,
-          catalogId,
-          merchantId,
-        });
-      }
-      modifierCursor = response.result.cursor;
-    }
+    // let modifierCursor: string | undefined | null = null;
+    // while (modifierCursor !== undefined) {
+    //   const response = await this.squareService.retryOrThrow(
+    //     accessToken,
+    //     async (client) => {
+    //       return await client.catalogApi.listCatalog(
+    //         modifierCursor ?? undefined,
+    //         'MODIFIER',
+    //       );
+    //     },
+    //   );
+    //   for (const squareModifier of response.result.objects ?? []) {
+    //     await this.modifiersService.process({
+    //       squareCatalogObject: squareModifier,
+    //       catalogId,
+    //       merchantId,
+    //     });
+    //   }
+    //   modifierCursor = response.result.cursor;
+    // }
 
     let categoriesCursor: string | undefined | null = null;
     while (categoriesCursor !== undefined) {
@@ -112,11 +118,16 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       );
       let squareCategoryIndex = 0;
       for (const category of response.result.objects ?? []) {
-        await this.categoriesService.process({
-          squareCategoryCatalogObject: category,
-          moaCatalogId: catalogId,
-          moaOrdinal: squareCategoryIndex,
-        });
+        try {
+          await this.categoriesService.process({
+            squareCategoryCatalogObject: category,
+            moaCatalogId: catalogId,
+            moaOrdinal: squareCategoryIndex,
+          });
+        } catch (error) {
+          this.logger.error(error);
+        }
+
         squareCategoryIndex++;
       }
       categoriesCursor = response.result.cursor;
@@ -134,10 +145,14 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
         },
       );
       for (const category of response.result.objects ?? []) {
-        await this.catalogImagesService.process({
-          catalogImage: category,
-          catalogId: catalogId,
-        });
+        try {
+          await this.catalogImagesService.process({
+            catalogImage: category,
+            catalogId: catalogId,
+          });
+        } catch (error) {
+          this.logger.error(error);
+        }
       }
       catalogImagesCursor = response.result.cursor;
     }
@@ -155,12 +170,17 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       );
       let index = 0;
       for (const item of response.result.objects ?? []) {
-        await this.itemsService.process({
-          merchantId,
-          squareItemCatalogObject: item,
-          catalogId: catalogId,
-          moaOrdinal: index,
-        });
+        try {
+          await this.itemsService.process({
+            merchantId,
+            squareItemCatalogObject: item,
+            catalogId: catalogId,
+            moaOrdinal: index,
+          });
+        } catch (error) {
+          this.logger.error(error);
+        }
+
         index++;
       }
       itemsCursor = response.result.cursor;
@@ -234,7 +254,8 @@ export class CatalogsService extends EntityRepositoryService<CatalogEntity> {
       for (const squareModifierList of squareModifierListCatalogObjects) {
         await this.modifierListsService.process({
           catalogObject: squareModifierList,
-          moaCatalogId: moaCatalog.id,
+          catalogId: moaCatalog.id,
+          merchantId,
         });
       }
 

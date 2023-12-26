@@ -1,8 +1,9 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
+import { type WrapperType } from '../../utils/wrapper-type.js';
 import { ModifierEntity } from '../entities/modifier.entity.js';
 import { LocationsService } from './locations.service.js';
 import { ModifierListsService } from './modifier-lists.service.js';
@@ -15,7 +16,8 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
   constructor(
     @InjectRepository(ModifierEntity)
     protected readonly repository: Repository<ModifierEntity>,
-    protected readonly modifierListsService: ModifierListsService,
+    @Inject(forwardRef(() => ModifierListsService))
+    protected readonly modifierListsService: WrapperType<ModifierListsService>,
     protected readonly modifierLocationOverridesService: ModifierLocationOverridesService,
     protected readonly locationsService: LocationsService,
   ) {
