@@ -9,6 +9,7 @@ import {
   ItemsPatchBody,
 } from '../dto/catalogs/item-patch.dto.js';
 import { CatalogImageEntity } from '../entities/catalog-image.entity.js';
+import { ItemModifierListEntity } from '../entities/item-modifier-list.entity.js';
 import { ItemEntity } from '../entities/item.entity.js';
 import { CatalogImagesService } from './catalog-images.service.js';
 import { CategoriesService } from './categories.service.js';
@@ -94,6 +95,12 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
 
     moaItem = await this.save(moaItem);
 
+    await this.itemModifierListService.removeAll(
+      await this.loadManyRelation<ItemModifierListEntity>(
+        moaItem,
+        'itemModifierLists',
+      ),
+    );
     for (const squareItemModifierListInfo of squareItemData.modifierListInfo ??
       []) {
       await this.itemModifierListService.process({
