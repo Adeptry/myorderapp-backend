@@ -60,6 +60,9 @@ export class ItemEntity extends BaseEntity {
    * Moa
    */
 
+  @Column({ nullable: true })
+  synced?: boolean;
+
   @ApiProperty({ required: false, nullable: true })
   @Column({ nullable: true, default: 0 })
   moaOrdinal?: number;

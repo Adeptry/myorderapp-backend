@@ -54,6 +54,11 @@ export class ModifierListEntity extends BaseEntity {
   @VersionColumn({ nullable: true })
   version?: number;
 
+  /* Moa */
+
+  @Column({ nullable: true })
+  synced?: boolean;
+
   /* Square */
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true, unique: false }) // TODO unique: true

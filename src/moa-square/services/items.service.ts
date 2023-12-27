@@ -35,13 +35,13 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
     this.logger = logger;
   }
 
-  async process(params: {
+  async squareSyncOrFail(params: {
     merchantId: string;
     squareItemCatalogObject: CatalogObject;
     catalogId: string;
     moaOrdinal: number;
   }) {
-    this.logger.verbose(this.process.name);
+    this.logger.verbose(this.squareSyncOrFail.name);
     const { squareItemCatalogObject, catalogId, moaOrdinal, merchantId } =
       params;
 
@@ -87,6 +87,7 @@ export class ItemsService extends EntityRepositoryService<ItemEntity> {
       });
     }
 
+    moaItem.synced = true;
     moaItem.name = squareItemData.name;
     moaItem.description = squareItemData.description;
     moaItem.category = moaCategory;

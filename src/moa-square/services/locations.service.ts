@@ -182,11 +182,11 @@ export class LocationsService extends EntityRepositoryService<LocationEntity> {
     });
   }
 
-  async syncSquare(params: {
+  async squareSync(params: {
     merchantId: string;
     squareAccessToken: string;
   }): Promise<LocationEntity[]> {
-    this.logger.verbose(this.syncSquare.name);
+    this.logger.verbose(this.squareSync.name);
     const { merchantId, squareAccessToken: accessToken } = params;
     const translations = this.translations();
     const locations = await this.find({

@@ -59,6 +59,9 @@ export class VariationEntity extends BaseEntity {
   @Column({ nullable: true, default: true })
   moaEnabled?: boolean;
 
+  @Column({ nullable: true })
+  synced?: boolean;
+
   /*
    * Square
    */

@@ -57,12 +57,12 @@ export class ModifierListsService extends EntityRepositoryService<ModifierListEn
       }
     },
   */
-  async process(params: {
+  async squareSyncOrFail(params: {
     catalogObject: CatalogObject;
     catalogId: string;
     merchantId: string;
   }) {
-    this.logger.verbose(this.process.name);
+    this.logger.verbose(this.squareSyncOrFail.name);
     const { catalogObject, catalogId, merchantId } = params;
     const squareModifierList = params.catalogObject.modifierListData;
 
@@ -84,6 +84,7 @@ export class ModifierListsService extends EntityRepositoryService<ModifierListEn
           squareId: params.catalogObject.id,
           name: squareModifierList?.name,
           ordinal: squareModifierList?.ordinal,
+          synced: true,
           selectionType: (squareModifierList?.selectionType ??
             'SINGLE') as MoaSelectionType,
           catalogId,
@@ -98,6 +99,7 @@ export class ModifierListsService extends EntityRepositoryService<ModifierListEn
       moaModifierList.ordinal = squareModifierList?.ordinal;
       moaModifierList.selectionType = (squareModifierList?.selectionType ??
         'SINGLE') as MoaSelectionType;
+      moaModifierList.synced = true;
       moaModifierList = await this.save(moaModifierList);
     }
 

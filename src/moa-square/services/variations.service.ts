@@ -95,6 +95,7 @@ export class VariationsService extends EntityRepositoryService<VariationEntity> 
       });
     }
 
+    moaVariation.synced = true;
     moaVariation.name = squareItemVariationData.name;
     moaVariation.ordinal = squareItemVariationData.ordinal;
     moaVariation.priceMoneyAmount =

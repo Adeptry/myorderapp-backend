@@ -50,6 +50,11 @@ export class CatalogImageEntity extends BaseEntity {
   @VersionColumn({ nullable: true })
   version?: number;
 
+  /* Moa */
+
+  @Column({ nullable: true })
+  synced?: boolean;
+
   /* Square */
 
   @Exclude({ toPlainOnly: true })

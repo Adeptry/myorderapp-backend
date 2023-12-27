@@ -69,6 +69,9 @@ export class ModifierEntity extends BaseEntity {
   @Column({ type: Number, nullable: true })
   ordinal?: number | null;
 
+  @Column({ nullable: true })
+  synced?: boolean;
+
   @Exclude({ toPlainOnly: true })
   @Column({ nullable: true })
   modifierListId?: string;

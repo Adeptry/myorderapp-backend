@@ -87,6 +87,7 @@ export class ModifiersService extends EntityRepositoryService<ModifierEntity> {
       );
     }
 
+    moaModifier.synced = true;
     moaModifier.name = squareModifierData?.name;
     moaModifier.ordinal = squareModifierData?.ordinal;
     moaModifier.priceMoneyAmount = Number(

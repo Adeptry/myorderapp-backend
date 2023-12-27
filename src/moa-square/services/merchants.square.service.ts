@@ -193,7 +193,7 @@ export class MerchantsSquareService {
 
     await this.service.save(merchant);
 
-    await this.catalogsService.squareSync2({
+    await this.catalogsService.squareSyncOrFail({
       squareAccessToken,
       catalogId,
       merchantId,
@@ -224,7 +224,7 @@ export class MerchantsSquareService {
       );
     }
 
-    await this.locationsService.syncSquare({ merchantId, squareAccessToken });
+    await this.locationsService.squareSync({ merchantId, squareAccessToken });
   }
 
   @OnEvent('square.location.created')

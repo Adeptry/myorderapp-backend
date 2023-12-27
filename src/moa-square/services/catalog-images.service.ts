@@ -31,16 +31,32 @@ export class CatalogImagesService extends EntityRepositoryService<CatalogImageEn
       }
     },
   */
-  async process(params: { catalogImage: CatalogObject; catalogId: string }) {
-    this.logger.verbose(this.process.name);
+  async squareSyncOrFail(params: {
+    catalogImage: CatalogObject;
+    catalogId: string;
+  }) {
+    this.logger.verbose(this.squareSyncOrFail.name);
     const { catalogImage, catalogId } = params;
-    const image = this.create({
-      squareId: catalogImage.id,
-      name: catalogImage?.imageData?.name,
-      url: catalogImage?.imageData?.url,
-      caption: catalogImage?.imageData?.caption,
-      catalogId,
+
+    let image = await this.findOne({
+      where: { catalogId, squareId: catalogImage.id },
     });
+
+    if (!image) {
+      image = this.create({
+        squareId: catalogImage.id,
+        name: catalogImage?.imageData?.name,
+        url: catalogImage?.imageData?.url,
+        caption: catalogImage?.imageData?.caption,
+        synced: true,
+        catalogId,
+      });
+    } else {
+      image.name = catalogImage?.imageData?.name;
+      image.url = catalogImage?.imageData?.url;
+      image.caption = catalogImage?.imageData?.caption;
+      image.synced = true;
+    }
 
     this.logger.verbose(`returning image`);
     return await this.save(image);

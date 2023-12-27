@@ -112,12 +112,12 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
       }
     },
   */
-  async process(params: {
+  async squareSyncOrFail(params: {
     squareCategoryCatalogObject: CatalogObject;
     moaCatalogId: string;
     moaOrdinal: number;
   }) {
-    this.logger.verbose(this.process.name);
+    this.logger.verbose(this.squareSyncOrFail.name);
     const { squareCategoryCatalogObject, moaCatalogId, moaOrdinal } = params;
     this.logger.verbose(
       `Processing category ${squareCategoryCatalogObject.categoryData?.name}.`,
@@ -140,6 +140,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
       );
     }
 
+    moaCategory.synced = true;
     moaCategory.name = squareCategoryCatalogObject.categoryData?.name;
     this.logger.verbose(`Updated category ${moaCategory.name}.`);
     return await this.save(moaCategory);
