@@ -180,7 +180,7 @@ export class AddressEntity extends BaseEntity {
 
   /* Relations */
 
-  @OneToOne(() => LocationEntity, (entity) => entity.address, {
+  @OneToOne('LocationEntity', 'address', {
     onDelete: 'CASCADE',
   })
   location?: Relation<LocationEntity>;
