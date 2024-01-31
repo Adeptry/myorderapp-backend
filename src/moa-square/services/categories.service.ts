@@ -77,6 +77,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
                 leftJoinVariations,
                 leftJoinModifierLists,
                 whereOnlyEnabled,
+                limit: 30, // emergency fallback
               })
               .getMany(),
           );
