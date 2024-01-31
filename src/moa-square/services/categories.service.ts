@@ -1,4 +1,5 @@
 import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import type { ConfigType } from '@nestjs/config';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CatalogObject } from 'square';
 import { Repository } from 'typeorm';
@@ -10,6 +11,7 @@ import {
   CategoryPatchBody,
 } from '../dto/catalogs/category-patch.dto.js';
 import { CategoryEntity } from '../entities/category.entity.js';
+import { MyOrderAppSquareConfig } from '../moa-square.config.js';
 import { CatalogSortService } from './catalog-sort.service.js';
 import { ItemsService } from './items.service.js';
 
@@ -22,6 +24,8 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
     protected readonly repository: Repository<CategoryEntity>,
     @Inject(forwardRef(() => ItemsService))
     private readonly itemsService: WrapperType<ItemsService>,
+    @Inject(MyOrderAppSquareConfig.KEY)
+    private readonly config: ConfigType<typeof MyOrderAppSquareConfig>,
     private readonly catalogSortService: CatalogSortService,
   ) {
     const logger = new Logger(CategoriesService.name);
@@ -77,7 +81,7 @@ export class CategoriesService extends EntityRepositoryService<CategoryEntity> {
                 leftJoinVariations,
                 leftJoinModifierLists,
                 whereOnlyEnabled,
-                limit: 30, // emergency fallback
+                limit: this.config?.squareMaximumItemsInCategory, // emergency fallback
               })
               .getMany(),
           );

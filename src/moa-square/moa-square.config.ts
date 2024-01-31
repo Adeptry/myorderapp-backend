@@ -1,6 +1,12 @@
 import { registerAs } from '@nestjs/config';
 import { plainToClass } from 'class-transformer';
-import { IsBoolean, IsOptional, IsString, validateSync } from 'class-validator';
+import {
+  IsBoolean,
+  IsNumber,
+  IsOptional,
+  IsString,
+  validateSync,
+} from 'class-validator';
 import { toBigIntOrThrow } from '../utils/to-big-int-or-throw.js';
 
 export type MyOrderAppSquareConfigType = {
@@ -14,6 +20,8 @@ export type MyOrderAppSquareConfigType = {
   squareTier0AppFeeBigIntNumerator: bigint;
   squareTier1AppFeeBigIntNumerator: bigint;
   squareTier2AppFeeBigIntNumerator: bigint;
+
+  squareMaximumItemsInCategory?: number;
 
   squareTestUseS3?: boolean;
   squareTestCode?: string;
@@ -69,6 +77,10 @@ class MyOrderAppSquareConfigValidator {
   SQUARE_TIER_1_APP_FEE_BIG_INT_NUMERATOR!: number;
 
   SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!: number;
+
+  @IsNumber()
+  @IsOptional()
+  SQUARE_MAXIMUM_ITEMS_IN_CATEGORY?: number;
 
   @IsBoolean()
   @IsOptional()
@@ -205,6 +217,10 @@ export const MyOrderAppSquareConfig = registerAs('moaSquare', () => {
     squareTier2AppFeeBigIntNumerator: toBigIntOrThrow(
       process.env.SQUARE_TIER_2_APP_FEE_BIG_INT_NUMERATOR!,
     ),
+
+    squareMaximumItemsInCategory: process.env.SQUARE_MAXIMUM_ITEMS_IN_CATEGORY
+      ? parseInt(process.env.SQUARE_MAXIMUM_ITEMS_IN_CATEGORY, 10)
+      : undefined,
 
     squareTestCode: process.env.SQUARE_TEST_CODE,
     squareTestAccessToken: process.env.SQUARE_TEST_ACCESS_TOKEN,
