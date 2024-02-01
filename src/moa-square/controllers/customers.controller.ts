@@ -151,15 +151,6 @@ export class CustomersController {
       merchantIdOrPath: merchantIdOrPath,
     });
 
-    try {
-      await this.mailService.sendPostCustomerMeOrThrow({
-        user,
-        merchant,
-      });
-    } catch (error) {
-      this.logger.error(error);
-    }
-
     const found = await this.service.findOne({
       where: { id: created.id },
       relations: {

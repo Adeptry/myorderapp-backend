@@ -3,13 +3,17 @@ import 'reflect-metadata';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { fileURLToPath } from 'url';
 
-// For local:
+// FOR MIGRATION GENERATION UNCOMMENT:
+//
 // import fs from 'fs';
 // const envConfig = fs.readFileSync('.env.staging');
 // for (const line of envConfig.toString().split('\n')) {
 //   const [key, value] = line.split('=');
 //   process.env[key] = value;
 // }
+//
+// THEN RUN:
+// npm run migration:generate -- src/database/migrations/SomeName
 
 export const AppDataSource = new DataSource({
   type: process.env.DATABASE_TYPE,

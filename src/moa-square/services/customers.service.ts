@@ -12,6 +12,7 @@ import { Customer as SquareCustomer } from 'square';
 import { FindOptionsRelations, Repository } from 'typeorm';
 import { EntityRepositoryService } from '../../database/entity-repository-service.js';
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
+import { MailService } from '../../mail/mail.service.js';
 import { UsersService } from '../../users/users.service.js';
 import { CustomerPatchBody } from '../dto/customers/customer-patch-body.dto.js';
 import { CustomerEntity } from '../entities/customer.entity.js';
@@ -29,6 +30,7 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
     private readonly squareService: NestSquareService,
     private readonly merchantsService: MerchantsService,
     private readonly locationsService: LocationsService,
+    private readonly mailService: MailService,
     private readonly i18n: I18nService<I18nTranslations>,
   ) {
     const logger = new Logger(CustomersService.name);
@@ -193,6 +195,15 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
           referenceId: customer.id,
         }),
     );
+
+    try {
+      await this.mailService.sendPostCustomerMeOrThrow({
+        user,
+        merchant,
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
 
     return await this.save(customer);
   }

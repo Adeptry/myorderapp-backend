@@ -125,6 +125,26 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true, default: 7 })
   categoryCollapseThreshold?: number;
 
+  @ApiProperty({
+    required: false,
+    nullable: true,
+    type: Boolean,
+  })
+  @Column({ nullable: true, default: false })
+  preferRelatedApplications?: boolean;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  playAppUrl?: string;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  playAppId?: string;
+
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  itunesUrl?: string;
+
   /* App Icon */
 
   @Column({ nullable: true })

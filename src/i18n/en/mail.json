@@ -48,7 +48,7 @@
   },
   "postCustomerMe": {
     "html": "<p>Hello,</p><p>Welcome to {merchant.squareBusinessName} on MyOrderApp!</p><p>We're thrilled to have you with us. Dive in and enjoy hassle-free ordering from {merchant.squareBusinessName}. Should you have questions or encounter any issues with your orders, don't hesitate to contact us at <a href='mailto:{supportEmail}'>{supportEmail}</a>.</p><p>Happy ordering!</p><p>Best regards,</p><p>The MyOrderApp Team</p>",
-    "subject": "Welcome to {merchant.squareBusinessName} on MyOrderApp,!",
+    "subject": "Welcome to {merchant.squareBusinessName} on MyOrderApp!",
     "text": "Hello,\n\nThank you for choosing {merchant.squareBusinessName} on MyOrderApp! Explore and experience smooth and efficient ordering from us. If you need any assistance or have inquiries, please email us at {supportEmail}.\n\nHappy shopping!\n\nBest regards,\nThe MyOrderApp Team"
   },
   "postMerchantMe": {
