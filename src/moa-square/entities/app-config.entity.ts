@@ -145,6 +145,10 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   itunesUrl?: string;
 
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  itunesId?: string;
+
   /* App Icon */
 
   @Column({ nullable: true })
