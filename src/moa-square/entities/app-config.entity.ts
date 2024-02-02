@@ -166,6 +166,10 @@ export class AppConfigEntity extends BaseEntity {
   @Column({ nullable: true })
   iconFileContentType?: string;
 
+  @ApiProperty({ required: false, type: String, nullable: true })
+  @Column({ nullable: true })
+  iconFileSize?: string;
+
   /* App Banner */
 
   @Column({ nullable: true })
