@@ -1,5 +1,16 @@
 # Notes
 
+## Thu 01 Feb 2024 10:30:43 PM EST
+
+- App icon
+- Screenshots
+- Launch screen
+- GoogleService-Info.plist
+- Firebase
+- iOS Info.plist
+- Apple Pay Merchant ID
+- Customize Square Android add payment colours
+
 ## Tue 26 Dec 2023 04:57:39 PM EST
 
 https://www.reddit.com/r/nestjs/comments/15yb1ek/i_have_seen_so_many_posts_recommending_forwardref/
@@ -59,14 +70,14 @@ https://www.reddit.com/r/nestjs/comments/15yb1ek/i_have_seen_so_many_posts_recom
 
 ## Forward Stripe Webhooks
 
-```
+```bash
 stripe listen --forward-to http://localhost:4000/v2/stripe/webhook
 https://www.npmjs.com/package/nextjs-google-analytics
 ```
 
 ## Visualize modules
 
-```
+```TypeScript
 import { SpelunkerModule } from 'nestjs-spelunker';
 const tree = SpelunkerModule.explore(app);
 const root = SpelunkerModule.graph(tree);
@@ -80,7 +91,7 @@ console.log(mermaidEdges.join('\n'));
 
 ## Generate secrets
 
-```
+```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'));"
 ```
 
