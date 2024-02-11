@@ -14,6 +14,7 @@ import { EntityRepositoryService } from '../../database/entity-repository-servic
 import { I18nTranslations } from '../../i18n/i18n.generated.js';
 import { MailService } from '../../mail/mail.service.js';
 import { UsersService } from '../../users/users.service.js';
+import { isValidSquarePhoneNumber } from '../../utils/is-square-phone-number.js';
 import { CustomerPatchBody } from '../dto/customers/customer-patch-body.dto.js';
 import { CustomerEntity } from '../entities/customer.entity.js';
 import { LocationsService } from './locations.service.js';
@@ -162,7 +163,9 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
             emailAddress: user.email ?? undefined,
             givenName: user.firstName ?? undefined,
             familyName: user.lastName ?? undefined,
-            phoneNumber: user.phoneNumber ?? undefined,
+            phoneNumber: isValidSquarePhoneNumber(user.phoneNumber)
+              ? user.phoneNumber ?? undefined
+              : undefined,
           }),
       );
       squareCustomer = createCustomerResponse.result.customer;
@@ -256,7 +259,9 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
         return client.customersApi.updateCustomer(squareId, {
           givenName: firstName,
           familyName: lastName,
-          phoneNumber,
+          phoneNumber: isValidSquarePhoneNumber(phoneNumber)
+            ? phoneNumber
+            : undefined,
         });
       });
     }
