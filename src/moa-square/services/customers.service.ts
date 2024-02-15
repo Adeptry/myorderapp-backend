@@ -308,4 +308,39 @@ export class CustomersService extends EntityRepositoryService<CustomerEntity> {
       return customer;
     }
   }
+
+  async deleteAndSyncSquareOrThrow(params: { id: string; merchantId: string }) {
+    this.logger.verbose(this.deleteAndSyncSquareOrThrow.name);
+    const { id, merchantId } = params;
+    const translations = this.translations();
+
+    const customer = await this.findOneOrFail({ where: { id, merchantId } });
+    const { squareId: customerSquareId } = customer;
+    if (!customerSquareId) {
+      throw new BadRequestException(translations.customersSquareIdNotFound);
+    }
+
+    const merchant = await this.merchantsService.findOneOrFail({
+      where: { id: merchantId },
+    });
+    const { squareAccessToken } = merchant;
+    if (!squareAccessToken) {
+      throw new BadRequestException(
+        translations.merchantsSquareAccessTokenNotFound,
+      );
+    }
+
+    try {
+      await this.remove(customer);
+      await this.squareService.retryOrThrow(squareAccessToken, (client) => {
+        return client.customersApi.deleteCustomer(customerSquareId);
+      });
+    } catch (error) {
+      this.logger.error(error);
+      throw new InternalServerErrorException(
+        error,
+        translations.squareInvalidResponse,
+      );
+    }
+  }
 }

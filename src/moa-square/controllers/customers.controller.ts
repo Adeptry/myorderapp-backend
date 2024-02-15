@@ -9,6 +9,7 @@ import {
   HttpStatus,
   Logger,
   NotFoundException,
+  Param,
   ParseBoolPipe,
   ParseEnumPipe,
   ParseIntPipe,
@@ -56,6 +57,7 @@ import { CustomerEntity } from '../entities/customer.entity.js';
 import type { CustomersGuardedRequest } from '../guards/customers.guard.js';
 import { CustomersGuard } from '../guards/customers.guard.js';
 import { MerchantsGuard } from '../guards/merchants.guard.js';
+import type { MerchantsGuardedRequest } from '../guards/merchants.guard.js';
 import { AppInstallsService } from '../services/app-installs.service.js';
 import { CustomersService } from '../services/customers.service.js';
 import { LocationsService } from '../services/locations.service.js';
@@ -303,6 +305,43 @@ export class CustomersController {
     }
 
     await this.usersService.removeIfUnrelated(user);
+
+    return;
+  }
+
+  @ApiBearerAuth()
+  @Delete(':id')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  @UseGuards(AuthGuard('jwt'), MerchantsGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse()
+  @ApiOperation({
+    summary: 'Delete Customer with ID',
+    operationId: 'deleteCustomerId',
+  })
+  async deleteId(
+    @Req() request: MerchantsGuardedRequest,
+    @Param('id') id: string,
+  ): Promise<void> {
+    const { merchant } = request;
+    const { id: merchantId } = merchant;
+
+    this.logger.verbose(this.deleteId.name);
+    const translations = this.translations();
+
+    if (!merchantId) {
+      throw new BadRequestException(translations.merchantsNotFound);
+    }
+
+    const customer = await this.service.findOne({
+      where: { id, merchantId },
+    });
+
+    if (!customer) {
+      throw new BadRequestException(translations.customersNotFound);
+    }
+
+    await this.service.deleteAndSyncSquareOrThrow({ id, merchantId });
 
     return;
   }
