@@ -58,7 +58,7 @@ export class CustomersGuard implements CanActivate {
     }
     request.user = user;
 
-    const customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+    let customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
       where: {
         userId: user.id,
         merchantIdOrPath,
@@ -68,19 +68,25 @@ export class CustomersGuard implements CanActivate {
     // /*
     //  * This fix is dedicated to Michael Ryan Bearce
     //  */
-    // if (!customer) {
-    //   try {
-    //     customer = await this.service.createSaveAndSyncSquare({
-    //       userId: user.id,
-    //       merchantIdOrPath,
-    //     });
-    //   } catch {
-    //     customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
-    //       where: {
-    //         userId: user.id,
-    //         merchantIdOrPath,
-    //       },
-    //     });
+    if (!customer) {
+      try {
+        customer = await this.service.createSaveAndSyncSquare({
+          userId: user.id,
+          merchantIdOrPath,
+        });
+      } catch {
+        customer = await this.service.findOneWithUserIdAndMerchantIdOrPath({
+          where: {
+            userId: user.id,
+            merchantIdOrPath,
+          },
+        });
+
+        if (!customer) {
+          throw new NotFoundException(translations.customersNotFound);
+        }
+      }
+    }
 
     if (!customer) {
       throw new NotFoundException(translations.customersNotFound);
